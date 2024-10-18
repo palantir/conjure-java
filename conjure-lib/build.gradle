@@ -31,6 +31,7 @@ dependencies {
     implementation 'com.palantir.safe-logging:safe-logging'
 
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

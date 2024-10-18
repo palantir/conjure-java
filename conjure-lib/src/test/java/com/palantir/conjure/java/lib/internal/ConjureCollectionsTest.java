@@ -18,7 +18,11 @@ package com.palantir.conjure.java.lib.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.serialization.ObjectMappers;
+import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -81,5 +85,23 @@ public class ConjureCollectionsTest {
 
         safeLongList.clear();
         assertThat(safeLongList).hasSize(0);
+    }
+
+    @Test
+    public void testSerializationRoundtrip() throws JsonProcessingException {
+        testSerialization(ConjureCollections.newNonNullDoubleList(List.of(1.1, 2.2, 3.3)), ConjureDoubleList.class);
+        testSerialization(ConjureCollections.newNonNullIntegerList(List.of(1, 2, 3)), ConjureIntegerList.class);
+        testSerialization(
+                ConjureCollections.newNonNullSafeLongList(List.of(SafeLong.of(1L), SafeLong.of(2L), SafeLong.of(3L))),
+                ConjureSafeLongList.class);
+    }
+
+    private static final ObjectMapper serverMapper = ObjectMappers.newServerJsonMapper();
+    private static final ObjectMapper clientMapper = ObjectMappers.newClientJsonMapper();
+
+    private static <T> void testSerialization(Collection<?> collection, Class<T> klass) throws JsonProcessingException {
+        String serialized = serverMapper.writeValueAsString(collection);
+        T deserialized = clientMapper.readValue(serialized, klass);
+        assertThat(deserialized).isEqualTo(collection);
     }
 }
