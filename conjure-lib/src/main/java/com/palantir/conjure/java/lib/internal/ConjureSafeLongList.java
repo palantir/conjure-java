@@ -16,7 +16,16 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.conjure.java.lib.SafeLong;
+import java.io.IOException;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
@@ -27,6 +36,8 @@ import org.eclipse.collections.impl.utility.Iterate;
  * ConjureSafeLongList is a boxed list wrapper for the eclipse-collections LongArrayList. This handles boxing/unboxing
  * with SafeLongs.
  */
+@JsonSerialize(using = ConjureSafeLongList.Serializer.class)
+@JsonDeserialize(using = ConjureSafeLongList.Deserializer.class)
 final class ConjureSafeLongList extends AbstractList<SafeLong> implements RandomAccess {
     private final LongArrayList delegate;
 
@@ -69,5 +80,25 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
     @Override
     public SafeLong set(int index, SafeLong element) {
         return SafeLong.of(delegate.set(index, element.longValue()));
+    }
+
+    static final class Serializer extends JsonSerializer<ConjureSafeLongList> {
+        @Override
+        public void serialize(ConjureSafeLongList val, JsonGenerator gen, SerializerProvider _serializer)
+                throws IOException {
+            // This is safe to serialize without checking because ConjureSafeLongList
+            // can only store SafeLong's
+            long[] longs = val.delegate.toArray();
+            gen.writeArray(longs, 0, longs.length);
+        }
+    }
+
+    static final class Deserializer extends JsonDeserializer<ConjureSafeLongList> {
+        @Override
+        public ConjureSafeLongList deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
+            // Avoid making a copy of the value from jackson
+            long[] longs = parser.readValueAs(long[].class);
+            return new ConjureSafeLongList(new LongArrayList(longs));
+        }
     }
 }
