@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
@@ -19,13 +20,6 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.io.InputStream;
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +53,7 @@ public interface EteServiceBlocking {
      * @apiNote {@code GET /base/integer}
      */
     @ClientEndpoint(method = "GET", path = "/base/integer")
-    int integer(AuthHeader authHeader);
+    int integer(AuthHeader authHeader) throws ConjureJavaErrors.JavaCompilationFailed;
 
     /** @apiNote {@code GET /base/double} */
     @ClientEndpoint(method = "GET", path = "/base/double")
@@ -398,10 +392,28 @@ public interface EteServiceBlocking {
             }
 
             @Override
-            public int integer(AuthHeader authHeader) {
+            public int integer(AuthHeader authHeader) throws ConjureJavaErrors.JavaCompilationFailed {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().callBlocking(integerChannel, _request.build(), integerDeserializer);
+                try {
+                    return _runtime.clients().callBlocking(integerChannel, _request.build(), integerDeserializer);
+                } catch (RemoteException e) {
+                    // TODO(pm): We need to change the `parameters` field (or add a new field) in SerializableError so
+                    // we can get the args and reconstruct the exception. Serialize the args.
+
+                    // For human-debugging, this isn't a huge deal because the errorInstanceId on the ServiceException
+                    // will be the same as that of the RemoteException, so devs can look up the logs in loki. But this
+                    // is needed for services to take any action based on the args.
+
+                    // It'd be pretty expensive to serialize the args each time, and there's no point doing so if
+                    // they're not utilized. We can update `ConjureExceptions` to only serialize the args if the
+                    // ConjureDefinedException is thrown. hm, but how will we know when to deserialize? Let's introduce
+                    // a new type replacing RemoteException: ConjureDefinedRemoteException?
+                    if (ConjureJavaErrors.isJavaCompilationFailed(e)) {
+                        throw ConjureJavaErrors.javaCompilationFailedNew(e.getCause());
+                    }
+                    throw e;
+                }
             }
 
             @Override

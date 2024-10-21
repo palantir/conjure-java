@@ -58,6 +58,9 @@ services:
       integer:
         http: GET /integer
         returns: integer
+        errors:
+          - JavaCompilationFailed
+          - InvalidServiceDefinition
         docs: one *two* three.
 
       double_:

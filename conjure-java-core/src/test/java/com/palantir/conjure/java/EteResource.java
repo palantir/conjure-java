@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.product.ConjureJavaErrors;
 import com.palantir.product.EteService;
 import com.palantir.product.LongAlias;
 import com.palantir.product.NestedStringAliasExample;
@@ -45,7 +46,10 @@ public class EteResource implements EteService {
     }
 
     @Override
-    public int integer(AuthHeader _authHeader) {
+    public int integer(AuthHeader authHeader) {
+        if (authHeader.toString().contains("throw")) {
+            throw ConjureJavaErrors.javaCompilationFailed();
+        }
         return 1234;
     }
 
