@@ -34,7 +34,7 @@ public interface UndertowEteService {
      *
      * @apiNote {@code GET /base/integer}
      */
-    int integer(AuthHeader authHeader);
+    int integer(AuthHeader authHeader) throws ConjureJavaErrors.JavaCompilationFailed;
 
     /** @apiNote {@code GET /base/double} */
     double double_(AuthHeader authHeader);

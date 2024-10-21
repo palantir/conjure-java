@@ -57,7 +57,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (throwable instanceof ServiceException) {
+        if (throwable instanceof ServiceThrownException) {
+            serviceDefinedException(exchange, throwable);
+        } else if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
             qosException(exchange, (QosException) throwable);
@@ -82,6 +84,8 @@ public enum ConjureExceptions implements ExceptionHandler {
                     exception.getErrorType().httpErrorCode());
         }
     }
+
+    private static void serviceDefinedException(HttpServerExchange exchange, Throwable throwable) {}
 
     private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
         log(exception);

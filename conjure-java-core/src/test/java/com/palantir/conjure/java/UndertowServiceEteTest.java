@@ -20,6 +20,7 @@ import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
 import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -42,6 +43,7 @@ import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
+import com.palantir.product.ConjureJavaErrors;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
 import com.palantir.product.EteBinaryServiceBlocking;
@@ -145,6 +147,17 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void client_can_retrieve_a_string_from_a_server() {
         assertThat(client.string(AuthHeader.valueOf("authHeader"))).isEqualTo("Hello, world!");
+    }
+
+    @Test
+    public void client_can_retrieve_an_integer_from_a_server() {
+        assertThat(client.integer(AuthHeader.valueOf("authHeader"))).isEqualTo(1234);
+    }
+
+    @Test
+    public void client_throws_when_retrieving_an_integer_from_a_server() {
+        assertThatExceptionOfType(ConjureJavaErrors.JavaCompilationFailed.class)
+                .isThrownBy(() -> client.integer(AuthHeader.valueOf("throw")));
     }
 
     @Test
