@@ -41,7 +41,11 @@ dependencies {
     implementation 'org.slf4j:slf4j-api'
 
     testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
-    testImplementation 'com.palantir.conjure.java.api:test-utils'
+    testImplementation 'com.palantir.conjure.java.api:test-utils', {
+      // TODO(ckozak): upgrading junit dependencies is blocked by the ancient dropwizard
+      // test libraries used in this project
+      exclude group: 'org.mockito'
+    }
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
