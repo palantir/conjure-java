@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.collections.impl.list.mutable.primitive.BooleanArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
@@ -180,24 +179,6 @@ public final class ConjureCollections {
         addAll(integerList, iterable);
 
         return integerList;
-    }
-
-    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Boolean> newNonNullBooleanList() {
-        return new ConjureBooleanList(new BooleanArrayList());
-    }
-
-    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
-        List<Boolean> booleanList;
-        if (iterable instanceof Collection) {
-            booleanList = new ConjureBooleanList(new BooleanArrayList(((Collection<Boolean>) iterable).size()));
-        } else {
-            booleanList = new ConjureBooleanList(new BooleanArrayList());
-        }
-        addAll(booleanList, iterable);
-
-        return booleanList;
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set

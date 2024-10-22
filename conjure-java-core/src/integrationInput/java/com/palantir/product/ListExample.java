@@ -27,6 +27,8 @@ public final class ListExample {
 
     private final List<Double> doubleItems;
 
+    private final List<Boolean> booleanItems;
+
     private final List<Optional<String>> optionalItems;
 
     private final List<OptionalAlias> aliasOptionalItems;
@@ -39,13 +41,16 @@ public final class ListExample {
             List<String> items,
             List<Integer> primitiveItems,
             List<Double> doubleItems,
+            List<Boolean> booleanItems,
             List<Optional<String>> optionalItems,
             List<OptionalAlias> aliasOptionalItems,
             List<List<String>> nestedItems) {
-        validateFields(items, primitiveItems, doubleItems, optionalItems, aliasOptionalItems, nestedItems);
+        validateFields(
+                items, primitiveItems, doubleItems, booleanItems, optionalItems, aliasOptionalItems, nestedItems);
         this.items = Collections.unmodifiableList(items);
         this.primitiveItems = Collections.unmodifiableList(primitiveItems);
         this.doubleItems = Collections.unmodifiableList(doubleItems);
+        this.booleanItems = Collections.unmodifiableList(booleanItems);
         this.optionalItems = Collections.unmodifiableList(optionalItems);
         this.aliasOptionalItems = Collections.unmodifiableList(aliasOptionalItems);
         this.nestedItems = Collections.unmodifiableList(nestedItems);
@@ -65,6 +70,11 @@ public final class ListExample {
     @JsonProperty("doubleItems")
     public List<Double> getDoubleItems() {
         return this.doubleItems;
+    }
+
+    @JsonProperty("booleanItems")
+    public List<Boolean> getBooleanItems() {
+        return this.booleanItems;
     }
 
     @JsonProperty("optionalItems")
@@ -96,6 +106,7 @@ public final class ListExample {
         return this.items.equals(other.items)
                 && this.primitiveItems.equals(other.primitiveItems)
                 && this.doubleItems.equals(other.doubleItems)
+                && this.booleanItems.equals(other.booleanItems)
                 && this.optionalItems.equals(other.optionalItems)
                 && this.aliasOptionalItems.equals(other.aliasOptionalItems)
                 && this.nestedItems.equals(other.nestedItems);
@@ -109,6 +120,7 @@ public final class ListExample {
             hash = 31 * hash + this.items.hashCode();
             hash = 31 * hash + this.primitiveItems.hashCode();
             hash = 31 * hash + this.doubleItems.hashCode();
+            hash = 31 * hash + this.booleanItems.hashCode();
             hash = 31 * hash + this.optionalItems.hashCode();
             hash = 31 * hash + this.aliasOptionalItems.hashCode();
             hash = 31 * hash + this.nestedItems.hashCode();
@@ -121,14 +133,15 @@ public final class ListExample {
     @Override
     public String toString() {
         return "ListExample{items: " + items + ", primitiveItems: " + primitiveItems + ", doubleItems: " + doubleItems
-                + ", optionalItems: " + optionalItems + ", aliasOptionalItems: " + aliasOptionalItems
-                + ", nestedItems: " + nestedItems + '}';
+                + ", booleanItems: " + booleanItems + ", optionalItems: " + optionalItems + ", aliasOptionalItems: "
+                + aliasOptionalItems + ", nestedItems: " + nestedItems + '}';
     }
 
     private static void validateFields(
             List<String> items,
             List<Integer> primitiveItems,
             List<Double> doubleItems,
+            List<Boolean> booleanItems,
             List<Optional<String>> optionalItems,
             List<OptionalAlias> aliasOptionalItems,
             List<List<String>> nestedItems) {
@@ -136,6 +149,7 @@ public final class ListExample {
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, primitiveItems, "primitiveItems");
         missingFields = addFieldIfMissing(missingFields, doubleItems, "doubleItems");
+        missingFields = addFieldIfMissing(missingFields, booleanItems, "booleanItems");
         missingFields = addFieldIfMissing(missingFields, optionalItems, "optionalItems");
         missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         missingFields = addFieldIfMissing(missingFields, nestedItems, "nestedItems");
@@ -149,7 +163,7 @@ public final class ListExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(6);
+                missingFields = new ArrayList<>(7);
             }
             missingFields.add(fieldName);
         }
@@ -170,6 +184,8 @@ public final class ListExample {
 
         private List<Double> doubleItems = ConjureCollections.newNonNullDoubleList();
 
+        private List<Boolean> booleanItems = ConjureCollections.newNonNullList();
+
         private List<Optional<String>> optionalItems = ConjureCollections.newNonNullList();
 
         private List<OptionalAlias> aliasOptionalItems = ConjureCollections.newNonNullList();
@@ -183,6 +199,7 @@ public final class ListExample {
             items(other.getItems());
             primitiveItems(other.getPrimitiveItems());
             doubleItems(other.getDoubleItems());
+            booleanItems(other.getBooleanItems());
             optionalItems(other.getOptionalItems());
             aliasOptionalItems(other.getAliasOptionalItems());
             nestedItems(other.getNestedItems());
@@ -251,6 +268,28 @@ public final class ListExample {
             checkNotBuilt();
             Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null");
             this.doubleItems.add(doubleItems);
+            return this;
+        }
+
+        @JsonSetter(value = "booleanItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder booleanItems(@Nonnull Iterable<Boolean> booleanItems) {
+            checkNotBuilt();
+            this.booleanItems = ConjureCollections.newNonNullList(
+                    Preconditions.checkNotNull(booleanItems, "booleanItems cannot be null"));
+            return this;
+        }
+
+        public Builder addAllBooleanItems(@Nonnull Iterable<Boolean> booleanItems) {
+            checkNotBuilt();
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.booleanItems, Preconditions.checkNotNull(booleanItems, "booleanItems cannot be null"));
+            return this;
+        }
+
+        public Builder booleanItems(boolean booleanItems) {
+            checkNotBuilt();
+            Preconditions.checkNotNull(booleanItems, "booleanItems cannot be null");
+            this.booleanItems.add(booleanItems);
             return this;
         }
 
@@ -325,7 +364,8 @@ public final class ListExample {
         public ListExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new ListExample(items, primitiveItems, doubleItems, optionalItems, aliasOptionalItems, nestedItems);
+            return new ListExample(
+                    items, primitiveItems, doubleItems, booleanItems, optionalItems, aliasOptionalItems, nestedItems);
         }
 
         private void checkNotBuilt() {

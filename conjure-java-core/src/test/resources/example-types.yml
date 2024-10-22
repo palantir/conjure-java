@@ -74,6 +74,7 @@ types:
             safety: safe
           primitiveItems: list<integer>
           doubleItems: list<double>
+          booleanItems: list<boolean>
           optionalItems: list<optional<string>>
           aliasOptionalItems: list<OptionalAlias>
           nestedItems: list<list<string>>
