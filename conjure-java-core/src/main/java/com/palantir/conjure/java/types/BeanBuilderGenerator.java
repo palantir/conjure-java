@@ -671,6 +671,32 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
+    private MethodSpec createPrimitiveCollectionSetter(EnrichedField enriched, boolean override) {
+        FieldSpec field = enriched.poetSpec();
+        Type type = enriched.conjureDef().getType();
+
+        CollectionType collectionType = getCollectionType(type);
+        return BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
+                        "addAll", enriched, typeMapper, builderClass, safetyEvaluator)
+                .addAnnotations(ConjureAnnotations.override(override))
+                .addCode(verifyNotBuilt())
+                .addCode(CodeBlocks.statement(
+                        "$1T.addAllTo$2L(this.$3N, $4L)",
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName(),
+                        field.name,
+                        Expressions.requireNonNull(
+                                field.name, enriched.fieldName().get() + " cannot be null")))
+                .addStatement("return this")
+                .build();
+        /*
+        ConjureCollections.class,
+                        spec.name,
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
+         */
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
@@ -765,10 +791,19 @@ public final class BeanBuilderGenerator {
         Type type = enriched.conjureDef().getType();
         Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
+        ImmutableList.Builder<MethodSpec> builder = ImmutableList.builder();
+
         if (type.accept(TypeVisitor.IS_LIST)) {
-            return ImmutableList.of(
+            CollectionType collectionType = getCollectionType(type);
+            if (collectionType.getConjureCollectionType().isPrimitiveCollection()
+                    && collectionType.useNonNullFactory()) {
+                builder.add(createPrimitiveCollectionSetter(enriched, override));
+            }
+
+            builder.add(
                     createCollectionSetter("addAll", enriched, override),
                     createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
+            return builder.build();
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
@@ -820,7 +855,9 @@ public final class BeanBuilderGenerator {
     private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES =
             EnumSet.of(PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
 
-    /** Check if the optionalType contains a primitive boolean, double or integer. */
+    /**
+     * Check if the optionalType contains a primitive boolean, double or integer.
+     */
     private boolean isPrimitiveOptional(OptionalType optionalType) {
         return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && OPTIONAL_PRIMITIVES.contains(
@@ -1039,21 +1076,27 @@ public final class BeanBuilderGenerator {
     }
 
     private enum ConjureCollectionType {
-        LIST("List"),
-        DOUBLE_LIST("DoubleList"),
-        INTEGER_LIST("IntegerList"),
-        BOOLEAN_LIST("BooleanList"),
-        SAFE_LONG_LIST("SafeLongList"),
-        SET("Set");
+        LIST("List", false),
+        DOUBLE_LIST("DoubleList", true),
+        INTEGER_LIST("IntegerList", true),
+        BOOLEAN_LIST("BooleanList", true),
+        SAFE_LONG_LIST("SafeLongList", true),
+        SET("Set", false);
 
         private final String collectionName;
+        private final Boolean primitiveCollection;
 
-        ConjureCollectionType(String collectionName) {
+        ConjureCollectionType(String collectionName, Boolean primitiveCollection) {
             this.collectionName = collectionName;
+            this.primitiveCollection = primitiveCollection;
         }
 
         public String getCollectionName() {
             return collectionName;
+        }
+
+        public Boolean isPrimitiveCollection() {
+            return primitiveCollection;
         }
     }
 

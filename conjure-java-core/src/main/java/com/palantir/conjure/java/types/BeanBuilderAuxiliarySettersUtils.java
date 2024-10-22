@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
@@ -28,6 +29,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -42,6 +44,39 @@ import org.apache.commons.lang3.StringUtils;
 public final class BeanBuilderAuxiliarySettersUtils {
 
     private BeanBuilderAuxiliarySettersUtils() {}
+
+    public static MethodSpec.Builder createPrimitiveCollectionSetterBuilder(
+            String prefix,
+            EnrichedField enriched,
+            TypeMapper typeMapper,
+            ClassName returnClass,
+            SafetyEvaluator safetyEvaluator) {
+        FieldSpec field = enriched.poetSpec();
+        FieldDefinition definition = enriched.conjureDef();
+        Type type = definition.getType();
+        Type innerType = type.accept(TypeVisitor.LIST).getItemType();
+        TypeName boxedTypeName = typeMapper.getClassName(innerType);
+        TypeName innerTypeName;
+        // SafeLong is just a special case of long
+        if (boxedTypeName.equals(ClassName.get(SafeLong.class))) {
+            innerTypeName = ConjureAnnotations.withSafety(
+                    TypeName.LONG, safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()));
+        } else {
+            innerTypeName = ConjureAnnotations.withSafety(
+                    Primitives.unbox(boxedTypeName), safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()));
+        }
+
+        return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name))
+                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
+                        .map(rendered -> CodeBlock.of("$L", rendered))
+                        .orElseGet(() -> CodeBlock.builder().build()))
+                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
+                .addModifiers(Modifier.PUBLIC)
+                // Var arg of the primitive type
+                .varargs()
+                .addParameter(Parameters.nonnullParameter(ArrayTypeName.of(innerTypeName), field.name))
+                .returns(returnClass);
+    }
 
     public static MethodSpec.Builder createCollectionSetterBuilder(
             String prefix,
