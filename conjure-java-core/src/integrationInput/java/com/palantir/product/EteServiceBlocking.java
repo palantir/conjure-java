@@ -189,6 +189,8 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
+            // Create an error deserializer for each error type
+
             private final Deserializer<String> stringDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 

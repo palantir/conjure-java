@@ -16,15 +16,21 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.RateLimiter;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableConjureDefinedError;
+import com.palantir.conjure.java.api.errors.SerializableConjureErrorParameter;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -35,6 +41,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.xnio.IoUtils;
@@ -50,6 +57,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Exceptions should always be serialized using JSON
     private static final Serializer<SerializableError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
+    private static final Serializer<SerializableConjureDefinedError> conjureDefinedErrorSerializer =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
+    private static final ObjectMapper errorParameterMapper = ObjectMappers.newServerJsonMapper();
 
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
@@ -57,8 +67,8 @@ public enum ConjureExceptions implements ExceptionHandler {
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (throwable instanceof ServiceThrownException) {
-            serviceDefinedException(exchange, throwable);
+        if (throwable instanceof CheckedServiceException checkedServiceException) {
+            checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
@@ -85,10 +95,38 @@ public enum ConjureExceptions implements ExceptionHandler {
         }
     }
 
-    private static void serviceDefinedException(HttpServerExchange exchange, Throwable throwable) {}
+    private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
+        ErrorType errorType = exception.getErrorType();
+
+        writeConjureDefinedErrorResponse(
+                exchange,
+                Optional.of(SerializableConjureDefinedError.builder()
+                        .errorCode(errorType.code().toString())
+                        .errorName(errorType.name())
+                        .errorInstanceId(exception.getErrorInstanceId())
+                        .parameters(exception.getArgs().stream()
+                                .map(arg -> SerializableConjureErrorParameter.builder()
+                                        .name(arg.getName())
+                                        .serializedValue(serializeParameter(arg))
+                                        .isSafeForLogging(arg.isSafeForLogging())
+                                        .build())
+                                .toList())
+                        .build()),
+                exception.getErrorType().httpErrorCode());
+    }
+
+    private static String serializeParameter(Arg<?> arg) {
+        try {
+            errorParameterMapper.writeValueAsString(arg.getValue());
+        } catch (Exception _unused) {
+            // TODO(pm): think this through.
+        }
+        return Objects.toString(arg.getValue());
+    }
 
     private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
         log(exception);
+        // POINTER(pm): This is where we serialize the ServiceException's args into a SerializableError.
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
@@ -194,6 +232,28 @@ public enum ConjureExceptions implements ExceptionHandler {
             if (maybeBody.isPresent()) {
                 try {
                     serializer.serialize(maybeBody.get(), exchange);
+                } catch (IOException | RuntimeException e) {
+                    log.info("Failed to write error response", e);
+                }
+            }
+        } else {
+            // This prevents the server from sending the final null chunk, alerting
+            // clients that the response was terminated prior to receiving full contents.
+            // Note that in the case of http/2 this does not close a connection, which
+            // would break other active requests, only resets the stream.
+            log.warn("Closing the connection to alert the client of an error");
+            IoUtils.safeClose(exchange.getConnection());
+        }
+    }
+
+    private static void writeConjureDefinedErrorResponse(
+            HttpServerExchange exchange, Optional<SerializableConjureDefinedError> maybeBody, int statusCode) {
+        // Do not attempt to write the failure if data has already been written
+        if (!isResponseStarted(exchange)) {
+            exchange.setStatusCode(statusCode);
+            if (maybeBody.isPresent()) {
+                try {
+                    conjureDefinedErrorSerializer.serialize(maybeBody.get(), exchange);
                 } catch (IOException | RuntimeException e) {
                     log.info("Failed to write error response", e);
                 }

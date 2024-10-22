@@ -1,13 +1,10 @@
 package com.palantir.product;
 
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.Safe;
-import com.palantir.logsafe.SafeLoggable;
-import java.util.List;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -49,27 +46,19 @@ public final class ConjureJavaErrors {
     }
 
     @Contract("true -> fail")
-    public static void throwIfJavaCompilationFailedNew(boolean shouldThrow) {
+    public static void throwIfJavaCompilationFailedNew(boolean shouldThrow) throws JavaCompilationFailed {
         if (shouldThrow) {
             throw javaCompilationFailedNew();
         }
     }
 
-    public static final class JavaCompilationFailed extends RuntimeException implements SafeLoggable {
-        private JavaCompilationFailed(ErrorType errorType, Arg<?>... parameters) {}
-
-        private JavaCompilationFailed(ErrorType errorType, @Nullable Throwable cause, Arg<?>... parameters) {}
-
-        // TODO(pm): let's have another interface that extends RuntimeException implements SafeLoggeable, and implements
-        //  these two methods. Should be the same for all generated exceptions.
-        @Override
-        public @Safe String getLogMessage() {
-            return "JavaCompilatonFailed: <message>";
+    public static final class JavaCompilationFailed extends CheckedServiceException {
+        private JavaCompilationFailed(ErrorType errorType) {
+            super(errorType);
         }
 
-        @Override
-        public List<Arg<?>> getArgs() {
-            return List.of();
+        private JavaCompilationFailed(ErrorType errorType, @Nullable Throwable cause) {
+            super(errorType, cause);
         }
     }
 
