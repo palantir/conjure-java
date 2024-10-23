@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: '[Feature] Non-boxing ''addAll'' Methods for Primitive Types'
+  links:
+  - https://github.com/palantir/conjure-java/pull/2389
