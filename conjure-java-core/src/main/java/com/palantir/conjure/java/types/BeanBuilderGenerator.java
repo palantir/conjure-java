@@ -677,7 +677,7 @@ public final class BeanBuilderGenerator {
 
         CollectionType collectionType = getCollectionType(type);
         return BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
-                        "addAll", enriched, typeMapper, builderClass, safetyEvaluator)
+                        enriched, typeMapper, builderClass, safetyEvaluator)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addCode(CodeBlocks.statement(
@@ -689,12 +689,6 @@ public final class BeanBuilderGenerator {
                                 field.name, enriched.fieldName().get() + " cannot be null")))
                 .addStatement("return this")
                 .build();
-        /*
-        ConjureCollections.class,
-                        spec.name,
-                        Expressions.requireNonNull(
-                                spec.name, enriched.fieldName().get() + " cannot be null"));
-         */
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
