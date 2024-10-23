@@ -218,6 +218,13 @@ public final class ListExample {
             return this;
         }
 
+        public Builder primitiveItems(@Nonnull int[] primitiveItems) {
+            checkNotBuilt();
+            this.primitiveItems = ConjureCollections.newNonNullIntegerList(
+                    Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
+            return this;
+        }
+
         public Builder addAllPrimitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
             ConjureCollections.addAllAndCheckNonNull(
@@ -234,6 +241,13 @@ public final class ListExample {
 
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
+            checkNotBuilt();
+            this.doubleItems = ConjureCollections.newNonNullDoubleList(
+                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+            return this;
+        }
+
+        public Builder doubleItems(@Nonnull double[] doubleItems) {
             checkNotBuilt();
             this.doubleItems = ConjureCollections.newNonNullDoubleList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));

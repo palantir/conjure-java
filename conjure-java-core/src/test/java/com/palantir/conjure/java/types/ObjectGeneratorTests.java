@@ -66,6 +66,7 @@ public final class ObjectGeneratorTests {
                                 .excludeEmptyOptionals(true)
                                 .unionsWithUnknownValues(true)
                                 .jetbrainsContractAnnotations(true)
+                                .primitiveCollectionArraySetters(true)
                                 .build())))
                 .emit(def, tempDir);
 

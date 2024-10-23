@@ -18,6 +18,7 @@ package com.palantir.conjure.java.lib.internal;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -140,9 +141,20 @@ public final class ConjureCollections {
         return set;
     }
 
+    /**
+     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
+     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
+     * Conjure[type]List should be replaced with that.
+     */
+
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
         return new ConjureDoubleList(new DoubleArrayList());
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Double> newNonNullDoubleList(double[] doubles) {
+        return new ConjureDoubleList(DoubleArrayList.newListWith(doubles.clone()));
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -158,15 +170,14 @@ public final class ConjureCollections {
         return doubleList;
     }
 
-    /**
-     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
-     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
-     * Conjure[type]List should be replaced with that.
-     */
-
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList() {
         return new ConjureIntegerList(new IntArrayList());
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Integer> newNonNullIntegerList(int[] integers) {
+        return new ConjureIntegerList(IntArrayList.newListWith(integers.clone()));
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -188,6 +199,11 @@ public final class ConjureCollections {
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Boolean> newNonNullBooleanList(boolean[] booleans) {
+        return new ConjureBooleanList(BooleanArrayList.newListWith(booleans.clone()));
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
         List<Boolean> booleanList;
         if (iterable instanceof Collection) {
@@ -206,6 +222,19 @@ public final class ConjureCollections {
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<SafeLong> newNonNullSafeLongList(long[] longs) {
+        long[] conjureCopy = longs.clone();
+        for (long value : conjureCopy) {
+            if (!safeLongCheck(value)) {
+                throw new SafeIllegalArgumentException(
+                        "number must be safely representable in javascript i.e. lie between -9007199254740991 and "
+                                + "9007199254740991");
+            }
+        }
+        return new ConjureSafeLongList(LongArrayList.newListWith(conjureCopy));
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList(Iterable<SafeLong> iterable) {
         List<SafeLong> safeLongList;
         if (iterable instanceof Collection) {
@@ -216,5 +245,9 @@ public final class ConjureCollections {
         addAll(safeLongList, iterable);
 
         return safeLongList;
+    }
+
+    private static boolean safeLongCheck(long value) {
+        return SafeLong.MIN_VALUE.longValue() <= value && value <= SafeLong.MAX_VALUE.longValue();
     }
 }
