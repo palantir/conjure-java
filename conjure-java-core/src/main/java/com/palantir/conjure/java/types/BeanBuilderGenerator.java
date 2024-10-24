@@ -1042,7 +1042,10 @@ public final class BeanBuilderGenerator {
         LIST("List"),
         DOUBLE_LIST("DoubleList"),
         INTEGER_LIST("IntegerList"),
-        BOOLEAN_LIST("BooleanList"),
+        // Eclipse has a BooleanList type, but this use case implies
+        // bit mask and it doesn't serialize efficiently as a collection
+        // so let's just use the "naive" boxed collection
+        BOOLEAN_LIST("List"),
         SAFE_LONG_LIST("SafeLongList"),
         SET("Set");
 
