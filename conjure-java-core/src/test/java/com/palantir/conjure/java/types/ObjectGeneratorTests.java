@@ -25,6 +25,8 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorCode;
@@ -254,6 +256,29 @@ public final class ObjectGeneratorTests {
                                 .strictObjects(false)
                                 .jetbrainsContractAnnotations(true)
                                 .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
+    public void testRecipes() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/recipe-example.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(
+                                new ObjectGenerator(Options.builder()
+                                        .useImmutableBytes(true)
+                                        .strictObjects(false)
+                                        .jetbrainsContractAnnotations(true)
+                                        .build()),
+                                new ErrorGenerator(Options.builder()
+                                        .useImmutableBytes(true)
+                                        .excludeEmptyOptionals(true)
+                                        .jetbrainsContractAnnotations(true)
+                                        .build()),
+                                new UndertowServiceGenerator(Options.empty()),
+                                new DialogueServiceGenerator(Options.empty())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);

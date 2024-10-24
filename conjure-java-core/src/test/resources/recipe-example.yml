@@ -1,0 +1,46 @@
+types:
+  definitions:
+    default-package: com.company.product
+    objects:
+      Recipe:
+        fields:
+          name: RecipeName
+          steps: list<RecipeStep>
+      RecipeStep:
+        union:
+          mix: set<Ingredient>
+          chop: Ingredient
+      RecipeName:
+        alias: string
+      Ingredient:
+        alias: string
+    errors:
+      NotFound:
+        code: NOT_FOUND
+        namespace: Recipes
+        docs: The requested resource was not found.
+        safe-args:
+          resourceName: string
+      RecipeNotGood:
+        code: INTERNAL
+        namespace: Recipes
+        docs: The recipe is not good.
+        safe-args:
+          recipe: Recipe
+
+services:
+  RecipeBookService:
+    name: Recipe Book
+    package: com.company.product
+    base-path: /recipes
+    endpoints:
+      getRecipe:
+        http: GET /{recipeName}
+        args:
+          recipeName:
+            type: RecipeName
+        returns: Recipe
+#        errors:
+#          - type: NotFound
+#            docs: The requested recipe was not found.
+#          - type: RecipeNotGood
