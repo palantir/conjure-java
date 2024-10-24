@@ -218,6 +218,13 @@ public final class ListExample {
             return this;
         }
 
+        public Builder addAllPrimitiveItems(@Nonnull int... primitiveItems) {
+            checkNotBuilt();
+            ConjureCollections.addAllToIntegerList(
+                    this.primitiveItems, Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
+            return this;
+        }
+
         public Builder addAllPrimitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
             ConjureCollections.addAllAndCheckNonNull(
@@ -237,6 +244,13 @@ public final class ListExample {
             checkNotBuilt();
             this.doubleItems = ConjureCollections.newNonNullDoubleList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+            return this;
+        }
+
+        public Builder addAllDoubleItems(@Nonnull double... doubleItems) {
+            checkNotBuilt();
+            ConjureCollections.addAllToDoubleList(
+                    this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 

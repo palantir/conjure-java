@@ -19,6 +19,7 @@ package com.palantir.conjure.java.lib.internal;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -140,6 +141,12 @@ public final class ConjureCollections {
         return set;
     }
 
+    /**
+     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
+     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
+     * Conjure[type]List should be replaced with that.
+     */
+
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
         return new ConjureDoubleList(new DoubleArrayList());
@@ -158,11 +165,14 @@ public final class ConjureCollections {
         return doubleList;
     }
 
-    /**
-     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
-     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
-     * Conjure[type]List should be replaced with that.
-     */
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToDoubleList(Collection<Double> addTo, double[] elementsToAdd) {
+        if (addTo instanceof ConjureDoubleList) {
+            ((ConjureDoubleList) addTo).addAll(elementsToAdd);
+        } else {
+            addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
+        }
+    }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList() {
@@ -180,6 +190,15 @@ public final class ConjureCollections {
         addAll(integerList, iterable);
 
         return integerList;
+    }
+
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToIntegerList(Collection<Integer> addTo, int[] elementsToAdd) {
+        if (addTo instanceof ConjureIntegerList) {
+            ((ConjureIntegerList) addTo).addAll(elementsToAdd);
+        } else {
+            addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
+        }
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -200,6 +219,19 @@ public final class ConjureCollections {
         return booleanList;
     }
 
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToBooleanList(Collection<Boolean> addTo, boolean[] elementsToAdd) {
+        if (addTo instanceof ConjureBooleanList) {
+            ((ConjureBooleanList) addTo).addAll(elementsToAdd);
+        } else {
+            // Arrays.stream doesn't have a method for boolean, lol.
+            // Maybe because an array of booleans makes no sense?
+            for (boolean bool : elementsToAdd) {
+                addTo.add(bool);
+            }
+        }
+    }
+
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList() {
         return new ConjureSafeLongList(new LongArrayList());
@@ -216,5 +248,14 @@ public final class ConjureCollections {
         addAll(safeLongList, iterable);
 
         return safeLongList;
+    }
+
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToSafeLongList(Collection<SafeLong> addTo, long[] elementsToAdd) {
+        if (addTo instanceof ConjureSafeLongList) {
+            ((ConjureSafeLongList) addTo).addAll(elementsToAdd);
+        } else {
+            addAll(addTo, Arrays.stream(elementsToAdd).boxed().map(SafeLong::of).toList());
+        }
     }
 }

@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
@@ -28,6 +29,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -39,11 +41,43 @@ import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
-public final class BeanBuilderAuxiliarySettersUtils {
+final class BeanBuilderAuxiliarySettersUtils {
 
     private BeanBuilderAuxiliarySettersUtils() {}
 
-    public static MethodSpec.Builder createCollectionSetterBuilder(
+    static MethodSpec.Builder createPrimitiveCollectionSetterBuilder(
+            EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass, SafetyEvaluator safetyEvaluator) {
+        FieldSpec field = enriched.poetSpec();
+        FieldDefinition definition = enriched.conjureDef();
+        TypeName innerTypeName = extractInnerTypeFromList(definition, typeMapper, safetyEvaluator);
+
+        return MethodSpec.methodBuilder("addAll" + StringUtils.capitalize(field.name))
+                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
+                        .map(rendered -> CodeBlock.of("$L", rendered))
+                        .orElseGet(() -> CodeBlock.builder().build()))
+                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
+                .addModifiers(Modifier.PUBLIC)
+                // Forces the array argument to instead be variadic
+                .varargs()
+                .addParameter(Parameters.nonnullParameter(ArrayTypeName.of(innerTypeName), field.name))
+                .returns(returnClass);
+    }
+
+    private static TypeName extractInnerTypeFromList(
+            FieldDefinition conjureDef, TypeMapper typeMapper, SafetyEvaluator safetyEvaluator) {
+        Type innerType = conjureDef.getType().accept(TypeVisitor.LIST).getItemType();
+        TypeName boxedTypeName = typeMapper.getClassName(innerType);
+
+        // SafeLong is just a special case of long
+        if (boxedTypeName.equals(ClassName.get(SafeLong.class))) {
+            return ConjureAnnotations.withSafety(TypeName.LONG, safetyEvaluator.getUsageTimeSafety(conjureDef));
+        } else {
+            return ConjureAnnotations.withSafety(
+                    Primitives.unbox(boxedTypeName), safetyEvaluator.getUsageTimeSafety(conjureDef));
+        }
+    }
+
+    static MethodSpec.Builder createCollectionSetterBuilder(
             String prefix,
             EnrichedField enriched,
             TypeMapper typeMapper,
@@ -66,7 +100,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                         field.name));
     }
 
-    public static MethodSpec.Builder createOptionalSetterBuilder(
+    static MethodSpec.Builder createOptionalSetterBuilder(
             EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass, SafetyEvaluator safetyEvaluator) {
         FieldSpec field = enriched.poetSpec();
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
@@ -78,7 +112,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                         field.name));
     }
 
-    public static MethodSpec.Builder createItemSetterBuilder(
+    static MethodSpec.Builder createItemSetterBuilder(
             EnrichedField enriched,
             Type itemType,
             TypeMapper typeMapper,
@@ -89,7 +123,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(ConjureAnnotations.withSafety(typeMapper.getClassName(itemType), safety), field.name);
     }
 
-    public static MethodSpec.Builder createMapSetterBuilder(
+    static MethodSpec.Builder createMapSetterBuilder(
             EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass) {
         MapType type = enriched.conjureDef().getType().accept(TypeVisitor.MAP);
         return publicSetter(enriched, returnClass)
@@ -97,7 +131,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(typeMapper.getClassName(type.getValueType()), "value");
     }
 
-    public static MethodSpec.Builder publicSetter(EnrichedField enriched, ClassName returnClass) {
+    static MethodSpec.Builder publicSetter(EnrichedField enriched, ClassName returnClass) {
         FieldDefinition definition = enriched.conjureDef();
         return MethodSpec.methodBuilder(enriched.poetSpec().name)
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
@@ -108,7 +142,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass);
     }
 
-    public static TypeName widenParameterIfPossible(
+    static TypeName widenParameterIfPossible(
             TypeName current, Type type, TypeMapper typeMapper, Optional<LogSafety> safety) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
@@ -147,7 +181,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
 
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
     // since we know all of those are final.
-    public static boolean isWidenableContainedType(Type containedType) {
+    static boolean isWidenableContainedType(Type containedType) {
         return containedType.accept(new DefaultTypeVisitor<Boolean>() {
             @Override
             public Boolean visitPrimitive(PrimitiveType value) {

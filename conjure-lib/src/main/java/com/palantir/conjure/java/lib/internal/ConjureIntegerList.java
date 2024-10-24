@@ -55,6 +55,10 @@ final class ConjureIntegerList extends AbstractList<Integer> implements RandomAc
         return delegate.addAllAtIndex(index, target);
     }
 
+    public void addAll(int... source) {
+        this.delegate.addAll(source);
+    }
+
     @Override
     public Integer remove(int index) {
         return delegate.removeAtIndex(index);

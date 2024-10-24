@@ -55,6 +55,10 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
         return delegate.addAllAtIndex(index, target);
     }
 
+    public void addAll(double... source) {
+        this.delegate.addAll(source);
+    }
+
     @Override
     public Double remove(int index) {
         return delegate.removeAtIndex(index);

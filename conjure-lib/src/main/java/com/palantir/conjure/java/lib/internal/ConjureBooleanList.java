@@ -55,6 +55,10 @@ final class ConjureBooleanList extends AbstractList<Boolean> implements RandomAc
         return delegate.addAllAtIndex(index, target);
     }
 
+    public void addAll(boolean... source) {
+        this.delegate.addAll(source);
+    }
+
     @Override
     public Boolean remove(int index) {
         return delegate.removeAtIndex(index);

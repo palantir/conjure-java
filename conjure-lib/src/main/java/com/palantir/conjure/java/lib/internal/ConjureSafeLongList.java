@@ -56,6 +56,14 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
         return delegate.addAllAtIndex(index, target);
     }
 
+    public void addAll(long... source) {
+        for (long value : source) {
+            // Doesn't use SafeLong creation because this causes unnecessary boxing
+            SafeLong.check(value);
+        }
+        this.delegate.addAll(source);
+    }
+
     @Override
     public SafeLong remove(int index) {
         return SafeLong.of(delegate.removeAtIndex(index));
