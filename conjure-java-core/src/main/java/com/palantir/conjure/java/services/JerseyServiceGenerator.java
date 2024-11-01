@@ -74,6 +74,8 @@ public final class JerseyServiceGenerator implements Generator {
 
     private final Options options;
 
+    // TODO(pm): when a service has endpoint errors defined for Jersey, just fail to generate. This is not supported. If
+    //  people want to use this feature, they'll have to migrate away from Jersey.
     public JerseyServiceGenerator(Options options) {
         this.options = options;
         this.binaryReturnTypeResponse = ClassName.get(jaxrsPackage("core"), "Response");

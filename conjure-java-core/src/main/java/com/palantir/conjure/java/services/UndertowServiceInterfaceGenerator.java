@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.EndpointErrorMapper;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
@@ -55,11 +56,14 @@ final class UndertowServiceInterfaceGenerator {
         this.options = options;
     }
 
+    // TODO(pm): We need something that resolves the error type to the generated exceptions class. Let's generate the
+    //  exceptions before we create the undertow service interfaces.
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition,
             SafetyEvaluator safetyEvaluator,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            EndpointErrorMapper endpointErrorMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
@@ -69,9 +73,13 @@ final class UndertowServiceInterfaceGenerator {
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint ->
-                        generateServiceInterfaceMethod(endpoint, safetyEvaluator, typeMapper, returnTypeMapper))
+                .map(endpoint -> generateServiceInterfaceMethod(
+                        endpoint, safetyEvaluator, typeMapper, returnTypeMapper, endpointErrorMapper))
                 .collect(Collectors.toList()));
+
+        // TODO(pm): create the exceptions from the error definitions if they are used by the endpoints.
+        //  what if they're used in multiple places? we should dedupe them.
+        //
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(
@@ -86,7 +94,8 @@ final class UndertowServiceInterfaceGenerator {
             EndpointDefinition endpointDef,
             SafetyEvaluator safetyEvaluator,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            EndpointErrorMapper endpointErrorMapper) {
         String methodName =
                 JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
@@ -103,6 +112,12 @@ final class UndertowServiceInterfaceGenerator {
         } else {
             endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
         }
+
+        methodBuilder.addExceptions(endpointDef.getErrors().stream()
+                // What happens if there are multiple errors from different packages with the same name? Let's match the
+                // behavior with what happens if there are different conjure imported types with the same name.
+                .map(endpointError -> endpointErrorMapper.getClassName(endpointError.getError()))
+                .collect(Collectors.toList()));
 
         return methodBuilder.build();
     }
