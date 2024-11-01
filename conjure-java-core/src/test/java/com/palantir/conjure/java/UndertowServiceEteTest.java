@@ -36,7 +36,9 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.services.CheckedErrorGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -86,6 +88,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+// MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -558,7 +561,8 @@ public final class UndertowServiceEteTest extends TestBase {
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml"),
                 new File("src/test/resources/alias-test-service.yml"),
-                new File("src/test/resources/external-long-test-service.yml")));
+                new File("src/test/resources/external-long-test-service.yml"),
+                new File("src/test/resources/example-endpoint-errors.yml")));
         Options options = Options.builder()
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)
@@ -567,7 +571,11 @@ public final class UndertowServiceEteTest extends TestBase {
                 .build();
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new UndertowServiceGenerator(options), new ObjectGenerator(options)))
+                        ImmutableSet.of(
+                                new UndertowServiceGenerator(options),
+                                new ObjectGenerator(options),
+                                new ErrorGenerator(options),
+                                new CheckedErrorGenerator(options)))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }

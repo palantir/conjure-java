@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -163,6 +164,17 @@ public final class TypeFunctions {
         ImmutableMap.Builder<TypeName, TypeDefinition> builder =
                 ImmutableMap.builderWithExpectedSize(typeDefinitions.size());
         typeDefinitions.forEach(def -> builder.put(def.accept(TypeDefinitionVisitor.TYPE_NAME), def));
+        return builder.buildOrThrow();
+    }
+
+    public static Map<TypeName, ErrorDefinition> toErrorsMap(ConjureDefinition definition) {
+        return toErrorsMap(definition.getErrors());
+    }
+
+    public static Map<TypeName, ErrorDefinition> toErrorsMap(List<ErrorDefinition> errorDefinitions) {
+        ImmutableMap.Builder<TypeName, ErrorDefinition> builder =
+                ImmutableMap.builderWithExpectedSize(errorDefinitions.size());
+        errorDefinitions.forEach(def -> builder.put(def.getErrorName(), def));
         return builder.buildOrThrow();
     }
 
