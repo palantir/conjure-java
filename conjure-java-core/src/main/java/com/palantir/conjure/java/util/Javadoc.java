@@ -19,6 +19,7 @@ package com.palantir.conjure.java.util;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.HttpMethod;
 import com.palantir.conjure.spec.HttpPath;
 import java.util.Optional;
@@ -83,6 +84,14 @@ public final class Javadoc {
                                 argument.getArgName().get(), endpoint)
                         + " "
                         + Javadoc.render(docs));
+    }
+
+    public static String getEndpointErrorJavadoc(EndpointError endpointError) {
+        return "@throws " + endpointError.getError().getName()
+                + endpointError
+                        .getDocs()
+                        .map(docs -> " " + Javadoc.render(docs))
+                        .orElse("");
     }
 
     public static String getRequestLine(HttpMethod httpMethod, HttpPath httpPath) {

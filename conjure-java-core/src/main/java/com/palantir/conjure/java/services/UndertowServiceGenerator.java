@@ -20,22 +20,18 @@ import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
-import com.palantir.conjure.java.types.EndpointErrorMapper;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.JavaFile;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class UndertowServiceGenerator implements Generator {
@@ -49,9 +45,6 @@ public final class UndertowServiceGenerator implements Generator {
     @Override
     public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
-        Map<TypeName, ErrorDefinition> errors = TypeFunctions.toErrorsMap(conjureDefinition);
-        // TODO(pm): gather the errors from the definition and create an errorsMap for consumption by the interface
-        //  generator.
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(
@@ -59,11 +52,6 @@ public final class UndertowServiceGenerator implements Generator {
         TypeMapper returnTypeMapper = new TypeMapper(
                 types,
                 new SpecializeBinaryClassNameVisitor(defaultVisitor, types, ClassName.get(BinaryResponseBody.class)));
-        EndpointErrorMapper endpointErrorMapper = new EndpointErrorMapper(
-                errors.entrySet().stream()
-                        .map(entry -> Map.entry(entry.getKey(), entry.getValue().getNamespace()))
-                        .collect(Collectors.toMap(Entry::getKey, Entry::getValue)),
-                options);
 
         UndertowServiceInterfaceGenerator interfaceGenerator = new UndertowServiceInterfaceGenerator(options);
         UndertowServiceHandlerGenerator handlerGenerator = new UndertowServiceHandlerGenerator(options);
@@ -71,13 +59,8 @@ public final class UndertowServiceGenerator implements Generator {
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> Stream.of(
                         interfaceGenerator.generateServiceInterface(
-                                serviceDef, safetyEvaluator, typeMapper, returnTypeMapper, endpointErrorMapper),
+                                serviceDef, safetyEvaluator, typeMapper, returnTypeMapper),
                         handlerGenerator.generateServiceHandler(
-                                serviceDef,
-                                types,
-                                typeMapper,
-                                returnTypeMapper,
-                                endpointErrorMapper,
-                                safetyEvaluator)));
+                                serviceDef, types, typeMapper, returnTypeMapper, safetyEvaluator)));
     }
 }

@@ -29,6 +29,7 @@ import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.JavaFile;
@@ -54,7 +55,7 @@ public final class CheckedErrorGenerator implements Generator {
 
     @Override
     public Stream<JavaFile> generate(ConjureDefinition definition) {
-        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
+        Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
@@ -140,7 +141,6 @@ public final class CheckedErrorGenerator implements Generator {
                     .build();
             methodBuilder.addParameter(causeParameter);
         }
-
         methodBuilder.addCode(");");
 
         return methodBuilder.build();

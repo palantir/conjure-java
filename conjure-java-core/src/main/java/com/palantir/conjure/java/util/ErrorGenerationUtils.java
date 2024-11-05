@@ -149,6 +149,7 @@ public final class ErrorGenerationUtils {
         return parameterBuilder.build();
     }
 
+
     // Conditional factory method
     public static MethodSpec.Builder conditionalStaticFactoryMethodBuilder(
             TypeMapper typeMapper,

@@ -26,7 +26,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.services.CheckedErrorGenerator;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
