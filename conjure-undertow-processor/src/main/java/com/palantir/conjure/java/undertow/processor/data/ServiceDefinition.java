@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
-import com.squareup.javapoet.ClassName;
+import com.palantir.javapoet.ClassName;
 import java.util.List;
 import org.immutables.value.Value;
 

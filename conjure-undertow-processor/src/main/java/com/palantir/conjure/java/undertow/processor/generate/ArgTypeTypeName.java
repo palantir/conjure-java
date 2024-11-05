@@ -18,7 +18,7 @@ package com.palantir.conjure.java.undertow.processor.generate;
 
 import com.palantir.conjure.java.undertow.processor.data.ArgumentType;
 import com.palantir.conjure.java.undertow.processor.data.ArgumentType.OptionalType;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.TypeName;
 import java.util.Optional;
 
 enum ArgTypeTypeName implements ArgumentType.Cases<TypeName> {

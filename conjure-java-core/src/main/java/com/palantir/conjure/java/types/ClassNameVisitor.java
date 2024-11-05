@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.spec.Type;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.TypeName;
 
 /** Maps a conjure type into the corresponding java type. */
 public interface ClassNameVisitor extends Type.Visitor<TypeName> {

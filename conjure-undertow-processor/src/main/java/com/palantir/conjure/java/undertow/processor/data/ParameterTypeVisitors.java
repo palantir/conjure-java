@@ -18,7 +18,7 @@ package com.palantir.conjure.java.undertow.processor.data;
 
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.Cases;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.SafeLoggingAnnotation;
-import com.squareup.javapoet.CodeBlock;
+import com.palantir.javapoet.CodeBlock;
 
 public final class ParameterTypeVisitors {
 

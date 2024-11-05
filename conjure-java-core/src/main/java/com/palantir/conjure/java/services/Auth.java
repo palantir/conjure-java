@@ -19,11 +19,11 @@ package com.palantir.conjure.java.services;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.HeaderAuthType;
+import com.palantir.javapoet.ParameterSpec;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import com.squareup.javapoet.ParameterSpec;
 
 public final class Auth {
 
