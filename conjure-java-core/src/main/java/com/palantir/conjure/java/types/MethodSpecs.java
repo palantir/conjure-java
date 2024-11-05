@@ -23,13 +23,13 @@ import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.FieldName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,15 +87,15 @@ public final class MethodSpecs {
     }
 
     private static CodeBlock createEqualsStatement(FieldSpec field) {
-        String thisField = "this." + field.name;
-        String otherField = "other." + field.name;
+        String thisField = "this." + field.name();
+        String otherField = "other." + field.name();
 
-        if (Primitives.isDouble(field.type)) {
+        if (Primitives.isDouble(field.type())) {
             return CodeBlock.of(
                     "$1T.doubleToLongBits($2L) == $1T.doubleToLongBits($3L)", Double.class, thisField, otherField);
-        } else if (Primitives.isPrimitive(field.type)) {
+        } else if (Primitives.isPrimitive(field.type())) {
             return CodeBlock.of("$L == $L", thisField, otherField);
-        } else if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
+        } else if (field.type().equals(ClassName.get(OffsetDateTime.class))) {
             return CodeBlock.of("$L.isEqual($L)", thisField, otherField);
         }
 
@@ -165,13 +165,13 @@ public final class MethodSpecs {
     }
 
     private static CodeBlock computeHashCode(FieldSpec fieldSpec) {
-        if (Primitives.isPrimitive(fieldSpec.type)) {
-            if (TypeName.INT.equals(fieldSpec.type)) {
+        if (Primitives.isPrimitive(fieldSpec.type())) {
+            if (TypeName.INT.equals(fieldSpec.type())) {
                 return createHashInput(fieldSpec);
             } else {
                 return CodeBlock.of(
                         "$1T.$2N($3L)",
-                        Primitives.box(fieldSpec.type).withoutAnnotations(),
+                        Primitives.box(fieldSpec.type()).withoutAnnotations(),
                         "hashCode",
                         createHashInput(fieldSpec));
             }
@@ -211,12 +211,12 @@ public final class MethodSpecs {
     }
 
     private static CodeBlock createHashInput(FieldSpec field) {
-        if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
-            return CodeBlock.of("$N.toInstant()", "this." + field.name);
+        if (field.type().equals(ClassName.get(OffsetDateTime.class))) {
+            return CodeBlock.of("$N.toInstant()", "this." + field.name());
         }
 
         // Use 'this.' to avoid collisions with local variables
-        return CodeBlock.of("$N", "this." + field.name);
+        return CodeBlock.of("$N", "this." + field.name());
     }
 
     private static <T> Collector<T, List<T>, List<T>> joining(T delim) {
