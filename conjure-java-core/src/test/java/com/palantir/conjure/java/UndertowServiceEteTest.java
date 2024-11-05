@@ -36,8 +36,8 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.services.CheckedErrorGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
@@ -70,6 +70,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -577,7 +578,20 @@ public final class UndertowServiceEteTest extends TestBase {
                                 new ErrorGenerator(options),
                                 new CheckedErrorGenerator(options)))
                 .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
+        validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
+    }
+
+    private static void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
+        for (Path file : files) {
+            Path relativePath = folder.toPath().relativize(file);
+            Path output = outputDir.resolve(relativePath);
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Files.createDirectories(relativePath.getParent());
+                Files.deleteIfExists(output);
+                Files.copy(file, output);
+            }
+            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+        }
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {

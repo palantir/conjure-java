@@ -1,4 +1,6 @@
 types:
+  conjure-imports:
+    importedErrors: errors-for-endpoints.yml
   definitions:
     default-package: com.palantir.product
     errors:
@@ -16,7 +18,7 @@ types:
           resource: string
 services:
   ErrorService:
-    name: Ete Service
+    name: Error Service
     package: com.palantir.product
     default-auth: header
     base-path: /base
@@ -26,11 +28,17 @@ services:
         returns: string
         errors:
           - InvalidArgument
-
-#      testMultipleErrors:
-#        http: GET /multiple
-#        returns: string
-#        errors:
-#          - InvalidArgument
-#          - error: NotFound
-#            docs: Something was not found.
+      testImportedError:
+        http: GET /imported
+        returns: string
+        errors:
+          - importedErrors.EndpointError
+      testMultipleErrorsAndPackages:
+        http: GET /multiple
+        returns: string
+        errors:
+          - InvalidArgument
+          - error: NotFound
+            docs: Something was not found.
+          - importedErrors.DifferentNamespace
+          - importedErrors.DifferentPackage
