@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.collections.impl.list.mutable.primitive.BooleanArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
@@ -182,22 +181,18 @@ public final class ConjureCollections {
         return integerList;
     }
 
-    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    /**
+     * Deprecated, this should only ever be called by a previously generated conjure internal implementation.
+     */
     public static List<Boolean> newNonNullBooleanList() {
-        return new ConjureBooleanList(new BooleanArrayList());
+        return newNonNullList();
     }
 
-    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    /**
+     * Deprecated, this should only ever be called by a previously generated conjure internal implementation.
+     */
     public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
-        List<Boolean> booleanList;
-        if (iterable instanceof Collection) {
-            booleanList = new ConjureBooleanList(new BooleanArrayList(((Collection<Boolean>) iterable).size()));
-        } else {
-            booleanList = new ConjureBooleanList(new BooleanArrayList());
-        }
-        addAll(booleanList, iterable);
-
-        return booleanList;
+        return newNonNullList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
