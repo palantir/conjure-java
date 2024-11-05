@@ -66,19 +66,19 @@ import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.humanreadabletypes.HumanReadableDuration;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -301,7 +301,7 @@ final class UndertowServiceHandlerGenerator {
         if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
             ParameterizedTypeName type =
                     UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options);
-            TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
+            TypeName resultType = Iterables.getOnlyElement(type.typeArguments());
             endpointBuilder.addSuperinterface(
                     ParameterizedTypeName.get(ClassName.get(ReturnValueWriter.class), resultType));
 
@@ -399,12 +399,12 @@ final class UndertowServiceHandlerGenerator {
         // generic type incompatibilities.
         if (options.nonNullTopLevelCollectionValues() && input instanceof ParameterizedTypeName) {
             ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
-            if (LIST_NAME.equals(parameterized.rawType)) {
+            if (LIST_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
-                        IMMUTABLE_LIST_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
-            } else if (SET_NAME.equals(parameterized.rawType)) {
+                        IMMUTABLE_LIST_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
+            } else if (SET_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
-                        IMMUTABLE_SET_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
+                        IMMUTABLE_SET_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
             }
         }
 

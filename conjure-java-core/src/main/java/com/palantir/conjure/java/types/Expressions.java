@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.base.Joiner;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
 import com.palantir.logsafe.Preconditions;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.stream.IntStream;

@@ -23,7 +23,7 @@ import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
-import com.squareup.javapoet.JavaFile;
+import com.palantir.javapoet.JavaFile;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;

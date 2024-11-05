@@ -35,16 +35,16 @@ import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Function;
@@ -111,7 +111,7 @@ public final class DialogueInterfaceGenerator {
                 .addJavadoc(
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
-                .returns(staticFactoryMethod.returnType)
+                .returns(staticFactoryMethod.returnType())
                 .addParameter(Channel.class, StaticFactoryMethodGenerator.CHANNEL)
                 .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder()
@@ -119,7 +119,7 @@ public final class DialogueInterfaceGenerator {
                                 "if ($L instanceof $T) { return $L(($T) $L, $L); }\n",
                                 StaticFactoryMethodGenerator.CHANNEL,
                                 EndpointChannelFactory.class,
-                                staticFactoryMethod.name,
+                                staticFactoryMethod.name(),
                                 EndpointChannelFactory.class,
                                 StaticFactoryMethodGenerator.CHANNEL,
                                 StaticFactoryMethodGenerator.RUNTIME)
@@ -131,7 +131,7 @@ public final class DialogueInterfaceGenerator {
                                         + "  } "
                                         + "}, "
                                         + "$L);",
-                                staticFactoryMethod.name,
+                                staticFactoryMethod.name(),
                                 EndpointChannelFactory.class,
                                 Override.class,
                                 EndpointChannel.class,
