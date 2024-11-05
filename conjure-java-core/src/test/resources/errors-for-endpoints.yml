@@ -1,0 +1,22 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    errors:
+      EndpointError:
+        namespace: EndpointSpecific
+        code: INVALID_ARGUMENT
+        docs: Docs for an endpoint error.
+        safe-args:
+          typeName: string
+        unsafe-args:
+          typeDef: any
+      DifferentPackage:
+        package: com.palantir.another
+        namespace: EndpointSpecific
+        docs: An error in a different package.
+        code: INTERNAL
+      DifferentNamespace:
+        package: com.palantir.product
+        namespace: EndpointSpecificTwo
+        docs: An error in a different namespace.
+        code: INTERNAL

@@ -29,7 +29,6 @@ import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.UndertowTypeFunctions.AsyncRequestProcessingMetadata;
 import com.palantir.conjure.java.types.CodeBlocks;
-import com.palantir.conjure.java.types.EndpointErrorMapper;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -51,7 +50,9 @@ import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ListType;
@@ -127,7 +128,6 @@ final class UndertowServiceHandlerGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper,
-            EndpointErrorMapper endpointErrorMapper,
             SafetyEvaluator safetyEvaluator) {
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
@@ -197,7 +197,6 @@ final class UndertowServiceHandlerGenerator {
                                 typeDefinitions,
                                 typeMapper,
                                 returnTypeMapper,
-                                endpointErrorMapper,
                                 safetyEvaluator)))
                 .build();
 
@@ -228,7 +227,6 @@ final class UndertowServiceHandlerGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper,
-            EndpointErrorMapper endpointErrorMapper,
             SafetyEvaluator safetyEvaluator) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
                 .addAnnotation(Override.class)
@@ -236,7 +234,7 @@ final class UndertowServiceHandlerGenerator {
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
                 .addExceptions(endpointDefinition.getErrors().stream()
-                        .map(endpointError -> endpointErrorMapper.getClassName(endpointError.getError()))
+                        .map(endpointError -> createEndpointErrorException(endpointError, options))
                         .toList())
                 .addCode(endpointInvocation(
                         endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper, safetyEvaluator));
@@ -373,6 +371,14 @@ final class UndertowServiceHandlerGenerator {
                         .build()));
 
         return endpointBuilder.build();
+    }
+
+    private static ClassName createEndpointErrorException(EndpointError endpointError, Options options) {
+        ErrorTypeName errorTypeName = endpointError.getError();
+        return ClassName.get(
+                Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
+                "Server" + errorTypeName.getNamespace() + "Errors",
+                errorTypeName.getName());
     }
 
     private static void addTags(EndpointDefinition endpointDefinition, TypeSpec.Builder endpointBuilder) {
