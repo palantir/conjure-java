@@ -7,22 +7,22 @@ import javax.annotation.processing.Generated;
 public interface UndertowErrorService {
     /**
      * @apiNote {@code GET /base/basic}
-     * @throws InvalidArgument
+     * @throws ServerTestErrors.InvalidArgument
      */
     String testBasicError(AuthHeader authHeader) throws ServerTestErrors.InvalidArgument;
 
     /**
      * @apiNote {@code GET /base/imported}
-     * @throws EndpointError
+     * @throws ServerEndpointSpecificErrors.EndpointError
      */
     String testImportedError(AuthHeader authHeader) throws ServerEndpointSpecificErrors.EndpointError;
 
     /**
      * @apiNote {@code GET /base/multiple}
-     * @throws InvalidArgument
-     * @throws NotFound Something was not found.
-     * @throws DifferentNamespace
-     * @throws DifferentPackage
+     * @throws ServerTestErrors.InvalidArgument
+     * @throws ServerTestErrors.NotFound Something was not found.
+     * @throws ServerEndpointSpecificTwoErrors.DifferentNamespace
+     * @throws com.palantir.another.ServerEndpointSpecificErrors.DifferentPackage
      */
     String testMultipleErrorsAndPackages(AuthHeader authHeader)
             throws ServerTestErrors.InvalidArgument, ServerTestErrors.NotFound,

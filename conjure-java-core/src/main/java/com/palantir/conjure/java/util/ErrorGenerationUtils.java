@@ -16,7 +16,12 @@
 
 package com.palantir.conjure.java.util;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.Expressions;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointError;
@@ -25,6 +30,8 @@ import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.LogSafety;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
@@ -145,6 +152,103 @@ public final class ErrorGenerationUtils {
                 .ifPresent(docs ->
                         parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
         return parameterBuilder.build();
+    }
+
+    // Conditional factory method
+    public static MethodSpec.Builder conditionalStaticFactoryMethodBuilder(
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ErrorDefinition errorDefinition,
+            Options options,
+            ClassName exceptionClassThrown,
+            Optional<String> errorType) {
+        String exceptionMethodName = CaseFormat.UPPER_CAMEL.to(
+                CaseFormat.LOWER_CAMEL, errorDefinition.getErrorName().getName());
+        String methodName = "throwIf" + errorDefinition.getErrorName().getName();
+        String shouldThrowVar = "shouldThrow";
+
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, shouldThrowVar)
+                        .addJavadoc("Cause the method to throw when true\n")
+                        .build())
+                .addParameters(ErrorGenerationUtils.createParametersForConditionalStaticFactory(
+                        typeMapper, safetyEvaluator, errorDefinition));
+
+        if (options.jetbrainsContractAnnotations()) {
+            methodBuilder.addAnnotation(
+                    ErrorGenerationUtils.createContractAnnotationForConditionalFactory(errorDefinition));
+        }
+
+        methodBuilder
+                .beginControlFlow("if ($N)", shouldThrowVar)
+                .addCode(
+                        "throw $L;",
+                        Expressions.localMethodCall(
+                                exceptionMethodName,
+                                Stream.concat(
+                                                errorDefinition.getSafeArgs().stream(),
+                                                errorDefinition.getUnsafeArgs().stream())
+                                        .map(arg -> arg.getFieldName().get())
+                                        .collect(Collectors.toList())));
+        if (errorType.isPresent()) {
+            methodBuilder.addJavadoc(
+                    "Throws a {@link $T} of type $L when {@code $L} is true.\n",
+                    exceptionClassThrown,
+                    errorType.get(),
+                    shouldThrowVar);
+        } else {
+            methodBuilder.addJavadoc(
+                    "Throws a {@link $T} when {@code $L} is true.\n", exceptionClassThrown, shouldThrowVar);
+        }
+        return methodBuilder.endControlFlow();
+    }
+
+    private static List<ParameterSpec> createParametersForConditionalStaticFactory(
+            TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, ErrorDefinition errorDefinition) {
+        return Stream.concat(
+                        errorDefinition.getSafeArgs().stream().map(field -> FieldDefinition.builder()
+                                .from(field)
+                                .safety(LogSafety.SAFE)
+                                .build()),
+                        errorDefinition.getUnsafeArgs().stream().map(field -> FieldDefinition.builder()
+                                .from(field)
+                                .safety(LogSafety.UNSAFE)
+                                .build()))
+                .map(arg -> {
+                    TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
+                    Optional<LogSafety> underlyingTypeSafety = safetyEvaluator.getUsageTimeSafety(arg);
+                    Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
+                    if (!SafetyEvaluator.allows(underlyingTypeSafety, typeSafety)) {
+                        throw new IllegalStateException(String.format(
+                                "Cannot use %s type %s as a %s parameter in error %s -> %s",
+                                typeSafety.map(Object::toString).orElse("unknown"),
+                                argumentTypeName,
+                                underlyingTypeSafety.map(Object::toString).orElse("unknown"),
+                                errorDefinition.getErrorName().getName(),
+                                arg.getFieldName()));
+                    }
+                    return ParameterSpec.builder(
+                                    argumentTypeName, arg.getFieldName().get())
+                            .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
+                            .addJavadoc(
+                                    "$L",
+                                    StringUtils.appendIfMissing(
+                                            arg.getDocs().map(Javadoc::render).orElse(""), "\n"))
+                            .build();
+                })
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    private static AnnotationSpec createContractAnnotationForConditionalFactory(ErrorDefinition errorDefinition) {
+        String contract = String.format(
+                "true%s -> fail",
+                ", _"
+                        .repeat(errorDefinition.getSafeArgs().size()
+                                + errorDefinition.getUnsafeArgs().size()));
+        return AnnotationSpec.builder(ClassName.get("org.jetbrains.annotations", "Contract"))
+                .addMember("value", "$S", contract)
+                .build();
     }
 
     private ErrorGenerationUtils() {}

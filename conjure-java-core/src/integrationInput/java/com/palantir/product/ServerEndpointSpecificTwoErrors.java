@@ -3,26 +3,35 @@ package com.palantir.product;
 import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
+import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
 public final class ServerEndpointSpecificTwoErrors {
     private ServerEndpointSpecificTwoErrors() {}
 
     public static DifferentNamespace differentNamespace() {
-        return new DifferentNamespace();
+        return new DifferentNamespace(null);
     }
 
     public static DifferentNamespace differentNamespace(@Nullable Throwable cause) {
         return new DifferentNamespace(cause);
     }
 
-    public static final class DifferentNamespace extends CheckedServiceException {
-        private DifferentNamespace() {
-            super(com.palantir.product.EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE);
+    /**
+     * Throws a {@link DifferentNamespace} when {@code shouldThrow} is true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     */
+    @Contract("true -> fail")
+    public static void throwIfDifferentNamespace(boolean shouldThrow) throws DifferentNamespace {
+        if (shouldThrow) {
+            throw differentNamespace();
         }
+    }
 
+    public static final class DifferentNamespace extends CheckedServiceException {
         private DifferentNamespace(@Nullable Throwable cause) {
-            super(com.palantir.product.EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE, cause);
+            super(EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE, cause);
         }
     }
 }
