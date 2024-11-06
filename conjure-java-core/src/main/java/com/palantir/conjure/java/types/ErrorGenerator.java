@@ -18,7 +18,6 @@ package com.palantir.conjure.java.types;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
@@ -28,22 +27,17 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.ErrorDefinitionsByPackageAndNamespace;
-import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
-import com.palantir.conjure.spec.FieldDefinition;
-import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.TypeDefinition;
-import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
-import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import java.util.List;
@@ -52,7 +46,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
 
 public final class ErrorGenerator implements Generator {
 
@@ -126,89 +119,14 @@ public final class ErrorGenerator implements Generator {
         // Generate ServiceException factory check methods
         List<MethodSpec> checkMethodSpecs = errorTypeDefinitions.stream()
                 .filter(errorDefinition -> !endpointErrors.contains(errorDefinition))
-                .map(entry -> {
-                    String exceptionMethodName = CaseFormat.UPPER_CAMEL.to(
-                            CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
-                    String methodName = "throwIf" + entry.getErrorName().getName();
-
-                    String shouldThrowVar = "shouldThrow";
-
-                    MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
-                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                            .addJavadoc(
-                                    "Throws a {@link $T} of type $L when {@code $L} is true.\n",
-                                    ServiceException.class,
-                                    entry.getErrorName().getName(),
-                                    shouldThrowVar)
-                            .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, shouldThrowVar)
-                                    .addJavadoc("Cause the method to throw when true\n")
-                                    .build())
-                            .addParameters(Streams.concat(
-                                            entry.getSafeArgs().stream().map(field -> FieldDefinition.builder()
-                                                    .from(field)
-                                                    .safety(LogSafety.SAFE)
-                                                    .build()),
-                                            entry.getUnsafeArgs().stream().map(field -> FieldDefinition.builder()
-                                                    .from(field)
-                                                    .safety(LogSafety.UNSAFE)
-                                                    .build()))
-                                    .map(arg -> {
-                                        TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
-                                        Optional<LogSafety> underlyingTypeSafety =
-                                                safetyEvaluator.getUsageTimeSafety(arg);
-                                        Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
-                                        if (!SafetyEvaluator.allows(underlyingTypeSafety, typeSafety)) {
-                                            throw new IllegalStateException(String.format(
-                                                    "Cannot use %s type %s as a %s parameter in error %s -> %s",
-                                                    typeSafety
-                                                            .map(Object::toString)
-                                                            .orElse("unknown"),
-                                                    argumentTypeName,
-                                                    underlyingTypeSafety
-                                                            .map(Object::toString)
-                                                            .orElse("unknown"),
-                                                    entry.getErrorName().getName(),
-                                                    arg.getFieldName()));
-                                        }
-                                        return ParameterSpec.builder(
-                                                        argumentTypeName,
-                                                        arg.getFieldName().get())
-                                                .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
-                                                .addJavadoc(
-                                                        "$L",
-                                                        StringUtils.appendIfMissing(
-                                                                arg.getDocs()
-                                                                        .map(Javadoc::render)
-                                                                        .orElse(""),
-                                                                "\n"))
-                                                .build();
-                                    })
-                                    .collect(ImmutableList.toImmutableList()));
-                    if (options.jetbrainsContractAnnotations()) {
-                        String contract = String.format(
-                                "true%s -> fail",
-                                ", _"
-                                        .repeat(entry.getSafeArgs().size()
-                                                + entry.getUnsafeArgs().size()));
-                        methodBuilder.addAnnotation(
-                                AnnotationSpec.builder(ClassName.get("org.jetbrains.annotations", "Contract"))
-                                        .addMember("value", "$S", contract)
-                                        .build());
-                    }
-
-                    return methodBuilder
-                            .beginControlFlow("if ($N)", shouldThrowVar)
-                            .addCode(
-                                    "throw $L;",
-                                    Expressions.localMethodCall(
-                                            exceptionMethodName,
-                                            Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
-                                                    .map(arg ->
-                                                            arg.getFieldName().get())
-                                                    .collect(Collectors.toList())))
-                            .endControlFlow()
-                            .build();
-                })
+                .map(entry -> ErrorGenerationUtils.conditionalStaticFactoryMethodBuilder(
+                                typeMapper,
+                                safetyEvaluator,
+                                entry,
+                                options,
+                                ClassName.get(ServiceException.class),
+                                Optional.of(entry.getErrorName().getName()))
+                        .build())
                 .collect(Collectors.toList());
 
         List<MethodSpec> isRemoteExceptionDefinitions = errorTypeDefinitions.stream()

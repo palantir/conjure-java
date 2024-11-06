@@ -29,15 +29,18 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
-import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeSpec;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
@@ -53,6 +56,7 @@ public final class CheckedErrorGenerator implements Generator {
     @Override
     public Stream<JavaFile> generate(ConjureDefinition definition) {
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
         return ErrorDefinitionsByPackageAndNamespace.from(definition.getErrors())
@@ -65,6 +69,7 @@ public final class CheckedErrorGenerator implements Generator {
                     }
                     return Stream.of(generateErrorExceptionsForNamespace(
                             typeMapper,
+                            safetyEvaluator,
                             Packages.getPrefixedPackage(pkg, options.packagePrefix()),
                             namespace,
                             filteredErrorDefinitions));
@@ -73,6 +78,7 @@ public final class CheckedErrorGenerator implements Generator {
 
     private JavaFile generateErrorExceptionsForNamespace(
             TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
             String conjurePackage,
             ErrorNamespace namespace,
             List<ErrorDefinition> errorDefinitions) {
@@ -83,11 +89,12 @@ public final class CheckedErrorGenerator implements Generator {
                     return Stream.of(withoutCause, withCause);
                 })
                 .toList();
-
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorExceptionsClassName(conjurePackage, namespace))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(ErrorGenerationUtils.privateConstructor())
                 .addMethods(constructors)
+                .addMethods(generateConditionalExceptionFactories(
+                        typeMapper, safetyEvaluator, errorDefinitions, conjurePackage, options))
                 .addTypes(errorDefinitions.stream()
                         .map(def -> generateErrorException(typeMapper, conjurePackage, namespace, def))
                         .toList())
@@ -114,64 +121,80 @@ public final class CheckedErrorGenerator implements Generator {
 
         methodBuilder.addCode("return new $T(", exceptionClass);
 
-        boolean firstArg = true;
-
+        List<CodeBlock> args = new ArrayList<>(
+                Stream.concat(errorDefinition.getSafeArgs().stream(), errorDefinition.getUnsafeArgs().stream())
+                        .map(arg -> CodeBlock.of("$N", arg.getFieldName().get()))
+                        .toList());
         if (withCause) {
-            ErrorGenerationUtils.addNullableThrowableCauseParameterToMethodBuilder(methodBuilder);
-            firstArg = false;
+            args.add(CodeBlock.of("$N", "cause"));
+        } else {
+            args.add(CodeBlock.of("$N", "null"));
         }
-
-        for (FieldDefinition arg : Stream.concat(
-                        errorDefinition.getSafeArgs().stream(), errorDefinition.getUnsafeArgs().stream())
-                .toList()) {
-            if (!firstArg) {
-                methodBuilder.addCode(", ");
-            }
-            firstArg = false;
-            methodBuilder.addCode("$L", arg.getFieldName().get());
-        }
+        methodBuilder.addCode("$L", args.stream().collect(CodeBlock.joining(",")));
 
         ErrorGenerationUtils.addAllParametersWithSafetyAnnotationsToMethodBuilder(
                 typeMapper, methodBuilder, errorDefinition);
+        if (withCause) {
+            ParameterSpec causeParameter = ParameterSpec.builder(Throwable.class, "cause")
+                    .addAnnotation(Nullable.class)
+                    .build();
+            methodBuilder.addParameter(causeParameter);
+        }
 
         methodBuilder.addCode(");");
 
         return methodBuilder.build();
     }
 
+    private static List<MethodSpec> generateConditionalExceptionFactories(
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            List<ErrorDefinition> errorDefinitions,
+            String conjurePackage,
+            Options options) {
+        return errorDefinitions.stream()
+                .map(errorDefinition -> {
+                    ClassName exceptionClassName = ClassName.get(
+                            conjurePackage,
+                            "Server" + errorDefinition.getNamespace() + "Errors",
+                            errorDefinition.getErrorName().getName());
+                    return ErrorGenerationUtils.conditionalStaticFactoryMethodBuilder(
+                                    typeMapper,
+                                    safetyEvaluator,
+                                    errorDefinition,
+                                    options,
+                                    exceptionClassName,
+                                    Optional.empty())
+                            .addException(exceptionClassName)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
     private TypeSpec generateErrorException(
             TypeMapper typeMapper, String conjurePackage, ErrorNamespace namespace, ErrorDefinition errorDefinition) {
         return TypeSpec.classBuilder(errorDefinition.getErrorName().getName())
                 .superclass(CheckedServiceException.class)
-                .addMethod(buildExceptionConstructor(typeMapper, conjurePackage, namespace, errorDefinition, false))
-                .addMethod(buildExceptionConstructor(typeMapper, conjurePackage, namespace, errorDefinition, true))
+                .addMethod(buildExceptionConstructor(typeMapper, conjurePackage, namespace, errorDefinition))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .build();
     }
 
     private MethodSpec buildExceptionConstructor(
-            TypeMapper typeMapper,
-            String conjurePackage,
-            ErrorNamespace namespace,
-            ErrorDefinition errorDefinition,
-            boolean withCause) {
+            TypeMapper typeMapper, String conjurePackage, ErrorNamespace namespace, ErrorDefinition errorDefinition) {
         MethodSpec.Builder methodBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addCode(
-                        "super($L.$L",
+                        "super($T.$L",
                         ErrorGenerator.errorTypesClassName(conjurePackage, namespace),
                         CaseFormat.UPPER_CAMEL.to(
                                 CaseFormat.UPPER_UNDERSCORE,
                                 errorDefinition.getErrorName().getName()));
-        if (withCause) {
-            methodBuilder.addParameter(ParameterSpec.builder(Throwable.class, "cause")
-                    .addAnnotation(Nullable.class)
-                    .build());
-            methodBuilder.addCode(", cause");
-        }
-
+        methodBuilder.addCode(", cause");
         ErrorGenerationUtils.addAllLogSafeArgumentsToMethodBuilder(typeMapper, errorDefinition, methodBuilder);
-
+        methodBuilder.addParameter(ParameterSpec.builder(Throwable.class, "cause")
+                .addAnnotation(Nullable.class)
+                .build());
         methodBuilder.addCode(");");
         return methodBuilder.build();
     }

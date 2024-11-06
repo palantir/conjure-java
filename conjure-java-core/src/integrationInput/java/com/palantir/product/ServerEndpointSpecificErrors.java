@@ -7,31 +7,40 @@ import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
+import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
 public final class ServerEndpointSpecificErrors {
     private ServerEndpointSpecificErrors() {}
 
     public static EndpointError endpointError(@Safe String typeName, @Unsafe Object typeDef) {
-        return new EndpointError(typeName, typeDef);
+        return new EndpointError(typeName, typeDef, null);
     }
 
     public static EndpointError endpointError(
-            @Nullable Throwable cause, @Safe String typeName, @Unsafe Object typeDef) {
-        return new EndpointError(cause, typeName, typeDef);
+            @Safe String typeName, @Unsafe Object typeDef, @Nullable Throwable cause) {
+        return new EndpointError(typeName, typeDef, cause);
+    }
+
+    /**
+     * Throws a {@link EndpointError} when {@code shouldThrow} is true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     * @param typeName
+     * @param typeDef
+     */
+    @Contract("true, _, _ -> fail")
+    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef)
+            throws EndpointError {
+        if (shouldThrow) {
+            throw endpointError(typeName, typeDef);
+        }
     }
 
     public static final class EndpointError extends CheckedServiceException {
-        private EndpointError(@Safe String typeName, @Unsafe Object typeDef) {
+        private EndpointError(@Safe String typeName, @Unsafe Object typeDef, @Nullable Throwable cause) {
             super(
-                    com.palantir.product.EndpointSpecificErrors.ENDPOINT_ERROR,
-                    SafeArg.of("typeName", typeName),
-                    UnsafeArg.of("typeDef", typeDef));
-        }
-
-        private EndpointError(@Nullable Throwable cause, @Safe String typeName, @Unsafe Object typeDef) {
-            super(
-                    com.palantir.product.EndpointSpecificErrors.ENDPOINT_ERROR,
+                    EndpointSpecificErrors.ENDPOINT_ERROR,
                     cause,
                     SafeArg.of("typeName", typeName),
                     UnsafeArg.of("typeDef", typeDef));

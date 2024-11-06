@@ -49,15 +49,10 @@ public final class ServiceGenerators {
                 .flatMap(argument -> Javadoc.getParameterJavadoc(argument, endpointDef).stream())
                 .collect(Collectors.joining("\n"))));
 
-        Optional<String> errors = Optional.ofNullable(Strings.emptyToNull(endpointDef.getErrors().stream()
-                .map(Javadoc::getEndpointErrorJavadoc)
-                .collect(Collectors.joining("\n"))));
-
         StringBuilder sb = new StringBuilder();
         docs.ifPresent(sb::append);
         requestLine.ifPresent(sb::append);
         params.ifPresent(sb::append);
-        errors.ifPresent(sb::append);
         depr.ifPresent(sb::append);
         incDoc.ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
