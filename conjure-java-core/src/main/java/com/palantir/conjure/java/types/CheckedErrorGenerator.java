@@ -23,7 +23,6 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
-import com.palantir.conjure.java.util.ErrorGenerationUtils.ErrorDefinitionsByPackageAndNamespace;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -59,9 +58,9 @@ public final class CheckedErrorGenerator implements Generator {
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
-        return ErrorDefinitionsByPackageAndNamespace.from(definition.getErrors())
-                .processErrorDefinitions((pkg, namespace, errorDefinitions) -> {
-                    List<ErrorDefinition> filteredErrorDefinitions = errorDefinitions.stream()
+        return ErrorGenerationUtils.getNamespacedErrorsFromDefinitions(definition.getErrors()).stream()
+                .flatMap(namespacedErrors -> {
+                    List<ErrorDefinition> filteredErrorDefinitions = namespacedErrors.errors().stream()
                             .filter(endpointErrors::contains)
                             .toList();
                     if (filteredErrorDefinitions.isEmpty()) {
@@ -70,8 +69,8 @@ public final class CheckedErrorGenerator implements Generator {
                     return Stream.of(generateErrorExceptionsForNamespace(
                             typeMapper,
                             safetyEvaluator,
-                            Packages.getPrefixedPackage(pkg, options.packagePrefix()),
-                            namespace,
+                            Packages.getPrefixedPackage(namespacedErrors.javaPackage(), options.packagePrefix()),
+                            namespacedErrors.namespace(),
                             filteredErrorDefinitions));
                 });
     }
@@ -89,7 +88,8 @@ public final class CheckedErrorGenerator implements Generator {
                     return Stream.of(withoutCause, withCause);
                 })
                 .toList();
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorExceptionsClassName(conjurePackage, namespace))
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
+                        ClassName.get(conjurePackage, ErrorGenerationUtils.errorExceptionsClassName(namespace)))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(ErrorGenerationUtils.privateConstructor())
                 .addMethods(constructors)
@@ -197,9 +197,5 @@ public final class CheckedErrorGenerator implements Generator {
                 .build());
         methodBuilder.addCode(");");
         return methodBuilder.build();
-    }
-
-    private static ClassName errorExceptionsClassName(String conjurePackage, ErrorNamespace namespace) {
-        return ClassName.get(conjurePackage, "Server" + namespace.get() + "Errors");
     }
 }

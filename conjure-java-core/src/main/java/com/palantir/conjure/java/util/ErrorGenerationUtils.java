@@ -32,7 +32,6 @@ import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
@@ -49,11 +48,14 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.function.TriFunction;
 
 public final class ErrorGenerationUtils {
     public static MethodSpec privateConstructor() {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
+    }
+
+    public static String errorExceptionsClassName(ErrorNamespace namespace) {
+        return "Server" + namespace.get() + "Errors";
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {
@@ -76,28 +78,21 @@ public final class ErrorGenerationUtils {
         }
     }
 
-    public record ErrorDefinitionsByPackageAndNamespace(
-            Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> packageToNamespacedErrorDefs) {
-        public static ErrorDefinitionsByPackageAndNamespace from(List<ErrorDefinition> errorTypeNameToDef) {
-            Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> pkgToNamespacedErrorDefs = new HashMap<>();
-            errorTypeNameToDef.forEach(errorDef -> {
-                String errorPkg = errorDef.getErrorName().getPackage();
-                pkgToNamespacedErrorDefs.computeIfAbsent(errorPkg, key -> new HashMap<>());
-                Map<ErrorNamespace, List<ErrorDefinition>> namespacedErrorDefs = pkgToNamespacedErrorDefs.get(errorPkg);
-                ErrorNamespace namespace = errorDef.getNamespace();
-                namespacedErrorDefs.computeIfAbsent(namespace, key -> new ArrayList<>());
-                namespacedErrorDefs.get(namespace).add(errorDef);
-            });
-            return new ErrorDefinitionsByPackageAndNamespace(pkgToNamespacedErrorDefs);
-        }
+    public record NamespacedErrors(String javaPackage, ErrorNamespace namespace, List<ErrorDefinition> errors) {}
 
-        public Stream<JavaFile> processErrorDefinitions(
-                TriFunction<String, ErrorNamespace, List<ErrorDefinition>, Stream<JavaFile>> function) {
-            return packageToNamespacedErrorDefs.entrySet().stream()
-                    .flatMap(entry -> entry.getValue().entrySet().stream()
-                            .flatMap(innerEntry ->
-                                    function.apply(entry.getKey(), innerEntry.getKey(), innerEntry.getValue())));
-        }
+    public static List<NamespacedErrors> getNamespacedErrorsFromDefinitions(List<ErrorDefinition> errorTypeNameToDef) {
+        record ErrorGroup(String javaPackage, ErrorNamespace namespace) {}
+        Map<ErrorGroup, List<ErrorDefinition>> errorsByGroup = new HashMap<>();
+        errorTypeNameToDef.forEach(errorDef -> {
+            ErrorGroup errorGroup = new ErrorGroup(errorDef.getErrorName().getPackage(), errorDef.getNamespace());
+            errorsByGroup.computeIfAbsent(errorGroup, key -> new ArrayList<>()).add(errorDef);
+        });
+        return errorsByGroup.entrySet().stream()
+                .map(entry -> {
+                    ErrorGroup errorGroup = entry.getKey();
+                    return new NamespacedErrors(errorGroup.javaPackage(), errorGroup.namespace(), entry.getValue());
+                })
+                .collect(ImmutableList.toImmutableList());
     }
 
     public static void addNullableThrowableCauseParameterToMethodBuilder(MethodSpec.Builder methodBuilder) {

@@ -26,7 +26,6 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
-import com.palantir.conjure.java.util.ErrorGenerationUtils.ErrorDefinitionsByPackageAndNamespace;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -63,14 +62,14 @@ public final class ErrorGenerator implements Generator {
         TypeMapper typeMapper = new TypeMapper(types, options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
-        return ErrorDefinitionsByPackageAndNamespace.from(definition.getErrors())
-                .processErrorDefinitions((pkg, namespace, errorDefinitions) -> Stream.of(generateErrorTypesForNamespace(
+        return ErrorGenerationUtils.getNamespacedErrorsFromDefinitions(definition.getErrors()).stream()
+                .flatMap(namespacedErrors -> Stream.of(generateErrorTypesForNamespace(
                         typeMapper,
                         safetyEvaluator,
                         endpointErrors,
-                        Packages.getPrefixedPackage(pkg, options.packagePrefix()),
-                        namespace,
-                        errorDefinitions)));
+                        Packages.getPrefixedPackage(namespacedErrors.javaPackage(), options.packagePrefix()),
+                        namespacedErrors.namespace(),
+                        namespacedErrors.errors())));
     }
 
     private static ImmutableList<FieldSpec> generateErrorTypeFields(
