@@ -30,7 +30,9 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
+import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -42,13 +44,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class ConjureExceptionHandlerTest {
 
-    private RuntimeException exception;
+    private Exception exception;
     private Undertow server;
 
     @BeforeEach
@@ -78,6 +83,56 @@ public final class ConjureExceptionHandlerTest {
         assertThat(getErrorBody(connection))
                 .contains("{\"errorCode\":\"CONFLICT\"")
                 .contains("\"parameters\":{\"foo\":\"bar\"}}");
+    }
+
+    @Test
+    public void checkServiceExceptionArgumentsSerializedWithToString() throws IOException {
+        record Argument(String field1, Optional<Integer> maybeField2, List<String> collectionField) {}
+        exception = new ServiceException(
+                ErrorType.CONFLICT, SafeArg.of("arg", new Argument("foo", Optional.of(42), List.of("bar", "baz"))));
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        String expectedSerializedArg = "\"Argument[field1=foo, maybeField2=Optional[42], collectionField=[bar, baz]]\"";
+        assertThat(getErrorBody(connection))
+                .contains("{\"errorCode\":\"CONFLICT\"")
+                .contains("\"parameters\":{\"arg\":" + expectedSerializedArg + "}}");
+    }
+
+    @Test
+    public void handlesCheckedServiceException() throws IOException {
+        final class DifferentPackage extends CheckedServiceException {
+            private DifferentPackage(@Nullable Throwable cause) {
+                super(ErrorType.CONFLICT, cause);
+            }
+        }
+
+        exception = new DifferentPackage(null);
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        assertThat(getErrorBody(connection))
+                .contains("{\"errorCode\":\"CONFLICT\"")
+                .contains("\"parameters\":{}}");
+    }
+
+    @Test
+    public void handlesCheckedServiceExceptionWithComplexArg() throws IOException {
+        record Argument(String field1, Optional<Integer> maybeField2, List<String> collectionField) {}
+        final class DifferentPackage extends CheckedServiceException {
+            private DifferentPackage(@Safe Argument argument, @Nullable Throwable cause) {
+                super(ErrorType.CONFLICT, cause, SafeArg.of("arg", argument));
+            }
+        }
+
+        exception = new DifferentPackage(new Argument("foo", Optional.of(42), List.of("bar", "baz")), null);
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        String expectedSerializedArg = "{\"field1\":\"foo\",\"maybeField2\":42,\"collectionField\":[\"bar\",\"baz\"]}";
+        assertThat(getErrorBody(connection))
+                .contains("{\"errorCode\":\"CONFLICT\"")
+                .contains("\"parameters\":{\"arg\":" + expectedSerializedArg + "}}");
     }
 
     @Test

@@ -24,6 +24,7 @@ import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapte
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -53,6 +54,8 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Exceptions should always be serialized using JSON
     private static final Serializer<SerializableError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
+    private static final Serializer<ConjureError> errorSerializer =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
 
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
@@ -60,7 +63,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (throwable instanceof ServiceException) {
+        if (throwable instanceof CheckedServiceException checkedServiceException) {
+            checkedServiceException(exchange, checkedServiceException);
+        } else if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
             qosException(exchange, (QosException) throwable);
@@ -84,6 +89,14 @@ public enum ConjureExceptions implements ExceptionHandler {
                     Optional.of(SerializableError.forException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
+    }
+
+    private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
+        log(exception);
+        writeErrorResponse(
+                exchange,
+                ConjureError.fromCheckedServiceException(exception),
+                exception.getErrorType().httpErrorCode());
     }
 
     private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
@@ -186,17 +199,33 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode());
     }
 
+    private static void writeErrorResponse(HttpServerExchange exchange, ConjureError error, int statusCode) {
+        writeResponseInternal(exchange, statusCode, () -> errorSerializer.serialize(error, exchange));
+    }
+
     private static void writeResponse(
             HttpServerExchange exchange, Optional<SerializableError> maybeBody, int statusCode) {
+        writeResponseInternal(exchange, statusCode, () -> {
+            if (maybeBody.isPresent()) {
+                serializer.serialize(maybeBody.get(), exchange);
+            }
+        });
+    }
+
+    @FunctionalInterface
+    private interface SerializerRunnable {
+        void run() throws IOException;
+    }
+
+    private static void writeResponseInternal(
+            HttpServerExchange exchange, int statusCode, SerializerRunnable serializeMessage) {
         // Do not attempt to write the failure if data has already been written
         if (!isResponseStarted(exchange)) {
             exchange.setStatusCode(statusCode);
-            if (maybeBody.isPresent()) {
-                try {
-                    serializer.serialize(maybeBody.get(), exchange);
-                } catch (IOException | RuntimeException e) {
-                    log.info("Failed to write error response", e);
-                }
+            try {
+                serializeMessage.run();
+            } catch (IOException | RuntimeException e) {
+                log.info("Failed to write error response", e);
             }
         } else {
             // This prevents the server from sending the final null chunk, alerting
@@ -234,6 +263,24 @@ public enum ConjureExceptions implements ExceptionHandler {
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
                     exceptionForLogging);
+        }
+    }
+
+    private static void log(CheckedServiceException checkedServiceException) {
+        if (checkedServiceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+            log.info(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", checkedServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", checkedServiceException.getErrorType().name()),
+                    checkedServiceException);
+        } else {
+            log.error(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", checkedServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", checkedServiceException.getErrorType().name()),
+                    checkedServiceException);
         }
     }
 
