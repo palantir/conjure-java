@@ -82,7 +82,7 @@ public final class Javadoc {
                         + JavaNameSanitizer.sanitizeParameterName(
                                 argument.getArgName().get(), endpoint)
                         + " "
-                        + Javadoc.render(docs));
+                        + Javadoc.render(argument.getDocs().get()));
     }
 
     public static String getRequestLine(HttpMethod httpMethod, HttpPath httpPath) {

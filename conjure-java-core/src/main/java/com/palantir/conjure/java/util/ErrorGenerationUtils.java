@@ -55,7 +55,7 @@ public final class ErrorGenerationUtils {
     }
 
     public static String errorExceptionsClassName(ErrorNamespace namespace) {
-        return "Server" + namespace.get() + "Errors";
+        return namespace.get() + "ServerErrors";
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {

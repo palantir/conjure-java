@@ -29,7 +29,6 @@ dependencies {
     implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'com.palantir.tokens:auth-tokens'
-    implementation 'com.palantir.conjure.java.api:errors'
 
     // Recommend a higher version of wildfly (1.6.0.Final+) then the one shipped with undertow to avoid CVEs.
     runtimeOnly 'org.wildfly.common:wildfly-common'

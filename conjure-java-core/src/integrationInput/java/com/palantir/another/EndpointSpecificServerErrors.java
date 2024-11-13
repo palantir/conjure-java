@@ -1,13 +1,13 @@
 package com.palantir.another;
 
-import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
-public final class ServerEndpointSpecificErrors {
-    private ServerEndpointSpecificErrors() {}
+public final class EndpointSpecificServerErrors {
+    private EndpointSpecificServerErrors() {}
 
     public static DifferentPackage differentPackage() {
         return new DifferentPackage(null);

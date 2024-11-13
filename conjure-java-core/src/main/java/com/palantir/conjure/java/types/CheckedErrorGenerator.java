@@ -20,7 +20,7 @@ import com.google.common.base.CaseFormat;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
 import com.palantir.conjure.java.util.Packages;
@@ -112,7 +112,7 @@ public final class CheckedErrorGenerator implements Generator {
 
         ClassName exceptionClass = ClassName.get(
                 conjurePackage,
-                "Server" + errorDefinition.getNamespace() + "Errors",
+                ErrorGenerationUtils.errorExceptionsClassName(errorDefinition.getNamespace()),
                 errorDefinition.getErrorName().getName());
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
@@ -156,7 +156,7 @@ public final class CheckedErrorGenerator implements Generator {
                 .map(errorDefinition -> {
                     ClassName exceptionClassName = ClassName.get(
                             conjurePackage,
-                            "Server" + errorDefinition.getNamespace() + "Errors",
+                            ErrorGenerationUtils.errorExceptionsClassName(errorDefinition.getNamespace()),
                             errorDefinition.getErrorName().getName());
                     return ErrorGenerationUtils.conditionalStaticFactoryMethodBuilder(
                                     typeMapper,

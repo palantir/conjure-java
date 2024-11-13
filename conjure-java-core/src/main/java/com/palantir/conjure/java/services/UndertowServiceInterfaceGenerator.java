@@ -16,14 +16,17 @@
 
 package com.palantir.conjure.java.services;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
+import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -37,7 +40,6 @@ import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
@@ -99,7 +101,11 @@ final class UndertowServiceInterfaceGenerator {
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 
-        addJavaDoc(methodBuilder, endpointDef, options.packagePrefix());
+        ServiceGenerators.addJavaDocForEndpointDefinition(
+                methodBuilder,
+                options.packagePrefix(),
+                endpointDef,
+                new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.INCLUDE));
 
         if (UndertowTypeFunctions.isAsync(endpointDef, options)) {
             methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, options));
@@ -112,54 +118,12 @@ final class UndertowServiceInterfaceGenerator {
                     ErrorTypeName errorTypeName = endpointError.getError();
                     return ClassName.get(
                             Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
-                            "Server" + errorTypeName.getNamespace() + "Errors",
+                            ErrorGenerationUtils.errorExceptionsClassName(errorTypeName.getNamespace()),
                             errorTypeName.getName());
                 })
                 .collect(Collectors.toList()));
 
         return methodBuilder.build();
-    }
-
-    private static void addJavaDoc(
-            MethodSpec.Builder methodBuilder,
-            EndpointDefinition endpointDefinition,
-            Optional<String> maybePackagePrefix) {
-        Optional<String> depr = endpointDefinition.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
-        Optional<String> incDoc = Javadoc.getIncubatingJavadoc(endpointDefinition.getTags());
-        Optional<String> docs = endpointDefinition.getDocs().map(Javadoc::render);
-        Optional<String> requestLine = Optional.of(
-                Javadoc.getRequestLine(endpointDefinition.getHttpMethod(), endpointDefinition.getHttpPath()));
-        Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDefinition.getArgs().stream()
-                .flatMap(argument -> Javadoc.getParameterJavadoc(argument, endpointDefinition).stream())
-                .collect(Collectors.joining("\n"))));
-        StringBuilder sb = new StringBuilder();
-        docs.ifPresent(sb::append);
-        requestLine.ifPresent(sb::append);
-        params.ifPresent(sb::append);
-        if (!endpointDefinition.getErrors().isEmpty()) {
-            if (!sb.isEmpty()) {
-                methodBuilder.addJavadoc("$L", sb.toString());
-            }
-            methodBuilder.addJavadoc(endpointDefinition.getErrors().stream()
-                    .map(endpointError -> CodeBlock.of(
-                            "@throws $T $L",
-                            ClassName.get(
-                                    Packages.getPrefixedPackage(
-                                            endpointError.getError().getPackage(), maybePackagePrefix),
-                                    "Server" + endpointError.getError().getNamespace() + "Errors",
-                                    endpointError.getError().getName()),
-                            endpointError
-                                    .getDocs()
-                                    .map(endpointErrorDocs -> " " + Javadoc.render(endpointErrorDocs))
-                                    .orElse("")))
-                    .collect(CodeBlock.joining("\n")));
-            sb.setLength(0);
-        }
-        depr.ifPresent(sb::append);
-        incDoc.ifPresent(sb::append);
-        if (!sb.isEmpty()) {
-            methodBuilder.addJavadoc("$L", sb.toString());
-        }
     }
 
     private List<ParameterSpec> createServiceMethodParameters(

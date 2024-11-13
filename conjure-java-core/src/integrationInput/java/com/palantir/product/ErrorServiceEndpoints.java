@@ -49,7 +49,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException, ServerTestErrors.InvalidArgument {
+        public void handleRequest(HttpServerExchange exchange) throws IOException, TestServerErrors.InvalidArgument {
             AuthHeader authHeader = runtime.auth().header(exchange);
             String result = delegate.testBasicError(authHeader);
             serializer.serialize(result, exchange);
@@ -96,7 +96,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange)
-                throws IOException, ServerEndpointSpecificErrors.EndpointError {
+                throws IOException, EndpointSpecificServerErrors.EndpointError {
             AuthHeader authHeader = runtime.auth().header(exchange);
             String result = delegate.testImportedError(authHeader);
             serializer.serialize(result, exchange);
@@ -143,9 +143,9 @@ public final class ErrorServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange)
-                throws IOException, ServerTestErrors.InvalidArgument, ServerTestErrors.NotFound,
-                        ServerEndpointSpecificTwoErrors.DifferentNamespace,
-                        com.palantir.another.ServerEndpointSpecificErrors.DifferentPackage {
+                throws IOException, TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
+                        EndpointSpecificTwoServerErrors.DifferentNamespace,
+                        com.palantir.another.EndpointSpecificServerErrors.DifferentPackage {
             AuthHeader authHeader = runtime.auth().header(exchange);
             String result = delegate.testMultipleErrorsAndPackages(authHeader);
             serializer.serialize(result, exchange);
