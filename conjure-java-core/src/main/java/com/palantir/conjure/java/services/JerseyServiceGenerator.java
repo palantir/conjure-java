@@ -22,6 +22,9 @@ import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
+import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SafetyEvaluator;
@@ -202,7 +205,12 @@ public final class JerseyServiceGenerator implements Generator {
 
         methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
-        ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerators.addJavaDocForEndpointDefinition(
+                methodBuilder,
+                options.packagePrefix(),
+                endpointDef,
+                // Endpoint errors are not supported for Jersey servers
+                new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.EXCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
         return methodBuilder.build();
     }

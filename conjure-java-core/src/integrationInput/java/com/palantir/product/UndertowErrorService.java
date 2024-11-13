@@ -7,25 +7,25 @@ import javax.annotation.processing.Generated;
 public interface UndertowErrorService {
     /**
      * @apiNote {@code GET /base/basic}
-     * @throws ServerTestErrors.InvalidArgument
+     * @throws TestServerErrors.InvalidArgument
      */
-    String testBasicError(AuthHeader authHeader) throws ServerTestErrors.InvalidArgument;
+    String testBasicError(AuthHeader authHeader) throws TestServerErrors.InvalidArgument;
 
     /**
      * @apiNote {@code GET /base/imported}
-     * @throws ServerEndpointSpecificErrors.EndpointError
+     * @throws EndpointSpecificServerErrors.EndpointError
      */
-    String testImportedError(AuthHeader authHeader) throws ServerEndpointSpecificErrors.EndpointError;
+    String testImportedError(AuthHeader authHeader) throws EndpointSpecificServerErrors.EndpointError;
 
     /**
      * @apiNote {@code GET /base/multiple}
-     * @throws ServerTestErrors.InvalidArgument
-     * @throws ServerTestErrors.NotFound Something was not found.
-     * @throws ServerEndpointSpecificTwoErrors.DifferentNamespace
-     * @throws com.palantir.another.ServerEndpointSpecificErrors.DifferentPackage
+     * @throws TestServerErrors.InvalidArgument
+     * @throws TestServerErrors.NotFound Something was not found.
+     * @throws EndpointSpecificTwoServerErrors.DifferentNamespace
+     * @throws com.palantir.another.EndpointSpecificServerErrors.DifferentPackage
      */
     String testMultipleErrorsAndPackages(AuthHeader authHeader)
-            throws ServerTestErrors.InvalidArgument, ServerTestErrors.NotFound,
-                    ServerEndpointSpecificTwoErrors.DifferentNamespace,
-                    com.palantir.another.ServerEndpointSpecificErrors.DifferentPackage;
+            throws TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
+                    EndpointSpecificTwoServerErrors.DifferentNamespace,
+                    com.palantir.another.EndpointSpecificServerErrors.DifferentPackage;
 }

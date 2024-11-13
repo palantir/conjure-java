@@ -1,6 +1,6 @@
 package com.palantir.product;
 
-import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
@@ -10,8 +10,8 @@ import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
-public final class ServerEndpointSpecificErrors {
-    private ServerEndpointSpecificErrors() {}
+public final class EndpointSpecificServerErrors {
+    private EndpointSpecificServerErrors() {}
 
     public static EndpointError endpointError(@Safe String typeName, @Unsafe Object typeDef) {
         return new EndpointError(typeName, typeDef, null);
