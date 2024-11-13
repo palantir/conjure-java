@@ -29,7 +29,6 @@ import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.UndertowTypeFunctions.AsyncRequestProcessingMetadata;
 import com.palantir.conjure.java.types.CodeBlocks;
-import com.palantir.conjure.java.types.EndpointErrorMapper;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -129,7 +128,6 @@ final class UndertowServiceHandlerGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper,
-            EndpointErrorMapper endpointErrorMapper,
             SafetyEvaluator safetyEvaluator) {
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
@@ -199,7 +197,6 @@ final class UndertowServiceHandlerGenerator {
                                 typeDefinitions,
                                 typeMapper,
                                 returnTypeMapper,
-                                endpointErrorMapper,
                                 safetyEvaluator)))
                 .build();
 
@@ -230,7 +227,6 @@ final class UndertowServiceHandlerGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper,
-            EndpointErrorMapper endpointErrorMapper,
             SafetyEvaluator safetyEvaluator) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
                 .addAnnotation(Override.class)

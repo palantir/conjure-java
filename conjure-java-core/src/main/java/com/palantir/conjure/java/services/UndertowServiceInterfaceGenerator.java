@@ -23,7 +23,6 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
 import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
-import com.palantir.conjure.java.types.EndpointErrorMapper;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
@@ -61,14 +60,11 @@ final class UndertowServiceInterfaceGenerator {
         this.options = options;
     }
 
-    // TODO(pm): We need something that resolves the error type to the generated exceptions class. Let's generate the
-    //  exceptions before we create the undertow service interfaces.
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition,
             SafetyEvaluator safetyEvaluator,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper,
-            EndpointErrorMapper endpointErrorMapper) {
+            TypeMapper returnTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
@@ -78,13 +74,9 @@ final class UndertowServiceInterfaceGenerator {
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceInterfaceMethod(
-                        endpoint, safetyEvaluator, typeMapper, returnTypeMapper, endpointErrorMapper))
+                .map(endpoint ->
+                        generateServiceInterfaceMethod(endpoint, safetyEvaluator, typeMapper, returnTypeMapper))
                 .collect(Collectors.toList()));
-
-        // TODO(pm): create the exceptions from the error definitions if they are used by the endpoints.
-        //  what if they're used in multiple places? we should dedupe them.
-        //
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(
@@ -99,8 +91,7 @@ final class UndertowServiceInterfaceGenerator {
             EndpointDefinition endpointDef,
             SafetyEvaluator safetyEvaluator,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper,
-            EndpointErrorMapper endpointErrorMapper) {
+            TypeMapper returnTypeMapper) {
         String methodName =
                 JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
