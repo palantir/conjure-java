@@ -50,7 +50,7 @@ public final class CollectionsTestObject {
             CollectionsTestAliasSet aset,
             CollectionsTestAliasMap amap) {
         validateFields(items, itemsMap, optionalItem, itemsSet, alist, aset, amap);
-        this.items = Collections.unmodifiableList(items);
+        this.items = ConjureCollections.unmodifiableList(items);
         this.itemsMap = Collections.unmodifiableMap(itemsMap);
         this.optionalItem = optionalItem;
         this.itemsSet = Collections.unmodifiableSet(itemsSet);

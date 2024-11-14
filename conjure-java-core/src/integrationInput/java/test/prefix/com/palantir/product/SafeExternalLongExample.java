@@ -44,7 +44,7 @@ public final class SafeExternalLongExample {
         validateFields(optionalSafeExternalLong, safeExternalLongList, safeExternalLongSet);
         this.safeExternalLongValue = safeExternalLongValue;
         this.optionalSafeExternalLong = optionalSafeExternalLong;
-        this.safeExternalLongList = Collections.unmodifiableList(safeExternalLongList);
+        this.safeExternalLongList = ConjureCollections.unmodifiableList(safeExternalLongList);
         this.safeExternalLongSet = Collections.unmodifiableSet(safeExternalLongSet);
     }
 

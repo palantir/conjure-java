@@ -14,7 +14,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -35,7 +34,7 @@ public final class StrictThreeFields {
 
     private StrictThreeFields(List<String> myList, BearerToken bearerTokenValue, Optional<String> optionalItem) {
         validateFields(myList, bearerTokenValue, optionalItem);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.optionalItem = optionalItem;
     }

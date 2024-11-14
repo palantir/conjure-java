@@ -12,7 +12,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,7 +34,7 @@ public final class ExternalLongExample {
         validateFields(optionalExternalLong, listExternalLong);
         this.externalLong = externalLong;
         this.optionalExternalLong = optionalExternalLong;
-        this.listExternalLong = Collections.unmodifiableList(listExternalLong);
+        this.listExternalLong = ConjureCollections.unmodifiableList(listExternalLong);
     }
 
     @JsonProperty("externalLong")
