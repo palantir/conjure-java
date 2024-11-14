@@ -17,14 +17,13 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.QosReasons;
 import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -52,9 +51,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
     // Exceptions should always be serialized using JSON
-    private static final Serializer<SerializableError> serializer =
-            new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
-    private static final Serializer<ConjureError> errorSerializer =
+    private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
 
     // Log at most once every second
@@ -86,16 +83,16 @@ public enum ConjureExceptions implements ExceptionHandler {
             log(exception, throwable);
             writeResponse(
                     exchange,
-                    Optional.of(SerializableError.forException(exception)),
+                    Optional.of(ConjureError.fromServiceException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
     }
 
     private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
         log(exception);
-        writeErrorResponse(
+        writeResponse(
                 exchange,
-                ConjureError.fromCheckedServiceException(exception),
+                Optional.of(ConjureError.fromCheckedServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
@@ -103,7 +100,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         log(exception);
         writeResponse(
                 exchange,
-                Optional.of(SerializableError.forException(exception)),
+                Optional.of(ConjureError.fromServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
@@ -151,11 +148,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
             writeResponse(
                     exchange,
-                    Optional.of(SerializableError.builder()
-                            .errorCode(remoteException.getError().errorCode())
-                            .errorName(remoteException.getError().errorName())
-                            .errorInstanceId(remoteException.getError().errorInstanceId())
-                            .build()),
+                    Optional.of(ConjureError.fromRemoteException(remoteException)),
                     remoteException.getStatus());
         } else {
             // log at WARN instead of ERROR because this indicates an issue in a remote server
@@ -169,7 +162,7 @@ public enum ConjureExceptions implements ExceptionHandler {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, remoteException);
             writeResponse(
                     exchange,
-                    Optional.of(SerializableError.forException(exception)),
+                    Optional.of(ConjureError.fromServiceException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
     }
@@ -179,7 +172,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         log(exception, throwable);
         writeResponse(
                 exchange,
-                Optional.of(SerializableError.forException(exception)),
+                Optional.of(ConjureError.fromServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
@@ -187,7 +180,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         int statusCode = frameworkException.getStatusCode();
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
         log(exception, frameworkException);
-        writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode);
+        writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
@@ -199,31 +192,12 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode());
     }
 
-    private static void writeErrorResponse(HttpServerExchange exchange, ConjureError error, int statusCode) {
-        writeResponseInternal(exchange, statusCode, () -> errorSerializer.serialize(error, exchange));
-    }
-
-    private static void writeResponse(
-            HttpServerExchange exchange, Optional<SerializableError> maybeBody, int statusCode) {
-        writeResponseInternal(exchange, statusCode, () -> {
-            if (maybeBody.isPresent()) {
-                serializer.serialize(maybeBody.get(), exchange);
-            }
-        });
-    }
-
-    @FunctionalInterface
-    private interface SerializerRunnable {
-        void run() throws IOException;
-    }
-
-    private static void writeResponseInternal(
-            HttpServerExchange exchange, int statusCode, SerializerRunnable serializeMessage) {
+    private static void writeResponse(HttpServerExchange exchange, Optional<ConjureError> maybeBody, int statusCode) {
         // Do not attempt to write the failure if data has already been written
         if (!isResponseStarted(exchange)) {
             exchange.setStatusCode(statusCode);
             try {
-                serializeMessage.run();
+                serializer.serialize(maybeBody.get(), exchange);
             } catch (IOException | RuntimeException e) {
                 log.info("Failed to write error response", e);
             }

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.QosException;
@@ -30,7 +31,6 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
-import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -46,6 +46,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,13 +89,16 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void checkServiceExceptionArgumentsSerializedWithToString() throws IOException {
-        record Argument(String field1, Optional<Integer> maybeField2, List<String> collectionField) {}
+        record Argument(
+                String field1, Optional<Integer> maybeField2, List<String> collectionField, String nullString) {}
         exception = new ServiceException(
-                ErrorType.CONFLICT, SafeArg.of("arg", new Argument("foo", Optional.of(42), List.of("bar", "baz"))));
+                ErrorType.CONFLICT,
+                SafeArg.of("arg", new Argument("foo", Optional.of(42), List.of("bar", "baz"), null)));
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
-        String expectedSerializedArg = "\"Argument[field1=foo, maybeField2=Optional[42], collectionField=[bar, baz]]\"";
+        String expectedSerializedArg =
+                "\"Argument[field1=foo, maybeField2=Optional[42], collectionField=[bar, baz], nullString=null]\"";
         assertThat(getErrorBody(connection))
                 .contains("{\"errorCode\":\"CONFLICT\"")
                 .contains("\"parameters\":{\"arg\":" + expectedSerializedArg + "}}");
@@ -117,22 +122,53 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
-    public void handlesCheckedServiceExceptionWithComplexArg() throws IOException {
-        record Argument(String field1, Optional<Integer> maybeField2, List<String> collectionField) {}
-        final class DifferentPackage extends CheckedServiceException {
-            private DifferentPackage(@Safe Argument argument, @Nullable Throwable cause) {
+    public void handlesCheckedServiceExceptionWithOptionals() throws IOException {
+        record Argument(
+                Integer integer,
+                Integer nullValue,
+                OptionalInt optionalInt,
+                OptionalInt emptyOptionalInt,
+                OptionalDouble optionalDouble,
+                OptionalDouble emptyOptionalDouble,
+                Optional<String> optional,
+                Optional<String> emptyOptional,
+                Optional<List<String>> optOfList,
+                List<Optional<String>> listOfOpt) {}
+
+        final class OptionalException extends CheckedServiceException {
+            private OptionalException(@Safe Argument argument, @Nullable Throwable cause) {
                 super(ErrorType.CONFLICT, cause, SafeArg.of("arg", argument));
             }
         }
 
-        exception = new DifferentPackage(new Argument("foo", Optional.of(42), List.of("bar", "baz")), null);
-        HttpURLConnection connection = execute();
+        exception = new OptionalException(
+                new Argument(
+                        1,
+                        null,
+                        OptionalInt.of(2),
+                        OptionalInt.empty(),
+                        OptionalDouble.of(3.0),
+                        OptionalDouble.empty(),
+                        Optional.of("value"),
+                        Optional.empty(),
+                        Optional.of(List.of("a", "b")),
+                        List.of(Optional.of("c"), Optional.empty(), Optional.of("d"))),
+                null);
 
+        HttpURLConnection connection = execute();
         assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
-        String expectedSerializedArg = "{\"field1\":\"foo\",\"maybeField2\":42,\"collectionField\":[\"bar\",\"baz\"]}";
+        String expectedSerializedArgs = "{\"integer\":1," + "\"nullValue\":null,"
+                + "\"optionalInt\":2,"
+                + "\"emptyOptionalInt\":null,"
+                + "\"optionalDouble\":3.0,"
+                + "\"emptyOptionalDouble\":null,"
+                + "\"optional\":\"value\","
+                + "\"emptyOptional\":null,"
+                + "\"optOfList\":[\"a\",\"b\"],"
+                + "\"listOfOpt\":[\"c\",null,\"d\"]}";
         assertThat(getErrorBody(connection))
                 .contains("{\"errorCode\":\"CONFLICT\"")
-                .contains("\"parameters\":{\"arg\":" + expectedSerializedArg + "}}");
+                .contains("\"parameters\":{\"arg\":" + expectedSerializedArgs + "}}");
     }
 
     @Test

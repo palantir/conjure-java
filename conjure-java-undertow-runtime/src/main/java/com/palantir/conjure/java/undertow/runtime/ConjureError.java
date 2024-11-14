@@ -16,35 +16,82 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.palantir.conjure.java.undertow.lib.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Preconditions;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
+/**
+ * A representation of a Conjure defined error that will be serialized and sent over the wire from a server to a client.
+ * <p>Previously {@link SerializableError} was used for this purpose. The main difference is that
+ * {@link SerializableError#parameters()} is a {@code Map<String, String>} while {@link ConjureError#parameters} is a
+ * {@code Map<String, Object>}. When constructing a {@link SerializableError} from a {@link ServiceException}, the error
+ * parameters were converted to strings using {@link Objects#toString} which made it difficult for the client to recover
+ * the structured type. Storing the parameter value as an object allows servers to send Jackson-serialized objects which
+ * the client can convert to their original type.
+ *
+ * @param errorCode A fixed code word identifying the type of error. For errors generated from {@link ServiceException}
+ *                  and {@link CheckedServiceException}, this corresponds to the {@link ErrorType#code} and is part of
+ *                  the service's API surface.
+ * @param errorName A fixed name identifying the error. For errors generated from {@link ServiceException} and
+ *                  {@link CheckedServiceException}, this corresponding to the {@link ErrorType#name} and is part of the
+ *                  service's API surface.
+ * @param errorInstanceId errorInstanceId A unique identifier for (this instance of) this error.
+ * @param parameters params A list of parameters providing additional context about the error.
+ */
 record ConjureError(
         @JsonProperty("errorCode") String errorCode,
         @JsonProperty("errorName") String errorName,
         @JsonProperty("errorInstanceId") String errorInstanceId,
-        @JsonProperty("parameters") Map<String, Object> parameters) {
+        @JsonProperty("parameters") @JsonInclude(content = Include.NON_ABSENT) Map<String, Object> parameters) {
 
     ConjureError {
         Preconditions.checkNotNull(errorCode, "errorCode cannot be null");
         Preconditions.checkNotNull(errorName, "errorName cannot be null");
-        Preconditions.checkNotNull(parameters, "parameters cannot be null");
-        // TODO(pm): why was there a default empty string value for errorInstanceId in SerializableError?
         Preconditions.checkNotNull(errorInstanceId, "errorInstanceId cannot be null");
+        Preconditions.checkNotNull(parameters, "parameters cannot be null");
     }
 
     static ConjureError fromCheckedServiceException(CheckedServiceException exception) {
-        Map<String, Object> parameters = exception.getArgs().stream()
-                .filter(arg -> arg.getValue() != null)
-                .map(arg -> Map.entry(arg.getName(), arg.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> parameters = new HashMap<>();
+        for (Arg<?> arg : exception.getArgs()) {
+            parameters.put(arg.getName(), arg.getValue());
+        }
         return new ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
                 exception.getErrorInstanceId(),
                 parameters);
+    }
+
+    static ConjureError fromServiceException(ServiceException exception) {
+        Map<String, Object> parameters = new HashMap<>();
+        for (Arg<?> arg : exception.getArgs()) {
+            parameters.put(arg.getName(), Objects.toString(arg.getValue()));
+        }
+        ErrorType errorType = exception.getErrorType();
+        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
+    }
+
+    /**
+     * {@link RemoteException}s are thrown by clients that send requests to remote services, and indicate an error with
+     * the remote service. When a server forwards a {@link RemoteException}, the forwarded error is considered to be
+     * internal to the server. The parameters from the {@link RemoteException} may not be relevant for the server
+     * forwarding the error, and should not be included. {@link RemoteException}s are logged when received by the server,
+     * so users can retrieve the parameters by finding logs corresponding to the {@code errorInstanceId}.
+     */
+    static ConjureError fromRemoteException(RemoteException exception) {
+        SerializableError error = exception.getError();
+        return new ConjureError(error.errorCode(), error.errorName(), error.errorInstanceId(), Collections.emptyMap());
     }
 }
