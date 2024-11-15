@@ -18,7 +18,10 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -30,6 +33,7 @@ import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
@@ -44,6 +48,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -56,6 +61,7 @@ public final class ConjureExceptionHandlerTest {
 
     private Exception exception;
     private Undertow server;
+    private static final JsonMapper CLIENT_JSON_MAPPER = ObjectMappers.newClientJsonMapper();
 
     @BeforeEach
     public void before() {
@@ -88,23 +94,24 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void checkServiceExceptionArgumentsSerializedWithToString() throws IOException {
+        // When:
         record Argument(
                 String field1, Optional<Integer> maybeField2, List<String> collectionField, String nullString) {}
-        exception = new ServiceException(
-                ErrorType.CONFLICT,
-                SafeArg.of("arg", new Argument("foo", Optional.of(42), List.of("bar", "baz"), null)));
+        Argument arg = new Argument("foo", Optional.of(42), List.of("bar", "baz"), null);
+        exception = new ServiceException(ErrorType.CONFLICT, SafeArg.of("arg", arg));
         HttpURLConnection connection = execute();
 
+        // Then:
         assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
-        String expectedSerializedArg =
-                "\"Argument[field1=foo, maybeField2=Optional[42], collectionField=[bar, baz], nullString=null]\"";
-        assertThat(getErrorBody(connection))
-                .contains("{\"errorCode\":\"CONFLICT\"")
-                .contains("\"parameters\":{\"arg\":" + expectedSerializedArg + "}}");
+        ConjureError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), ConjureError.class);
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
+        assertThat(error.errorName()).isEqualTo("Default:Conflict");
+        assertThat(error.parameters()).containsEntry("arg", arg.toString());
     }
 
     @Test
     public void handlesCheckedServiceException() throws IOException {
+        // When:
         final class DifferentPackage extends CheckedServiceException {
             private DifferentPackage(@Nullable Throwable cause) {
                 super(ErrorType.CONFLICT, cause);
@@ -114,14 +121,17 @@ public final class ConjureExceptionHandlerTest {
         exception = new DifferentPackage(null);
         HttpURLConnection connection = execute();
 
+        // Then:
         assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
-        assertThat(getErrorBody(connection))
-                .contains("{\"errorCode\":\"CONFLICT\"")
-                .contains("\"parameters\":{}}");
+        ConjureError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), ConjureError.class);
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
+        assertThat(error.errorName()).isEqualTo("Default:Conflict");
+        assertThat(error.parameters()).isEmpty();
     }
 
     @Test
     public void handlesCheckedServiceExceptionWithOptionals() throws IOException {
+        // When:
         record Argument(Optional<List<String>> optOfList, List<Optional<String>> listOfOpt) {}
         final class OptionalException extends CheckedServiceException {
             private OptionalException() {
@@ -142,16 +152,27 @@ public final class ConjureExceptionHandlerTest {
                         SafeArg.of("emptyOptional", Optional.empty()));
             }
         }
+
         exception = new OptionalException();
         HttpURLConnection connection = execute();
+
+        // Then:
         assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
-        String expectedSerializedParams =
-                "{\"optionalInt\":2," + "\"arg\":{\"optOfList\":[\"a\",\"b\"],\"listOfOpt\":[\"c\",null,\"d\"]},"
-                        + "\"optionalDouble\":3.0,"
-                        + "\"optional\":\"value\"}";
-        assertThat(getErrorBody(connection))
-                .contains("{\"errorCode\":\"CONFLICT\"")
-                .contains("\"parameters\":" + expectedSerializedParams + "}");
+        ConjureError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), ConjureError.class);
+        assertThat(error.errorName()).isEqualTo("Default:Conflict");
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
+        assertThat(error.parameters()).containsOnlyKeys("optionalInt", "arg", "optionalDouble", "optional");
+        assertThat(error.parameters())
+                .containsAllEntriesOf(Map.of("optionalInt", 2, "optionalDouble", 3.0, "optional", "value"));
+        assertThat(error.parameters()).hasEntrySatisfying("arg", arg -> {
+            assertThat(arg).asInstanceOf(MAP).containsOnlyKeys("optOfList", "listOfOpt");
+            assertThat(arg).asInstanceOf(MAP).hasEntrySatisfying("optOfList", value -> {
+                assertThat(value).asInstanceOf(LIST).containsExactly("a", "b");
+            });
+            assertThat(arg).asInstanceOf(MAP).hasEntrySatisfying("listOfOpt", value -> {
+                assertThat(value).asInstanceOf(LIST).containsExactly("c", null, "d");
+            });
+        });
     }
 
     @Test

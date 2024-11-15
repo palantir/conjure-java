@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -56,24 +55,7 @@ record ConjureError(
         @JsonProperty("errorCode") String errorCode,
         @JsonProperty("errorName") String errorName,
         @JsonProperty("errorInstanceId") String errorInstanceId,
-        @JsonInclude(content = JsonInclude.Include.CUSTOM, contentFilter = NonAbsentFilter.class)
-                Map<String, Object> parameters) {
-
-    static class NonAbsentFilter {
-        @Override
-        public boolean equals(Object obj) {
-            return obj == null
-                    || (obj instanceof Optional && ((Optional<?>) obj).isEmpty())
-                    || (obj instanceof OptionalInt && ((OptionalInt) obj).isEmpty())
-                    || (obj instanceof OptionalLong && ((OptionalLong) obj).isEmpty())
-                    || (obj instanceof OptionalDouble && ((OptionalDouble) obj).isEmpty());
-        }
-
-        @Override
-        public int hashCode() {
-            return getClass().hashCode();
-        }
-    }
+        @JsonProperty("parameters") Map<String, Object> parameters) {
 
     ConjureError {
         Preconditions.checkNotNull(errorCode, "errorCode cannot be null");
@@ -85,7 +67,9 @@ record ConjureError(
     static ConjureError fromCheckedServiceException(CheckedServiceException exception) {
         Map<String, Object> parameters = new HashMap<>();
         for (Arg<?> arg : exception.getArgs()) {
-            parameters.put(arg.getName(), arg.getValue());
+            if (shouldIncludeArgInParameters(arg)) {
+                parameters.put(arg.getName(), arg.getValue());
+            }
         }
         return new ConjureError(
                 exception.getErrorType().code().name(),
@@ -113,5 +97,14 @@ record ConjureError(
     static ConjureError fromRemoteException(RemoteException exception) {
         SerializableError error = exception.getError();
         return new ConjureError(error.errorCode(), error.errorName(), error.errorInstanceId(), Collections.emptyMap());
+    }
+
+    private static boolean shouldIncludeArgInParameters(Arg<?> arg) {
+        Object obj = arg.getValue();
+        return obj != null
+                && (!(obj instanceof Optional) || ((Optional<?>) obj).isPresent())
+                && (!(obj instanceof OptionalInt) || ((OptionalInt) obj).isPresent())
+                && (!(obj instanceof OptionalLong) || ((OptionalLong) obj).isPresent())
+                && (!(obj instanceof OptionalDouble) || ((OptionalDouble) obj).isPresent());
     }
 }
