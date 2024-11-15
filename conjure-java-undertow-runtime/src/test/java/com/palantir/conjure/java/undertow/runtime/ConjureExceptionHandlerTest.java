@@ -32,7 +32,6 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
-import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -123,52 +122,36 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handlesCheckedServiceExceptionWithOptionals() throws IOException {
-        record Argument(
-                Integer integer,
-                Integer nullValue,
-                OptionalInt optionalInt,
-                OptionalInt emptyOptionalInt,
-                OptionalDouble optionalDouble,
-                OptionalDouble emptyOptionalDouble,
-                Optional<String> optional,
-                Optional<String> emptyOptional,
-                Optional<List<String>> optOfList,
-                List<Optional<String>> listOfOpt) {}
-
+        record Argument(Optional<List<String>> optOfList, List<Optional<String>> listOfOpt) {}
         final class OptionalException extends CheckedServiceException {
-            private OptionalException(@Safe Argument argument, @Nullable Throwable cause) {
-                super(ErrorType.CONFLICT, cause, SafeArg.of("arg", argument));
+            private OptionalException() {
+                super(
+                        ErrorType.CONFLICT,
+                        (Throwable) null,
+                        SafeArg.of(
+                                "arg",
+                                new Argument(
+                                        Optional.of(List.of("a", "b")),
+                                        List.of(Optional.of("c"), Optional.empty(), Optional.of("d")))),
+                        SafeArg.of("nullValue", null),
+                        SafeArg.of("optionalInt", OptionalInt.of(2)),
+                        SafeArg.of("emptyOptionalInt", OptionalInt.empty()),
+                        SafeArg.of("optionalDouble", OptionalDouble.of(3.0)),
+                        SafeArg.of("emptyOptionalDouble", OptionalDouble.empty()),
+                        SafeArg.of("optional", Optional.of("value")),
+                        SafeArg.of("emptyOptional", Optional.empty()));
             }
         }
-
-        exception = new OptionalException(
-                new Argument(
-                        1,
-                        null,
-                        OptionalInt.of(2),
-                        OptionalInt.empty(),
-                        OptionalDouble.of(3.0),
-                        OptionalDouble.empty(),
-                        Optional.of("value"),
-                        Optional.empty(),
-                        Optional.of(List.of("a", "b")),
-                        List.of(Optional.of("c"), Optional.empty(), Optional.of("d"))),
-                null);
-
+        exception = new OptionalException();
         HttpURLConnection connection = execute();
         assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
-        String expectedSerializedArgs = "{\"integer\":1," + "\"nullValue\":null,"
-                + "\"optionalInt\":2,"
-                + "\"emptyOptionalInt\":null,"
-                + "\"optionalDouble\":3.0,"
-                + "\"emptyOptionalDouble\":null,"
-                + "\"optional\":\"value\","
-                + "\"emptyOptional\":null,"
-                + "\"optOfList\":[\"a\",\"b\"],"
-                + "\"listOfOpt\":[\"c\",null,\"d\"]}";
+        String expectedSerializedParams =
+                "{\"optionalInt\":2," + "\"arg\":{\"optOfList\":[\"a\",\"b\"],\"listOfOpt\":[\"c\",null,\"d\"]},"
+                        + "\"optionalDouble\":3.0,"
+                        + "\"optional\":\"value\"}";
         assertThat(getErrorBody(connection))
                 .contains("{\"errorCode\":\"CONFLICT\"")
-                .contains("\"parameters\":{\"arg\":" + expectedSerializedArgs + "}}");
+                .contains("\"parameters\":" + expectedSerializedParams + "}");
     }
 
     @Test

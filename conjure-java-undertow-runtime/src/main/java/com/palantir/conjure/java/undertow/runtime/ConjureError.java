@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -30,6 +29,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 /**
  * A representation of a Conjure defined error that will be serialized and sent over the wire from a server to a client.
@@ -53,7 +56,24 @@ record ConjureError(
         @JsonProperty("errorCode") String errorCode,
         @JsonProperty("errorName") String errorName,
         @JsonProperty("errorInstanceId") String errorInstanceId,
-        @JsonProperty("parameters") @JsonInclude(content = Include.NON_ABSENT) Map<String, Object> parameters) {
+        @JsonInclude(content = JsonInclude.Include.CUSTOM, contentFilter = NonAbsentFilter.class)
+                Map<String, Object> parameters) {
+
+    static class NonAbsentFilter {
+        @Override
+        public boolean equals(Object obj) {
+            return obj == null
+                    || (obj instanceof Optional && ((Optional<?>) obj).isEmpty())
+                    || (obj instanceof OptionalInt && ((OptionalInt) obj).isEmpty())
+                    || (obj instanceof OptionalLong && ((OptionalLong) obj).isEmpty())
+                    || (obj instanceof OptionalDouble && ((OptionalDouble) obj).isEmpty());
+        }
+
+        @Override
+        public int hashCode() {
+            return getClass().hashCode();
+        }
+    }
 
     ConjureError {
         Preconditions.checkNotNull(errorCode, "errorCode cannot be null");
