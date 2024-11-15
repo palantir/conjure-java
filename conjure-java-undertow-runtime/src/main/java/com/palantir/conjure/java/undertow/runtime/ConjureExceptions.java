@@ -196,10 +196,12 @@ public enum ConjureExceptions implements ExceptionHandler {
         // Do not attempt to write the failure if data has already been written
         if (!isResponseStarted(exchange)) {
             exchange.setStatusCode(statusCode);
-            try {
-                serializer.serialize(maybeBody.get(), exchange);
-            } catch (IOException | RuntimeException e) {
-                log.info("Failed to write error response", e);
+            if (maybeBody.isPresent()) {
+                try {
+                    serializer.serialize(maybeBody.get(), exchange);
+                } catch (IOException | RuntimeException e) {
+                    log.info("Failed to write error response", e);
+                }
             }
         } else {
             // This prevents the server from sending the final null chunk, alerting
