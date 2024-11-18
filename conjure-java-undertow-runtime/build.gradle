@@ -39,8 +39,8 @@ dependencies {
     implementation 'org.checkerframework:checker-qual'
     implementation 'org.jboss.xnio:xnio-api'
     implementation 'org.slf4j:slf4j-api'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
 
-    testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
     testImplementation 'com.palantir.conjure.java.api:test-utils', {
       // TODO(ckozak): upgrading junit dependencies is blocked by the ancient dropwizard
       // test libraries used in this project
