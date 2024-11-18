@@ -52,19 +52,19 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.FieldSpec;
-import com.palantir.javapoet.MethodSpec;
-import com.palantir.javapoet.ParameterSpec;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
-import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -243,20 +243,20 @@ public final class BeanBuilderGenerator {
     private void addBuilderInterfaceAndMethod(TypeSpec.Builder specBuilder, List<TypeSpec> interfaces) {
         List<TypeName> interfaceClassNames = interfaces.stream()
                 .map(stageInterface ->
-                        ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name()))
+                        ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name))
                 .map(Primitives::box)
                 .collect(Collectors.toList());
 
         TypeSpec builderInterface = TypeSpec.interfaceBuilder(STAGED_BUILDER_INTERFACE_NAME)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(interfaces.stream()
-                        .map(TypeSpec::methodSpecs)
+                        .map(stageInterface -> stageInterface.methodSpecs)
                         .flatMap(List::stream)
                         .map(method -> method.toBuilder()
                                 .addAnnotation(Override.class)
                                 .returns(
-                                        method.name().equals("build")
-                                                ? method.returnType()
+                                        method.name.equals("build")
+                                                ? method.returnType
                                                 : ClassName.get(
                                                         objectClass.packageName(),
                                                         objectClass.simpleName(),
@@ -300,7 +300,7 @@ public final class BeanBuilderGenerator {
             stageInterface.addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
                     .addParameter(ParameterSpec.builder(
                                     BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                            field.poetSpec().type(),
+                                            field.poetSpec().type,
                                             field.conjureDef().getType(),
                                             typeMapper,
                                             safetyEvaluator.getUsageTimeSafety(field.conjureDef())),
@@ -363,7 +363,7 @@ public final class BeanBuilderGenerator {
         methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
                 .addParameter(ParameterSpec.builder(
                                 BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                        enriched.poetSpec().type(), type, typeMapper, safety),
+                                        enriched.poetSpec().type, type, typeMapper, safety),
                                 JavaNameSanitizer.sanitize(enriched.fieldName()))
                         .addAnnotation(Nonnull.class)
                         .build())
@@ -543,7 +543,7 @@ public final class BeanBuilderGenerator {
         CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
                 enrichedFields,
                 enrichedField -> CodeBlocks.statement(
-                        "$1N(other.$2N())", enrichedField.poetSpec().name(), enrichedField.getterName())));
+                        "$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
 
         return MethodSpec.methodBuilder("from")
                 .addAnnotations(ConjureAnnotations.override(override))
@@ -639,11 +639,11 @@ public final class BeanBuilderGenerator {
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
                         BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                field.type(),
+                                field.type,
                                 type,
                                 typeMapper,
                                 safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
-                        field.name()))
+                        field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
@@ -680,82 +680,80 @@ public final class BeanBuilderGenerator {
                 if (collectionType.useNonNullFactory()) {
                     return CodeBlocks.statement(
                             "this.$1N = $2T.newNonNull$3L($4L)",
-                            spec.name(),
+                            spec.name,
                             ConjureCollections.class,
                             collectionType.getConjureCollectionType().getCollectionName(),
                             Expressions.requireNonNull(
-                                    spec.name(), enriched.fieldName().get() + " cannot be null"));
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
                 } else {
                     return CodeBlocks.statement(
                             "this.$1N = $2T.new$3L($4L)",
-                            spec.name(),
+                            spec.name,
                             ConjureCollections.class,
                             collectionType.getConjureCollectionType().getCollectionName(),
                             Expressions.requireNonNull(
-                                    spec.name(), enriched.fieldName().get() + " cannot be null"));
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
                 }
             }
             if (collectionType.useNonNullFactory()) {
                 return CodeBlocks.statement(
                         "$1T.addAllAndCheckNonNull(this.$2N, $3L)",
                         ConjureCollections.class,
-                        spec.name(),
+                        spec.name,
                         Expressions.requireNonNull(
-                                spec.name(), enriched.fieldName().get() + " cannot be null"));
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
             } else {
                 return CodeBlocks.statement(
                         "$1T.addAll(this.$2N, $3L)",
                         ConjureCollections.class,
-                        spec.name(),
+                        spec.name,
                         Expressions.requireNonNull(
-                                spec.name(), enriched.fieldName().get() + " cannot be null"));
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
             }
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             if (shouldClearFirst) {
                 return CodeBlocks.statement(
                         "this.$1N = new $2T<>($3L)",
-                        spec.name(),
+                        spec.name,
                         LinkedHashMap.class,
                         Expressions.requireNonNull(
-                                spec.name(), enriched.fieldName().get() + " cannot be null"));
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
             }
             return CodeBlocks.statement(
                     "this.$1N.putAll($2L)",
-                    spec.name(),
-                    Expressions.requireNonNull(spec.name(), enriched.fieldName().get() + " cannot be null"));
+                    spec.name,
+                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
         } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
                     .addStatement(
                             "$L",
                             Expressions.requireNonNull(
-                                    spec.name(), enriched.fieldName().get() + " cannot be null"))
+                                    spec.name, enriched.fieldName().get() + " cannot be null"))
                     .addStatement(
                             "this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
-                            spec.name(),
+                            spec.name,
                             ByteBuffer.class)
-                    .addStatement("(($1T)this.$2N).rewind()", Buffer.class, spec.name())
+                    .addStatement("(($1T)this.$2N).rewind()", Buffer.class, spec.name)
                     .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
             CodeBlock nullCheckedValue =
-                    Expressions.requireNonNull(spec.name(), enriched.fieldName().get() + " cannot be null");
+                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
 
             if (BeanBuilderAuxiliarySettersUtils.isWidenableContainedType(optionalType.getItemType())) {
                 // we capture covariant type via generic Function#identity mapping before assignment to bind
                 // the resultant optional to the invariant inner variable type
                 return CodeBlock.builder()
-                        .addStatement(
-                                "this.$1N = $2L.map($3T.identity())", spec.name(), nullCheckedValue, Function.class)
+                        .addStatement("this.$1N = $2L.map($3T.identity())", spec.name, nullCheckedValue, Function.class)
                         .build();
             } else {
-                return CodeBlocks.statement("this.$1L = $2L", spec.name(), nullCheckedValue);
+                return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
             }
         } else {
-            CodeBlock nullCheckedValue = Primitives.isPrimitive(spec.type())
-                    ? CodeBlock.of("$N", spec.name()) // primitive types can't be null, so no need for requireNonNull!
-                    : Expressions.requireNonNull(
-                            spec.name(), enriched.fieldName().get() + " cannot be null");
-            return CodeBlocks.statement("this.$1L = $2L", spec.name(), nullCheckedValue);
+            CodeBlock nullCheckedValue = Primitives.isPrimitive(spec.type)
+                    ? CodeBlock.of("$N", spec.name) // primitive types can't be null, so no need for requireNonNull!
+                    : Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
+            return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
         }
     }
 
@@ -808,14 +806,14 @@ public final class BeanBuilderGenerator {
         if (isPrimitiveOptional(type)) {
             return CodeBlocks.statement(
                     "this.$1N = $2T.of($1N)",
-                    enriched.poetSpec().name(),
+                    enriched.poetSpec().name,
                     asRawType(typeMapper.getClassName(Type.optional(type))));
         } else {
             return CodeBlocks.statement(
                     "this.$1N = $2T.of($3L)",
-                    spec.name(),
+                    spec.name,
                     Optional.class,
-                    Expressions.requireNonNull(spec.name(), enriched.fieldName().get() + " cannot be null"));
+                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
         }
     }
 
@@ -838,11 +836,11 @@ public final class BeanBuilderGenerator {
                 .addCode(verifyNotBuilt());
 
         if (options.nonNullCollections()) {
-            builder.addStatement(Expressions.requireNonNull(
-                    field.name(), enriched.fieldName().get() + " cannot be null"));
+            builder.addStatement(
+                    Expressions.requireNonNull(field.name, enriched.fieldName().get() + " cannot be null"));
         }
 
-        return builder.addStatement("this.$1N.add($1N)", field.name())
+        return builder.addStatement("this.$1N.add($1N)", field.name)
                 .addStatement("return this")
                 .build();
     }
@@ -851,7 +849,7 @@ public final class BeanBuilderGenerator {
         return BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, builderClass)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
-                .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name())
+                .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
                 .addStatement("return this")
                 .build();
     }
@@ -888,7 +886,7 @@ public final class BeanBuilderGenerator {
 
     private static TypeName asRawType(TypeName type) {
         if (type instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) type).rawType();
+            return ((ParameterizedTypeName) type).rawType;
         }
         return type;
     }

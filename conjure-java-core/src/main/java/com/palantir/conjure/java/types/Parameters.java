@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.java.util.Primitives;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ParameterSpec;
-import com.palantir.javapoet.TypeName;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 

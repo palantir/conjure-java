@@ -17,8 +17,8 @@
 package com.palantir.conjure.java.undertow.processor.data;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.TypeName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;

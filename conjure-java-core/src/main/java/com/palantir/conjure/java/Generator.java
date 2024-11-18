@@ -17,7 +17,7 @@
 package com.palantir.conjure.java;
 
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.javapoet.JavaFile;
+import com.squareup.javapoet.JavaFile;
 import java.util.stream.Stream;
 
 public interface Generator {

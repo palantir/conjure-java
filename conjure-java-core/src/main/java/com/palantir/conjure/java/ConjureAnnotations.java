@@ -24,13 +24,13 @@ import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.LogSafety;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 
 public final class ConjureAnnotations {
@@ -110,13 +110,13 @@ public final class ConjureAnnotations {
             if (typeName instanceof ParameterizedTypeName) {
                 ParameterizedTypeName param = (ParameterizedTypeName) typeName;
                 // Handle List/Set/Optional wrappers, however Map has not been implemented yet.
-                if (param.typeArguments().size() == 1) {
-                    TypeName typeArgument = Iterables.getOnlyElement(param.typeArguments());
+                if (param.typeArguments.size() == 1) {
+                    TypeName typeArgument = Iterables.getOnlyElement(param.typeArguments);
                     if (typeArgument instanceof ClassName) {
                         ImmutableList<AnnotationSpec> annotations = safety(maybeSafety);
-                        return ParameterizedTypeName.get(param.rawType(), typeArgument.annotated(annotations));
+                        return ParameterizedTypeName.get(param.rawType, typeArgument.annotated(annotations));
                     } else if (typeArgument instanceof ParameterizedTypeName) {
-                        return ParameterizedTypeName.get(param.rawType(), withSafety(typeArgument, maybeSafety));
+                        return ParameterizedTypeName.get(param.rawType, withSafety(typeArgument, maybeSafety));
                     }
                 }
             }

@@ -20,7 +20,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.javapoet.ClassName;
+import com.squareup.javapoet.ClassName;
 
 public final class Names {
     private Names() {}

@@ -25,13 +25,13 @@ import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,7 +39,7 @@ import java.util.Optional;
 /** The marker concept is deprecated in favor of tags, however the functionality has not been dropped yet. */
 public final class ConjureMarkers {
 
-    public static final ImmutableSet<com.palantir.javapoet.TypeName> SAFETY_CLASS_NAMES =
+    public static final ImmutableSet<com.squareup.javapoet.TypeName> SAFETY_CLASS_NAMES =
             ImmutableSet.of(ClassName.get(Safe.class), ClassName.get(Unsafe.class));
 
     private static final TypeName SAFE_TYPE_NAME =

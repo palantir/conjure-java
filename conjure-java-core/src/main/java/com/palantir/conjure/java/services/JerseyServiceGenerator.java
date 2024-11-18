@@ -44,14 +44,14 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.JavaFile;
-import com.palantir.javapoet.MethodSpec;
-import com.palantir.javapoet.ParameterSpec;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
-import com.palantir.javapoet.TypeSpec;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -238,7 +238,7 @@ public final class JerseyServiceGenerator implements Generator {
                 createServiceMethodParameters(endpointDef, safetyEvaluator, argumentTypeMapper, false);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
                 .map(param -> extraArgs.stream()
-                        .filter(arg -> arg.getArgName().get().equals(param.name()))
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
                         .findFirst())
                 .collect(Collectors.toList());
 

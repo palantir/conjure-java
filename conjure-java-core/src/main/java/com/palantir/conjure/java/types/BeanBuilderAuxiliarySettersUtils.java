@@ -28,13 +28,13 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.FieldSpec;
-import com.palantir.javapoet.MethodSpec;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
-import com.palantir.javapoet.WildcardTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.WildcardTypeName;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +53,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
         FieldDefinition definition = enriched.conjureDef();
         Type type = definition.getType();
 
-        return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name()))
+        return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name))
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
                         .map(rendered -> CodeBlock.of("$L", rendered))
                         .orElseGet(() -> CodeBlock.builder().build()))
@@ -62,8 +62,8 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass)
                 .addParameter(Parameters.nonnullParameter(
                         widenParameterIfPossible(
-                                field.type(), type, typeMapper, safetyEvaluator.getUsageTimeSafety(definition)),
-                        field.name()));
+                                field.type, type, typeMapper, safetyEvaluator.getUsageTimeSafety(definition)),
+                        field.name));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
@@ -75,7 +75,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                         ConjureAnnotations.withSafety(
                                 typeMapper.getClassName(type.getItemType()),
                                 safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
-                        field.name()));
+                        field.name));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(
@@ -86,7 +86,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
             Optional<LogSafety> safety) {
         FieldSpec field = enriched.poetSpec();
         return publicSetter(enriched, returnClass)
-                .addParameter(ConjureAnnotations.withSafety(typeMapper.getClassName(itemType), safety), field.name());
+                .addParameter(ConjureAnnotations.withSafety(typeMapper.getClassName(itemType), safety), field.name);
     }
 
     public static MethodSpec.Builder createMapSetterBuilder(
@@ -99,7 +99,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
 
     public static MethodSpec.Builder publicSetter(EnrichedField enriched, ClassName returnClass) {
         FieldDefinition definition = enriched.conjureDef();
-        return MethodSpec.methodBuilder(enriched.poetSpec().name())
+        return MethodSpec.methodBuilder(enriched.poetSpec().name)
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
                         .map(rendered -> CodeBlock.of("$L", rendered))
                         .orElseGet(() -> CodeBlock.builder().build()))

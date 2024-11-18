@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
-import com.palantir.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock;
 import org.derive4j.Data;
 
 @Data

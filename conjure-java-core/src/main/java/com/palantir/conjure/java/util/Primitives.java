@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.util;
 
-import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.TypeName;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.TypeName;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public final class Primitives {
 
     public static TypeName box(TypeName type) {
         if (isPrimitive(type)) {
-            List<AnnotationSpec> annotations = type.annotations();
+            List<AnnotationSpec> annotations = type.annotations;
             return PRIMITIVES.get(getPrimitiveType(type).orElseThrow()).annotated(annotations);
         } else {
             return type;
@@ -59,7 +59,7 @@ public final class Primitives {
     }
 
     public static TypeName unbox(TypeName type) {
-        List<AnnotationSpec> annotations = type.annotations();
+        List<AnnotationSpec> annotations = type.annotations;
         return type.withoutAnnotations().unbox().annotated(annotations);
     }
 

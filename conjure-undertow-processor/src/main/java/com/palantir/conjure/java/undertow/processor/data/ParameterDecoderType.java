@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
-import com.palantir.javapoet.TypeName;
+import com.squareup.javapoet.TypeName;
 import org.derive4j.Data;
 import org.immutables.value.Value;
 

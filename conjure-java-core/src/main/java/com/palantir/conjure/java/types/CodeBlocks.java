@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock;
 import java.util.Arrays;
 
 public final class CodeBlocks {

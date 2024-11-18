@@ -20,9 +20,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.Type;
-import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.ParameterizedTypeName;
-import com.palantir.javapoet.TypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 
 public final class ReturnTypeMapper {
