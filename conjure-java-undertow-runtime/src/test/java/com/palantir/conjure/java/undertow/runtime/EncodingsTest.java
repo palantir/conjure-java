@@ -203,6 +203,51 @@ final class EncodingsTest {
         assertThat(smile.supportsContentType("application/unknown")).isFalse();
     }
 
+    @Test
+    void deserializeIoExceptionIsClientError() {
+        assertThatThrownBy(() -> deserialize(new ThrowingInputStream(), new TypeMarker<String>() {}))
+                .isInstanceOf(FrameworkException.class)
+                .hasMessageContaining("Failed to deserialize")
+                .matches(exception -> ((FrameworkException) exception).getStatusCode() == 400, "Expected 400 status");
+    }
+
+    @Test
+    void serializeIoExceptionIsClientError() {
+        assertThatThrownBy(() -> serialize("value", new ThrowingOutputStream()))
+                .isInstanceOf(FrameworkException.class)
+                .hasMessageContaining("Failed to serialize")
+                .matches(exception -> ((FrameworkException) exception).getStatusCode() == 400, "Expected 400 status");
+    }
+
+    private static final class ThrowingInputStream extends InputStream {
+
+        private static IOException fail() {
+            return new IOException("expected");
+        }
+
+        @Override
+        public int read() throws IOException {
+            throw fail();
+        }
+
+        @Override
+        public int read(byte[] _buffer, int _off, int _len) throws IOException {
+            throw fail();
+        }
+    }
+
+    private static final class ThrowingOutputStream extends OutputStream {
+
+        private static IOException fail() {
+            return new IOException("expected");
+        }
+
+        @Override
+        public void write(int _value) throws IOException {
+            throw fail();
+        }
+    }
+
     private static InputStream asStream(String data) {
         return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
     }
