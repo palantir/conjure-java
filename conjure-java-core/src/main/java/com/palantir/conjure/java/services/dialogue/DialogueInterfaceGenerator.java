@@ -23,6 +23,9 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
+import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -175,7 +178,11 @@ public final class DialogueInterfaceGenerator {
                 methodBuilder.addAnnotation(Deprecated.class);
             }
         });
-        methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));
+        ServiceGenerators.addJavaDocForEndpointDefinition(
+                methodBuilder,
+                options.packagePrefix(),
+                endpointDef,
+                new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
         TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
         methodBuilder.returns(returnType);

@@ -17,45 +17,74 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.base.Strings;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.MethodSpec;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class ServiceGenerators {
-
-    public static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
-        return getJavaDocInternal(endpointDef, false);
+    public enum RequestLineJavaDoc {
+        INCLUDE,
+        EXCLUDE
     }
 
-    public static String getJavaDocWithRequestLine(EndpointDefinition endpointDef) {
-        return getJavaDocInternal(endpointDef, true).get();
+    public enum EndpointErrorsJavaDoc {
+        INCLUDE,
+        EXCLUDE
     }
 
-    private static Optional<String> getJavaDocInternal(EndpointDefinition endpointDef, boolean includeRequestLine) {
-        Optional<String> depr = endpointDef.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
+    public record EndpointJavaDocGenerationOptions(
+            RequestLineJavaDoc requestLineJavaDoc, EndpointErrorsJavaDoc endpointErrorsJavaDoc) {}
 
-        Optional<String> incDoc = Javadoc.getIncubatingJavadoc(endpointDef.getTags());
+    public static void addJavaDocForEndpointDefinition(
+            MethodSpec.Builder methodBuilder,
+            Optional<String> maybePackagePrefix,
+            EndpointDefinition endpointDefinition,
+            EndpointJavaDocGenerationOptions options) {
+        addJavaDocForEndpointDefinitionInternal(methodBuilder, maybePackagePrefix, endpointDefinition, options);
+    }
 
-        Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
-
-        Optional<String> requestLine = Optional.empty();
-
-        if (includeRequestLine) {
-            requestLine = Optional.of(Javadoc.getRequestLine(endpointDef.getHttpMethod(), endpointDef.getHttpPath()));
+    private static void addJavaDocForEndpointDefinitionInternal(
+            MethodSpec.Builder methodBuilder,
+            Optional<String> maybePackagePrefix,
+            EndpointDefinition endpointDefinition,
+            EndpointJavaDocGenerationOptions options) {
+        endpointDefinition.getDocs().map(Javadoc::render).ifPresent(doc -> methodBuilder.addJavadoc("$L", doc));
+        if (options.requestLineJavaDoc() == RequestLineJavaDoc.INCLUDE) {
+            methodBuilder.addJavadoc(
+                    "$L", Javadoc.getRequestLine(endpointDefinition.getHttpMethod(), endpointDefinition.getHttpPath()));
         }
-
-        Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
-                .flatMap(argument -> Javadoc.getParameterJavadoc(argument, endpointDef).stream())
-                .collect(Collectors.joining("\n"))));
-
-        StringBuilder sb = new StringBuilder();
-        docs.ifPresent(sb::append);
-        requestLine.ifPresent(sb::append);
-        params.ifPresent(sb::append);
-        depr.ifPresent(sb::append);
-        incDoc.ifPresent(sb::append);
-        return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
+        Optional.ofNullable(Strings.emptyToNull(endpointDefinition.getArgs().stream()
+                        .flatMap(argument -> Javadoc.getParameterJavadoc(argument, endpointDefinition).stream())
+                        .collect(Collectors.joining("\n"))))
+                .ifPresent(params -> methodBuilder.addJavadoc("$L", params));
+        if (options.endpointErrorsJavaDoc() == EndpointErrorsJavaDoc.INCLUDE) {
+            methodBuilder.addJavadoc(endpointDefinition.getErrors().stream()
+                    .map(endpointError -> CodeBlock.of(
+                            "@throws $T $L",
+                            ClassName.get(
+                                    Packages.getPrefixedPackage(
+                                            endpointError.getError().getPackage(), maybePackagePrefix),
+                                    ErrorGenerationUtils.errorExceptionsClassName(
+                                            endpointError.getError().getNamespace()),
+                                    endpointError.getError().getName()),
+                            endpointError
+                                    .getDocs()
+                                    .map(endpointErrorDocs -> " " + Javadoc.render(endpointErrorDocs))
+                                    .orElse("")))
+                    .collect(CodeBlock.joining("\n")));
+        }
+        endpointDefinition
+                .getDeprecated()
+                .map(Javadoc::getDeprecatedJavadoc)
+                .ifPresent(d -> methodBuilder.addJavadoc("$L", d));
+        Javadoc.getIncubatingJavadoc(endpointDefinition.getTags())
+                .ifPresent(ind -> methodBuilder.addJavadoc("$L", ind));
     }
 
     private ServiceGenerators() {}

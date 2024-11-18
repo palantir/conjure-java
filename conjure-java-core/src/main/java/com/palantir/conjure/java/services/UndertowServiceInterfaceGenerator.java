@@ -20,9 +20,13 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
+import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -31,6 +35,7 @@ import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -96,13 +101,27 @@ final class UndertowServiceInterfaceGenerator {
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 
-        methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));
+        ServiceGenerators.addJavaDocForEndpointDefinition(
+                methodBuilder,
+                options.packagePrefix(),
+                endpointDef,
+                new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.INCLUDE));
 
         if (UndertowTypeFunctions.isAsync(endpointDef, options)) {
             methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, options));
         } else {
             endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
         }
+
+        methodBuilder.addExceptions(endpointDef.getErrors().stream()
+                .map(endpointError -> {
+                    ErrorTypeName errorTypeName = endpointError.getError();
+                    return ClassName.get(
+                            Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
+                            ErrorGenerationUtils.errorExceptionsClassName(errorTypeName.getNamespace()),
+                            errorTypeName.getName());
+                })
+                .collect(Collectors.toList()));
 
         return methodBuilder.build();
     }

@@ -39,6 +39,7 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
@@ -51,6 +52,7 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ListType;
@@ -231,6 +233,15 @@ final class UndertowServiceHandlerGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
+                .addExceptions(endpointDefinition.getErrors().stream()
+                        .map(endpointError -> {
+                            ErrorTypeName errorTypeName = endpointError.getError();
+                            return ClassName.get(
+                                    Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
+                                    ErrorGenerationUtils.errorExceptionsClassName(errorTypeName.getNamespace()),
+                                    errorTypeName.getName());
+                        })
+                        .toList())
                 .addCode(endpointInvocation(
                         endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper, safetyEvaluator));
 
@@ -364,7 +375,6 @@ final class UndertowServiceHandlerGenerator {
                         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get(String.class)))
                         .addStatement("return $1T.of($2S)", Optional.class, documentation)
                         .build()));
-
         return endpointBuilder.build();
     }
 

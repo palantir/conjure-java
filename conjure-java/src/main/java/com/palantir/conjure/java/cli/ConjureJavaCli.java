@@ -29,6 +29,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
+import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -254,7 +255,9 @@ public final class ConjureJavaCli implements Runnable {
                     generatorBuilder.add(new JerseyServiceGenerator(config.options()));
                 }
                 if (config.generateUndertow()) {
-                    generatorBuilder.add(new UndertowServiceGenerator(config.options()));
+                    generatorBuilder.add(
+                            new UndertowServiceGenerator(config.options()),
+                            new CheckedErrorGenerator(config.options()));
                 }
                 if (config.generateDialogue()) {
                     generatorBuilder.add(new DialogueServiceGenerator(config.options()));
