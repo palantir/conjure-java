@@ -38,7 +38,7 @@ import java.util.OptionalLong;
  * <p>Previously {@link SerializableError} was used for this purpose. The main difference is that
  * {@link SerializableError#parameters()} is a {@code Map<String, String>} while {@link ConjureError#parameters} is a
  * {@code Map<String, Object>}. When constructing a {@link SerializableError} from a {@link ServiceException}, the error
- * parameters were converted to strings using {@link Objects#toString} which made it difficult for the client to recover
+ * parameters were converted to strings using {@link Objects#toString} which made it difficult for clients to recover
  * the structured type. Storing the parameter value as an object allows servers to send Jackson-serialized objects which
  * the client can convert to their original type.
  *
