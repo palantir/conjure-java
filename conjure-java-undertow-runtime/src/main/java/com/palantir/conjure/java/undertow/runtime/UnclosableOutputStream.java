@@ -16,19 +16,46 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import io.undertow.io.BufferWritableOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 
-/** Helper stream used in {@link ConjureBodySerDe} to make error propagation easier. */
-final class UnclosableOutputStream extends OutputStream {
+/**
+ * Helper stream used in {@link ConjureBodySerDe} to make error propagation easier.
+ * <p>
+ * Note that this implements {@link BufferWritableOutputStream} as some consumers leverage the knowledge that the
+ * {@link OutputStream} passed to {@link BinaryResponseBody#write} is an {@link io.undertow.io.UndertowOutputStream}
+ * for more efficient writes with {@link ByteBuffer}.
+ */
+final class UnclosableOutputStream extends OutputStream implements BufferWritableOutputStream {
 
     private final OutputStream delegate;
+    private final BufferWritableOutputStream bufferWritableDelegate;
     private boolean closeCalled;
 
     UnclosableOutputStream(OutputStream delegate) {
-        this.delegate = Preconditions.checkNotNull(delegate, "Delegate is required");
+        Preconditions.checkNotNull(delegate, "Delegate is required");
+        this.delegate = delegate;
+        this.bufferWritableDelegate = delegate instanceof BufferWritableOutputStream bufferWritableOutputStream
+                ? bufferWritableOutputStream
+                : SimpleBufferWritableOutputStream.wrap(delegate);
+    }
+
+    @Override
+    public void write(ByteBuffer[] buffers) throws IOException {
+        bufferWritableDelegate.write(buffers);
+    }
+
+    @Override
+    public void write(ByteBuffer byteBuffer) throws IOException {
+        bufferWritableDelegate.write(byteBuffer);
     }
 
     @Override
@@ -50,6 +77,11 @@ final class UnclosableOutputStream extends OutputStream {
     }
 
     @Override
+    public void transferFrom(FileChannel source) throws IOException {
+        bufferWritableDelegate.transferFrom(source);
+    }
+
+    @Override
     public void flush() throws IOException {
         delegate.flush();
     }
@@ -68,5 +100,29 @@ final class UnclosableOutputStream extends OutputStream {
     @Override
     public String toString() {
         return "UnclosableOutputStream{" + delegate + '}';
+    }
+
+    private record SimpleBufferWritableOutputStream(WritableByteChannel channel) implements BufferWritableOutputStream {
+
+        static SimpleBufferWritableOutputStream wrap(OutputStream outputStream) {
+            return new SimpleBufferWritableOutputStream(Channels.newChannel(outputStream));
+        }
+
+        @Override
+        public void write(ByteBuffer[] buffers) throws IOException {
+            for (ByteBuffer buffer : buffers) {
+                channel.write(buffer);
+            }
+        }
+
+        @Override
+        public void write(ByteBuffer byteBuffer) throws IOException {
+            channel.write(byteBuffer);
+        }
+
+        @Override
+        public void transferFrom(FileChannel source) throws IOException {
+            source.transferTo(0, source.size(), channel);
+        }
     }
 }
