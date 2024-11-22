@@ -16,11 +16,12 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
-import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
+import org.eclipse.collections.api.list.primitive.MutableLongList;
 import org.eclipse.collections.impl.utility.Iterate;
 
 /**
@@ -28,9 +29,9 @@ import org.eclipse.collections.impl.utility.Iterate;
  * with SafeLongs.
  */
 final class ConjureSafeLongList extends AbstractList<SafeLong> implements RandomAccess {
-    private final LongArrayList delegate;
+    private final MutableLongList delegate;
 
-    ConjureSafeLongList(LongArrayList delegate) {
+    ConjureSafeLongList(MutableLongList delegate) {
         this.delegate = delegate;
     }
 
@@ -56,6 +57,14 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
         return delegate.addAllAtIndex(index, target);
     }
 
+    public void addAll(long... source) {
+        for (long value : source) {
+            // Doesn't use SafeLong creation because this causes unnecessary boxing
+            SafeLong.check(value);
+        }
+        this.delegate.addAll(source);
+    }
+
     @Override
     public SafeLong remove(int index) {
         return SafeLong.of(delegate.removeAtIndex(index));
@@ -69,5 +78,16 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
     @Override
     public SafeLong set(int index, SafeLong element) {
         return SafeLong.of(delegate.set(index, element.longValue()));
+    }
+
+    public ConjureSafeLongList asUnmodifiable() {
+        return new ConjureSafeLongList(delegate.asUnmodifiable());
+    }
+
+    // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
+    // This is a serialization optimization that avoids boxing, but does copy
+    @JsonValue
+    long[] jacksonSerialize() {
+        return delegate.toArray();
     }
 }
