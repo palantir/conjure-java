@@ -171,11 +171,7 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToDoubleList(Collection<Double> addTo, double[] elementsToAdd) {
-        if (addTo instanceof ConjureDoubleList) {
-            ((ConjureDoubleList) addTo).addAll(elementsToAdd);
-        } else {
-            addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
-        }
+        addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -198,11 +194,7 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToIntegerList(Collection<Integer> addTo, int[] elementsToAdd) {
-        if (addTo instanceof ConjureIntegerList) {
-            ((ConjureIntegerList) addTo).addAll(elementsToAdd);
-        } else {
-            addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
-        }
+        addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
     }
 
     /**
@@ -240,10 +232,6 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToSafeLongList(Collection<SafeLong> addTo, long[] elementsToAdd) {
-        if (addTo instanceof ConjureSafeLongList) {
-            ((ConjureSafeLongList) addTo).addAll(elementsToAdd);
-        } else {
-            addAll(addTo, Arrays.stream(elementsToAdd).boxed().map(SafeLong::of).toList());
-        }
+        addAll(addTo, Arrays.stream(elementsToAdd).boxed().map(SafeLong::of).toList());
     }
 }

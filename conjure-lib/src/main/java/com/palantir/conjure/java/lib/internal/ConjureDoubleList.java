@@ -16,11 +16,10 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
-import org.eclipse.collections.api.list.primitive.MutableDoubleList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.utility.Iterate;
 
 /**
@@ -28,9 +27,9 @@ import org.eclipse.collections.impl.utility.Iterate;
  * a BoxedMutableDoubleList will be released. Once available, ConjureDoubleList should be replaced with that.
  */
 final class ConjureDoubleList extends AbstractList<Double> implements RandomAccess {
-    private final MutableDoubleList delegate;
+    private final DoubleArrayList delegate;
 
-    ConjureDoubleList(MutableDoubleList delegate) {
+    ConjureDoubleList(DoubleArrayList delegate) {
         this.delegate = delegate;
     }
 
@@ -56,10 +55,6 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
         return delegate.addAllAtIndex(index, target);
     }
 
-    public void addAll(double... source) {
-        this.delegate.addAll(source);
-    }
-
     @Override
     public Double remove(int index) {
         return delegate.removeAtIndex(index);
@@ -73,16 +68,5 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
     @Override
     public Double set(int index, Double element) {
         return delegate.set(index, element);
-    }
-
-    public ConjureDoubleList asUnmodifiable() {
-        return new ConjureDoubleList(delegate.asUnmodifiable());
-    }
-
-    // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
-    // This is a serialization optimization that avoids boxing, but does copy
-    @JsonValue
-    double[] jacksonSerialize() {
-        return delegate.toArray();
     }
 }
