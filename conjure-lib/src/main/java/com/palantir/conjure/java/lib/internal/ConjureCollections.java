@@ -39,33 +39,8 @@ public final class ConjureCollections {
         // cannot instantiate
     }
 
-    /*
-     * This is bizarre. Allow me to explain...
-     *
-     * We do _not_ want to expose the Conjure*List types externally
-     * but we also want the optimizations they provide to make it thru
-     * to jackson for serialization. So the runtime type needs to be
-     * preserved while also not exposing the type :phew:.
-     *
-     * To achieve this we have to do some gymnastics surrounding the type
-     * system. We need this to return the type of the list given, but also
-     * return specific Conjure types when detected. This requires that we
-     * erase the type info, but we know this is safe because we are directly
-     * returning the same type which is by definition the identity function.
-     * Therefore the input List<T> is the same types as the output List<T>.
-     */
     public static <T> List<T> unmodifiableList(List<T> list) {
-        // Return the unmodifiable version of the Eclipse types
-        if (list instanceof ConjureIntegerList) {
-            return (List<T>) ((ConjureIntegerList) list).asUnmodifiable();
-        } else if (list instanceof ConjureDoubleList) {
-            return (List<T>) ((ConjureDoubleList) list).asUnmodifiable();
-        } else if (list instanceof ConjureSafeLongList) {
-            return (List<T>) ((ConjureSafeLongList) list).asUnmodifiable();
-        } else {
-            // Otherwise use the JDK types
-            return Collections.unmodifiableList(list);
-        }
+        return Collections.unmodifiableList(list);
     }
 
     @SuppressWarnings("unchecked")

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.lib.internal;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.Preconditions;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
@@ -60,7 +61,11 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
     public void addAll(long... source) {
         for (long value : source) {
             // Doesn't use SafeLong creation because this causes unnecessary boxing
-            SafeLong.check(value);
+            // Mostly copied from SafeLong
+            Preconditions.checkArgument(
+                    SafeLong.MIN_VALUE.longValue() <= value && value <= SafeLong.MAX_VALUE.longValue(),
+                    "number must be safely representable in javascript i.e. "
+                            + "lie between -9007199254740991 and 9007199254740991");
         }
         this.delegate.addAll(source);
     }

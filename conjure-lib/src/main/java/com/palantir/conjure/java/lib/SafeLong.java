@@ -40,7 +40,7 @@ public final class SafeLong implements Comparable<SafeLong> {
         return longValue;
     }
 
-    public static long check(long value) {
+    private static long check(long value) {
         Preconditions.checkArgument(
                 MIN_SAFE_VALUE <= value && value <= MAX_SAFE_VALUE,
                 "number must be safely representable in javascript i.e. "
