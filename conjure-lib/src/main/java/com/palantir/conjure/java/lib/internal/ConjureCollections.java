@@ -20,6 +20,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,10 @@ public final class ConjureCollections {
 
     private ConjureCollections() {
         // cannot instantiate
+    }
+
+    public static <T> List<T> unmodifiableList(List<T> list) {
+        return Collections.unmodifiableList(list);
     }
 
     @SuppressWarnings("unchecked")
@@ -139,6 +144,12 @@ public final class ConjureCollections {
         return set;
     }
 
+    /**
+     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
+     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
+     * Conjure[type]List should be replaced with that.
+     */
+
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
         return new ConjureDoubleList(new DoubleArrayList());
@@ -157,11 +168,12 @@ public final class ConjureCollections {
         return doubleList;
     }
 
-    /**
-     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
-     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
-     * Conjure[type]List should be replaced with that.
-     */
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToDoubleList(Collection<Double> addTo, double[] elementsToAdd) {
+        for (double el : elementsToAdd) {
+            addTo.add(el);
+        }
+    }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList() {
@@ -181,9 +193,17 @@ public final class ConjureCollections {
         return integerList;
     }
 
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToIntegerList(Collection<Integer> addTo, int[] elementsToAdd) {
+        for (int el : elementsToAdd) {
+            addTo.add(el);
+        }
+    }
+
     /**
      * Deprecated, this should only ever be called by a previously generated conjure internal implementation.
      */
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newNonNullBooleanList() {
         return newNonNullList();
     }
@@ -211,5 +231,12 @@ public final class ConjureCollections {
         addAll(safeLongList, iterable);
 
         return safeLongList;
+    }
+
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addAllToSafeLongList(Collection<SafeLong> addTo, long[] elementsToAdd) {
+        for (long el : elementsToAdd) {
+            addTo.add(SafeLong.of(el));
+        }
     }
 }
