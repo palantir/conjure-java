@@ -19,7 +19,6 @@ package com.palantir.conjure.java.lib.internal;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -171,7 +170,9 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToDoubleList(Collection<Double> addTo, double[] elementsToAdd) {
-        addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
+        for (double el : elementsToAdd) {
+            addTo.add(el);
+        }
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -194,7 +195,9 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToIntegerList(Collection<Integer> addTo, int[] elementsToAdd) {
-        addAll(addTo, () -> Arrays.stream(elementsToAdd).iterator());
+        for (int el : elementsToAdd) {
+            addTo.add(el);
+        }
     }
 
     /**
@@ -232,6 +235,8 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToSafeLongList(Collection<SafeLong> addTo, long[] elementsToAdd) {
-        addAll(addTo, Arrays.stream(elementsToAdd).boxed().map(SafeLong::of).toList());
+        for (long el : elementsToAdd) {
+            addTo.add(SafeLong.of(el));
+        }
     }
 }
