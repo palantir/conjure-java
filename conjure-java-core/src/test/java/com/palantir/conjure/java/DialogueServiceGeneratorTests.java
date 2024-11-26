@@ -88,7 +88,8 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/cookie-service.yml"),
                 new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml")));
+                new File("src/test/resources/ete-binary.yml"),
+                new File("src/test/resources/example-endpoint-errors.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
                         ImmutableSet.of(new DialogueServiceGenerator(

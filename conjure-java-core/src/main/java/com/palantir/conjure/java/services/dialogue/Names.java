@@ -30,6 +30,11 @@ public final class Names {
         return maybeRelocate(def, options, simpleName);
     }
 
+    public static ClassName resultTypesClassName(ServiceDefinition def, Options options) {
+        String simpleName = "Dialogue" + def.getServiceName().getName().replaceAll("Service$", "") + "ResultTypes";
+        return maybeRelocate(def, options, simpleName);
+    }
+
     public static ClassName blockingClassName(ServiceDefinition def, Options options) {
         String simpleName = def.getServiceName().getName() + "Blocking";
         return maybeRelocate(def, options, simpleName);

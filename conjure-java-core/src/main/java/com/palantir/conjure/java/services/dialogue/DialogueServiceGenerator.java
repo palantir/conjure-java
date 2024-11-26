@@ -63,6 +63,8 @@ public final class DialogueServiceGenerator implements Generator {
 
         DialogueInterfaceGenerator interfaceGenerator =
                 new DialogueInterfaceGenerator(options, parameterMapper, new ReturnTypeMapper(returnTypes));
+        DialogueEndpointResultTypeGenerator resultTypeGenerator =
+                new DialogueEndpointResultTypeGenerator(options, new ReturnTypeMapper(returnTypes));
 
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 types.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
@@ -85,6 +87,7 @@ public final class DialogueServiceGenerator implements Generator {
                 .flatMap(serviceDef -> !serviceDef.getEndpoints().isEmpty()
                         ? Stream.of(
                                 endpoints.endpointsClass(serviceDef),
+                                resultTypeGenerator.generateEndpointResultTypes(serviceDef),
                                 interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
                                 interfaceGenerator.generateAsync(serviceDef, asyncGenerator))
                         : Stream.of(
