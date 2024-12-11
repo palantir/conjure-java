@@ -169,6 +169,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Java 24's loom support removes the need for async interfaces. When set to true, only Dialogue interfaces for
+     * blocking clients will be generated. The Dialogue async interfaces will not be generated.
+     */
+    @Value.Default
+    default boolean excludeDialogueAsyncInterfaces() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
