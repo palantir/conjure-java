@@ -18,16 +18,22 @@ package com.palantir.conjure.java.services.dialogue;
 
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.CaseFormat;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureErrors.BaseEndpointError;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
 import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
@@ -43,12 +49,15 @@ import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.lang.model.element.Modifier;
@@ -67,19 +76,39 @@ public final class DialogueInterfaceGenerator {
         this.returnTypes = returnTypes;
     }
 
-    public JavaFile generateBlocking(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
-        return generate(def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator);
+    public JavaFile generateBlocking(
+            ServiceDefinition def,
+            StaticFactoryMethodGenerator methodGenerator,
+            // TODO(pm): use this flag.
+            boolean generateDialogueEndpointErrorResultTypes) {
+        return generate(
+                def,
+                Names.blockingClassName(def, options),
+                returnTypes::baseType,
+                methodGenerator,
+                generateDialogueEndpointErrorResultTypes);
     }
 
-    public JavaFile generateAsync(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
-        return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator);
+    public JavaFile generateAsync(
+            ServiceDefinition def,
+            StaticFactoryMethodGenerator methodGenerator,
+            // TODO(pm): use this flag.
+            boolean generateDialogueEndpointErrorResultTypes) {
+        return generate(
+                def,
+                Names.asyncClassName(def, options),
+                returnTypes::async,
+                methodGenerator,
+                generateDialogueEndpointErrorResultTypes);
     }
 
     private JavaFile generate(
             ServiceDefinition def,
             ClassName className,
             Function<Optional<Type>, TypeName> returnTypeMapper,
-            StaticFactoryMethodGenerator methodGenerator) {
+            StaticFactoryMethodGenerator methodGenerator,
+            boolean _generateDialogueEndpointErrorResultTypes) {
+        String packageName = Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix());
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class))
@@ -103,8 +132,13 @@ public final class DialogueInterfaceGenerator {
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
         serviceBuilder.addMethods(def.getEndpoints().stream()
-                .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
+                .map(endpoint -> apiMethod(packageName, className, endpoint, returnTypeMapper))
                 .collect(toList()));
+
+        // Create public sealed interface for the "response" type for each of the endpoints.
+        serviceBuilder.addTypes(def.getEndpoints().stream()
+                .map(endpointDef -> responseTypeForEndpoint(packageName, className, endpointDef, returnTypeMapper))
+                .toList());
 
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
@@ -145,13 +179,103 @@ public final class DialogueInterfaceGenerator {
                         .build())
                 .build());
 
-        return JavaFile.builder(
-                        Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
-                        serviceBuilder.build())
+        return JavaFile.builder(packageName, serviceBuilder.build()).build();
+    }
+
+    private TypeSpec responseTypeForEndpoint(
+            String packageName,
+            ClassName className,
+            EndpointDefinition endpointDef,
+            Function<Optional<Type>, TypeName> returnTypeMapper) {
+        ClassName responseTypeName = ClassName.get(
+                packageName,
+                className.simpleName(),
+                ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
+        // Create the success record
+        TypeSpec successRecord = TypeSpec.recordBuilder(
+                        ClassName.get(packageName, responseTypeName.simpleName(), "Success"))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .recordConstructor(MethodSpec.compactConstructorBuilder()
+                        .addParameter(ParameterSpec.builder(returnTypeMapper.apply(endpointDef.getReturns()), "value")
+                                .build())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("$T.checkArgumentNotNull(value, \"value cannot be null\")", Preconditions.class)
+                        .build())
+                .addSuperinterface(responseTypeName)
+                .build();
+
+        // Create a record for each of the endpoint's errors
+        List<TypeSpec> errorTypes = new ArrayList<>();
+        for (EndpointError endpointError : endpointDef.getErrors()) {
+            String errorTypeName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, endpointError.getError().getName());
+            ClassName errorTypesClassName = ClassName.get(
+                    endpointError.getError().getPackage(),
+                    ErrorGenerationUtils.errorTypesClassName(
+                            endpointError.getError().getNamespace()),
+                    errorTypeName);
+            ClassName parametersClassName = ClassName.get(
+                    endpointError.getError().getPackage(),
+                    ErrorGenerationUtils.errorTypesClassName(
+                            endpointError.getError().getNamespace()),
+                    ErrorGenerationUtils.errorParametersClassName(
+                            endpointError.getError().getName()));
+            TypeSpec endpointErrorType = TypeSpec.classBuilder(ClassName.get(
+                            packageName,
+                            responseTypeName.simpleName(),
+                            endpointError.getError().getName()))
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .addSuperinterface(responseTypeName)
+                    .superclass(ParameterizedTypeName.get(ClassName.get(BaseEndpointError.class), parametersClassName))
+                    .addMethod(errorTypeConstructor(parametersClassName, errorTypesClassName))
+                    .build();
+            errorTypes.add(endpointErrorType);
+        }
+
+        // Get type from typespec
+        return TypeSpec.interfaceBuilder(responseTypeName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SEALED)
+                .addPermittedSubclass(
+                        ClassName.get(packageName, className.simpleName(), responseTypeName.simpleName(), "Success"))
+                .addPermittedSubclasses(errorTypes.stream()
+                        .map(type -> ClassName.get(
+                                packageName, className.simpleName(), responseTypeName.simpleName(), type.name()))
+                        .toList())
+                .addType(successRecord)
+                .addTypes(errorTypes)
                 .build();
     }
 
-    private MethodSpec apiMethod(EndpointDefinition endpointDef, Function<Optional<Type>, TypeName> returnTypeMapper) {
+    private MethodSpec errorTypeConstructor(ClassName parametersClassName, ClassName errorTypesClassName) {
+        MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
+                .addAnnotation(JsonCreator.class)
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorCode")
+                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                .addMember("value", "$S", "errorCode")
+                                .build())
+                        .build())
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorInstanceId")
+                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                .addMember("value", "$S", "errorInstanceId")
+                                .build())
+                        .build())
+                // TODO(pm): Only add the parameters if the error has them. Plumb in error definitions.
+                .addParameter(ParameterSpec.builder(parametersClassName, "parameters")
+                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                .addMember("value", "$S", "parameters")
+                                .build())
+                        .build())
+                .addStatement(
+                        // TODO(pm): Perhaps these shouldn't be literals but names ($N).
+                        "super(errorCode, $T.name(), errorInstanceId, parameters)", errorTypesClassName);
+        return ctorBuilder.build();
+    }
+
+    private MethodSpec apiMethod(
+            String packageName,
+            ClassName className,
+            EndpointDefinition endpointDef,
+            Function<Optional<Type>, TypeName> returnTypeMapper) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -184,7 +308,11 @@ public final class DialogueInterfaceGenerator {
                 endpointDef,
                 new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
-        TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
+        // TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
+        TypeName returnType = ClassName.get(
+                packageName,
+                className.simpleName(),
+                ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
         methodBuilder.returns(returnType);
 
         if (TypeName.get(InputStream.class).equals(returnType)) {

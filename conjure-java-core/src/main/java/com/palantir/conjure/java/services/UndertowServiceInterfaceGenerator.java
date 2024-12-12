@@ -118,7 +118,7 @@ final class UndertowServiceInterfaceGenerator {
                     ErrorTypeName errorTypeName = endpointError.getError();
                     return ClassName.get(
                             Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
-                            ErrorGenerationUtils.errorExceptionsClassName(errorTypeName.getNamespace()),
+                            ErrorGenerationUtils.serverErrorsClassName(errorTypeName.getNamespace()),
                             errorTypeName.getName());
                 })
                 .collect(Collectors.toList()));

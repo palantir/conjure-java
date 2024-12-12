@@ -26,23 +26,27 @@ import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.types.CheckedErrorGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
+import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
+import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
+import com.palantir.product.ErrorServiceBlocking.TestBasicErrorResponse;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import dialogue.com.palantir.product.EteBinaryServiceBlocking;
 import dialogue.com.palantir.product.EteServiceAsync;
 import dialogue.com.palantir.product.EteServiceBlocking;
-import dialogue.com.palantir.product.NestedStringAliasExample;
-import dialogue.com.palantir.product.SimpleEnum;
-import dialogue.com.palantir.product.StringAliasExample;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -73,10 +77,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import undertow.com.palantir.product.EmptyPathServiceEndpoints;
+import undertow.com.palantir.product.ErrorServiceEndpoints;
 import undertow.com.palantir.product.EteBinaryServiceEndpoints;
 import undertow.com.palantir.product.EteServiceEndpoints;
 
-// MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -87,6 +91,8 @@ public final class UndertowServiceEteTest extends TestBase {
     private static Undertow server;
 
     private final EteServiceBlocking client;
+    // TODO(pm): this should be in a different test.
+    private final com.palantir.product.ErrorServiceBlocking errorServiceClient;
     private final EteServiceAsync asyncClient;
 
     private final EteBinaryServiceBlocking binaryClient;
@@ -97,6 +103,7 @@ public final class UndertowServiceEteTest extends TestBase {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(port));
         this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
         this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
+        this.errorServiceClient = DialogueClients.create(com.palantir.product.ErrorServiceBlocking.class, clientConfiguration(port));
     }
 
     @BeforeAll
@@ -106,6 +113,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 .services(EteServiceEndpoints.of(new UndertowEteResource()))
                 .services(EmptyPathServiceEndpoints.of(() -> true))
                 .services(EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
+                .services(ErrorServiceEndpoints.of(new ErrorResource.Impl()))
                 .build();
 
         server = Undertow.builder()
@@ -131,6 +139,14 @@ public final class UndertowServiceEteTest extends TestBase {
         EmptyPathService emptyPathClient = JaxRsClient.create(
                 EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration(port));
         assertThat(emptyPathClient.emptyPath()).isTrue();
+    }
+
+    @Test
+    public void error_client_returns_result() {
+        TestBasicErrorResponse result = errorServiceClient.testBasicError(AuthHeader.valueOf("authHeader"));
+        assertThat(result).isInstanceOfSatisfying(TestBasicErrorResponse.Success.class, success -> {
+            assertThat(success.value()).isEqualTo("HELLO");
+        });
     }
 
     @Test
@@ -545,6 +561,44 @@ public final class UndertowServiceEteTest extends TestBase {
                     assertThat(re.getStatus()).isEqualTo(422);
                 });
     }
+
+    @BeforeAll
+    public static void beforeClass() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/ete-service.yml"),
+                new File("src/test/resources/ete-binary.yml"),
+                new File("src/test/resources/alias-test-service.yml"),
+                new File("src/test/resources/external-long-test-service.yml"),
+                new File("src/test/resources/example-endpoint-errors.yml")));
+        Options options = Options.builder()
+                .undertowServicePrefix(true)
+                .nonNullCollections(true)
+                .excludeEmptyOptionals(true)
+                .jetbrainsContractAnnotations(true)
+                .build();
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(
+                                new UndertowServiceGenerator(options),
+                                new ObjectGenerator(options),
+                                new ErrorGenerator(options),
+                                new CheckedErrorGenerator(options)))
+                .emit(def, folder);
+        // validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
+    }
+
+    //    private static void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
+    //        for (Path file : files) {
+    //            Path relativePath = folder.toPath().relativize(file);
+    //            Path output = outputDir.resolve(relativePath);
+    //            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+    //                Files.createDirectories(relativePath.getParent());
+    //                Files.deleteIfExists(output);
+    //                Files.copy(file, output);
+    //            }
+    //            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+    //        }
+    //    }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
         URL url = new URL("http://localhost:" + port + "/test-example/api" + path);
