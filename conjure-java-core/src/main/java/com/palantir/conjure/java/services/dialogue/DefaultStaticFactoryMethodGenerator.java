@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.palantir.conjure.java.services.dialogue;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
+import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.HeaderParameterType;
@@ -45,6 +50,7 @@ import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DeserializerArgs;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
@@ -76,22 +82,26 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
+    private final DeclaredEndpointErrors declaredEndpointErrors;
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
             TypeNameResolver typeNameResolver,
             ParameterTypeMapper parameterTypes,
             ReturnTypeMapper returnTypes,
-            StaticFactoryMethodType methodType) {
+            StaticFactoryMethodType methodType,
+            DeclaredEndpointErrors declaredEndpointErrors) {
         this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
         this.methodType = methodType;
+        this.declaredEndpointErrors = declaredEndpointErrors;
     }
 
     @Override
     public MethodSpec generate(ServiceDefinition def) {
+        // Need: 1) the name of the response type (static), 2) all the error types (declaredEndpointErrors)
         ClassName className = getClassName(def);
         TypeSpec.Builder impl = TypeSpec.anonymousClassBuilder("").addSuperinterface(className);
 
@@ -108,8 +118,17 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     .ifPresent(impl::addField);
 
             impl.addField(bindEndpointChannel(def, endpoint));
-            deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
-            impl.addMethod(clientImpl(endpoint));
+            deserializer(
+                            ClassName.get(
+                                    Packages.getPrefixedPackage(
+                                            def.getServiceName().getPackage(), options.packagePrefix()),
+                                    className.simpleName(),
+                                    ErrorGenerationUtils.responseTypeName(endpoint.getEndpointName())),
+                            endpoint,
+                            endpoint.getEndpointName(),
+                            endpoint.getReturns())
+                    .ifPresent(impl::addField);
+            impl.addMethod(clientImpl(className, endpoint));
         });
 
         impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
@@ -159,25 +178,52 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build());
     }
 
-    private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
+    private Optional<FieldSpec> deserializer(
+            TypeName responseType, EndpointDefinition endpointDef, EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
         if (isBinaryOrOptionalBinary(className, returnTypes)) {
             return Optional.empty();
         }
         ParameterizedTypeName deserializerType =
-                ParameterizedTypeName.get(ClassName.get(Deserializer.class), className);
+                ParameterizedTypeName.get(ClassName.get(Deserializer.class), responseType);
 
-        CodeBlock realDeserializer = CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className);
+        // CodeBlock realDeserializer = CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className);
+        CodeBlock realDeserializerWithArgs = CodeBlock.builder()
+                .add("deserializer(")
+                .add(constructDeserializerArgsForEndpoint(endpointDef, responseType))
+                .add(")")
+                .build();
         CodeBlock voidDeserializer = CodeBlock.of("emptyBodyDeserializer()");
         CodeBlock initializer = CodeBlock.of(
                 "$L.bodySerDe().$L",
                 StaticFactoryMethodGenerator.RUNTIME,
-                type.isPresent() ? realDeserializer : voidDeserializer);
+                type.isPresent() ? realDeserializerWithArgs : voidDeserializer);
 
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(initializer)
                 .build());
+    }
+
+    private CodeBlock constructDeserializerArgsForEndpoint(EndpointDefinition endpointDef, TypeName responseType) {
+        CodeBlock.Builder retBuilder = CodeBlock.builder()
+                .add("$T.<$T>builder()", DeserializerArgs.class, responseType)
+                .add(".baseType(new $T<>() {})", TypeMarker.class)
+                // TODO(pm): consider making "Success" a constant string for re-use in the record creation.
+                .add(".success(new $T<$T.Success>() {})", TypeMarker.class, responseType);
+        for (EndpointError err : endpointDef.getErrors()) {
+            ErrorTypeName errorTypeName = err.getError();
+            String errorName = errorTypeName.getName();
+            String errorType = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName);
+            ClassName errorClass = ClassName.get(
+                    errorTypeName.getPackage(),
+                    ErrorGenerationUtils.errorTypesClassName(errorTypeName.getNamespace()),
+                    errorType);
+            retBuilder.add(
+                    ".error($T.name(), new $T<$T.$L>() {})", errorClass, TypeMarker.class, responseType, errorName);
+        }
+        retBuilder.add(".build()");
+        return retBuilder.build();
     }
 
     private static boolean isBinaryOrOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
@@ -193,7 +239,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))));
     }
 
-    private MethodSpec clientImpl(EndpointDefinition def) {
+    private MethodSpec clientImpl(ClassName className, EndpointDefinition def) {
         List<ParameterSpec> params = parameterTypes.implementationMethodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
@@ -207,8 +253,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     .build());
         }
 
-        TypeName returnType =
-                methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
+        // TODO(pm): handle the unflagged case. Handle the async case.
+        TypeName returnType = ClassName.get(
+                className.packageName(),
+                className.simpleName(),
+                ErrorGenerationUtils.responseTypeName(def.getEndpointName()));
+        //        TypeName returnType =
+        //                methodType.switchBy(returnTypes.baseType(def.getReturns()),
+        // returnTypes.async(def.getReturns()));
         methodBuilder.returns(returnType);
 
         CodeBlock.Builder requestParams = CodeBlock.builder();

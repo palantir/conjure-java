@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.util;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -25,6 +26,7 @@ import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointError;
+import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.ErrorTypeName;
@@ -50,12 +52,29 @@ import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 public final class ErrorGenerationUtils {
+    /**
+     * The name of the sealed interface returned by endpoints with associated errors, permitting implementations for a
+     * successful result and each error type.
+     */
+    // TODO(pm): Move these methods around.
+    public static String responseTypeName(EndpointName endpointName) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, endpointName.get()) + "Response";
+    }
+
+    public static String errorParametersClassName(String errorName) {
+        return errorName + "Parameters";
+    }
+
     public static MethodSpec privateConstructor() {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
     }
 
-    public static String errorExceptionsClassName(ErrorNamespace namespace) {
+    public static String serverErrorsClassName(ErrorNamespace namespace) {
         return namespace.get() + "ServerErrors";
+    }
+
+    public static String errorTypesClassName(ErrorNamespace namespace) {
+        return namespace.get() + "Errors";
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {
@@ -146,6 +165,22 @@ public final class ErrorGenerationUtils {
                 .getDocs()
                 .ifPresent(docs ->
                         parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
+        return parameterBuilder.build();
+    }
+
+    public static ParameterSpec buildParameterWithSafetyAnnotationWithJsonProperty(
+            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
+        Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
+        String argName = argDefinition.getFieldName().get();
+        TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
+        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
+        argDefinition
+                .getDocs()
+                .ifPresent(docs ->
+                        parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
+        parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$S", argDefinition.getFieldName())
+                .build());
         return parameterBuilder.build();
     }
 

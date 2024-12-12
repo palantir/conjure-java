@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
@@ -89,14 +90,49 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/cookie-service.yml"),
                 new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml"),
-                new File("src/test/resources/example-endpoint-errors.yml")));
+                new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
                         ImmutableSet.of(new DialogueServiceGenerator(
                                 Options.builder().apiVersion("1.2.3").build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
+    }
+
+    @Test
+    public void generateServiceWithResultTypes() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-endpoint-errors.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(
+                                new ErrorGenerator(Options.builder()
+                                        .useImmutableBytes(true)
+                                        .excludeEmptyOptionals(true)
+                                        .jetbrainsContractAnnotations(true)
+                                        .generateDialogueEndpointErrorResultTypes(true)
+                                        .build()),
+                                new DialogueServiceGenerator(Options.builder()
+                                        .apiVersion("1.2.3")
+                                        .excludeDialogueAsyncInterfaces(true) // TODO(pm): excluding for testing.
+                                        .generateDialogueEndpointErrorResultTypes(true)
+                                        .build())))
+                .emit(def, folder);
+        // validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
+        validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
+    }
+
+    private void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
+        for (Path file : files) {
+            Path relativePath = folder.toPath().relativize(file);
+            Path output = outputDir.resolve(relativePath);
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Files.createDirectories(relativePath.getParent());
+                Files.deleteIfExists(output);
+                Files.copy(file, output);
+            }
+            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+        }
     }
 
     @Test

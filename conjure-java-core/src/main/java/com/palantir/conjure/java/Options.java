@@ -178,6 +178,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * TODO(pm): flesh this out more. For errors associated with endpoints, this option enables the generated Dialogue
+     *  clients to return a result type.
+     */
+    @Value.Default
+    default boolean generateDialogueEndpointErrorResultTypes() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

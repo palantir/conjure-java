@@ -31,6 +31,7 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
+import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -162,10 +163,46 @@ public final class ErrorGenerator implements Generator {
                 .addMethods(isRemoteExceptionDefinitions)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
 
+        if (options.generateDialogueEndpointErrorResultTypes()) {
+            typeBuilder.addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper));
+        }
+
         return JavaFile.builder(conjurePackage, typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static List<TypeSpec> generateErrorParameterRecords(
+            List<ErrorDefinition> errorTypeDefinitions, TypeMapper typeMapper) {
+        return errorTypeDefinitions.stream()
+                .map(errorDefinition -> generateErrorParameterRecord(errorDefinition, typeMapper))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    private static Optional<TypeSpec> generateErrorParameterRecord(
+            ErrorDefinition errorDefinition, TypeMapper typeMapper) {
+        // TODO(pm): uncomment this.
+        //        if (errorDefinition.getSafeArgs().isEmpty()
+        //                && errorDefinition.getUnsafeArgs().isEmpty()) {
+        //            return Optional.empty();
+        //        }
+        TypeSpec.Builder parametersRecordBuilder = TypeSpec.recordBuilder(ErrorGenerationUtils.errorParametersClassName(
+                        errorDefinition.getErrorName().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+        MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder();
+        for (FieldDefinition fieldDef : errorDefinition.getSafeArgs()) {
+            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationWithJsonProperty(
+                    typeMapper, fieldDef, true));
+        }
+        for (FieldDefinition fieldDef : errorDefinition.getUnsafeArgs()) {
+            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationWithJsonProperty(
+                    typeMapper, fieldDef, false));
+        }
+        return Optional.of(
+                parametersRecordBuilder.recordConstructor(ctorBuilder.build()).build());
     }
 
     private static MethodSpec generateExceptionFactory(
@@ -194,6 +231,6 @@ public final class ErrorGenerator implements Generator {
     }
 
     static ClassName errorTypesClassName(String conjurePackage, ErrorNamespace namespace) {
-        return ClassName.get(conjurePackage, namespace.get() + "Errors");
+        return ClassName.get(conjurePackage, ErrorGenerationUtils.errorTypesClassName(namespace));
     }
 }

@@ -18,4 +18,6 @@ public final class EndpointSpecificTwoErrors {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return DIFFERENT_NAMESPACE.name().equals(remoteException.getError().errorName());
     }
+
+    public static record DifferentNamespaceParameters() {}
 }
