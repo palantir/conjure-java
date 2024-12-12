@@ -24,6 +24,7 @@ import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.dialogue.BinaryRequestBody;
@@ -32,6 +33,8 @@ import com.palantir.javapoet.JavaFile;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -84,14 +87,30 @@ public final class DialogueServiceGenerator implements Generator {
                 StaticFactoryMethodType.BLOCKING);
 
         return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> !serviceDef.getEndpoints().isEmpty()
-                        ? Stream.of(
-                                endpoints.endpointsClass(serviceDef),
-                                resultTypeGenerator.generateEndpointResultTypes(serviceDef),
-                                interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                                interfaceGenerator.generateAsync(serviceDef, asyncGenerator))
-                        : Stream.of(
-                                interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                                interfaceGenerator.generateAsync(serviceDef, asyncGenerator)));
+                .flatMap(serviceDef -> generateFilesForService(
+                        options.excludeDialogueAsyncInterfaces(),
+                        serviceDef,
+                        endpoints,
+                        interfaceGenerator,
+                        blockingGenerator,
+                        asyncGenerator));
+    }
+
+    private static Stream<JavaFile> generateFilesForService(
+            boolean excludeDialogueAsyncInterfaces,
+            ServiceDefinition serviceDef,
+            DialogueEndpointsGenerator endpointsGenerator,
+            DialogueInterfaceGenerator interfaceGenerator,
+            StaticFactoryMethodGenerator blockingGenerator,
+            StaticFactoryMethodGenerator asyncGenerator) {
+        List<JavaFile> files = new ArrayList<>(/* initialCapacity= */ 3);
+        if (!serviceDef.getEndpoints().isEmpty()) {
+            files.add(endpointsGenerator.endpointsClass(serviceDef));
+        }
+        files.add(interfaceGenerator.generateBlocking(serviceDef, blockingGenerator));
+        if (!excludeDialogueAsyncInterfaces) {
+            files.add(interfaceGenerator.generateAsync(serviceDef, asyncGenerator));
+        }
+        return files.stream();
     }
 }

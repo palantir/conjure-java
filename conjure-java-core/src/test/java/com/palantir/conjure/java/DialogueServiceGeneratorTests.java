@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
@@ -98,11 +99,27 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
+    @Test
+    public void testServiceGeneration_excludeDialogueAsyncInterfaces() {
+        List<Path> files = getGeneratedFilesForDef(
+                "example-service",
+                Options.builder().excludeDialogueAsyncInterfaces(true).build());
+        List<String> fileNames =
+                files.stream().map(Path::getFileName).map(Path::toString).toList();
+        assertThat(fileNames).noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
+    }
+
     private void testServiceGeneration(String conjureFile) throws IOException {
+        validateGeneratorOutput(
+                getGeneratedFilesForDef(conjureFile, Options.empty()),
+                Paths.get("src/test/resources/test/api"),
+                ".dialogue");
+    }
+
+    private List<Path> getGeneratedFilesForDef(String conjureFile, Options options) {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(Options.empty())))
+        return new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(options)))
                 .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".dialogue");
     }
 }

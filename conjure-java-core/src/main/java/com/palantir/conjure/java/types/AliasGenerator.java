@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -148,8 +147,7 @@ public final class AliasGenerator {
 
         if (isAliasOfDouble(typeDef)) {
             CodeBlock longCastCodeBlock = CodeBlock.builder()
-                    .addStatement("long safeValue = $T.of(value).longValue()", SafeLong.class)
-                    .addStatement("return new $T((double) safeValue)", thisClass)
+                    .addStatement("return new $T((double) value)", thisClass)
                     .build();
 
             CodeBlock intCastCodeBlock = CodeBlock.builder()

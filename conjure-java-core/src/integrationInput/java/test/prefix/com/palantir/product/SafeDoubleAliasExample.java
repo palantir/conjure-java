@@ -2,7 +2,6 @@ package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Safe;
 import java.math.BigDecimal;
 import javax.annotation.Nullable;
@@ -58,8 +57,7 @@ public final class SafeDoubleAliasExample implements Comparable<SafeDoubleAliasE
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static SafeDoubleAliasExample of(@Safe long value) {
-        long safeValue = SafeLong.of(value).longValue();
-        return new SafeDoubleAliasExample((double) safeValue);
+        return new SafeDoubleAliasExample((double) value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
