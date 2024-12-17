@@ -340,6 +340,58 @@ public final class ConjureExceptionHandlerTest {
                 .doesNotThrowAnyException();
     }
 
+    @Test
+    public void oldParameterSerialization() throws IOException {
+        // When:
+        record Argument(
+                String field1, Optional<Integer> maybeField2, List<String> collectionField, String nullString) {}
+        Argument arg = new Argument("foo", Optional.of(42), List.of("bar", "baz"), null);
+        exception = new ServiceException(ErrorType.CONFLICT, SafeArg.of("arg", arg));
+        HttpURLConnection connection = execute();
+
+        // Then:
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        SerializableError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+        assertThat(error.parameters())
+                .containsEntry(
+                        "arg",
+                        "Argument[field1=foo, maybeField2=Optional[42], collectionField=[bar, baz], nullString=null]");
+    }
+
+    @Test
+    public void newParameterSerialization() throws IOException {
+        // When:
+        record Argument(
+                String field1, Optional<Integer> maybeField2, List<String> collectionField, String nullString) {}
+        Argument arg = new Argument("foo", Optional.of(42), List.of("bar", "baz"), null);
+        final class CheckedException extends CheckedServiceException {
+            private CheckedException() {
+                super(ErrorType.CONFLICT, (Throwable) null, SafeArg.of("arg", arg));
+            }
+        }
+
+        exception = new CheckedException();
+        HttpURLConnection connection = execute();
+
+        // Then:
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        SerializableError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+
+        /*
+        pretty-printed JSON:
+         {
+          "field1" : "foo",
+          "maybeField2" : 42,
+          "collectionField" : [ "bar", "baz" ],
+          "nullString" : null
+         }
+        */
+        assertThat(error.parameters())
+                .containsEntry(
+                        "arg",
+                        "{\"field1\":\"foo\",\"maybeField2\":42,\"collectionField\":[\"bar\",\"baz\"],\"nullString\":null}");
+    }
+
     private static String getErrorBody(HttpURLConnection connection) {
         try (InputStream response = connection.getErrorStream()) {
             return new String(response.readAllBytes(), StandardCharsets.UTF_8);
