@@ -100,6 +100,7 @@ public final class EnumGenerator {
             Optional<ClassName> visitorBuilderClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"))
                 .addAnnotation(Safe.class)
                 .addAnnotation(Immutable.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)

@@ -118,6 +118,7 @@ public final class UnionGenerator {
                         typeDef.getTypeName().getName())
                 .addAnnotations(safety)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                .addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
                 .addMethod(generateConstructor(baseClass))
@@ -681,7 +682,8 @@ public final class UnionGenerator {
                         .addMember("property", "\"type\"")
                         .addMember("visible", "$L", true)
                         .addMember("defaultImpl", "$T.class", unknownWrapperClass)
-                        .build());
+                        .build())
+                .addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"));
         if (!memberTypes.isEmpty()) {
             List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
                     .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
@@ -736,6 +738,7 @@ public final class UnionGenerator {
                             .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
                                     .addMember("value", "$S", memberTypeDef.getFieldName())
                                     .build())
+                            .addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"))
                             .addFields(fields)
                             .addMethod(MethodSpec.constructorBuilder()
                                     .addModifiers(Modifier.PRIVATE)
@@ -824,6 +827,7 @@ public final class UnionGenerator {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(baseClass)
+                .addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"))
                 .addFields(fields)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)

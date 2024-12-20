@@ -176,6 +176,7 @@ public final class BeanGenerator {
             }
         }
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
+        typeBuilder.addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"));
 
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 

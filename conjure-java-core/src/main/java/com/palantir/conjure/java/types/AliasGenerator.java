@@ -78,6 +78,7 @@ public final class AliasGenerator {
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
                 .addAnnotations(computedSafetyAnnotations)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
+                .addAnnotation(ClassName.get("io.quarkus.runtime.annotations", "RegisterForReflection"))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
                 .addMethod(createConstructor(aliasTypeName))
