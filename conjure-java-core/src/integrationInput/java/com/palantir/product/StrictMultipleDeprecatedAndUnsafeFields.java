@@ -55,7 +55,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             Map<ResourceIdentifier, String> mappedRids,
             StrictFourFields strictFourFieldsObject) {
         validateFields(myList, bearerTokenValue, safeLongValue, optionalItem, mappedRids, strictFourFieldsObject);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.safeLongValue = safeLongValue;
         this.myInteger = myInteger;

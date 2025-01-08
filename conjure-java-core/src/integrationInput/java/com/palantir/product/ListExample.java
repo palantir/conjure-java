@@ -11,7 +11,6 @@ import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -47,13 +46,13 @@ public final class ListExample {
             List<List<String>> nestedItems) {
         validateFields(
                 items, primitiveItems, doubleItems, booleanItems, optionalItems, aliasOptionalItems, nestedItems);
-        this.items = Collections.unmodifiableList(items);
-        this.primitiveItems = Collections.unmodifiableList(primitiveItems);
-        this.doubleItems = Collections.unmodifiableList(doubleItems);
-        this.booleanItems = Collections.unmodifiableList(booleanItems);
-        this.optionalItems = Collections.unmodifiableList(optionalItems);
-        this.aliasOptionalItems = Collections.unmodifiableList(aliasOptionalItems);
-        this.nestedItems = Collections.unmodifiableList(nestedItems);
+        this.items = ConjureCollections.unmodifiableList(items);
+        this.primitiveItems = ConjureCollections.unmodifiableList(primitiveItems);
+        this.doubleItems = ConjureCollections.unmodifiableList(doubleItems);
+        this.booleanItems = ConjureCollections.unmodifiableList(booleanItems);
+        this.optionalItems = ConjureCollections.unmodifiableList(optionalItems);
+        this.aliasOptionalItems = ConjureCollections.unmodifiableList(aliasOptionalItems);
+        this.nestedItems = ConjureCollections.unmodifiableList(nestedItems);
     }
 
     @JsonProperty("items")

@@ -56,7 +56,7 @@ public final class ManyFieldExample {
         this.integer = integer;
         this.doubleValue = doubleValue;
         this.optionalItem = optionalItem;
-        this.items = Collections.unmodifiableList(items);
+        this.items = ConjureCollections.unmodifiableList(items);
         this.set = Collections.unmodifiableSet(set);
         this.map = Collections.unmodifiableMap(map);
         this.alias = alias;

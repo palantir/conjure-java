@@ -44,7 +44,7 @@ public final class StrictFourFields {
             Optional<String> optionalItem,
             Map<ResourceIdentifier, String> mappedRids) {
         validateFields(myList, bearerTokenValue, optionalItem, mappedRids);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.optionalItem = optionalItem;
         this.mappedRids = Collections.unmodifiableMap(mappedRids);

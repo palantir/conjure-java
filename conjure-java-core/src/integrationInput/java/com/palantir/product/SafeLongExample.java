@@ -11,7 +11,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +28,7 @@ public final class SafeLongExample {
     private SafeLongExample(SafeLong safeLongValue, List<SafeLong> safeLongList) {
         validateFields(safeLongValue, safeLongList);
         this.safeLongValue = safeLongValue;
-        this.safeLongList = Collections.unmodifiableList(safeLongList);
+        this.safeLongList = ConjureCollections.unmodifiableList(safeLongList);
     }
 
     @JsonProperty("safeLongValue")
