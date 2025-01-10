@@ -26,9 +26,6 @@ public final class SafeLong implements Comparable<SafeLong> {
     private static final long MIN_SAFE_VALUE = -(1L << 53) + 1;
     private static final long MAX_SAFE_VALUE = (1L << 53) - 1;
 
-    public static final SafeLong MAX_VALUE = SafeLong.of(MAX_SAFE_VALUE);
-    public static final SafeLong MIN_VALUE = SafeLong.of(MIN_SAFE_VALUE);
-
     private final long longValue;
 
     private SafeLong(long longValue) {

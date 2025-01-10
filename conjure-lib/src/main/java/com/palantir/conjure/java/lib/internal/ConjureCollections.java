@@ -195,8 +195,12 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToDoubleList(Collection<Double> addTo, double[] elementsToAdd) {
-        for (double el : elementsToAdd) {
-            addTo.add(el);
+        if (addTo instanceof ConjureDoubleList) {
+            ((ConjureDoubleList) addTo).addAll(elementsToAdd);
+        } else {
+            for (double el : elementsToAdd) {
+                addTo.add(el);
+            }
         }
     }
 
@@ -220,8 +224,12 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToIntegerList(Collection<Integer> addTo, int[] elementsToAdd) {
-        for (int el : elementsToAdd) {
-            addTo.add(el);
+        if (addTo instanceof ConjureIntegerList) {
+            ((ConjureIntegerList) addTo).addAll(elementsToAdd);
+        } else {
+            for (int el : elementsToAdd) {
+                addTo.add(el);
+            }
         }
     }
 
