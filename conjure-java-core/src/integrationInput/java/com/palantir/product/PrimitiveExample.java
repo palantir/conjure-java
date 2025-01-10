@@ -131,6 +131,12 @@ public final class PrimitiveExample {
             return this;
         }
 
+        public Builder addAllInts(@Nonnull int... ints) {
+            checkNotBuilt();
+            ConjureCollections.addAllToIntegerList(this.ints, Preconditions.checkNotNull(ints, "ints cannot be null"));
+            return this;
+        }
+
         public Builder addAllInts(@Nonnull Iterable<Integer> ints) {
             checkNotBuilt();
             ConjureCollections.addAllAndCheckNonNull(
@@ -150,6 +156,13 @@ public final class PrimitiveExample {
             checkNotBuilt();
             this.doubles = ConjureCollections.newNonNullDoubleList(
                     Preconditions.checkNotNull(doubles, "doubles cannot be null"));
+            return this;
+        }
+
+        public Builder addAllDoubles(@Nonnull double... doubles) {
+            checkNotBuilt();
+            ConjureCollections.addAllToDoubleList(
+                    this.doubles, Preconditions.checkNotNull(doubles, "doubles cannot be null"));
             return this;
         }
 
