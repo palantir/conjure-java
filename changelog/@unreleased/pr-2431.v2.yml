@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Optimize Jackson deserialization when deserializing optimized lists
+    of primitives.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2431
