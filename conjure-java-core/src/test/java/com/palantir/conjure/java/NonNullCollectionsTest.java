@@ -25,12 +25,15 @@ import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.product.CovariantListExample;
 import com.palantir.product.ListExample;
+import com.palantir.product.PrimitiveExample;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public class NonNullCollectionsTest {
-    private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper clientMapper = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper serverMapper = ObjectMappers.newServerJsonMapper();
 
     @Test
     public void throwsNpe() {
@@ -55,7 +58,7 @@ public class NonNullCollectionsTest {
                 .optionalItems(Collections.singleton(Optional.empty()))
                 .build();
 
-        assertThat(objectMapper.readValue(objectMapper.writeValueAsString(listExample), ListExample.class))
+        assertThat(clientMapper.readValue(clientMapper.writeValueAsString(listExample), ListExample.class))
                 .isEqualTo(listExample);
 
         // non-null collections will add "contentNulls = Nulls.FAIL" to the JsonSetter annotation. This will cause deser
@@ -64,12 +67,30 @@ public class NonNullCollectionsTest {
                 .addAllItems(Collections.singleton(Optional.empty()))
                 .build();
         assertThatExceptionOfType(InvalidNullException.class)
-                .isThrownBy(() -> objectMapper.readValue(
-                        objectMapper.writeValueAsString(covariantListExample), CovariantListExample.class));
+                .isThrownBy(() -> clientMapper.readValue(
+                        clientMapper.writeValueAsString(covariantListExample), CovariantListExample.class));
 
         // Similarly, setting a null in the builder also breaks
         assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> CovariantListExample.builder()
                 .addAllItems(Collections.singleton(null))
                 .build());
+    }
+
+    @Test
+    public void testSerDeOptimizationRespectsConjureEmptyCollections() throws JsonProcessingException {
+        PrimitiveExample expected = PrimitiveExample.builder().build();
+        assertThat(clientMapper.writeValueAsString(expected))
+                .describedAs("Does not serialize any empty collections, even when optimizing for primitives")
+                .isEqualTo("{}");
+    }
+
+    @Test
+    public void testSerializationRoundtrip() throws JsonProcessingException {
+        PrimitiveExample expected = PrimitiveExample.builder()
+                .ints(List.of(1, 2, 3))
+                .doubles(List.of(1.1, 2.2, 3.3))
+                .build();
+        String serialized = serverMapper.writeValueAsString(expected);
+        assertThat(expected).isEqualTo(clientMapper.readValue(serialized, PrimitiveExample.class));
     }
 }
