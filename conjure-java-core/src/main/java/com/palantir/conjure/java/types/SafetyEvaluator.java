@@ -324,10 +324,6 @@ public final class SafetyEvaluator {
         return builder.buildOrThrow();
     }
 
-    public static Optional<LogSafety> combine(Optional<LogSafety> one, Optional<LogSafety> two) {
-        return Preconditions.checkNotNull(COMBINE_TABLE.get(one, two), "Missing an entry in the combine table");
-    }
-
     private static Optional<LogSafety> computeCombine(Optional<LogSafety> one, Optional<LogSafety> two) {
         if (one.isPresent() && two.isPresent()) {
             return Optional.of(combine(one.get(), two.get()));
@@ -350,6 +346,10 @@ public final class SafetyEvaluator {
             return LogSafety.UNSAFE;
         }
         return one;
+    }
+
+    public static Optional<LogSafety> combine(Optional<LogSafety> one, Optional<LogSafety> two) {
+        return Preconditions.checkNotNull(COMBINE_TABLE.get(one, two), "Missing an entry in the combine table");
     }
 
     public static boolean allows(Optional<LogSafety> required, Optional<LogSafety> given) {
