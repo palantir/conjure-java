@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: '[Fix] Restore Mistakenly Removed ''MAX_VALUE'' and ''MIN_VALUE'''
+  links:
+  - https://github.com/palantir/conjure-java/pull/2434
