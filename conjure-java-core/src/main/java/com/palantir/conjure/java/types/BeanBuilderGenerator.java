@@ -601,11 +601,12 @@ public final class BeanBuilderGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             boolean override,
             boolean strict) {
-        Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size());
+        // Each field tends to fan out into many setters
+        Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size() * 5);
         for (EnrichedField field : fields) {
             setters.add(createSetter(field, typesMap, override));
             if (!strict || field.conjureDef().getType().accept(TypeVisitor.IS_OPTIONAL)) {
-                setters.addAll(createAuxiliarySetters(field, override));
+                setters.addAll(createAuxiliarySetters(field, typesMap, override));
             }
         }
         return setters;
@@ -616,6 +617,38 @@ public final class BeanBuilderGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             boolean override) {
         FieldSpec field = enriched.poetSpec();
+        Type type = enriched.conjureDef().getType();
+
+        boolean shouldClearFirst = true;
+        MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
+                .addParameter(Parameters.nonnullParameter(
+                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                field.type(),
+                                type,
+                                typeMapper,
+                                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
+                        field.name()))
+                .addCode(verifyNotBuilt())
+                .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
+
+        if (enriched.isPrimitive()) {
+            setterBuilder.addCode("this.$L = true;", deriveFieldInitializedName(enriched));
+        }
+
+        setterBuilder.addStatement("return this").addAnnotations(ConjureAnnotations.override(override));
+
+        // Certain type combinations and feature flags may produce highly optimized code paths.
+        // These optimized paths include deserialization, so if it isn't enabled we should add the
+        // simple deserializer.
+        if (!isPrimitiveOptimized(type)) {
+            setterBuilder.addAnnotation(createJacksonSetterAnnotation(enriched, typesMap));
+        }
+
+        return setterBuilder.build();
+    }
+
+    private AnnotationSpec createJacksonSetterAnnotation(
+            EnrichedField enriched, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         Type type = enriched.conjureDef().getType();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", enriched.fieldName().get());
@@ -634,28 +667,7 @@ public final class BeanBuilderGenerator {
                 annotationBuilder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
             }
         }
-
-        boolean shouldClearFirst = true;
-        MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
-                .addParameter(Parameters.nonnullParameter(
-                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                field.type(),
-                                type,
-                                typeMapper,
-                                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
-                        field.name()))
-                .addCode(verifyNotBuilt())
-                .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
-
-        if (enriched.isPrimitive()) {
-            setterBuilder.addCode("this.$L = true;", deriveFieldInitializedName(enriched));
-        }
-
-        return setterBuilder
-                .addStatement("return this")
-                .addAnnotations(ConjureAnnotations.override(override))
-                .addAnnotation(annotationBuilder.build())
-                .build();
+        return annotationBuilder.build();
     }
 
     private MethodSpec createCollectionSetter(String prefix, EnrichedField enriched, boolean override) {
@@ -671,7 +683,10 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
-    private MethodSpec createPrimitiveCollectionSetter(EnrichedField enriched, boolean override) {
+    private MethodSpec createPrimitiveCollectionSetter(
+            EnrichedField enriched,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            boolean override) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
 
@@ -679,6 +694,8 @@ public final class BeanBuilderGenerator {
         return BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
                         enriched, typeMapper, builderClass, safetyEvaluator)
                 .addAnnotations(ConjureAnnotations.override(override))
+                // Unlike the other setter, when this setter is present it is always responsible for deserialization
+                .addAnnotation(createJacksonSetterAnnotation(enriched, typesMap))
                 .addCode(verifyNotBuilt())
                 .addCode(CodeBlocks.statement(
                         "$1T.addAllTo$2L(this.$3N, $4L)",
@@ -783,7 +800,10 @@ public final class BeanBuilderGenerator {
         return type.accept(TypeVisitor.IS_BINARY) && !options.useImmutableBytes();
     }
 
-    private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
+    private List<MethodSpec> createAuxiliarySetters(
+            EnrichedField enriched,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            boolean override) {
         Type type = enriched.conjureDef().getType();
         Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
@@ -793,7 +813,7 @@ public final class BeanBuilderGenerator {
             CollectionType collectionType = getCollectionType(type);
             if (collectionType.getConjureCollectionType().isPrimitiveCollection()
                     && collectionType.useNonNullFactory()) {
-                builder.add(createPrimitiveCollectionSetter(enriched, override));
+                builder.add(createPrimitiveCollectionSetter(enriched, typesMap, override));
             }
 
             builder.add(
@@ -1062,11 +1082,11 @@ public final class BeanBuilderGenerator {
             this.nullHandlingMode = nullHandlingMode;
         }
 
-        public ConjureCollectionType getConjureCollectionType() {
+        ConjureCollectionType getConjureCollectionType() {
             return conjureCollectionType;
         }
 
-        public boolean useNonNullFactory() {
+        boolean useNonNullFactory() {
             return nullHandlingMode.shouldUseNonNullFactory();
         }
     }
@@ -1097,13 +1117,19 @@ public final class BeanBuilderGenerator {
             this.primitiveCollection = primitiveCollection;
         }
 
-        public String getCollectionName() {
+        String getCollectionName() {
             return collectionName;
         }
 
-        public Boolean isPrimitiveCollection() {
+        Boolean isPrimitiveCollection() {
             return primitiveCollection;
         }
+    }
+
+    private boolean isPrimitiveOptimized(Type type) {
+        return type.accept(TypeVisitor.IS_LIST)
+                // Check above guards the getCollectionType call below
+                && getCollectionType(type).getConjureCollectionType().isPrimitiveCollection();
     }
 
     private enum ConjureCollectionNullHandlingMode {
@@ -1116,7 +1142,7 @@ public final class BeanBuilderGenerator {
             this.useNonNullFactory = useNonNullFactory;
         }
 
-        public boolean shouldUseNonNullFactory() {
+        boolean shouldUseNonNullFactory() {
             return useNonNullFactory;
         }
     }

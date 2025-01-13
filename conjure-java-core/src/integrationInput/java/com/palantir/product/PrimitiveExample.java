@@ -123,7 +123,6 @@ public final class PrimitiveExample {
             return this;
         }
 
-        @JsonSetter(value = "ints", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder ints(@Nonnull Iterable<Integer> ints) {
             checkNotBuilt();
             this.ints =
@@ -131,6 +130,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @JsonSetter(value = "ints", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder addAllInts(@Nonnull int... ints) {
             checkNotBuilt();
             ConjureCollections.addAllToIntegerList(this.ints, Preconditions.checkNotNull(ints, "ints cannot be null"));
@@ -151,7 +151,6 @@ public final class PrimitiveExample {
             return this;
         }
 
-        @JsonSetter(value = "doubles", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubles(@Nonnull Iterable<Double> doubles) {
             checkNotBuilt();
             this.doubles = ConjureCollections.newNonNullDoubleList(
@@ -159,6 +158,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @JsonSetter(value = "doubles", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder addAllDoubles(@Nonnull double... doubles) {
             checkNotBuilt();
             ConjureCollections.addAllToDoubleList(
