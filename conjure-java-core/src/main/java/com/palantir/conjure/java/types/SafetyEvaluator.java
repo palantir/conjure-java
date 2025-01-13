@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.types;
 
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -37,17 +39,23 @@ import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.logsafe.Preconditions;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class SafetyEvaluator {
+
+    // Make a constant to avoid allocating a new Optional every time we process a type definition for safety
+    private static final Optional<LogSafety> OPTIONAL_OF_SAFE = Optional.of(LogSafety.SAFE);
+
     /**
      * Enums contain an unknown variant, however we assume that the unknown variant is only used
      * for past and future values which are known at compile-time in that version.
      */
-    public static final Optional<LogSafety> ENUM_SAFETY = Optional.of(LogSafety.SAFE);
+    public static final Optional<LogSafety> ENUM_SAFETY = OPTIONAL_OF_SAFE;
     /**
      * Unknown variant should be considered unsafe because we don't know what kind of data it may contain,
      * however this makes rollout much more challenging, so we will ratchet unknown safety once we have
@@ -137,7 +145,7 @@ public final class SafetyEvaluator {
         @Override
         public Optional<LogSafety> visitObject(ObjectDefinition value) {
             return with(value.getTypeName(), () -> {
-                Optional<LogSafety> safety = Optional.of(LogSafety.SAFE);
+                Optional<LogSafety> safety = OPTIONAL_OF_SAFE;
                 for (FieldDefinition field : value.getFields()) {
                     safety = combine(safety, getSafety(field.getType(), field.getSafety()));
                 }
@@ -164,7 +172,7 @@ public final class SafetyEvaluator {
         private Optional<LogSafety> with(TypeName typeName, Supplier<Optional<LogSafety>> task) {
             if (!inProgress.add(typeName)) {
                 // Given recursive evaluation, we return the least restrictive type: SAFE.
-                return Optional.of(LogSafety.SAFE);
+                return OPTIONAL_OF_SAFE;
             }
             Optional<LogSafety> result = task.get();
             if (!inProgress.remove(typeName)) {
@@ -298,7 +306,25 @@ public final class SafetyEvaluator {
         }
     }
 
-    public static Optional<LogSafety> combine(Optional<LogSafety> one, Optional<LogSafety> two) {
+    private static final Table<Optional<LogSafety>, Optional<LogSafety>, Optional<LogSafety>> COMBINE_TABLE =
+            computeCombineTable();
+
+    private static Table<Optional<LogSafety>, Optional<LogSafety>, Optional<LogSafety>> computeCombineTable() {
+        List<Optional<LogSafety>> allValues = Stream.concat(
+                        Stream.of(Optional.<LogSafety>empty()),
+                        LogSafety.values().stream().map(Optional::of))
+                .toList();
+        ImmutableTable.Builder<Optional<LogSafety>, Optional<LogSafety>, Optional<LogSafety>> builder =
+                ImmutableTable.builder();
+        for (Optional<LogSafety> left : allValues) {
+            for (Optional<LogSafety> right : allValues) {
+                builder.put(left, right, computeCombine(left, right));
+            }
+        }
+        return builder.buildOrThrow();
+    }
+
+    private static Optional<LogSafety> computeCombine(Optional<LogSafety> one, Optional<LogSafety> two) {
         if (one.isPresent() && two.isPresent()) {
             return Optional.of(combine(one.get(), two.get()));
         }
@@ -307,7 +333,7 @@ public final class SafetyEvaluator {
                 .filter(value -> !LogSafety.SAFE.equals(value));
     }
 
-    public static LogSafety combine(LogSafety one, LogSafety two) {
+    private static LogSafety combine(LogSafety one, LogSafety two) {
         LogSafety.Value first = one.get();
         LogSafety.Value second = two.get();
         if (first == LogSafety.Value.UNKNOWN || second == LogSafety.Value.UNKNOWN) {
@@ -320,6 +346,10 @@ public final class SafetyEvaluator {
             return LogSafety.UNSAFE;
         }
         return one;
+    }
+
+    public static Optional<LogSafety> combine(Optional<LogSafety> one, Optional<LogSafety> two) {
+        return Preconditions.checkNotNull(COMBINE_TABLE.get(one, two), "Missing an entry in the combine table");
     }
 
     public static boolean allows(Optional<LogSafety> required, Optional<LogSafety> given) {
