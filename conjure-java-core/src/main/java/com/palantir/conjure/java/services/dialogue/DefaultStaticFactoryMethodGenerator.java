@@ -116,7 +116,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
         String javadoc = methodType.switchBy(
                 "Creates a synchronous/blocking client for a $L service.",
-                "Creates an " + "asynchronous/non-blocking client for a $L service.");
+                "Creates an asynchronous/non-blocking client for a $L service.");
         MethodSpec method = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(javadoc, def.getServiceName().getName())
