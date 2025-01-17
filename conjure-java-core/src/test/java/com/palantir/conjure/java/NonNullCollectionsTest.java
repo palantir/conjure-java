@@ -26,6 +26,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.product.CovariantListExample;
 import com.palantir.product.ListExample;
 import com.palantir.product.PrimitiveExample;
+import com.palantir.product.PrimitiveStrictExample;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +79,10 @@ public class NonNullCollectionsTest {
 
     @Test
     public void testSerDeOptimizationRespectsConjureEmptyCollections() throws JsonProcessingException {
-        PrimitiveExample expected = PrimitiveExample.builder().build();
+        PrimitiveStrictExample expected = PrimitiveStrictExample.builder()
+                .ints(Collections.emptyList())
+                .doubles(Collections.emptyList())
+                .build();
         assertThat(clientMapper.writeValueAsString(expected))
                 .describedAs("Does not serialize any empty collections, even when optimizing for primitives")
                 .isEqualTo("{}");
@@ -87,10 +91,23 @@ public class NonNullCollectionsTest {
     @Test
     public void testSerializationRoundtrip() throws JsonProcessingException {
         PrimitiveExample expected = PrimitiveExample.builder()
+                .field(1)
+                .addAllInts(1, 2, 3)
+                .addAllDoubles(1.1, 2.2, 3.3)
+                .build();
+        String serialized = serverMapper.writeValueAsString(expected);
+        assertThat(expected).isEqualTo(clientMapper.readValue(serialized, PrimitiveExample.class));
+    }
+
+    // We had an issue where the primitive optimization removed the JsonSetter from the final builder
+    // which would fail this test
+    @Test
+    public void testStrictStagedDeserializationRoundtrips() throws JsonProcessingException {
+        PrimitiveStrictExample expected = PrimitiveStrictExample.builder()
                 .ints(List.of(1, 2, 3))
                 .doubles(List.of(1.1, 2.2, 3.3))
                 .build();
         String serialized = serverMapper.writeValueAsString(expected);
-        assertThat(expected).isEqualTo(clientMapper.readValue(serialized, PrimitiveExample.class));
+        assertThat(expected).isEqualTo(clientMapper.readValue(serialized, PrimitiveStrictExample.class));
     }
 }

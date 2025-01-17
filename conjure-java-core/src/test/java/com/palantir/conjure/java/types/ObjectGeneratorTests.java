@@ -177,6 +177,23 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
                                 .excludeEmptyCollections(true)
                                 .nonNullCollections(true)
+                                .useStagedBuilders(true)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
+    public void testObjectGenerator_primitiveCollectionsStrictStaged() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/primitive-collections-strict.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .excludeEmptyCollections(true)
+                                .nonNullCollections(true)
+                                .useStrictStagedBuilders(true)
                                 .build())))
                 .emit(def, tempDir);
 
