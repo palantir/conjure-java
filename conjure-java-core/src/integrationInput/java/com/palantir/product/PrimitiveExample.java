@@ -17,19 +17,27 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@JsonDeserialize(builder = PrimitiveExample.Builder.class)
+@JsonDeserialize(builder = PrimitiveExample.DefaultBuilder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class PrimitiveExample {
+    private final int field;
+
     private final List<Integer> ints;
 
     private final List<Double> doubles;
 
     private int memoizedHashCode;
 
-    private PrimitiveExample(List<Integer> ints, List<Double> doubles) {
+    private PrimitiveExample(int field, List<Integer> ints, List<Double> doubles) {
         validateFields(ints, doubles);
+        this.field = field;
         this.ints = ConjureCollections.unmodifiableList(ints);
         this.doubles = ConjureCollections.unmodifiableList(doubles);
+    }
+
+    @JsonProperty("field")
+    public int getField() {
+        return this.field;
     }
 
     @JsonProperty("ints")
@@ -55,7 +63,7 @@ public final class PrimitiveExample {
                 && this.memoizedHashCode != other.memoizedHashCode) {
             return false;
         }
-        return this.ints.equals(other.ints) && this.doubles.equals(other.doubles);
+        return this.field == other.field && this.ints.equals(other.ints) && this.doubles.equals(other.doubles);
     }
 
     @Override
@@ -63,6 +71,7 @@ public final class PrimitiveExample {
         int result = memoizedHashCode;
         if (result == 0) {
             int hash = 1;
+            hash = 31 * hash + this.field;
             hash = 31 * hash + this.ints.hashCode();
             hash = 31 * hash + this.doubles.hashCode();
             result = hash;
@@ -73,11 +82,11 @@ public final class PrimitiveExample {
 
     @Override
     public String toString() {
-        return "PrimitiveExample{ints: " + ints + ", doubles: " + doubles + '}';
+        return "PrimitiveExample{field: " + field + ", ints: " + ints + ", doubles: " + doubles + '}';
     }
 
-    public static PrimitiveExample of(List<Integer> ints, List<Double> doubles) {
-        return builder().ints(ints).doubles(doubles).build();
+    public static PrimitiveExample of(int field, List<Integer> ints, List<Double> doubles) {
+        return builder().field(field).ints(ints).doubles(doubles).build();
     }
 
     private static void validateFields(List<Integer> ints, List<Double> doubles) {
@@ -101,28 +110,107 @@ public final class PrimitiveExample {
         return missingFields;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static FieldStageBuilder builder() {
+        return new DefaultBuilder();
+    }
+
+    public interface FieldStageBuilder {
+        Completed_StageBuilder field(@Nonnull int field);
+
+        Builder from(PrimitiveExample other);
+    }
+
+    public interface Completed_StageBuilder {
+        @CheckReturnValue
+        PrimitiveExample build();
+
+        Completed_StageBuilder ints(@Nonnull Iterable<Integer> ints);
+
+        Completed_StageBuilder addAllInts(@Nonnull Iterable<Integer> ints);
+
+        Completed_StageBuilder addAllInts(@Nonnull int... ints);
+
+        Completed_StageBuilder ints(int ints);
+
+        Completed_StageBuilder doubles(@Nonnull Iterable<Double> doubles);
+
+        Completed_StageBuilder addAllDoubles(@Nonnull Iterable<Double> doubles);
+
+        Completed_StageBuilder addAllDoubles(@Nonnull double... doubles);
+
+        Completed_StageBuilder doubles(double doubles);
+    }
+
+    public interface Builder extends FieldStageBuilder, Completed_StageBuilder {
+        @Override
+        Builder field(@Nonnull int field);
+
+        @Override
+        Builder from(PrimitiveExample other);
+
+        @CheckReturnValue
+        @Override
+        PrimitiveExample build();
+
+        @Override
+        Builder ints(@Nonnull Iterable<Integer> ints);
+
+        @Override
+        Builder addAllInts(@Nonnull Iterable<Integer> ints);
+
+        @Override
+        Builder addAllInts(@Nonnull int... ints);
+
+        @Override
+        Builder ints(int ints);
+
+        @Override
+        Builder doubles(@Nonnull Iterable<Double> doubles);
+
+        @Override
+        Builder addAllDoubles(@Nonnull Iterable<Double> doubles);
+
+        @Override
+        Builder addAllDoubles(@Nonnull double... doubles);
+
+        @Override
+        Builder doubles(double doubles);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder {
+    static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
+
+        private int field;
 
         private List<Integer> ints = ConjureCollections.newNonNullIntegerList();
 
         private List<Double> doubles = ConjureCollections.newNonNullDoubleList();
 
-        private Builder() {}
+        private boolean _fieldInitialized = false;
 
+        private DefaultBuilder() {}
+
+        @Override
         public Builder from(PrimitiveExample other) {
             checkNotBuilt();
+            field(other.getField());
             ints(other.getInts());
             doubles(other.getDoubles());
             return this;
         }
 
+        @Override
+        @JsonSetter("field")
+        public Builder field(int field) {
+            checkNotBuilt();
+            this.field = field;
+            this._fieldInitialized = true;
+            return this;
+        }
+
+        @Override
         public Builder ints(@Nonnull Iterable<Integer> ints) {
             checkNotBuilt();
             this.ints =
@@ -130,6 +218,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         @JsonSetter(value = "ints", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder addAllInts(@Nonnull int... ints) {
             checkNotBuilt();
@@ -137,6 +226,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         public Builder addAllInts(@Nonnull Iterable<Integer> ints) {
             checkNotBuilt();
             ConjureCollections.addAllAndCheckNonNull(
@@ -144,6 +234,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         public Builder ints(int ints) {
             checkNotBuilt();
             Preconditions.checkNotNull(ints, "ints cannot be null");
@@ -151,6 +242,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         public Builder doubles(@Nonnull Iterable<Double> doubles) {
             checkNotBuilt();
             this.doubles = ConjureCollections.newNonNullDoubleList(
@@ -158,6 +250,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         @JsonSetter(value = "doubles", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder addAllDoubles(@Nonnull double... doubles) {
             checkNotBuilt();
@@ -166,6 +259,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         public Builder addAllDoubles(@Nonnull Iterable<Double> doubles) {
             checkNotBuilt();
             ConjureCollections.addAllAndCheckNonNull(
@@ -173,6 +267,7 @@ public final class PrimitiveExample {
             return this;
         }
 
+        @Override
         public Builder doubles(double doubles) {
             checkNotBuilt();
             Preconditions.checkNotNull(doubles, "doubles cannot be null");
@@ -180,11 +275,33 @@ public final class PrimitiveExample {
             return this;
         }
 
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
+            List<String> missingFields = null;
+            missingFields = addFieldIfMissing(missingFields, _fieldInitialized, "field");
+            if (missingFields != null) {
+                throw new SafeIllegalArgumentException(
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+            }
+        }
+
+        private static List<String> addFieldIfMissing(List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(1);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
+        @Override
         @CheckReturnValue
         public PrimitiveExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new PrimitiveExample(ints, doubles);
+            validatePrimitiveFieldsHaveBeenInitialized();
+            return new PrimitiveExample(field, ints, doubles);
         }
 
         private void checkNotBuilt() {
