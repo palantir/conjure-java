@@ -197,7 +197,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         CodeBlock initializer = CodeBlock.of(
                 "$L.bodySerDe().$L",
                 StaticFactoryMethodGenerator.RUNTIME,
-                type.isPresent() ? realDeserializerWithArgs : voidDeserializer);
+                // TODO(pm): make this nicer.
+                type.isPresent() || options.generateDialogueEndpointErrorResultTypes()
+                        ? realDeserializerWithArgs
+                        : voidDeserializer);
 
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -292,7 +295,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         methodBuilder.addCode(request);
-        methodBuilder.addCode(methodType.switchBy(def.getReturns().isPresent() ? "return " : "", "return "));
+        methodBuilder.addCode(methodType.switchBy(
+                // TODO(pm): make this nicer.
+                def.getReturns().isPresent() || options.generateDialogueEndpointErrorResultTypes() ? "return " : "",
+                "return "));
         methodBuilder.addCode(execute);
 
         return methodBuilder.build();

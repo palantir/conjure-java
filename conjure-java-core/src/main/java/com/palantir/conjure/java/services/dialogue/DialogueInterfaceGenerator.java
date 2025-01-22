@@ -79,7 +79,6 @@ public final class DialogueInterfaceGenerator {
     public JavaFile generateBlocking(
             ServiceDefinition def,
             StaticFactoryMethodGenerator methodGenerator,
-            // TODO(pm): use this flag.
             boolean generateDialogueEndpointErrorResultTypes) {
         return generate(
                 def,
@@ -191,19 +190,8 @@ public final class DialogueInterfaceGenerator {
                 packageName,
                 className.simpleName(),
                 ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
-        // Create the success record
-        TypeSpec successRecord = TypeSpec.recordBuilder(
-                        ClassName.get(packageName, responseTypeName.simpleName(), "Success"))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .recordConstructor(MethodSpec.compactConstructorBuilder()
-                        .addParameter(ParameterSpec.builder(returnTypeMapper.apply(endpointDef.getReturns()), "value")
-                                .build())
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("$T.checkArgumentNotNull(value, \"value cannot be null\")", Preconditions.class)
-                        .build())
-                .addSuperinterface(responseTypeName)
-                .build();
-
+        TypeSpec successRecord =
+                createSuccessRecord(packageName, className, responseTypeName, endpointDef, returnTypeMapper);
         // Create a record for each of the endpoint's errors
         List<TypeSpec> errorTypes = new ArrayList<>();
         for (EndpointError endpointError : endpointDef.getErrors()) {
@@ -244,6 +232,40 @@ public final class DialogueInterfaceGenerator {
                 .addType(successRecord)
                 .addTypes(errorTypes)
                 .build();
+    }
+
+    private TypeSpec createSuccessRecord(
+            String packageName,
+            ClassName className,
+            ClassName responseTypeName,
+            EndpointDefinition endpointDef,
+            Function<Optional<Type>, TypeName> returnTypeMapper) {
+        ClassName successTypeClassName =
+                ClassName.get(packageName, className.simpleName(), responseTypeName.simpleName(), "Success");
+        TypeSpec.Builder successRecordBuilder = TypeSpec.recordBuilder(successTypeClassName);
+        MethodSpec.Builder successCtorBuilder =
+                MethodSpec.compactConstructorBuilder().addModifiers(Modifier.PUBLIC);
+        TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
+        if (!returnType.equals(TypeName.VOID)) {
+            successCtorBuilder
+                    .addParameter(ParameterSpec.builder(returnType, "value").build())
+                    .addStatement("$T.checkArgumentNotNull(value, \"value cannot be null\")", Preconditions.class);
+        }
+
+        successRecordBuilder
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .recordConstructor(successCtorBuilder.build())
+                .addSuperinterface(responseTypeName);
+
+        if (returnType.equals(TypeName.VOID)) {
+            successRecordBuilder.addMethod(MethodSpec.methodBuilder("create")
+                    .addAnnotation(JsonCreator.class)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(successTypeClassName)
+                    .addStatement("return new $T()", successTypeClassName)
+                    .build());
+        }
+        return successRecordBuilder.build();
     }
 
     private MethodSpec errorTypeConstructor(ClassName parametersClassName, ClassName errorTypesClassName) {

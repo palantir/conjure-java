@@ -42,3 +42,7 @@ services:
             docs: Something was not found.
           - importedErrors.DifferentNamespace
           - importedErrors.DifferentPackage
+      testEmptyBody:
+        http: GET /empty
+        errors:
+          - InvalidArgument
