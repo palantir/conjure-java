@@ -16,7 +16,11 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 
 public final class ConjureErrors {
     private ConjureErrors() {}
@@ -54,6 +58,26 @@ public final class ConjureErrors {
 
         public final T getParams() {
             return params;
+        }
+    }
+
+    public abstract static class NullToDefaultDeserializer<T> extends JsonDeserializer<T> {
+        public abstract T create();
+
+        /**
+         * If a non-null value is deserialized as `null`, throw an exception.
+         */
+        @Override
+        public T deserialize(JsonParser _parser, DeserializationContext _ctxt) {
+            throw new SafeIllegalStateException("Attempted to deserialize non-null value as null");
+        }
+
+        /**
+         * When `null` is deserialized, a new object of type `T` is created.
+         */
+        @Override
+        public T getNullValue(DeserializationContext _ctxt) {
+            return create();
         }
     }
 }

@@ -99,5 +99,35 @@ enum DialogueErrorEndpoints implements Endpoint {
         public String version() {
             return "1.2.3";
         }
+    },
+
+    testEmptyBody {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("base").fixed("empty").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "ErrorService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testEmptyBody";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
     }
 }

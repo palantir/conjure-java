@@ -37,6 +37,10 @@ public interface ErrorServiceBlocking {
     @ClientEndpoint(method = "GET", path = "/base/multiple")
     TestMultipleErrorsAndPackagesResponse testMultipleErrorsAndPackages(AuthHeader authHeader);
 
+    /** @apiNote {@code GET /base/empty} */
+    @ClientEndpoint(method = "GET", path = "/base/empty")
+    TestEmptyBodyResponse testEmptyBody(AuthHeader authHeader);
+
     /** Creates a synchronous/blocking client for a ErrorService service. */
     static ErrorServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ErrorServiceBlocking() {
@@ -89,6 +93,18 @@ public interface ErrorServiceBlocking {
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.DifferentPackage>() {})
                                     .build());
 
+            private final EndpointChannel testEmptyBodyChannel =
+                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testEmptyBody);
+
+            private final Deserializer<TestEmptyBodyResponse> testEmptyBodyDeserializer = _runtime.bodySerDe()
+                    .deserializer(DeserializerArgs.<TestEmptyBodyResponse>builder()
+                            .baseType(new TypeMarker<>() {})
+                            .success(new TypeMarker<TestEmptyBodyResponse.Success>() {})
+                            .error(
+                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    new TypeMarker<TestEmptyBodyResponse.InvalidArgument>() {})
+                            .build());
+
             @Override
             public TestBasicErrorResponse testBasicError(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
@@ -114,6 +130,14 @@ public interface ErrorServiceBlocking {
                                 testMultipleErrorsAndPackagesChannel,
                                 _request.build(),
                                 testMultipleErrorsAndPackagesDeserializer);
+            }
+
+            @Override
+            public TestEmptyBodyResponse testEmptyBody(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
             }
 
             @Override
@@ -248,6 +272,27 @@ public interface ErrorServiceBlocking {
                         com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
                         errorInstanceId,
                         parameters);
+            }
+        }
+    }
+
+    sealed interface TestEmptyBodyResponse
+            permits TestEmptyBodyResponse.Success, TestEmptyBodyResponse.InvalidArgument {
+        record Success() implements TestEmptyBodyResponse {
+            @JsonCreator
+            public static Success create() {
+                return new Success();
+            }
+        }
+
+        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+                implements TestEmptyBodyResponse {
+            @JsonCreator
+            InvalidArgument(
+                    @JsonProperty("errorCode") String errorCode,
+                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
+                super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
             }
         }
     }
