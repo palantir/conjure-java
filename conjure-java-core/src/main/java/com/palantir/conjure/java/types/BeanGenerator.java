@@ -130,8 +130,8 @@ public final class BeanGenerator {
                     .addAnnotations(safety)
                     .build());
 
-            // If the `excludeStaticFactoryMethods` is set, do not create a static factory method, unless the object
-            // does not have any fields.
+            // If the `excludeStaticFactoryMethods` is set, do not create a static factory method. The object is
+            // guaranteed to have at least one field here.
             if (!options.excludeStaticFactoryMethodsForObjectsWithAtLeastOneField()
                     && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
                 typeBuilder.addMethod(createStaticFactoryMethod(
@@ -376,10 +376,6 @@ public final class BeanGenerator {
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
             boolean useNonStrictStagedBuilders) {
-        if (fields.isEmpty()) {
-            return createStaticFactoryMethodForEmptyBean(objectClass); // TODO(kkak): Return
-        }
-
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -411,7 +407,7 @@ public final class BeanGenerator {
         return MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass)
-                .addAnnotation(ConjureAnnotations.propertiesJsonCreator()) // TODO(kkak): DelegatingCreator
+                .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                 .addCode("return $L;", SINGLETON_INSTANCE_NAME)
                 .build();
     }
