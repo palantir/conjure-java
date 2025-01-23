@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
@@ -14,8 +15,6 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.AuthHeader;
-import java.lang.Override;
-import java.lang.String;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
@@ -32,26 +31,25 @@ public interface ErrorServiceAsync {
     /** @apiNote {@code GET /base/multiple} */
     @ClientEndpoint(method = "GET", path = "/base/multiple")
     ListenableFuture<String> testMultipleErrorsAndPackages(AuthHeader authHeader);
-
     /** Creates an asynchronous/non-blocking client for a ErrorService service. */
     static ErrorServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ErrorServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final EndpointChannel testBasicErrorChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBasicError);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testBasicError);
 
             private final Deserializer<String> testBasicErrorDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel testImportedErrorChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testImportedError);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testImportedError);
 
             private final Deserializer<String> testImportedErrorDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel testMultipleErrorsAndPackagesChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testMultipleErrorsAndPackages);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testMultipleErrorsAndPackages);
 
             private final Deserializer<String> testMultipleErrorsAndPackagesDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});

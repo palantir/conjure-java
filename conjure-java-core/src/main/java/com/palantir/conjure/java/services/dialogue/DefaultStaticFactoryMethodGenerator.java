@@ -17,10 +17,10 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
-import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -82,21 +82,18 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
-    private final DeclaredEndpointErrors declaredEndpointErrors;
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
             TypeNameResolver typeNameResolver,
             ParameterTypeMapper parameterTypes,
             ReturnTypeMapper returnTypes,
-            StaticFactoryMethodType methodType,
-            DeclaredEndpointErrors declaredEndpointErrors) {
+            StaticFactoryMethodType methodType) {
         this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
         this.methodType = methodType;
-        this.declaredEndpointErrors = declaredEndpointErrors;
     }
 
     @Override
@@ -187,20 +184,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         ParameterizedTypeName deserializerType =
                 ParameterizedTypeName.get(ClassName.get(Deserializer.class), responseType);
 
-        // CodeBlock realDeserializer = CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className);
-        CodeBlock realDeserializerWithArgs = CodeBlock.builder()
-                .add("deserializer(")
-                .add(constructDeserializerArgsForEndpoint(endpointDef, responseType))
-                .add(")")
-                .build();
-        CodeBlock voidDeserializer = CodeBlock.of("emptyBodyDeserializer()");
         CodeBlock initializer = CodeBlock.of(
                 "$L.bodySerDe().$L",
                 StaticFactoryMethodGenerator.RUNTIME,
-                // TODO(pm): make this nicer.
-                type.isPresent() || options.generateDialogueEndpointErrorResultTypes()
-                        ? realDeserializerWithArgs
-                        : voidDeserializer);
+                options.generateDialogueEndpointErrorResultTypes()
+                        ? constructDeserializerWithEndpointErrors(endpointDef, responseType)
+                        : constructDeserializer(type, className));
 
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -208,7 +197,13 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build());
     }
 
-    private CodeBlock constructDeserializerArgsForEndpoint(EndpointDefinition endpointDef, TypeName responseType) {
+    private CodeBlock constructDeserializer(Optional<Type> type, TypeName className) {
+        return type.isPresent()
+                ? CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className)
+                : CodeBlock.of("emptyBodyDeserializer()");
+    }
+
+    private CodeBlock constructDeserializerWithEndpointErrors(EndpointDefinition endpointDef, TypeName responseType) {
         CodeBlock.Builder retBuilder = CodeBlock.builder()
                 .add("$T.<$T>builder()", DeserializerArgs.class, responseType)
                 .add(".baseType(new $T<>() {})", TypeMarker.class)
@@ -226,7 +221,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     ".error($T.name(), new $T<$T.$L>() {})", errorClass, TypeMarker.class, responseType, errorName);
         }
         retBuilder.add(".build()");
-        return retBuilder.build();
+        return CodeBlock.builder()
+                .add("deserializer(")
+                .add(retBuilder.build())
+                .add(")")
+                .build();
     }
 
     private static boolean isBinaryOrOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
@@ -256,14 +255,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     .build());
         }
 
-        // TODO(pm): handle the unflagged case. Handle the async case.
-        TypeName returnType = ClassName.get(
-                className.packageName(),
-                className.simpleName(),
-                ErrorGenerationUtils.responseTypeName(def.getEndpointName()));
-        //        TypeName returnType =
-        //                methodType.switchBy(returnTypes.baseType(def.getReturns()),
-        // returnTypes.async(def.getReturns()));
+        TypeName returnType = getReturnType(def, className);
         methodBuilder.returns(returnType);
 
         CodeBlock.Builder requestParams = CodeBlock.builder();
@@ -296,12 +288,28 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
         methodBuilder.addCode(request);
         methodBuilder.addCode(methodType.switchBy(
-                // TODO(pm): make this nicer.
-                def.getReturns().isPresent() || options.generateDialogueEndpointErrorResultTypes() ? "return " : "",
+                def.getReturns().isPresent()
+                                || (options.generateDialogueEndpointErrorResultTypes()
+                                        && !def.getErrors().isEmpty())
+                        ? "return "
+                        : "",
                 "return "));
         methodBuilder.addCode(execute);
 
         return methodBuilder.build();
+    }
+
+    private TypeName getReturnType(EndpointDefinition def, ClassName className) {
+        if (options.generateDialogueEndpointErrorResultTypes()
+                && !def.getErrors().isEmpty()) {
+            ClassName returnType = ClassName.get(
+                    className.packageName(),
+                    className.simpleName(),
+                    ErrorGenerationUtils.responseTypeName(def.getEndpointName()));
+            return methodType.switchBy(
+                    returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType));
+        }
+        return methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
     }
 
     private CodeBlock generateParam(String endpointName, ArgumentDefinition param) {
