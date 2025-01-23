@@ -37,12 +37,14 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
+import com.palantir.product.ListAlias;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -53,6 +55,15 @@ public final class ObjectGeneratorTests {
 
     @TempDir
     public File tempDir;
+
+    @Test
+    public void testListWithNull() {
+        List<String> arr = new ArrayList<>();
+        arr.add("");
+        arr.add(null);
+        ListAlias listAlias = ListAlias.of(arr);
+        assertThat(listAlias.get()).containsExactly("", null);
+    }
 
     @Test
     public void testObjectGenerator_allExamples() throws IOException {
@@ -68,7 +79,6 @@ public final class ObjectGeneratorTests {
                                 .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(def, tempDir);
-
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
