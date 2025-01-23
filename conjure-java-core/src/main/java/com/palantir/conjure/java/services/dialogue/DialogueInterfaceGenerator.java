@@ -23,6 +23,9 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
+import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -35,16 +38,16 @@ import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Function;
@@ -111,7 +114,7 @@ public final class DialogueInterfaceGenerator {
                 .addJavadoc(
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
-                .returns(staticFactoryMethod.returnType)
+                .returns(staticFactoryMethod.returnType())
                 .addParameter(Channel.class, StaticFactoryMethodGenerator.CHANNEL)
                 .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder()
@@ -119,7 +122,7 @@ public final class DialogueInterfaceGenerator {
                                 "if ($L instanceof $T) { return $L(($T) $L, $L); }\n",
                                 StaticFactoryMethodGenerator.CHANNEL,
                                 EndpointChannelFactory.class,
-                                staticFactoryMethod.name,
+                                staticFactoryMethod.name(),
                                 EndpointChannelFactory.class,
                                 StaticFactoryMethodGenerator.CHANNEL,
                                 StaticFactoryMethodGenerator.RUNTIME)
@@ -131,7 +134,7 @@ public final class DialogueInterfaceGenerator {
                                         + "  } "
                                         + "}, "
                                         + "$L);",
-                                staticFactoryMethod.name,
+                                staticFactoryMethod.name(),
                                 EndpointChannelFactory.class,
                                 Override.class,
                                 EndpointChannel.class,
@@ -166,8 +169,20 @@ public final class DialogueInterfaceGenerator {
                 .forEach(referenceType -> methodBuilder.addAnnotation(
                         ClassName.get(referenceType.getPackage(), referenceType.getName())));
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
-        methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));
+        endpointDef.getDeprecated().ifPresent(_deprecatedValue -> {
+            if (endpointDef.getTags().contains("deprecated-for-removal")) {
+                methodBuilder.addAnnotation(AnnotationSpec.builder(Deprecated.class)
+                        .addMember("forRemoval", "true")
+                        .build());
+            } else {
+                methodBuilder.addAnnotation(Deprecated.class);
+            }
+        });
+        ServiceGenerators.addJavaDocForEndpointDefinition(
+                methodBuilder,
+                options.packagePrefix(),
+                endpointDef,
+                new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
         TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
         methodBuilder.returns(returnType);

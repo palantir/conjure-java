@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
@@ -16,7 +17,6 @@ import com.palantir.ri.ResourceIdentifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,9 +75,7 @@ public final class MultipleOrderedStages {
         return this.mappedRids;
     }
 
-    /**
-     * @deprecated this optional is deprecated
-     */
+    /** @deprecated this optional is deprecated */
     @JsonProperty("optionalItem")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @Deprecated
@@ -170,6 +168,7 @@ public final class MultipleOrderedStages {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         MultipleOrderedStages build();
 
         Completed_StageBuilder items(@Nonnull Iterable<SafeLong> items);
@@ -184,15 +183,11 @@ public final class MultipleOrderedStages {
 
         Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         Completed_StageBuilder optionalItem(@Nonnull Optional<OneField> optionalItem);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         Completed_StageBuilder optionalItem(@Nonnull OneField optionalItem);
     }
@@ -207,6 +202,7 @@ public final class MultipleOrderedStages {
         @Override
         Builder item(@Nonnull String item);
 
+        @CheckReturnValue
         @Override
         MultipleOrderedStages build();
 
@@ -228,16 +224,12 @@ public final class MultipleOrderedStages {
         @Override
         Builder mappedRids(ResourceIdentifier key, String value);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         Builder optionalItem(@Nonnull Optional<OneField> optionalItem);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         Builder optionalItem(@Nonnull OneField optionalItem);
@@ -252,7 +244,7 @@ public final class MultipleOrderedStages {
 
         private String item;
 
-        private Set<SafeLong> items = new LinkedHashSet<>();
+        private Set<SafeLong> items = ConjureCollections.newSet();
 
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
@@ -291,7 +283,7 @@ public final class MultipleOrderedStages {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<SafeLong> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newSet(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -331,9 +323,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
@@ -343,9 +333,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         public Builder optionalItem(@Nonnull OneField optionalItem) {
@@ -355,6 +343,7 @@ public final class MultipleOrderedStages {
         }
 
         @Override
+        @CheckReturnValue
         public MultipleOrderedStages build() {
             checkNotBuilt();
             this._buildInvoked = true;

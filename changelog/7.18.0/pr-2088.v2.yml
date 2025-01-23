@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Refactor BeanGenerator#generateBeanType to move logic for creating
+    empty beans to separate method
+  links:
+  - https://github.com/palantir/conjure-java/pull/2088

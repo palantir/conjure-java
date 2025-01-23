@@ -12,6 +12,8 @@ import javax.annotation.processing.Generated;
 public final class DateTimeAliasExample implements Comparable<DateTimeAliasExample> {
     private final OffsetDateTime value;
 
+    private int memoizedHashCode;
+
     private DateTimeAliasExample(@Nonnull OffsetDateTime value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
@@ -28,13 +30,26 @@ public final class DateTimeAliasExample implements Comparable<DateTimeAliasExamp
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof DateTimeAliasExample && this.value.equals(((DateTimeAliasExample) other).value));
+        return this == other || (other instanceof DateTimeAliasExample && equalTo((DateTimeAliasExample) other));
+    }
+
+    private boolean equalTo(DateTimeAliasExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
+        return this.value.isEqual(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = this.value.toInstant().hashCode();
+            memoizedHashCode = result;
+        }
+        return result;
     }
 
     @Override

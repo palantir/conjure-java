@@ -49,12 +49,44 @@ public abstract class TypeMarker<T> {
                 SafeArg.of("typeVariable", type));
     }
 
+    private TypeMarker(Type type) {
+        this.type = Preconditions.checkNotNull(type, "Type is required");
+    }
+
     public final Type getType() {
         return type;
     }
 
     @Override
+    public final boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other instanceof TypeMarker) {
+            TypeMarker<?> that = (TypeMarker<?>) other;
+            return type.equals(that.type);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return type.hashCode();
+    }
+
+    @Override
     public final String toString() {
         return "TypeMarker{type=" + type + '}';
+    }
+
+    /** Create a new {@link TypeMarker} instance wrapping the provided {@link Type}. */
+    public static TypeMarker<?> of(Type type) {
+        return new WrappingTypeMarker(type);
+    }
+
+    private static final class WrappingTypeMarker extends TypeMarker<Object> {
+        private WrappingTypeMarker(Type type) {
+            super(type);
+        }
     }
 }

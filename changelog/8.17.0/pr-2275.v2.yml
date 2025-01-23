@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Avoid generating union builders for large unions. Particularly large
+    enums result in too much bytecode, and in some cases cause us to run against Java
+    limits
+  links:
+  - https://github.com/palantir/conjure-java/pull/2275

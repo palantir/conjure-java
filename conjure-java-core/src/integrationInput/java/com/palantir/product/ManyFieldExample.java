@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -12,7 +13,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,31 +56,25 @@ public final class ManyFieldExample {
         this.integer = integer;
         this.doubleValue = doubleValue;
         this.optionalItem = optionalItem;
-        this.items = Collections.unmodifiableList(items);
+        this.items = ConjureCollections.unmodifiableList(items);
         this.set = Collections.unmodifiableSet(set);
         this.map = Collections.unmodifiableMap(map);
         this.alias = alias;
     }
 
-    /**
-     * docs for string field
-     */
+    /** docs for string field */
     @JsonProperty("string")
     public String getString() {
         return this.string;
     }
 
-    /**
-     * docs for integer field
-     */
+    /** docs for integer field */
     @JsonProperty("integer")
     public int getInteger() {
         return this.integer;
     }
 
-    /**
-     * docs for doubleValue field
-     */
+    /** docs for doubleValue field */
     @JsonProperty("doubleValue")
     public double getDoubleValue() {
         return this.doubleValue;
@@ -88,6 +82,7 @@ public final class ManyFieldExample {
 
     /**
      * docs for optionalItem field
+     *
      * @deprecated an optional field is deprecated
      */
     @JsonProperty("optionalItem")
@@ -97,25 +92,19 @@ public final class ManyFieldExample {
         return this.optionalItem;
     }
 
-    /**
-     * docs for items field with exciting character$ used by javapoet.
-     */
+    /** docs for items field with exciting character$ used by javapoet. */
     @JsonProperty("items")
     public List<String> getItems() {
         return this.items;
     }
 
-    /**
-     * docs for set field
-     */
+    /** docs for set field */
     @JsonProperty("set")
     public Set<String> getSet() {
         return this.set;
     }
 
-    /**
-     * @deprecated deprecation documentation.
-     */
+    /** @deprecated deprecation documentation. */
     @JsonProperty("map")
     @Deprecated
     public Map<String, String> getMap() {
@@ -124,6 +113,7 @@ public final class ManyFieldExample {
 
     /**
      * docs for alias field
+     *
      * @deprecated This field is deprecated.
      */
     @JsonProperty("alias")
@@ -226,9 +216,9 @@ public final class ManyFieldExample {
 
         private Optional<String> optionalItem = Optional.empty();
 
-        private List<String> items = new ArrayList<>();
+        private List<String> items = ConjureCollections.newNonNullList();
 
-        private Set<String> set = new LinkedHashSet<>();
+        private Set<String> set = ConjureCollections.newNonNullSet();
 
         private Map<String, String> map = new LinkedHashMap<>();
 
@@ -253,9 +243,7 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * docs for string field
-         */
+        /** docs for string field */
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
             checkNotBuilt();
@@ -263,9 +251,7 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * docs for integer field
-         */
+        /** docs for integer field */
         @JsonSetter("integer")
         public Builder integer(int integer) {
             checkNotBuilt();
@@ -274,9 +260,7 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * docs for doubleValue field
-         */
+        /** docs for doubleValue field */
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             checkNotBuilt();
@@ -287,6 +271,7 @@ public final class ManyFieldExample {
 
         /**
          * docs for optionalItem field
+         *
          * @deprecated an optional field is deprecated
          */
         @Deprecated
@@ -299,6 +284,7 @@ public final class ManyFieldExample {
 
         /**
          * docs for optionalItem field
+         *
          * @deprecated an optional field is deprecated
          */
         @Deprecated
@@ -308,65 +294,54 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * docs for items field with exciting character$ used by javapoet.
-         */
+        /** docs for items field with exciting character$ used by javapoet. */
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNonNullList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        /**
-         * docs for items field with exciting character$ used by javapoet.
-         */
+        /** docs for items field with exciting character$ used by javapoet. */
         public Builder addAllItems(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        /**
-         * docs for items field with exciting character$ used by javapoet.
-         */
+        /** docs for items field with exciting character$ used by javapoet. */
         public Builder items(String items) {
             checkNotBuilt();
+            Preconditions.checkNotNull(items, "items cannot be null");
             this.items.add(items);
             return this;
         }
 
-        /**
-         * docs for set field
-         */
+        /** docs for set field */
         @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            this.set = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(set, "set cannot be null"));
+            this.set = ConjureCollections.newNonNullSet(Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
-        /**
-         * docs for set field
-         */
+        /** docs for set field */
         public Builder addAllSet(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+            ConjureCollections.addAllAndCheckNonNull(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
-        /**
-         * docs for set field
-         */
+        /** docs for set field */
         public Builder set(String set) {
             checkNotBuilt();
+            Preconditions.checkNotNull(set, "set cannot be null");
             this.set.add(set);
             return this;
         }
 
-        /**
-         * @deprecated deprecation documentation.
-         */
+        /** @deprecated deprecation documentation. */
         @Deprecated
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
@@ -375,9 +350,7 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * @deprecated deprecation documentation.
-         */
+        /** @deprecated deprecation documentation. */
         @Deprecated
         public Builder putAllMap(@Nonnull Map<String, String> map) {
             checkNotBuilt();
@@ -385,9 +358,7 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * @deprecated deprecation documentation.
-         */
+        /** @deprecated deprecation documentation. */
         @Deprecated
         public Builder map(String key, String value) {
             checkNotBuilt();
@@ -397,6 +368,7 @@ public final class ManyFieldExample {
 
         /**
          * docs for alias field
+         *
          * @deprecated This field is deprecated.
          */
         @Deprecated
@@ -428,6 +400,7 @@ public final class ManyFieldExample {
             return missingFields;
         }
 
+        @CheckReturnValue
         public ManyFieldExample build() {
             checkNotBuilt();
             this._buildInvoked = true;

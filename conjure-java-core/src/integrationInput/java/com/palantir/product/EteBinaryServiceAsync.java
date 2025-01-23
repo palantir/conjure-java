@@ -22,46 +22,35 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteBinaryServiceAsync.Factory.class)
 public interface EteBinaryServiceAsync {
-    /**
-     * @apiNote {@code POST /binary}
-     */
+    /** @apiNote {@code POST /binary} */
     @ClientEndpoint(method = "POST", path = "/binary")
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
-    /**
-     * @apiNote {@code POST /binary/throws}
-     */
+    /** @apiNote {@code POST /binary/throws} */
     @ClientEndpoint(method = "POST", path = "/binary/throws")
     ListenableFuture<InputStream> postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
 
-    /**
-     * @apiNote {@code GET /binary/optional/present}
-     */
+    /** @apiNote {@code GET /binary/optional/present} */
     @ClientEndpoint(method = "GET", path = "/binary/optional/present")
     ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /binary/optional/empty}
-     */
+    /** @apiNote {@code GET /binary/optional/empty} */
     @ClientEndpoint(method = "GET", path = "/binary/optional/empty")
     ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
+     *
      * @apiNote {@code GET /binary/failure}
      */
     @ClientEndpoint(method = "GET", path = "/binary/failure")
-    ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
+    ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes, boolean useTryWithResources);
 
-    /**
-     * @apiNote {@code GET /binary/aliased}
-     */
+    /** @apiNote {@code GET /binary/aliased} */
     @ClientEndpoint(method = "GET", path = "/binary/aliased")
     ListenableFuture<Optional<InputStream>> getAliased(AuthHeader authHeader);
 
-    /**
-     * Creates an asynchronous/non-blocking client for a EteBinaryService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a EteBinaryService service. */
     static EteBinaryServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -133,10 +122,12 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes) {
+            public ListenableFuture<InputStream> getBinaryFailure(
+                    AuthHeader authHeader, int numBytes, boolean useTryWithResources) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
+                _request.putQueryParams("useTryWithResources", _plainSerDe.serializeBoolean(useTryWithResources));
                 return _runtime.clients()
                         .call(
                                 getBinaryFailureChannel,
@@ -163,9 +154,7 @@ public interface EteBinaryServiceAsync {
         };
     }
 
-    /**
-     * Creates an asynchronous/non-blocking client for a EteBinaryService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a EteBinaryService service. */
     static EteBinaryServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);

@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: conjure-undertow streamed binary response bodies protect against early
+    closure
+  links:
+  - https://github.com/palantir/conjure-java/pull/2352

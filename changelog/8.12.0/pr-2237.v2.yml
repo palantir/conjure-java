@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: do not attempt to generate a dialog service if no endpoints
+  links:
+  - https://github.com/palantir/conjure-java/pull/2237

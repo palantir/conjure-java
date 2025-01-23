@@ -28,13 +28,16 @@ public final class AliasedSafeLong implements Comparable<AliasedSafeLong> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof AliasedSafeLong && this.value.equals(((AliasedSafeLong) other).value));
+        return this == other || (other instanceof AliasedSafeLong && equalTo((AliasedSafeLong) other));
+    }
+
+    private boolean equalTo(AliasedSafeLong other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @Override

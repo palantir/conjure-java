@@ -28,13 +28,16 @@ public final class RidAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof RidAliasExample && this.value.equals(((RidAliasExample) other).value));
+        return this == other || (other instanceof RidAliasExample && equalTo((RidAliasExample) other));
+    }
+
+    private boolean equalTo(RidAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     public static RidAliasExample valueOf(String value) {

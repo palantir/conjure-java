@@ -19,7 +19,7 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.TypeName;
 import java.util.Map;
 import java.util.Optional;
 

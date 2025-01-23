@@ -25,9 +25,9 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
 import java.util.Map;
 import java.util.Optional;
 

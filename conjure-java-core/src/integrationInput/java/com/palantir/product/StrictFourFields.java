@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
@@ -43,7 +44,7 @@ public final class StrictFourFields {
             Optional<String> optionalItem,
             Map<ResourceIdentifier, String> mappedRids) {
         validateFields(myList, bearerTokenValue, optionalItem, mappedRids);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.optionalItem = optionalItem;
         this.mappedRids = Collections.unmodifiableMap(mappedRids);
@@ -161,6 +162,7 @@ public final class StrictFourFields {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictFourFields build();
     }
 
@@ -188,6 +190,7 @@ public final class StrictFourFields {
         @Override
         Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
+        @CheckReturnValue
         @Override
         StrictFourFields build();
     }
@@ -197,7 +200,7 @@ public final class StrictFourFields {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<String> myList = new ArrayList<>();
+        private List<String> myList = ConjureCollections.newList();
 
         private BearerToken bearerTokenValue;
 
@@ -221,7 +224,7 @@ public final class StrictFourFields {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 
@@ -257,6 +260,7 @@ public final class StrictFourFields {
         }
 
         @Override
+        @CheckReturnValue
         public StrictFourFields build() {
             checkNotBuilt();
             this._buildInvoked = true;

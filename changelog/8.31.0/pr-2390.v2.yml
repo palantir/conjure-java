@@ -1,0 +1,5 @@
+type: deprecation
+deprecation:
+  description: Remove Primitive Optimization for Boolean Collections
+  links:
+  - https://github.com/palantir/conjure-java/pull/2390

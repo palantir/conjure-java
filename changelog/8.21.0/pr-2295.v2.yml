@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Ensure that Aliased `Double` types with specified log safety have a
+    correct `equalTo`.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2295

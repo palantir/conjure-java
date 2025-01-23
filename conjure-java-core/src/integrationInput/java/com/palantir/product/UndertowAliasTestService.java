@@ -6,9 +6,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowAliasTestService {
-    /**
-     * @apiNote {@code GET /alias/test}
-     */
+    /** @apiNote {@code GET /alias/test} */
     void testOptionalAliasQueryParams(
             AuthHeader authHeader,
             Optional<AliasedInteger> optionalAliasInt,

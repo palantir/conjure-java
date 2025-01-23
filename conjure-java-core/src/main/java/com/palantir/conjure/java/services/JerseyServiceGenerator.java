@@ -22,6 +22,9 @@ import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
+import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
+import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SafetyEvaluator;
@@ -44,14 +47,14 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,11 +108,19 @@ public final class JerseyServiceGenerator implements Generator {
                 .map(serviceDef -> generateService(serviceDef, safetyEvaluator, returnTypeMapper, argumentTypeMapper));
     }
 
+    private static boolean hasEndpointErrorsDefined(ServiceDefinition serviceDefinition) {
+        return serviceDefinition.getEndpoints().stream()
+                .anyMatch(endpoint -> !endpoint.getErrors().isEmpty());
+    }
+
     private JavaFile generateService(
             ServiceDefinition serviceDefinition,
             SafetyEvaluator safetyEvaluator,
             TypeMapper returnTypeMapper,
             TypeMapper argumentTypeMapper) {
+        if (hasEndpointErrorsDefined(serviceDefinition)) {
+            throw new IllegalArgumentException("Endpoint errors are not supported for Jersey servers.");
+        }
         com.palantir.conjure.spec.TypeName prefixedName =
                 Packages.getPrefixedName(serviceDefinition.getServiceName(), options.packagePrefix());
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(prefixedName.getName())
@@ -194,7 +205,12 @@ public final class JerseyServiceGenerator implements Generator {
 
         methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
-        ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerators.addJavaDocForEndpointDefinition(
+                methodBuilder,
+                options.packagePrefix(),
+                endpointDef,
+                // Endpoint errors are not supported for Jersey servers
+                new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.EXCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
         return methodBuilder.build();
     }
@@ -238,7 +254,7 @@ public final class JerseyServiceGenerator implements Generator {
                 createServiceMethodParameters(endpointDef, safetyEvaluator, argumentTypeMapper, false);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
                 .map(param -> extraArgs.stream()
-                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .filter(arg -> arg.getArgName().get().equals(param.name()))
                         .findFirst())
                 .collect(Collectors.toList());
 

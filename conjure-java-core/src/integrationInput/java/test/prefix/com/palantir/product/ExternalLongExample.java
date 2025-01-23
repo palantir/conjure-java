@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,7 +34,7 @@ public final class ExternalLongExample {
         validateFields(optionalExternalLong, listExternalLong);
         this.externalLong = externalLong;
         this.optionalExternalLong = optionalExternalLong;
-        this.listExternalLong = Collections.unmodifiableList(listExternalLong);
+        this.listExternalLong = ConjureCollections.unmodifiableList(listExternalLong);
     }
 
     @JsonProperty("externalLong")
@@ -131,7 +131,7 @@ public final class ExternalLongExample {
 
         private Optional<Long> optionalExternalLong = Optional.empty();
 
-        private List<Long> listExternalLong = new ArrayList<>();
+        private List<Long> listExternalLong = ConjureCollections.newList();
 
         private boolean _externalLongInitialized = false;
 
@@ -172,7 +172,7 @@ public final class ExternalLongExample {
         @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP)
         public Builder listExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             checkNotBuilt();
-            this.listExternalLong = ConjureCollections.newArrayList(
+            this.listExternalLong = ConjureCollections.newList(
                     Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
         }
@@ -211,6 +211,7 @@ public final class ExternalLongExample {
             return missingFields;
         }
 
+        @CheckReturnValue
         public ExternalLongExample build() {
             checkNotBuilt();
             this._buildInvoked = true;

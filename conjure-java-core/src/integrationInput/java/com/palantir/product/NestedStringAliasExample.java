@@ -30,13 +30,16 @@ public final class NestedStringAliasExample {
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof NestedStringAliasExample
-                        && this.value.equals(((NestedStringAliasExample) other).value));
+                || (other instanceof NestedStringAliasExample && equalTo((NestedStringAliasExample) other));
+    }
+
+    private boolean equalTo(NestedStringAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     public static NestedStringAliasExample valueOf(@Safe String value) {

@@ -10,9 +10,7 @@ import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
-    /**
-     * Different package.
-     */
+    /** Different package. */
     public static final ErrorType DIFFERENT_PACKAGE =
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:DifferentPackage");
 
@@ -38,9 +36,7 @@ public final class ConjureErrors {
         }
     }
 
-    /**
-     * Returns true if the {@link RemoteException} is named Conjure:DifferentPackage
-     */
+    /** Returns true if the {@link RemoteException} is named Conjure:DifferentPackage */
     public static boolean isDifferentPackage(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return DIFFERENT_PACKAGE.name().equals(remoteException.getError().errorName());

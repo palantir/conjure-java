@@ -39,6 +39,7 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
@@ -51,6 +52,7 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ListType;
@@ -66,19 +68,19 @@ import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.humanreadabletypes.HumanReadableDuration;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -231,6 +233,15 @@ final class UndertowServiceHandlerGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
+                .addExceptions(endpointDefinition.getErrors().stream()
+                        .map(endpointError -> {
+                            ErrorTypeName errorTypeName = endpointError.getError();
+                            return ClassName.get(
+                                    Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
+                                    ErrorGenerationUtils.errorExceptionsClassName(errorTypeName.getNamespace()),
+                                    errorTypeName.getName());
+                        })
+                        .toList())
                 .addCode(endpointInvocation(
                         endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper, safetyEvaluator));
 
@@ -301,7 +312,7 @@ final class UndertowServiceHandlerGenerator {
         if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
             ParameterizedTypeName type =
                     UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options);
-            TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
+            TypeName resultType = Iterables.getOnlyElement(type.typeArguments());
             endpointBuilder.addSuperinterface(
                     ParameterizedTypeName.get(ClassName.get(ReturnValueWriter.class), resultType));
 
@@ -364,7 +375,6 @@ final class UndertowServiceHandlerGenerator {
                         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get(String.class)))
                         .addStatement("return $1T.of($2S)", Optional.class, documentation)
                         .build()));
-
         return endpointBuilder.build();
     }
 
@@ -399,12 +409,12 @@ final class UndertowServiceHandlerGenerator {
         // generic type incompatibilities.
         if (options.nonNullTopLevelCollectionValues() && input instanceof ParameterizedTypeName) {
             ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
-            if (LIST_NAME.equals(parameterized.rawType)) {
+            if (LIST_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
-                        IMMUTABLE_LIST_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
-            } else if (SET_NAME.equals(parameterized.rawType)) {
+                        IMMUTABLE_LIST_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
+            } else if (SET_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
-                        IMMUTABLE_SET_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
+                        IMMUTABLE_SET_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
             }
         }
 

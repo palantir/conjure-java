@@ -22,34 +22,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.stefanbirkner.systemlambda.SystemLambda;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.ByteStreams;
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
-import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.types.CheckedErrorGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.dialogue.BinaryRequestBody;
+import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
+import com.palantir.product.EteBinaryServiceBlocking;
 import com.palantir.product.EteBinaryServiceEndpoints;
-import com.palantir.product.EteBinaryServiceRetrofit;
-import com.palantir.product.EteService;
+import com.palantir.product.EteServiceAsync;
+import com.palantir.product.EteServiceBlocking;
 import com.palantir.product.EteServiceEndpoints;
-import com.palantir.product.EteServiceRetrofit;
 import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.SimpleEnum;
 import com.palantir.product.StringAliasExample;
@@ -59,17 +60,19 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -78,10 +81,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import okio.BufferedSink;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -89,10 +88,9 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.api.parallel.ResourceLock;
 
+// MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
-@ResourceLock("port:8080")
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
@@ -101,19 +99,17 @@ public final class UndertowServiceEteTest extends TestBase {
 
     private static Undertow server;
 
-    private final EteService client;
+    private final EteServiceBlocking client;
+    private final EteServiceAsync asyncClient;
 
-    private final EteServiceRetrofit retrofitClient;
+    private final EteBinaryServiceBlocking binaryClient;
 
-    private final EteBinaryServiceRetrofit binaryClient;
+    private static int port;
 
     public UndertowServiceEteTest() {
-        client = JaxRsClient.create(
-                EteService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        retrofitClient = Retrofit2Client.create(
-                EteServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        binaryClient = Retrofit2Client.create(
-                EteBinaryServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(port));
+        this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
+        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
     }
 
     @BeforeAll
@@ -127,10 +123,13 @@ public final class UndertowServiceEteTest extends TestBase {
 
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
-                .addHttpListener(8080, "0.0.0.0")
+                .addHttpListener(0, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
         server.start();
+        port = ((InetSocketAddress)
+                        Iterables.getOnlyElement(server.getListenerInfo()).getAddress())
+                .getPort();
     }
 
     @AfterAll
@@ -143,7 +142,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void jaxrs_client_can_make_a_call_to_an_empty_path() {
         EmptyPathService emptyPathClient = JaxRsClient.create(
-                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration(port));
         assertThat(emptyPathClient.emptyPath()).isTrue();
     }
 
@@ -185,8 +184,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void optional_empty_from_a_server_has_empty_status() {
-        assertThat(Futures.getUnchecked(retrofitClient.optionalEmpty(AuthHeader.valueOf("authHeader"))))
-                .isEmpty();
+        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader"))).isEmpty();
     }
 
     @Test
@@ -245,8 +243,7 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testCborContent() throws Exception {
         ObjectMapper cborMapper = ObjectMappers.newCborClientObjectMapper();
         // postString method
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        HttpURLConnection connection = openConnectionToTestApi("/base/notNullBody");
         connection.setRequestMethod("POST");
         connection.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
@@ -268,8 +265,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testContentLengthSet() throws Exception {
         // postString method
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        HttpURLConnection connection = openConnectionToTestApi("/base/notNullBody");
         connection.setRequestMethod("POST");
         connection.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
@@ -288,13 +284,10 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testBinaryPost() throws Exception {
         byte[] expected = "Hello, World".getBytes(StandardCharsets.UTF_8);
-        ResponseBody response = binaryClient
-                .postBinary(
-                        AuthHeader.valueOf("authHeader"),
-                        RequestBody.create(MediaType.parse("application/octet-stream"), expected))
-                .get();
-        assertThat(response.contentType()).isEqualTo(MediaType.parse("application/octet-stream"));
-        assertThat(response.bytes()).isEqualTo(expected);
+        try (InputStream response = binaryClient.postBinary(
+                AuthHeader.valueOf("authHeader"), BinaryRequestBody.of(new ByteArrayInputStream(expected)))) {
+            assertThat(response.readAllBytes()).isEqualTo(expected);
+        }
     }
 
     @Test
@@ -339,9 +332,8 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testExternalImportOptionalEmptyBodyZeroLength_noContentType() throws IOException {
         // Empty optional request body parameters may be encoded as JSON 'null' or an empty HTTP request body.
-        // Feign and Retrofit clients send JSON 'null', here we test that a non-present body works as expected.
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        // Feign clients send JSON 'null', here we test that a non-present body works as expected.
+        HttpURLConnection con = openConnectionToTestApi("/base/external/optional-body");
         con.setRequestMethod("POST");
         con.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
@@ -351,11 +343,10 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testExternalImportOptionalEmptyBodyZeroLength_withContentType() throws IOException {
         // Empty optional request body parameters may be encoded as JSON 'null' or an empty HTTP request body.
-        // Feign and Retrofit clients send JSON 'null', here we test that a non-present body works as expected.
+        // Feign send JSON 'null', here we test that a non-present body works as expected.
         // In this test case, we include "Content-Type: application/json" for backwards compatibility with
         // clients that always set request content-type regardless of the presence of a body.
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpURLConnection con = openConnectionToTestApi("/base/external/optional-body");
         con.setRequestMethod("POST");
         con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
         con.setRequestProperty(
@@ -365,8 +356,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testGetMethodsAllowHeadRequests() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/string");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpURLConnection con = openConnectionToTestApi("/base/string");
         con.setRequestMethod("HEAD");
         con.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
         con.setRequestProperty(
@@ -379,8 +369,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testOptionsOnGetIncludesHead() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/string");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpURLConnection con = openConnectionToTestApi("/base/string");
         con.setRequestMethod("OPTIONS");
         con.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
         con.setRequestProperty(
@@ -390,25 +379,25 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void testUnknownContentType() {
-        assertThatThrownBy(() -> {
-                    try {
-                        Futures.getUnchecked(binaryClient.postBinary(
-                                AuthHeader.valueOf("authHeader"),
-                                RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})));
-                    } catch (UncheckedExecutionException e) {
-                        throw e.getCause();
-                    }
-                })
-                .isInstanceOf(RemoteException.class)
-                .hasMessageContaining("INVALID_ARGUMENT");
+    public void testUnknownContentType() throws Exception {
+        HttpURLConnection con = openConnectionToTestApi("/binary");
+        con.setRequestMethod("POST");
+        con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/unsupported");
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setDoOutput(true);
+        con.getOutputStream().write(new byte[] {1, 2, 3});
+        assertThat(con.getResponseCode()).isEqualTo(415);
+        SerializableError serializableError =
+                CLIENT_OBJECT_MAPPER.readValue(con.getErrorStream(), SerializableError.class);
+        assertThat(serializableError.errorCode()).isEqualTo("INVALID_ARGUMENT");
     }
 
     @Test
     public void testSlashesInPathParam() {
         String expected = "foo/bar/baz/%2F";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(Futures.getUnchecked(retrofitClient.path(AuthHeader.valueOf("bearer"), expected)))
+        assertThat(Futures.getUnchecked(asyncClient.path(AuthHeader.valueOf("bearer"), expected)))
                 .isEqualTo(expected);
     }
 
@@ -416,7 +405,7 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testPlusInPathParam() {
         String expected = "foo+bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(Futures.getUnchecked(retrofitClient.path(AuthHeader.valueOf("bearer"), expected)))
+        assertThat(Futures.getUnchecked(asyncClient.path(AuthHeader.valueOf("bearer"), expected)))
                 .isEqualTo(expected);
     }
 
@@ -424,40 +413,68 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testSpaceInPathParam() {
         String expected = "foo bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(Futures.getUnchecked(retrofitClient.path(AuthHeader.valueOf("bearer"), expected)))
+        assertThat(Futures.getUnchecked(asyncClient.path(AuthHeader.valueOf("bearer"), expected)))
                 .isEqualTo(expected);
     }
 
     @Test
     public void testBinaryOptionalEmptyResponse() {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));
+        Optional<InputStream> response = binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader"));
         assertThat(response).isNotPresent();
     }
 
     @Test
     public void testBinaryOptionalPresentResponse() throws Exception {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
+        Optional<InputStream> response = binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
         assertThat(response).isPresent();
-        assertThat(response.get().string()).isEqualTo("Hello World!");
+        try (InputStream is = response.get()) {
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("Hello World!");
+        }
     }
 
     @Test
-    public void testBinaryServerSideFailureAfterManyBytesSent() {
-        ResponseBody response = Futures.getUnchecked(binaryClient.getBinaryFailure(
+    public void testBinaryServerSideFailureAfterManyBytesSent() throws IOException {
+        try (InputStream response = binaryClient.getBinaryFailure(
                 AuthHeader.valueOf("authHeader"),
                 // Write more bytes than one buffer
-                20000));
-        assertThatThrownBy(() -> ByteStreams.copy(response.byteStream(), ByteStreams.nullOutputStream()))
-                .isInstanceOf(IOException.class);
+                20000,
+                false)) {
+            assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
+        }
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterManyBytesSentTryWithResources() throws IOException {
+        try (InputStream response = binaryClient.getBinaryFailure(
+                AuthHeader.valueOf("authHeader"),
+                // Write more bytes than one buffer
+                20000,
+                true)) {
+            assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
+        }
     }
 
     @Test
     public void testBinaryServerSideFailureAfterFewBytesSent() {
         assertThatThrownBy(() -> {
                     try {
-                        Futures.getUnchecked(binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1));
+                        binaryClient
+                                .getBinaryFailure(AuthHeader.valueOf("authHeader"), 1, false)
+                                .close();
+                    } catch (UncheckedExecutionException e) {
+                        throw e.getCause();
+                    }
+                })
+                .isInstanceOf(RemoteException.class);
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterFewBytesSentTryWithResources() {
+        assertThatThrownBy(() -> {
+                    try {
+                        binaryClient
+                                .getBinaryFailure(AuthHeader.valueOf("authHeader"), 1, true)
+                                .close();
                     } catch (UncheckedExecutionException e) {
                         throw e.getCause();
                     }
@@ -468,46 +485,21 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     @Timeout(20)
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
-        byte[] data = new byte[1024];
-        ThreadLocalRandom.current().nextBytes(data);
-        assertThatThrownBy(() -> {
-                    try {
-                        Futures.getUnchecked(binaryClient.postBinaryThrows(
-                                AuthHeader.valueOf("authHeader"), 1024 * 1024, new RequestBody() {
-                                    @Override
-                                    public MediaType contentType() {
-                                        return MediaType.get("application/octet-stream");
-                                    }
+        int chunkSize = 1024 * 1024; // 1 MB
+        int expectedChunks = 1; // 1 MB
+        int chunksToSend = 1024; // 1 GB
+        int bytesExpected = expectedChunks * chunkSize;
 
-                                    @Override
-                                    public void writeTo(BufferedSink sink) throws IOException {
-                                        // 1gb
-                                        for (int i = 0; i < 1024 * 1024; i++) {
-                                            sink.write(data);
-                                        }
-                                    }
-                                }));
-                    } catch (UncheckedExecutionException e) {
-                        throw e.getCause();
-                    }
-                })
+        byte[] data = new byte[chunkSize];
+        ThreadLocalRandom.current().nextBytes(data);
+        assertThatThrownBy(() -> binaryClient.postBinaryThrows(
+                        AuthHeader.valueOf("authHeader"), bytesExpected, (OutputStream sink) -> {
+                            for (int i = 0; i < chunksToSend; i++) {
+                                sink.write(data);
+                            }
+                        }))
                 .isInstanceOfSatisfying(
                         RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
-    }
-
-    @Test
-    @Timeout(20)
-    public void testBinaryResponseClientDisconnect() throws Exception {
-        String output = SystemLambda.tapSystemErrAndOut(() -> {
-            binaryClient
-                    .getBinaryFailure(AuthHeader.valueOf("authHeader"), Integer.MAX_VALUE)
-                    .get()
-                    .close();
-            // Unfortunately there's no great way to tell when the server has finished processing
-            // our request.
-            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
-        });
-        assertThat(output).contains("INFO", "aborted by the client");
     }
 
     @Test
@@ -517,8 +509,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testVoidMethodRespondsNoContent() throws Exception {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/no-return");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpURLConnection con = openConnectionToTestApi("/base/no-return");
         con.setRequestMethod("POST");
         con.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
@@ -560,8 +551,9 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testListOfNull() {
         assertThatThrownBy(() ->
                         client.receiveListOfStrings(AuthHeader.valueOf("authHeader"), Collections.singletonList(null)))
-                .isInstanceOfSatisfying(
-                        RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
+                .isInstanceOfSatisfying(RemoteException.class, re -> {
+                    assertThat(re.getStatus()).isEqualTo(422);
+                });
     }
 
     @BeforeAll
@@ -570,7 +562,8 @@ public final class UndertowServiceEteTest extends TestBase {
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml"),
                 new File("src/test/resources/alias-test-service.yml"),
-                new File("src/test/resources/external-long-test-service.yml")));
+                new File("src/test/resources/external-long-test-service.yml"),
+                new File("src/test/resources/example-endpoint-errors.yml")));
         Options options = Options.builder()
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)
@@ -579,14 +572,35 @@ public final class UndertowServiceEteTest extends TestBase {
                 .build();
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new UndertowServiceGenerator(options), new ObjectGenerator(options)))
+                        ImmutableSet.of(
+                                new UndertowServiceGenerator(options),
+                                new ObjectGenerator(options),
+                                new ErrorGenerator(options),
+                                new CheckedErrorGenerator(options)))
                 .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
+        validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
+    }
+
+    private static void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
+        for (Path file : files) {
+            Path relativePath = folder.toPath().relativize(file);
+            Path output = outputDir.resolve(relativePath);
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Files.createDirectories(relativePath.getParent());
+                Files.deleteIfExists(output);
+                Files.copy(file, output);
+            }
+            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+        }
+    }
+
+    private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
+        URL url = new URL("http://localhost:" + port + "/test-example/api" + path);
+        return (HttpURLConnection) url.openConnection();
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/notNullBody");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        HttpURLConnection con = openConnectionToTestApi("/base/notNullBody");
         con.setRequestMethod("POST");
         con.setDoOutput(true);
         con.setRequestProperty("Content-Type", "application/json");

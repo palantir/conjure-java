@@ -1,0 +1,8 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      PrimitiveStrictExample:
+        fields:
+          ints: list<integer>
+          doubles: list<double>

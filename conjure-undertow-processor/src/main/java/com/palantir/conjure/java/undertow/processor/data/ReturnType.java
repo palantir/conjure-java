@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.TypeName;
 import java.util.Optional;
 import org.immutables.value.Value;
 

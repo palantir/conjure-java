@@ -43,26 +43,27 @@ import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
+import com.palantir.javapoet.TypeVariableName;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -82,6 +83,7 @@ public final class UnionGenerator {
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final String COMPLETED = "completed_";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
+    private static final int MAX_VALUES_FOR_BUILDER = 100;
 
     // If the member type is not known, a String containing the name of the unknown type is used.
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
@@ -98,7 +100,9 @@ public final class UnionGenerator {
         ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
         ClassName baseClass = unionClass.nestedClass("Base");
         ClassName visitorClass = unionClass.nestedClass("Visitor");
-        ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
+        Optional<ClassName> maybeVisitorBuilderClass = typeDef.getUnion().size() <= MAX_VALUES_FOR_BUILDER
+                ? Optional.of(unionClass.nestedClass("VisitorBuilder"))
+                : Optional.empty();
         Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
@@ -120,9 +124,13 @@ public final class UnionGenerator {
                 .addMethod(generateGetValue(baseClass))
                 .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator))
                 .addMethod(generateAcceptVisitMethod(visitorClass))
-                .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
+                .addType(generateVisitor(unionClass, visitorClass, memberTypes, maybeVisitorBuilderClass, options));
+
+        maybeVisitorBuilderClass.ifPresent(visitorBuilderClass -> typeBuilder
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
-                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
+                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options)));
+
+        typeBuilder
                 .addType(generateBase(baseClass, visitorClass, memberTypes))
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
@@ -133,7 +141,7 @@ public final class UnionGenerator {
                 .addMethod(MethodSpecs.createToString(
                                 unionClass.simpleName(),
                                 fields.stream()
-                                        .map(fieldSpec -> FieldName.of(fieldSpec.name))
+                                        .map(fieldSpec -> FieldName.of(fieldSpec.name()))
                                         .collect(Collectors.toList()))
                         .toBuilder()
                         .addAnnotations(safety)
@@ -252,7 +260,7 @@ public final class UnionGenerator {
             ClassName unionClass,
             ClassName visitorClass,
             Map<FieldDefinition, TypeName> memberTypes,
-            ClassName visitorBuilderClass,
+            Optional<ClassName> maybeVisitorBuilderClass,
             Options options) {
         TypeSpec.Builder visitorBuilder = TypeSpec.interfaceBuilder(visitorClass)
                 .addModifiers(Modifier.PUBLIC)
@@ -270,7 +278,7 @@ public final class UnionGenerator {
                     .build());
         }
         visitorBuilder.addMethod(visitUnknownBuilder.build());
-        visitorBuilder
+        maybeVisitorBuilderClass.ifPresent(visitorBuilderClass -> visitorBuilder
                 .addMethod(MethodSpec.methodBuilder("builder")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addTypeVariable(TYPE_VARIABLE)
@@ -284,7 +292,7 @@ public final class UnionGenerator {
                                                 .memberName),
                                 TYPE_VARIABLE))
                         .build())
-                .build();
+                .build());
         return visitorBuilder.build();
     }
 
@@ -776,7 +784,7 @@ public final class UnionGenerator {
                             .addMethod(MethodSpecs.createToString(
                                     wrapperClass.simpleName(),
                                     fields.stream()
-                                            .map(fieldSpec -> FieldName.of(fieldSpec.name))
+                                            .map(fieldSpec -> FieldName.of(fieldSpec.name()))
                                             .collect(Collectors.toList())));
 
                     return typeBuilder.build();
@@ -829,7 +837,7 @@ public final class UnionGenerator {
                         .addParameter(ParameterSpec.builder(genericMapType, VALUE_FIELD_NAME)
                                 .addAnnotation(Nonnull.class)
                                 .build())
-                        .addStatement("$L", Expressions.requireNonNull(typeParameter.name, "type cannot be null"))
+                        .addStatement("$L", Expressions.requireNonNull(typeParameter.name(), "type cannot be null"))
                         .addStatement(
                                 "$L",
                                 Expressions.requireNonNull(
@@ -860,14 +868,14 @@ public final class UnionGenerator {
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build())
                 .addMethod(createWrapperAcceptMethod(
-                        visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name, false, options))
+                        visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name(), false, options))
                 .addMethod(MethodSpecs.createEquals(wrapperClass))
                 .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
                 .addMethod(MethodSpecs.createToString(
                         wrapperClass.simpleName(),
                         fields.stream()
-                                .map(fieldSpec -> FieldName.of(fieldSpec.name))
+                                .map(fieldSpec -> FieldName.of(fieldSpec.name()))
                                 .collect(Collectors.toList())));
         return typeBuilder.build();
     }

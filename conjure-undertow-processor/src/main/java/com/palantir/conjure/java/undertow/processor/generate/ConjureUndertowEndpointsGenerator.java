@@ -50,18 +50,18 @@ import com.palantir.conjure.java.undertow.processor.data.ParameterType.SafeLoggi
 import com.palantir.conjure.java.undertow.processor.data.ParameterTypeVisitors.UsesRequestContextVisitor;
 import com.palantir.conjure.java.undertow.processor.data.ReturnType;
 import com.palantir.conjure.java.undertow.processor.data.ServiceDefinition;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -128,7 +128,7 @@ public final class ConjureUndertowEndpointsGenerator {
                                 ImmutableList.class,
                                 endpoints.stream()
                                         .map(endpoint -> CodeBlock.of(
-                                                "new $N($N, $N)", endpoint.name, RUNTIME_NAME, DELEGATE_NAME))
+                                                "new $N($N, $N)", endpoint.name(), RUNTIME_NAME, DELEGATE_NAME))
                                         .collect(CodeBlock.joining(", ")))
                         .build())
                 .addTypes(endpoints);
@@ -782,10 +782,11 @@ public final class ConjureUndertowEndpointsGenerator {
         if (input instanceof ParameterizedTypeName) {
             ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
 
-            Class<?> collectionClass = COLLECTION_CLASSES.get(parameterized.rawType);
+            Class<?> collectionClass = COLLECTION_CLASSES.get(parameterized.rawType());
             if (collectionClass != null) {
                 return ParameterizedTypeName.get(
-                        ClassName.get(collectionClass), parameterized.typeArguments.toArray(new TypeName[0]));
+                        ClassName.get(collectionClass),
+                        parameterized.typeArguments().toArray(new TypeName[0]));
             }
         }
 

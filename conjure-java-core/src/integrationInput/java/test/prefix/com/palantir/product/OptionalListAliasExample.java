@@ -15,6 +15,8 @@ public final class OptionalListAliasExample {
 
     private final Optional<List<String>> value;
 
+    private int memoizedHashCode;
+
     private OptionalListAliasExample(@Nonnull Optional<List<String>> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
@@ -36,13 +38,26 @@ public final class OptionalListAliasExample {
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof OptionalListAliasExample
-                        && this.value.equals(((OptionalListAliasExample) other).value));
+                || (other instanceof OptionalListAliasExample && equalTo((OptionalListAliasExample) other));
+    }
+
+    private boolean equalTo(OptionalListAliasExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = this.value.hashCode();
+            memoizedHashCode = result;
+        }
+        return result;
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

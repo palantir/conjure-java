@@ -17,10 +17,12 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReasons;
+import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
@@ -31,6 +33,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
@@ -48,7 +51,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
     // Exceptions should always be serialized using JSON
-    private static final Serializer<SerializableError> serializer =
+    private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
 
     // Log at most once every second
@@ -57,7 +60,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (throwable instanceof ServiceException) {
+        if (throwable instanceof CheckedServiceException checkedServiceException) {
+            checkedServiceException(exchange, checkedServiceException);
+        } else if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
             qosException(exchange, (QosException) throwable);
@@ -78,21 +83,30 @@ public enum ConjureExceptions implements ExceptionHandler {
             log(exception, throwable);
             writeResponse(
                     exchange,
-                    Optional.of(SerializableError.forException(exception)),
+                    Optional.of(ConjureError.fromServiceException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
+    }
+
+    private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
+        log(exception);
+        writeResponse(
+                exchange,
+                Optional.of(ConjureError.fromCheckedServiceException(exception)),
+                exception.getErrorType().httpErrorCode());
     }
 
     private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
         log(exception);
         writeResponse(
                 exchange,
-                Optional.of(SerializableError.forException(exception)),
+                Optional.of(ConjureError.fromServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
+        QosReasons.encodeToResponse(qosException.getReason(), exchange, UndertowQosResponseEncodingAdapter.INSTANCE);
 
         if (log.isDebugEnabled()) {
             log.debug("Quality-of-Service error handling request", qosException);
@@ -119,10 +133,10 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
-    // We forward these exceptions, but change the ErrorType to INTERNAL unless it was a 403, i.e., the problem is now
-    // considered internal to *this* service rather than the originating service. This means in particular
-    // that Conjure errors are defined only local to a given service and these error types don't
-    // propagate through other services.
+    // We forward these exceptions, but change the ErrorType to INTERNAL unless it was a 401 or 403, i.e.,
+    // the problem is now considered internal to *this* service rather than the originating service.
+    // This means in particular that Conjure errors are defined only local to a given service and these
+    // error types don't propagate through other services.
     private static void remoteException(HttpServerExchange exchange, RemoteException remoteException) {
         if (remoteException.getStatus() == 401 || remoteException.getStatus() == 403) {
             log.info(
@@ -134,11 +148,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
             writeResponse(
                     exchange,
-                    Optional.of(SerializableError.builder()
-                            .errorCode(remoteException.getError().errorCode())
-                            .errorName(remoteException.getError().errorName())
-                            .errorInstanceId(remoteException.getError().errorInstanceId())
-                            .build()),
+                    Optional.of(ConjureError.fromRemoteException(remoteException)),
                     remoteException.getStatus());
         } else {
             // log at WARN instead of ERROR because this indicates an issue in a remote server
@@ -152,7 +162,7 @@ public enum ConjureExceptions implements ExceptionHandler {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, remoteException);
             writeResponse(
                     exchange,
-                    Optional.of(SerializableError.forException(exception)),
+                    Optional.of(ConjureError.fromServiceException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
     }
@@ -162,7 +172,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         log(exception, throwable);
         writeResponse(
                 exchange,
-                Optional.of(SerializableError.forException(exception)),
+                Optional.of(ConjureError.fromServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
@@ -170,7 +180,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         int statusCode = frameworkException.getStatusCode();
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
         log(exception, frameworkException);
-        writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode);
+        writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
@@ -182,8 +192,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode());
     }
 
-    private static void writeResponse(
-            HttpServerExchange exchange, Optional<SerializableError> maybeBody, int statusCode) {
+    private static void writeResponse(HttpServerExchange exchange, Optional<ConjureError> maybeBody, int statusCode) {
         // Do not attempt to write the failure if data has already been written
         if (!isResponseStarted(exchange)) {
             exchange.setStatusCode(statusCode);
@@ -230,6 +239,24 @@ public enum ConjureExceptions implements ExceptionHandler {
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
                     exceptionForLogging);
+        }
+    }
+
+    private static void log(CheckedServiceException checkedServiceException) {
+        if (checkedServiceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+            log.info(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", checkedServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", checkedServiceException.getErrorType().name()),
+                    checkedServiceException);
+        } else {
+            log.error(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", checkedServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", checkedServiceException.getErrorType().name()),
+                    checkedServiceException);
         }
     }
 
@@ -287,4 +314,13 @@ public enum ConjureExceptions implements ExceptionHandler {
                     return _exchange -> {};
                 }
             };
+
+    private enum UndertowQosResponseEncodingAdapter implements QosResponseEncodingAdapter<HttpServerExchange> {
+        INSTANCE;
+
+        @Override
+        public void setHeader(HttpServerExchange exchange, String headerName, String headerValue) {
+            exchange.getResponseHeaders().put(HttpString.tryFromString(headerName), headerValue);
+        }
+    }
 }

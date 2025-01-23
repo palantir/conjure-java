@@ -46,7 +46,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
                 builder.encodings.isEmpty()
                         ? ImmutableList.of(Encodings.json(), Encodings.smile(), Encodings.cbor())
                         : builder.encodings);
-        this.auth = new ConjureAuthorizationExtractor(plainSerDe());
+        this.auth = new ConjureAuthorizationExtractor(plainSerDe(), builder.jsonWebTokenHandler);
         this.exceptionHandler = builder.exceptionHandler;
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, builder.exceptionHandler);
@@ -97,6 +97,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private ExceptionHandler exceptionHandler = ConjureExceptions.INSTANCE;
         private RequestArgHandler requestArgHandler = DefaultRequestArgHandler.INSTANCE;
+        private JsonWebTokenHandler jsonWebTokenHandler = (_exchange, _token) -> {};
         private final List<Encoding> encodings = new ArrayList<>();
         private final List<ParamMarker> paramMarkers = new ArrayList<>();
 
@@ -129,6 +130,12 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         @CanIgnoreReturnValue
         public Builder requestArgHandler(RequestArgHandler value) {
             requestArgHandler = Preconditions.checkNotNull(value, "requestLogParameterHandler is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder jsonWebTokenHandler(JsonWebTokenHandler value) {
+            jsonWebTokenHandler = Preconditions.checkNotNull(value, "jsonWebTokenHandler is required");
             return this;
         }
 

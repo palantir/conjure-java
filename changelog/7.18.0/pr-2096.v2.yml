@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Enum types now have a visitor builder
+  links:
+  - https://github.com/palantir/conjure-java/pull/2096

@@ -27,12 +27,16 @@ public final class BinaryAliasTwo {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof BinaryAliasTwo && this.value.equals(((BinaryAliasTwo) other).value));
+        return this == other || (other instanceof BinaryAliasTwo && equalTo((BinaryAliasTwo) other));
+    }
+
+    private boolean equalTo(BinaryAliasTwo other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

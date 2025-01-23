@@ -21,29 +21,34 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.palantir.baseline:gradle-baseline-java:5.18.0'
-        classpath 'com.palantir.gradle.conjure:gradle-conjure:5.41.0'
-        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.13.0'
-        classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.12.0'
-        classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.0.0'
-        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.33.0'
-        classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.10.0'
-        classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.5.0'
-        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.35.0'
+        classpath 'com.palantir.baseline:gradle-baseline-java:6.11.0'
+        classpath 'com.palantir.gradle.conjure:gradle-conjure:5.52.0'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.31.0'
+        classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.19.0'
+        classpath 'com.palantir.gradle.failure-reports:gradle-failure-reports:1.13.0'
+        classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.1.0'
+        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.59.0'
+        classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.16.0'
+        classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.6.0'
+        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.50.0'
+        classpath 'com.palantir.suppressible-error-prone:gradle-suppressible-error-prone:2.0.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
+        classpath 'org.revapi:gradle-revapi:1.8.0'
     }
 }
 
 apply plugin: 'com.palantir.external-publish'
+apply plugin: 'com.palantir.failure-reports'
 apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
+apply plugin: 'com.palantir.jdks'
 apply plugin: 'com.palantir.consistent-versions'
 apply plugin: 'com.palantir.baseline-java-versions'
 apply plugin: 'com.palantir.jdks.latest'
 
 javaVersions {
-    libraryTarget = 11
-    runtime = 17
+    libraryTarget = 17
+    runtime = 21
 }
 
 allprojects {
@@ -66,6 +71,15 @@ allprojects {
             if (details.requested.group == 'com.google.errorprone' && details.requested.name == 'error_prone_annotations') {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
                 details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
+            }
+            if (details.requested.group.startsWith('com.fasterxml.jackson') && (details.requested.version == '2.16.0' || details.requested.version == '2.16.1')) {
+                details.useTarget group: details.requested.group, name: details.requested.name, version: '2.15.3'
+                details.because 'https://github.com/FasterXML/jackson-databind/pull/4230'
+            }
+            if (details.requested.group.startsWith('org.slf4j')) {
+                details.useTarget group: details.requested.group, name: details.requested.name, version: '1.7.36'
+                details.because 'Dropwizard 2.x is used in tests. This version of Dropwizard only supports SLF4J < ' +
+                        '2.x. Until we upgrade Dropwizard, we should continue using a version of SLF4J < 2.x'
             }
         }
     }
@@ -107,4 +121,8 @@ afterEvaluate {
             builtBy project(':conjure-java').tasks.distTar
         }
     }
+}
+
+jdks {
+    daemonTarget = 17
 }

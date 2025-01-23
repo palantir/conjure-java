@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
@@ -13,7 +14,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -34,7 +34,7 @@ public final class StrictThreeFields {
 
     private StrictThreeFields(List<String> myList, BearerToken bearerTokenValue, Optional<String> optionalItem) {
         validateFields(myList, bearerTokenValue, optionalItem);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.optionalItem = optionalItem;
     }
@@ -144,6 +144,7 @@ public final class StrictThreeFields {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictThreeFields build();
     }
 
@@ -164,6 +165,7 @@ public final class StrictThreeFields {
         @Override
         Builder optionalItem(@Nonnull String optionalItem);
 
+        @CheckReturnValue
         @Override
         StrictThreeFields build();
     }
@@ -173,7 +175,7 @@ public final class StrictThreeFields {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<String> myList = new ArrayList<>();
+        private List<String> myList = ConjureCollections.newList();
 
         private BearerToken bearerTokenValue;
 
@@ -194,7 +196,7 @@ public final class StrictThreeFields {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 
@@ -222,6 +224,7 @@ public final class StrictThreeFields {
         }
 
         @Override
+        @CheckReturnValue
         public StrictThreeFields build() {
             checkNotBuilt();
             this._buildInvoked = true;

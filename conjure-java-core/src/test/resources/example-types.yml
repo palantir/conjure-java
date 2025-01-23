@@ -30,6 +30,7 @@ types:
       SafeLongExample:
         fields:
           safeLongValue: safelong
+          safeLongList: list<safelong>
       SafeExternalLongExample:
         fields:
           safeExternalLongValue: SafeExternalLong
@@ -73,6 +74,7 @@ types:
             safety: safe
           primitiveItems: list<integer>
           doubleItems: list<double>
+          booleanItems: list<boolean>
           optionalItems: list<optional<string>>
           aliasOptionalItems: list<OptionalAlias>
           nestedItems: list<list<string>>
@@ -89,6 +91,10 @@ types:
           items: map<string, string>
           optionalItems: map<string, optional<string>>
           aliasOptionalItems: map<string, OptionalAlias>
+      EnumNameTestExample:
+        values:
+          - INCOMPLETE
+          - COMPLETED
       EnumExample:
         docs: |
           This enumerates the numbers 1:2 also 100.
@@ -121,6 +127,9 @@ types:
         alias: StringAliasExample
       DoubleAliasExample:
         alias: double
+      SafeDoubleAliasExample:
+        alias: double
+        safety: safe
       IntegerAliasExample:
         alias: integer
       BooleanAliasExample:
@@ -317,3 +326,209 @@ types:
           class: string
           int: string
           len: string
+      LargeEnumExample:
+        values:
+          - E0
+          - E1
+          - E2
+          - E3
+          - E4
+          - E5
+          - E6
+          - E7
+          - E8
+          - E9
+          - E10
+          - E11
+          - E12
+          - E13
+          - E14
+          - E15
+          - E16
+          - E17
+          - E18
+          - E19
+          - E20
+          - E21
+          - E22
+          - E23
+          - E24
+          - E25
+          - E26
+          - E27
+          - E28
+          - E29
+          - E30
+          - E31
+          - E32
+          - E33
+          - E34
+          - E35
+          - E36
+          - E37
+          - E38
+          - E39
+          - E40
+          - E41
+          - E42
+          - E43
+          - E44
+          - E45
+          - E46
+          - E47
+          - E48
+          - E49
+          - E50
+          - E51
+          - E52
+          - E53
+          - E54
+          - E55
+          - E56
+          - E57
+          - E58
+          - E59
+          - E60
+          - E61
+          - E62
+          - E63
+          - E64
+          - E65
+          - E66
+          - E67
+          - E68
+          - E69
+          - E70
+          - E71
+          - E72
+          - E73
+          - E74
+          - E75
+          - E76
+          - E77
+          - E78
+          - E79
+          - E80
+          - E81
+          - E82
+          - E83
+          - E84
+          - E85
+          - E86
+          - E87
+          - E88
+          - E89
+          - E90
+          - E91
+          - E92
+          - E93
+          - E94
+          - E95
+          - E96
+          - E97
+          - E98
+          - E99
+          - E100
+      LargeUnionExample:
+        union:
+          u0: string
+          u1: string
+          u2: string
+          u3: string
+          u4: string
+          u5: string
+          u6: string
+          u7: string
+          u8: string
+          u9: string
+          u10: string
+          u11: string
+          u12: string
+          u13: string
+          u14: string
+          u15: string
+          u16: string
+          u17: string
+          u18: string
+          u19: string
+          u20: string
+          u21: string
+          u22: string
+          u23: string
+          u24: string
+          u25: string
+          u26: string
+          u27: string
+          u28: string
+          u29: string
+          u30: string
+          u31: string
+          u32: string
+          u33: string
+          u34: string
+          u35: string
+          u36: string
+          u37: string
+          u38: string
+          u39: string
+          u40: string
+          u41: string
+          u42: string
+          u43: string
+          u44: string
+          u45: string
+          u46: string
+          u47: string
+          u48: string
+          u49: string
+          u50: string
+          u51: string
+          u52: string
+          u53: string
+          u54: string
+          u55: string
+          u56: string
+          u57: string
+          u58: string
+          u59: string
+          u60: string
+          u61: string
+          u62: string
+          u63: string
+          u64: string
+          u65: string
+          u66: string
+          u67: string
+          u68: string
+          u69: string
+          u70: string
+          u71: string
+          u72: string
+          u73: string
+          u74: string
+          u75: string
+          u76: string
+          u77: string
+          u78: string
+          u79: string
+          u80: string
+          u81: string
+          u82: string
+          u83: string
+          u84: string
+          u85: string
+          u86: string
+          u87: string
+          u88: string
+          u89: string
+          u90: string
+          u91: string
+          u92: string
+          u93: string
+          u94: string
+          u95: string
+          u96: string
+          u97: string
+          u98: string
+          u99: string
+          u100: string

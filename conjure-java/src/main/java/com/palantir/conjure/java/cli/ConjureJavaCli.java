@@ -27,14 +27,14 @@ import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
+import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.javapoet.ClassName;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.squareup.javapoet.ClassName;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -118,12 +118,6 @@ public final class ConjureJavaCli implements Runnable {
                 defaultValue = "false",
                 description = "Generate interfaces for dialogue clients")
         private boolean generateDialogue;
-
-        @CommandLine.Option(
-                names = "--retrofit",
-                defaultValue = "false",
-                description = "Generate retrofit interfaces for streaming/async clients")
-        private boolean generateRetrofit;
 
         @CommandLine.Option(
                 names = "--jerseyBinaryAsResponse",
@@ -230,6 +224,12 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Union visitors expose the values of unknowns in addition to their types.")
         private boolean unionsWithUnknownValues;
 
+        @CommandLine.Option(
+                names = "--externalFallbackTypes",
+                defaultValue = "false",
+                description = "Java external type imports are generated using their fallback type.")
+        private boolean externalFallbackTypes;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -254,16 +254,15 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateJersey()) {
                     generatorBuilder.add(new JerseyServiceGenerator(config.options()));
                 }
-                if (config.generateRetrofit()) {
-                    generatorBuilder.add(new Retrofit2ServiceGenerator(config.options()));
-                }
                 if (config.generateUndertow()) {
-                    generatorBuilder.add(new UndertowServiceGenerator(config.options()));
+                    generatorBuilder.add(
+                            new UndertowServiceGenerator(config.options()),
+                            new CheckedErrorGenerator(config.options()));
                 }
                 if (config.generateDialogue()) {
                     generatorBuilder.add(new DialogueServiceGenerator(config.options()));
                 }
-                new GenerationCoordinator(executor, generatorBuilder.build())
+                new GenerationCoordinator(executor, generatorBuilder.build(), config.options())
                         .emit(conjureDefinition, config.outputDirectory());
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
@@ -279,7 +278,6 @@ public final class ConjureJavaCli implements Runnable {
                     .outputDirectory(new File(output))
                     .generateJersey(generateJersey)
                     .generateObjects(generateObjects)
-                    .generateRetrofit(generateRetrofit)
                     .generateUndertow(generateUndertow)
                     .generateDialogue(generateDialogue)
                     .options(Options.builder()
@@ -301,6 +299,7 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyOptionals(excludeEmptyOptionals)
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
+                            .externalFallbackTypes(externalFallbackTypes)
                             .build())
                     .build();
         }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -13,7 +14,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,11 +53,11 @@ public final class MultipleFieldsOnlyFinalStage {
             Optional<String> optionalItemOld,
             Set<String> itemsSetOld) {
         validateFields(items, itemsMap, optionalItem, itemsSet, itemsOld, itemsMapOld, optionalItemOld, itemsSetOld);
-        this.items = Collections.unmodifiableList(items);
+        this.items = ConjureCollections.unmodifiableList(items);
         this.itemsMap = Collections.unmodifiableMap(itemsMap);
         this.optionalItem = optionalItem;
         this.itemsSet = Collections.unmodifiableSet(itemsSet);
-        this.itemsOld = Collections.unmodifiableList(itemsOld);
+        this.itemsOld = ConjureCollections.unmodifiableList(itemsOld);
         this.itemsMapOld = Collections.unmodifiableMap(itemsMapOld);
         this.optionalItemOld = optionalItemOld;
         this.itemsSetOld = Collections.unmodifiableSet(itemsSetOld);
@@ -84,27 +84,21 @@ public final class MultipleFieldsOnlyFinalStage {
         return this.itemsSet;
     }
 
-    /**
-     * @deprecated this list is deprecated
-     */
+    /** @deprecated this list is deprecated */
     @JsonProperty("itemsOld")
     @Deprecated
     public List<String> getItemsOld() {
         return this.itemsOld;
     }
 
-    /**
-     * @deprecated this map is deprecated
-     */
+    /** @deprecated this map is deprecated */
     @JsonProperty("itemsMapOld")
     @Deprecated
     public Map<String, Integer> getItemsMapOld() {
         return this.itemsMapOld;
     }
 
-    /**
-     * @deprecated this optional is deprecated
-     */
+    /** @deprecated this optional is deprecated */
     @JsonProperty("optionalItemOld")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @Deprecated
@@ -112,9 +106,7 @@ public final class MultipleFieldsOnlyFinalStage {
         return this.optionalItemOld;
     }
 
-    /**
-     * @deprecated this set is deprecated
-     */
+    /** @deprecated this set is deprecated */
     @JsonProperty("itemsSetOld")
     @Deprecated
     public Set<String> getItemsSetOld() {
@@ -213,21 +205,21 @@ public final class MultipleFieldsOnlyFinalStage {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<String> items = new ArrayList<>();
+        private List<String> items = ConjureCollections.newList();
 
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
 
-        private Set<String> itemsSet = new LinkedHashSet<>();
+        private Set<String> itemsSet = ConjureCollections.newSet();
 
-        private List<String> itemsOld = new ArrayList<>();
+        private List<String> itemsOld = ConjureCollections.newList();
 
         private Map<String, Integer> itemsMapOld = new LinkedHashMap<>();
 
         private Optional<String> optionalItemOld = Optional.empty();
 
-        private Set<String> itemsSetOld = new LinkedHashSet<>();
+        private Set<String> itemsSetOld = ConjureCollections.newSet();
 
         private Builder() {}
 
@@ -247,7 +239,7 @@ public final class MultipleFieldsOnlyFinalStage {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -298,8 +290,7 @@ public final class MultipleFieldsOnlyFinalStage {
         @JsonSetter(value = "itemsSet", nulls = Nulls.SKIP)
         public Builder itemsSet(@Nonnull Iterable<String> itemsSet) {
             checkNotBuilt();
-            this.itemsSet = ConjureCollections.newLinkedHashSet(
-                    Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
+            this.itemsSet = ConjureCollections.newSet(Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
@@ -315,21 +306,16 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this list is deprecated
-         */
+        /** @deprecated this list is deprecated */
         @Deprecated
         @JsonSetter(value = "itemsOld", nulls = Nulls.SKIP)
         public Builder itemsOld(@Nonnull Iterable<String> itemsOld) {
             checkNotBuilt();
-            this.itemsOld =
-                    ConjureCollections.newArrayList(Preconditions.checkNotNull(itemsOld, "itemsOld cannot be null"));
+            this.itemsOld = ConjureCollections.newList(Preconditions.checkNotNull(itemsOld, "itemsOld cannot be null"));
             return this;
         }
 
-        /**
-         * @deprecated this list is deprecated
-         */
+        /** @deprecated this list is deprecated */
         @Deprecated
         public Builder addAllItemsOld(@Nonnull Iterable<String> itemsOld) {
             checkNotBuilt();
@@ -337,9 +323,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this list is deprecated
-         */
+        /** @deprecated this list is deprecated */
         @Deprecated
         public Builder itemsOld(String itemsOld) {
             checkNotBuilt();
@@ -347,9 +331,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this map is deprecated
-         */
+        /** @deprecated this map is deprecated */
         @Deprecated
         @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
         public Builder itemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
@@ -359,9 +341,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this map is deprecated
-         */
+        /** @deprecated this map is deprecated */
         @Deprecated
         public Builder putAllItemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
             checkNotBuilt();
@@ -369,9 +349,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this map is deprecated
-         */
+        /** @deprecated this map is deprecated */
         @Deprecated
         public Builder itemsMapOld(String key, int value) {
             checkNotBuilt();
@@ -379,9 +357,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @JsonSetter(value = "optionalItemOld", nulls = Nulls.SKIP)
         public Builder optionalItemOld(@Nonnull Optional<String> optionalItemOld) {
@@ -390,9 +366,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         public Builder optionalItemOld(@Nonnull String optionalItemOld) {
             checkNotBuilt();
@@ -401,21 +375,17 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this set is deprecated
-         */
+        /** @deprecated this set is deprecated */
         @Deprecated
         @JsonSetter(value = "itemsSetOld", nulls = Nulls.SKIP)
         public Builder itemsSetOld(@Nonnull Iterable<String> itemsSetOld) {
             checkNotBuilt();
-            this.itemsSetOld = ConjureCollections.newLinkedHashSet(
-                    Preconditions.checkNotNull(itemsSetOld, "itemsSetOld cannot be null"));
+            this.itemsSetOld =
+                    ConjureCollections.newSet(Preconditions.checkNotNull(itemsSetOld, "itemsSetOld cannot be null"));
             return this;
         }
 
-        /**
-         * @deprecated this set is deprecated
-         */
+        /** @deprecated this set is deprecated */
         @Deprecated
         public Builder addAllItemsSetOld(@Nonnull Iterable<String> itemsSetOld) {
             checkNotBuilt();
@@ -424,9 +394,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this set is deprecated
-         */
+        /** @deprecated this set is deprecated */
         @Deprecated
         public Builder itemsSetOld(String itemsSetOld) {
             checkNotBuilt();
@@ -434,6 +402,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
+        @CheckReturnValue
         public MultipleFieldsOnlyFinalStage build() {
             checkNotBuilt();
             this._buildInvoked = true;

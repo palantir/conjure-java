@@ -22,9 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-/**
- * A union of a safe long.
- */
+/** A union of a safe long. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class ExternalLongUnionExample {
     private final Base value;

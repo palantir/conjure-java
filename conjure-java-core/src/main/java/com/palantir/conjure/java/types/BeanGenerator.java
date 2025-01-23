@@ -26,6 +26,7 @@ import com.google.common.collect.Iterables;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -44,18 +45,18 @@ import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -194,10 +195,8 @@ public final class BeanGenerator {
             ImmutableList<AnnotationSpec> safety,
             ClassName objectClass,
             Options options) {
-        // Add ctor
         typeBuilder.addMethod(createConstructor(ImmutableList.of(), ImmutableList.of()));
 
-        // Add toString
         typeBuilder.addMethod(MethodSpecs.createToString(prefixedName.getName(), Collections.emptyList()).toBuilder()
                 .addAnnotations(safety)
                 .build());
@@ -249,7 +248,7 @@ public final class BeanGenerator {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE);
 
         Collection<FieldSpec> nonPrimitivePoetFields =
-                Collections2.filter(poetFields, f -> !Primitives.isPrimitive(f.type));
+                Collections2.filter(poetFields, f -> !Primitives.isPrimitive(f.type()));
         if (!nonPrimitivePoetFields.isEmpty()) {
             builder.addStatement("$L", Expressions.localMethodCall("validateFields", nonPrimitivePoetFields));
         }
@@ -258,13 +257,13 @@ public final class BeanGenerator {
         for (EnrichedField field : fields) {
             FieldSpec spec = field.poetSpec();
 
-            builder.addParameter(spec.type, spec.name);
+            builder.addParameter(spec.type(), spec.name());
 
             // Collection and Map types not copied in constructor for performance. This assumes that the constructor
             // is private and necessarily called from the builder, which does its own defensive copying.
             if (field.conjureDef().getType().accept(TypeVisitor.IS_LIST)) {
                 // TODO(melliot): contribute a fix to JavaPoet that parses $T correctly for a JavaPoet FieldSpec
-                body.addStatement("this.$1N = $2T.unmodifiableList($1N)", spec, Collections.class);
+                body.addStatement("this.$1N = $2T.unmodifiableList($1N)", spec, ConjureCollections.class);
             } else if (field.conjureDef().getType().accept(TypeVisitor.IS_SET)) {
                 body.addStatement("this.$1N = $2T.unmodifiableSet($1N)", spec, Collections.class);
             } else if (field.conjureDef().getType().accept(TypeVisitor.IS_MAP)) {
@@ -300,7 +299,7 @@ public final class BeanGenerator {
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
                 .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
-                .returns(field.poetSpec().type);
+                .returns(field.poetSpec().type());
         Type conjureDefType = field.conjureDef().getType();
         if (featureFlags.excludeEmptyOptionals()) {
             if (conjureDefType.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -331,9 +330,10 @@ public final class BeanGenerator {
         }
 
         if (conjureDefType.accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
-            getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
+            getterBuilder.addStatement(
+                    "return this.$N.asReadOnlyBuffer()", field.poetSpec().name());
         } else {
-            getterBuilder.addStatement("return this.$N", field.poetSpec().name);
+            getterBuilder.addStatement("return this.$N", field.poetSpec().name());
         }
 
         Javadoc.render(field.conjureDef().getDocs(), field.conjureDef().getDeprecated())
@@ -349,7 +349,7 @@ public final class BeanGenerator {
         builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
         for (EnrichedField field : fields) {
             FieldSpec spec = field.poetSpec();
-            builder.addParameter(ParameterSpec.builder(spec.type, spec.name).build());
+            builder.addParameter(ParameterSpec.builder(spec.type(), spec.name()).build());
             builder.addStatement(
                     "missingFields = addFieldIfMissing(missingFields, $N, $S)",
                     spec,
@@ -377,15 +377,17 @@ public final class BeanGenerator {
             SafetyEvaluator safetyEvaluator,
             boolean useNonStrictStagedBuilders) {
         if (fields.isEmpty()) {
-            return createStaticFactoryMethodForEmptyBean(objectClass);
+            return createStaticFactoryMethodForEmptyBean(objectClass); // TODO(kkak): Return
         }
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
+
         builder.addCode("return builder()");
         fields.forEach(field -> builder.addParameter(ParameterSpec.builder(
-                        getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
+                        getTypeNameWithoutOptional(field.poetSpec()),
+                        field.poetSpec().name())
                 .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                 .build()));
 
@@ -395,9 +397,9 @@ public final class BeanGenerator {
                 : fields.stream();
         methodArgs.map(EnrichedField::poetSpec).forEach(spec -> {
             if (isOptional(spec)) {
-                builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
+                builder.addCode("\n    .$L(Optional.of($L))", spec.name(), spec.name());
             } else {
-                builder.addCode("\n    .$L($L)", spec.name, spec.name);
+                builder.addCode("\n    .$L($L)", spec.name(), spec.name());
             }
         });
         builder.addCode("\n    .build();\n");
@@ -409,7 +411,7 @@ public final class BeanGenerator {
         return MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass)
-                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                .addAnnotation(ConjureAnnotations.propertiesJsonCreator()) // TODO(kkak): DelegatingCreator
                 .addCode("return $L;", SINGLETON_INSTANCE_NAME)
                 .build();
     }
@@ -442,18 +444,19 @@ public final class BeanGenerator {
 
     private static TypeName getTypeNameWithoutOptional(FieldSpec spec) {
         if (!isOptional(spec)) {
-            return spec.type;
+            return spec.type();
         }
-        TypeName typeName = ((ParameterizedTypeName) spec.type).typeArguments.get(0);
+        TypeName typeName =
+                ((ParameterizedTypeName) spec.type()).typeArguments().get(0);
         return Primitives.isBoxedPrimitive(typeName) ? Primitives.unbox(typeName) : typeName;
     }
 
     private static boolean isOptional(FieldSpec spec) {
-        if (!(spec.type instanceof ParameterizedTypeName)) {
+        if (!(spec.type() instanceof ParameterizedTypeName)) {
             // spec isn't a wrapper class
             return false;
         }
-        return ((ParameterizedTypeName) spec.type).rawType.simpleName().equals("Optional");
+        return ((ParameterizedTypeName) spec.type()).rawType().simpleName().equals("Optional");
     }
 
     /** Note, this is an implementation detail shared between {@link BeanBuilderGenerator} and {@link BeanGenerator}. */
@@ -475,7 +478,7 @@ public final class BeanGenerator {
 
         @Value.Derived
         default boolean isPrimitive() {
-            return Primitives.isPrimitive(poetSpec().type);
+            return Primitives.isPrimitive(poetSpec().type());
         }
 
         static EnrichedField of(FieldName fieldName, FieldDefinition conjureDef, FieldSpec poetSpec) {
@@ -496,8 +499,8 @@ public final class BeanGenerator {
      * Any types we generate directly will produce an efficient hashCode, but collections may be large, and we must
      * traverse through optionals.
      */
-    private static final class FieldRequiresMemoizedHashCode extends DefaultTypeVisitor<Boolean> {
-        private static final DefaultTypeVisitor<Boolean> INSTANCE = new FieldRequiresMemoizedHashCode();
+    static final class FieldRequiresMemoizedHashCode extends DefaultTypeVisitor<Boolean> {
+        static final DefaultTypeVisitor<Boolean> INSTANCE = new FieldRequiresMemoizedHashCode();
 
         @Override
         public Boolean visitOptional(OptionalType value) {

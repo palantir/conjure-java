@@ -86,6 +86,8 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderParamDeserializer;
 
+        private final Deserializer<String> constructorDecoderParamDeserializer;
+
         private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
 
         private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
@@ -129,6 +131,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
             this.decoderParamDeserializer = new QueryParamDeserializer<>(
                     "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+            this.constructorDecoderParamDeserializer = new QueryParamDeserializer<>(
+                    "constructorDecoderParam",
+                    new DefaultDecoderService.ConstructorStringCollectionDecoder(runtime, this));
             this.constructorDeserializer = new QueryParamDeserializer<>(
                     "constructor",
                     ParamDecoders.complexCollectionParamDecoder(
@@ -167,6 +172,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange);
             UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange);
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            String constructorDecoderParam = this.constructorDecoderParamDeserializer.deserialize(exchange);
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
             DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
             DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
@@ -188,6 +194,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             optionalSafeLongParam,
                             uuidParam,
                             decoderParam,
+                            constructorDecoderParam,
                             constructor,
                             ofFactory,
                             valueOfFactory,
@@ -258,6 +265,8 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderParamDeserializer;
 
+        private final Deserializer<String> constructorDecoderParamDeserializer;
+
         private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
 
         private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
@@ -301,6 +310,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
             this.decoderParamDeserializer =
                     new FormParamDeserializer<>("decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+            this.constructorDecoderParamDeserializer = new FormParamDeserializer<>(
+                    "constructorDecoderParam",
+                    new DefaultDecoderService.ConstructorStringCollectionDecoder(runtime, this));
             this.constructorDeserializer = new FormParamDeserializer<>(
                     "constructor",
                     ParamDecoders.complexCollectionParamDecoder(
@@ -339,6 +351,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange);
             UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange);
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            String constructorDecoderParam = this.constructorDecoderParamDeserializer.deserialize(exchange);
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
             DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
             DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
@@ -360,6 +373,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             optionalSafeLongParam,
                             uuidParam,
                             decoderParam,
+                            constructorDecoderParam,
                             constructor,
                             ofFactory,
                             valueOfFactory,
@@ -420,6 +434,8 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderParamDeserializer;
 
+        private final Deserializer<String> constructorDecoderParamDeserializer;
+
         private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
 
         private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
@@ -452,6 +468,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
             this.decoderParamDeserializer = new HeaderParamDeserializer<>(
                     "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+            this.constructorDecoderParamDeserializer = new HeaderParamDeserializer<>(
+                    "constructorDecoderParam",
+                    new DefaultDecoderService.ConstructorStringCollectionDecoder(runtime, this));
             this.constructorDeserializer = new HeaderParamDeserializer<>(
                     "constructor",
                     ParamDecoders.complexCollectionParamDecoder(
@@ -485,6 +504,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
             float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            String constructorDecoderParam = this.constructorDecoderParamDeserializer.deserialize(exchange);
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
             DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
             DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
@@ -501,6 +521,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             floatBoxed,
                             floatUnboxed,
                             decoderParam,
+                            constructorDecoderParam,
                             constructor,
                             ofFactory,
                             valueOfFactory,
@@ -551,6 +572,8 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderParamDeserializer;
 
+        private final Deserializer<String> constructorDecoderParamDeserializer;
+
         private final Deserializer<Float> floatBoxedDeserializer;
 
         private final Deserializer<Float> floatUnboxedDeserializer;
@@ -576,6 +599,8 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "booleanParam", ParamDecoders.booleanParamDecoder(runtime.plainSerDe()));
             this.decoderParamDeserializer =
                     new PathParamDeserializer<>("decoderParam", DefaultDecoderService.StringDecoder.INSTANCE);
+            this.constructorDecoderParamDeserializer = new PathParamDeserializer<>(
+                    "constructorDecoderParam", new DefaultDecoderService.ConstructorStringDecoder(runtime, this));
             this.floatBoxedDeserializer = new PathParamDeserializer<>(
                     "floatBoxed", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), Float::valueOf));
             this.floatUnboxedDeserializer = new PathParamDeserializer<>(
@@ -606,6 +631,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             String stringParam = this.stringParamDeserializer.deserialize(exchange);
             Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange);
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            String constructorDecoderParam = this.constructorDecoderParamDeserializer.deserialize(exchange);
             Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
             float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
@@ -619,6 +645,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             stringParam,
                             booleanParam,
                             decoderParam,
+                            constructorDecoderParam,
                             floatBoxed,
                             floatUnboxed,
                             constructor,
@@ -641,7 +668,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{constructor}/{ofFactory}/{valueOfFactory}/{fromStringFactory}/{createFactory}";
+            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{constructorDecoderParam}/{floatBoxed}/{floatUnboxed}/{constructor}/{ofFactory}/{valueOfFactory}/{fromStringFactory}/{createFactory}";
         }
 
         @Override

@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.services.dialogue;
 
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.squareup.javapoet.MethodSpec;
+import com.palantir.javapoet.MethodSpec;
 
 public interface StaticFactoryMethodGenerator {
     String CHANNEL = "_channel";

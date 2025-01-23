@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -13,7 +14,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public final class CollectionsTestObject {
             CollectionsTestAliasSet aset,
             CollectionsTestAliasMap amap) {
         validateFields(items, itemsMap, optionalItem, itemsSet, alist, aset, amap);
-        this.items = Collections.unmodifiableList(items);
+        this.items = ConjureCollections.unmodifiableList(items);
         this.itemsMap = Collections.unmodifiableMap(itemsMap);
         this.optionalItem = optionalItem;
         this.itemsSet = Collections.unmodifiableSet(itemsSet);
@@ -186,13 +186,13 @@ public final class CollectionsTestObject {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<String> items = new ArrayList<>();
+        private List<String> items = ConjureCollections.newList();
 
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
 
-        private Set<String> itemsSet = new LinkedHashSet<>();
+        private Set<String> itemsSet = ConjureCollections.newSet();
 
         private CollectionsTestAliasList alist = CollectionsTestAliasList.empty();
 
@@ -217,7 +217,7 @@ public final class CollectionsTestObject {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -268,8 +268,7 @@ public final class CollectionsTestObject {
         @JsonSetter(value = "itemsSet", nulls = Nulls.SKIP)
         public Builder itemsSet(@Nonnull Iterable<String> itemsSet) {
             checkNotBuilt();
-            this.itemsSet = ConjureCollections.newLinkedHashSet(
-                    Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
+            this.itemsSet = ConjureCollections.newSet(Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
@@ -306,6 +305,7 @@ public final class CollectionsTestObject {
             return this;
         }
 
+        @CheckReturnValue
         public CollectionsTestObject build() {
             checkNotBuilt();
             this._buildInvoked = true;

@@ -158,6 +158,21 @@ services:
         docs: |
           Gets all branches of this dataset.
         deprecated: use getBranches instead
+      getBranchesDeprecatedForRemoval:
+        http: GET /datasets/{datasetRid}/branchesDeprecatedForRemoval
+        args:
+          datasetRid:
+            type: rid
+            docs: |
+              A valid dataset resource identifier.
+            markers:
+              - Safe
+        returns: set<string>
+        docs: |
+          Gets all branches of this dataset.
+        deprecated: use getBranches instead
+        tags:
+          - deprecated-for-removal
 
       resolveBranch:
         http: GET /datasets/{datasetRid}/branches/{branch:.+}/resolve
@@ -263,3 +278,12 @@ services:
           strings:
             type: set<AliasedString>
             param-type: query
+  TestEmptyService:
+    name: Empty Test Service
+    package: com.palantir.another
+    default-auth: header
+    base-path: /testEmptyService
+    docs: |
+      This service has no endpoints.
+
+    endpoints: {}

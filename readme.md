@@ -24,13 +24,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --objects    Generate POJOs for Conjure type definitions
         --jersey     Generate jax-rs annotated interfaces for client or server-usage
         --undertow   Generate undertow handlers and interfaces for server-usage
-        --retrofit   Generate retrofit interfaces for streaming/async clients
         --requireNotNullAuthAndBodyParams
                      Generate @NotNull annotations for AuthHeaders and request body params
-        --retrofitCompletableFutures
-                     Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call (deprecated)
-        --retrofitListenableFutures
-                     Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call
         --undertowServicePrefixes
                      Generate service interfaces for Undertow with class names prefixed 'Undertow'
         --undertowListenableFutures
@@ -49,6 +44,10 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --jakartaPackages
                      Generates jax-rs annotated interfaces which use the newer 'jakarta` packages instead of the
                      legacy 'javax' packages.
+        --externalFallbackTypes
+                     Java external type imports are generated using their fallback type.
+        --excludeDialogueAsyncInterfaces
+                     Exclude the generation of asynchronous interfaces for Dialogue clients.
         --excludeStaticFactoryMethods
                      Exclude static factory methods from generated objects with one or more fields. Note that for 
                      objects without any fields, this will still generate the static factory method.
@@ -60,6 +59,7 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 * `incubating`: Describes an endpoint as incubating and likely to change. These endpoints are generated with an `@Incubating` annotation.
 * `server-request-context`: Opt into an additional [RequestContext](conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/RequestContext.java) parameter in conjure-undertow interfaces, which allows request metadata to be read, and additional arguments to be associated with the request log.
 * `server-async`: Opt into [asynchronous request processing](#asynchronous-request-processing) in conjure-undertow. The generated interface returns a `ListenableFuture` of the defined return type, allowing processing to occur in the background without blocking the request thread.
+* `deprecated-for-removal`: For endpoint definitions that [are marked deprecated](https://github.com/palantir/conjure/blob/master/docs/spec/conjure_definitions.md#endpointdefinition), indicates that the endpoint will be removed in a future release. This has the effect of Java code being generated with an `@Deprecated(forRemoval = true)` annotation on the endpoint method in the Dialogue service interface.
 
 #### Endpoint Argument Tags
 
@@ -208,36 +208,6 @@ Then in your server main method, [register your resource](https://github.com/dro
  }
 ```
 
-## Example Retrofit2 interfaces
-
-As an alternative to the JAX-RS interfaces above, conjure-java can generate equivalent interfaces with [Retrofit2](http://square.github.io/retrofit/) annotations. These clients are useful if you want to stream binary data or make non-blocking async calls:
-
-Example Retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
-
-```java
-public interface EteServiceRetrofit {
-
-    @GET("./base/binary")
-    @Streaming
-    Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
-}
-```
-
-### Retrofit2 clients
-
-Use [conjure-java-runtime's `Retrofit2Client`](https://github.com/palantir/conjure-java-runtime#conjure-java-retrofit2-client) which configures Retrofit2 with sensible defaults:
-
-
-```java
-RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
-            RecipeBookServiceRetrofit.class,
-            userAgent,
-            hostMetrics,
-            clientConfiguration);
-
-Call<List<Recipe>> asyncResults = recipes.getRecipes();
-```
-
 ## Undertow
 
 In the undertow setting, for a `ServiceName` conjure defined service, conjure will generate an interface: `ServiceName` to be extended by your resource and an [UndertowService](https://github.com/palantir/conjure-java/blob/develop/conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/UndertowService.java) named `ServiceNameEndpoints`
@@ -307,13 +277,13 @@ extending the tag value using the form `server-async{timeout=5 minutes}`.
 *Asynchronous request processing is helpful for endpoints which do not need a thread for the entirety of
 the request.*
 
-:+1: Delegation to an asynchronous client, for instance either retrofit or dialogue :+1:
+:+1: Delegation to an asynchronous client, for instance dialogue :+1:
 
 ```java
 @Override
 public ListenableFuture<String> getValue() {
-    // Assuming this retrofit client was compiled with --retrofitListenableFutures
-    return retrofitClient.getValue();
+    // Assuming this dialogue client was compiled with --undertowListenableFutures
+    return dialogueClient.getValue();
 }
 ```
 

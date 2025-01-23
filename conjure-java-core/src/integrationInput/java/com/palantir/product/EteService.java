@@ -31,11 +31,14 @@ import javax.ws.rs.core.StreamingOutput;
 public interface EteService {
     /**
      * foo bar baz.
+     *
      * <h2>Very Important Documentation</h2>
-     * <p>This documentation provides a <em>list</em>:</p>
+     *
+     * <p>This documentation provides a <em>list</em>:
+     *
      * <ul>
-     * <li>Docs rule</li>
-     * <li>Lists are wonderful</li>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
      * </ul>
      */
     @GET
@@ -43,9 +46,7 @@ public interface EteService {
     @ClientEndpoint(method = "GET", path = "/base/string")
     String string(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
-    /**
-     * one <em>two</em> three.
-     */
+    /** one <em>two</em> three. */
     @GET
     @Path("base/integer")
     @ClientEndpoint(method = "GET", path = "/base/integer")
@@ -99,6 +100,7 @@ public interface EteService {
 
     /**
      * Path endpoint.
+     *
      * @param param Documentation for <code>param</code>
      */
     @GET

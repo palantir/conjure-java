@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.SafeLong;
 import java.math.BigDecimal;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
@@ -27,15 +26,16 @@ public final class AliasedDouble implements Comparable<AliasedDouble> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof AliasedDouble
-                        && Double.doubleToLongBits(this.value)
-                                == Double.doubleToLongBits(((AliasedDouble) other).value));
+        return this == other || (other instanceof AliasedDouble && equalTo((AliasedDouble) other));
+    }
+
+    private boolean equalTo(AliasedDouble other) {
+        return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
     }
 
     @Override
     public int hashCode() {
-        return Double.hashCode(value);
+        return Double.hashCode(this.value);
     }
 
     @Override
@@ -54,8 +54,7 @@ public final class AliasedDouble implements Comparable<AliasedDouble> {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static AliasedDouble of(long value) {
-        long safeValue = SafeLong.of(value).longValue();
-        return new AliasedDouble((double) safeValue);
+        return new AliasedDouble((double) value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

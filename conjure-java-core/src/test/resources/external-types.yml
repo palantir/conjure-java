@@ -1,0 +1,40 @@
+types:
+  imports:
+    ExternalLong:
+      base-type: string
+      safety: safe
+      external:
+        # an intentionally unavailable class
+        java: com.my.custom.Long
+  definitions:
+    default-package: com.palantir.product.external
+    errors:
+      ErrorWithExternalRef:
+        namespace: Conjure
+        code: INVALID_ARGUMENT
+        docs: Invalid Conjure type definition.
+        safe-args:
+          arg: ExternalLong
+    objects:
+      ObjectWithExternalField:
+        fields:
+          field: ExternalLong
+      AliasToExternal:
+        alias: ExternalLong
+      UnionWithExternal:
+        docs: A type which can either be a StringExample, a set of strings, or an integer.
+        union:
+          field: ExternalLong
+services:
+  ServiceUsingExternalTypes:
+    name: ServiceUsingExternalTypes
+    default-auth: none
+    base-path: /
+    package: com.palantir.product.external
+    endpoints:
+      external:
+        http: PUT /external/{path}
+        args:
+          path: ExternalLong
+          body: list<ExternalLong>
+        returns: map<ExternalLong, ExternalLong>

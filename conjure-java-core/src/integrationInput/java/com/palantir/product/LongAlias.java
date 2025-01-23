@@ -25,12 +25,16 @@ public final class LongAlias {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof LongAlias && this.value == ((LongAlias) other).value);
+        return this == other || (other instanceof LongAlias && equalTo((LongAlias) other));
+    }
+
+    private boolean equalTo(LongAlias other) {
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(value);
+        return Long.hashCode(this.value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -37,24 +36,24 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.Type.Visitor;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeName;
+import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 public final class AliasGenerator {
@@ -74,11 +73,13 @@ public final class AliasGenerator {
         Optional<LogSafety> computedSafety = safetyEvaluator.evaluate(typeDef.getAlias(), safety);
         ImmutableList<AnnotationSpec> computedSafetyAnnotations = ConjureAnnotations.safety(computedSafety);
 
+        List<FieldSpec> fields = List.of(FieldSpec.builder(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
+                .build());
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
                 .addAnnotations(computedSafetyAnnotations)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addField(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
+                .addFields(fields)
                 .addMethod(createConstructor(aliasTypeName))
                 .addMethod(MethodSpec.methodBuilder("get")
                         .addModifiers(Modifier.PUBLIC)
@@ -92,22 +93,18 @@ public final class AliasGenerator {
                         .addAnnotations(safetyAnnotations)
                         .returns(String.class)
                         .addCode(primitiveSafeToString(aliasTypeName))
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("equals")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(ParameterSpec.builder(ClassName.OBJECT, "other")
-                                .addAnnotation(Nullable.class)
-                                .build())
-                        .returns(TypeName.BOOLEAN)
-                        .addCode(primitiveSafeEquality(thisClass, aliasTypeName, typeDef))
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("hashCode")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .returns(TypeName.INT)
-                        .addCode(primitiveSafeHashCode(aliasTypeName))
                         .build());
+
+        if (typeDef.getAlias().accept(BeanGenerator.FieldRequiresMemoizedHashCode.INSTANCE)) {
+            // only use memoized hashCode for complex alias types
+            spec.addMethod(MethodSpecs.createEquals(thisClass))
+                    .addMethod(MethodSpecs.createEqualTo(thisClass, fields, true));
+            MethodSpecs.addCachedHashCode(spec, fields);
+        } else {
+            spec.addMethod(MethodSpecs.createEquals(thisClass))
+                    .addMethod(MethodSpecs.createEqualTo(thisClass, fields))
+                    .addMethod(MethodSpecs.createHashCode(fields));
+        }
 
         typeDef.getAlias().accept(new ComparableVisitor(thisClass)).ifPresent(compareTo -> spec.addSuperinterface(
                         ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
@@ -150,8 +147,7 @@ public final class AliasGenerator {
 
         if (isAliasOfDouble(typeDef)) {
             CodeBlock longCastCodeBlock = CodeBlock.builder()
-                    .addStatement("long safeValue = $T.of(value).longValue()", SafeLong.class)
-                    .addStatement("return new $T((double) safeValue)", thisClass)
+                    .addStatement("return new $T((double) value)", thisClass)
                     .build();
 
             CodeBlock intCastCodeBlock = CodeBlock.builder()
@@ -426,43 +422,11 @@ public final class AliasGenerator {
         return builder.build();
     }
 
-    private static CodeBlock primitiveSafeEquality(
-            ClassName thisClass, TypeName aliasTypeName, AliasDefinition typeDef) {
-        if (isAliasOfDouble(typeDef)) {
-            return CodeBlocks.statement(
-                    "return this == other || "
-                            + "("
-                            + "other instanceof $1T "
-                            + "&& "
-                            + "$2T.doubleToLongBits(this.value) == "
-                            + "$2T.doubleToLongBits((($1T) other).value)"
-                            + ")",
-                    thisClass,
-                    Double.class);
-        }
-
-        if (Primitives.isPrimitive(aliasTypeName)) {
-            return CodeBlocks.statement(
-                    "return this == other || (other instanceof $1T && this.value == (($1T) other).value)", thisClass);
-        }
-
-        return CodeBlocks.statement(
-                "return this == other || (other instanceof $1T && this.value.equals((($1T) other).value))", thisClass);
-    }
-
     private static CodeBlock primitiveSafeToString(TypeName aliasTypeName) {
         if (Primitives.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement("return $T.valueOf(value)", String.class);
         }
         return CodeBlocks.statement("return value.toString()");
-    }
-
-    private static CodeBlock primitiveSafeHashCode(TypeName aliasTypeName) {
-        if (Primitives.isPrimitive(aliasTypeName)) {
-            return CodeBlocks.statement(
-                    "return $T.hashCode(value)", Primitives.box(aliasTypeName).withoutAnnotations());
-        }
-        return CodeBlocks.statement("return value.hashCode()");
     }
 
     private static final class ComparableVisitor implements Type.Visitor<Optional<MethodSpec>> {

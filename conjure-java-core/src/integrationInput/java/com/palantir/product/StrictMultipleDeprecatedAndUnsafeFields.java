@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
@@ -54,7 +55,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             Map<ResourceIdentifier, String> mappedRids,
             StrictFourFields strictFourFieldsObject) {
         validateFields(myList, bearerTokenValue, safeLongValue, optionalItem, mappedRids, strictFourFieldsObject);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.safeLongValue = safeLongValue;
         this.myInteger = myInteger;
@@ -65,6 +66,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     /**
      * these are docs.
+     *
      * @deprecated this is deprecated.
      */
     @JsonProperty("myList")
@@ -74,9 +76,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         return this.myList;
     }
 
-    /**
-     * @deprecated this is deprecated.
-     */
+    /** @deprecated this is deprecated. */
     @JsonProperty("bearerTokenValue")
     @Deprecated
     public BearerToken getBearerTokenValue() {
@@ -227,6 +227,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictMultipleDeprecatedAndUnsafeFields build();
     }
 
@@ -266,6 +267,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @Override
         Builder strictFourFieldsObject(@Nonnull StrictFourFields strictFourFieldsObject);
 
+        @CheckReturnValue
         @Override
         StrictMultipleDeprecatedAndUnsafeFields build();
     }
@@ -275,7 +277,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<@Unsafe String> myList = new ArrayList<>();
+        private List<@Unsafe String> myList = ConjureCollections.newList();
 
         private BearerToken bearerTokenValue;
 
@@ -308,6 +310,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         /**
          * these are docs.
+         *
          * @deprecated this is deprecated.
          */
         @Deprecated
@@ -315,13 +318,11 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<@Unsafe String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 
-        /**
-         * @deprecated this is deprecated.
-         */
+        /** @deprecated this is deprecated. */
         @Deprecated
         @Override
         @JsonSetter("bearerTokenValue")
@@ -401,6 +402,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         @Override
+        @CheckReturnValue
         public StrictMultipleDeprecatedAndUnsafeFields build() {
             checkNotBuilt();
             this._buildInvoked = true;

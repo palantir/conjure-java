@@ -29,9 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-/**
- * A type which can either be a StringExample, a set of strings, or an integer.
- */
+/** A type which can either be a StringExample, a set of strings, or an integer. */
 @Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
@@ -47,9 +45,7 @@ public final class UnionTypeExample {
         return value;
     }
 
-    /**
-     * Docs for when UnionTypeExample is of type StringExample.
-     */
+    /** Docs for when UnionTypeExample is of type StringExample. */
     public static UnionTypeExample stringExample(StringExample value) {
         return new UnionTypeExample(new StringExampleWrapper(value));
     }
@@ -215,9 +211,7 @@ public final class UnionTypeExample {
     }
 
     public interface Visitor<T> {
-        /**
-         * Docs for when UnionTypeExample is of type StringExample.
-         */
+        /** Docs for when UnionTypeExample is of type StringExample. */
         T visitStringExample(StringExample value);
 
         T visitThisFieldIsAnInteger(int value);

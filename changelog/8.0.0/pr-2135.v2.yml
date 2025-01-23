@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Remove Retrofit Client Generation
+  links:
+  - https://github.com/palantir/conjure-java/pull/2135

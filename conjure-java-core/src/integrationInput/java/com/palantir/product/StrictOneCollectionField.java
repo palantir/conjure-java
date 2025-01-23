@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,7 +25,7 @@ public final class StrictOneCollectionField {
 
     private StrictOneCollectionField(List<String> myList) {
         validateFields(myList);
-        this.myList = Collections.unmodifiableList(myList);
+        this.myList = ConjureCollections.unmodifiableList(myList);
     }
 
     @JsonProperty("myList")
@@ -98,6 +98,7 @@ public final class StrictOneCollectionField {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictOneCollectionField build();
     }
 
@@ -108,6 +109,7 @@ public final class StrictOneCollectionField {
         @Override
         Builder from(StrictOneCollectionField other);
 
+        @CheckReturnValue
         @Override
         StrictOneCollectionField build();
     }
@@ -117,7 +119,7 @@ public final class StrictOneCollectionField {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<String> myList = new ArrayList<>();
+        private List<String> myList = ConjureCollections.newList();
 
         private DefaultBuilder() {}
 
@@ -132,11 +134,12 @@ public final class StrictOneCollectionField {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 
         @Override
+        @CheckReturnValue
         public StrictOneCollectionField build() {
             checkNotBuilt();
             this._buildInvoked = true;

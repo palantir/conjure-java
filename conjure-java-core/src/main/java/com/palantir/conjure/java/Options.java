@@ -163,6 +163,21 @@ public interface Options {
         return false;
     }
 
+    /** When set, external type imports are generated as their fallback types. */
+    @Value.Default
+    default boolean externalFallbackTypes() {
+        return false;
+    }
+
+    /**
+     * Java 24's loom support removes the need for async interfaces. When set to true, only Dialogue interfaces for
+     * blocking clients will be generated. The Dialogue async interfaces will not be generated.
+     */
+    @Value.Default
+    default boolean excludeDialogueAsyncInterfaces() {
+        return false;
+    }
+
     /**
      * If set to true, static factory methods ('of') will be excluded from generated objects with one or more fields.
      * Note that for objects without any fields, static factory methods will still be generated.

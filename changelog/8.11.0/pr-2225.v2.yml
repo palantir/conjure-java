@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix externalFallbackTypes to also apply to endpoint return types
+  links:
+  - https://github.com/palantir/conjure-java/pull/2225

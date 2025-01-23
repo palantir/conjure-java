@@ -21,15 +21,11 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceAsync.Factory.class)
 public interface EmptyPathServiceAsync {
-    /**
-     * @apiNote {@code GET /}
-     */
+    /** @apiNote {@code GET /} */
     @ClientEndpoint(method = "GET", path = "/")
     ListenableFuture<Boolean> emptyPath();
 
-    /**
-     * Creates an asynchronous/non-blocking client for a EmptyPathService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a EmptyPathService service. */
     static EmptyPathServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EmptyPathServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -54,9 +50,7 @@ public interface EmptyPathServiceAsync {
         };
     }
 
-    /**
-     * Creates an asynchronous/non-blocking client for a EmptyPathService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a EmptyPathService service. */
     static EmptyPathServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);

@@ -50,15 +50,15 @@ public interface EteBinaryService {
     @ClientEndpoint(method = "GET", path = "/binary/optional/empty")
     Optional<StreamingOutput> getOptionalBinaryEmpty(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
-    /**
-     * Throws an exception after partially writing a binary response.
-     */
+    /** Throws an exception after partially writing a binary response. */
     @GET
     @Path("binary/failure")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ClientEndpoint(method = "GET", path = "/binary/failure")
     StreamingOutput getBinaryFailure(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @QueryParam("numBytes") int numBytes);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("numBytes") int numBytes,
+            @QueryParam("useTryWithResources") boolean useTryWithResources);
 
     @GET
     @Path("binary/aliased")

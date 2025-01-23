@@ -41,6 +41,9 @@ services:
           numBytes:
             type: integer
             param-type: query
+          useTryWithResources:
+            type: boolean
+            param-type: query
         docs: Throws an exception after partially writing a binary response.
         returns: binary
       getAliased:

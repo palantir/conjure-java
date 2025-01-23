@@ -15,6 +15,8 @@ public final class OptionalSetAliasExample {
 
     private final Optional<Set<String>> value;
 
+    private int memoizedHashCode;
+
     private OptionalSetAliasExample(@Nonnull Optional<Set<String>> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
@@ -35,14 +37,26 @@ public final class OptionalSetAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof OptionalSetAliasExample
-                        && this.value.equals(((OptionalSetAliasExample) other).value));
+        return this == other || (other instanceof OptionalSetAliasExample && equalTo((OptionalSetAliasExample) other));
+    }
+
+    private boolean equalTo(OptionalSetAliasExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = this.value.hashCode();
+            memoizedHashCode = result;
+        }
+        return result;
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

@@ -137,9 +137,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
         }
     },
 
-    /**
-     * Throws an exception after partially writing a binary response.
-     */
+    /** Throws an exception after partially writing a binary response. */
     getBinaryFailure {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("binary").fixed("failure").build();
