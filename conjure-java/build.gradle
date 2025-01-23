@@ -15,7 +15,6 @@
  */
 
 apply plugin: 'com.palantir.external-publish-application-dist'
-apply plugin: 'org.revapi.revapi-gradle-plugin'
 
 mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
