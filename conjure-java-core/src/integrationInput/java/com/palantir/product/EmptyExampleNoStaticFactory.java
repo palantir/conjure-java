@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.logsafe.Safe;
 import javax.annotation.processing.Generated;
 
-/**
- * There are no fields in this type. A static factory method (<code>of</code>) should be generated.
- */
+/** There are no fields in this type. A static factory method (<code>of</code>) should be generated. */
 @Safe
 @JsonSerialize
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,7 +22,7 @@ public final class EmptyExampleNoStaticFactory {
         return "EmptyExampleNoStaticFactory{}";
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static EmptyExampleNoStaticFactory of() {
         return INSTANCE;
     }
