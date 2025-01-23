@@ -114,7 +114,7 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                                         .build()),
                                 new DialogueServiceGenerator(Options.builder()
                                         .apiVersion("1.2.3")
-                                        .excludeDialogueAsyncInterfaces(true) // TODO(pm): excluding for testing.
+                                        .excludeDialogueAsyncInterfaces(false)
                                         .generateDialogueEndpointErrorResultTypes(true)
                                         .build())))
                 .emit(def, folder);

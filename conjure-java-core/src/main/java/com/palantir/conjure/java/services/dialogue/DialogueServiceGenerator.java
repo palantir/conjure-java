@@ -22,7 +22,6 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -53,8 +52,6 @@ public final class DialogueServiceGenerator implements Generator {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
-        // TODO(pm): only evaluate this if the option is set
-        DeclaredEndpointErrors declaredEndpointErrors = DeclaredEndpointErrors.from(conjureDefinition);
         TypeMapper parameterTypes = new TypeMapper(
                 types,
                 new SpecializeBinaryClassNameVisitor(
@@ -78,16 +75,14 @@ public final class DialogueServiceGenerator implements Generator {
                 typeNameResolver,
                 parameterMapper,
                 new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.ASYNC,
-                declaredEndpointErrors);
+                StaticFactoryMethodType.ASYNC);
 
         StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
                 options,
                 typeNameResolver,
                 parameterMapper,
                 new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.BLOCKING,
-                declaredEndpointErrors);
+                StaticFactoryMethodType.BLOCKING);
 
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateFilesForService(
