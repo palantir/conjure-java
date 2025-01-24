@@ -118,21 +118,7 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                                         .generateDialogueEndpointErrorResultTypes(true)
                                         .build())))
                 .emit(def, folder);
-        // validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
-        validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
-    }
-
-    private void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
-        for (Path file : files) {
-            Path relativePath = folder.toPath().relativize(file);
-            Path output = outputDir.resolve(relativePath);
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.createDirectories(relativePath.getParent());
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
+        TestBase.validateGeneratedOutput(folder.toPath(), files, Paths.get("src/integrationInput/java"));
     }
 
     @Test

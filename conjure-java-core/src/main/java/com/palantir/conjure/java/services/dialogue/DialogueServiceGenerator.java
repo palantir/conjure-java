@@ -22,6 +22,7 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.ErrorGenerationUtils.ErrorNameToParameterExistenceMapping;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -64,8 +65,10 @@ public final class DialogueServiceGenerator implements Generator {
                         new DefaultClassNameVisitor(types.keySet(), options), types, ClassName.get(InputStream.class)));
         ParameterTypeMapper parameterMapper = new ParameterTypeMapper(parameterTypes, safetyEvaluator);
 
-        DialogueInterfaceGenerator interfaceGenerator =
-                new DialogueInterfaceGenerator(options, parameterMapper, new ReturnTypeMapper(returnTypes));
+        ErrorNameToParameterExistenceMapping errorNameToParameterExistenceMapping =
+                ErrorNameToParameterExistenceMapping.from(conjureDefinition);
+        DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
+                options, parameterMapper, new ReturnTypeMapper(returnTypes), errorNameToParameterExistenceMapping);
 
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 types.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));

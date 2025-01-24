@@ -74,6 +74,7 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -590,21 +591,8 @@ public final class UndertowServiceEteTest extends TestBase {
                                 new ErrorGenerator(options),
                                 new CheckedErrorGenerator(options)))
                 .emit(def, folder);
-        // validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
+        TestBase.validateGeneratedOutput(folder.toPath(), files, Paths.get("src/integrationInput/java"));
     }
-
-    //    private static void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
-    //        for (Path file : files) {
-    //            Path relativePath = folder.toPath().relativize(file);
-    //            Path output = outputDir.resolve(relativePath);
-    //            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-    //                Files.createDirectories(relativePath.getParent());
-    //                Files.deleteIfExists(output);
-    //                Files.copy(file, output);
-    //            }
-    //            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-    //        }
-    //    }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
         URL url = new URL("http://localhost:" + port + "/test-example/api" + path);
