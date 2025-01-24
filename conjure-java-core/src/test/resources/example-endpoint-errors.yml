@@ -46,3 +46,13 @@ services:
         http: GET /empty
         errors:
           - InvalidArgument
+      testBinary:
+        http: GET /binary
+        returns: binary
+        errors:
+          - InvalidArgument
+      testOptionalBinary:
+        http: GET /optional-binary
+        returns: optional<binary>
+        errors:
+          - InvalidArgument

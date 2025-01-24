@@ -128,7 +128,8 @@ public final class DialogueInterfaceGenerator {
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
         serviceBuilder.addMethods(def.getEndpoints().stream()
-                .map(endpoint -> apiMethod(packageName, className, endpoint, serviceCallType))
+                .map(endpoint -> apiMethod(
+                        packageName, className, endpoint, generateDialogueEndpointErrorResultTypes, serviceCallType))
                 .collect(toList()));
 
         if (generateDialogueEndpointErrorResultTypes) {
@@ -237,9 +238,13 @@ public final class DialogueInterfaceGenerator {
                 MethodSpec.compactConstructorBuilder().addModifiers(Modifier.PUBLIC);
         TypeName returnType = returnTypes.baseType(endpointDef.getReturns());
         if (!returnType.equals(TypeName.VOID)) {
-            successCtorBuilder
-                    .addParameter(ParameterSpec.builder(returnType, "value").build())
-                    .addStatement("$T.checkArgumentNotNull(value, \"value cannot be null\")", Preconditions.class);
+            successCtorBuilder.addStatement(
+                    "$T.checkArgumentNotNull(value, \"value cannot be null\")", Preconditions.class);
+            ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(returnType, "value");
+            if (TypeName.get(InputStream.class).equals(returnType)) {
+                parameterBuilder.addAnnotation(MustBeClosed.class);
+            }
+            successCtorBuilder.addParameter(parameterBuilder.build());
         }
 
         successRecordBuilder
@@ -287,6 +292,7 @@ public final class DialogueInterfaceGenerator {
             String packageName,
             ClassName className,
             EndpointDefinition endpointDef,
+            boolean generateDialogueEndpointErrorResultTypes,
             StaticFactoryMethodType serviceCallType) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         endpointDef.getEndpointName().get())
@@ -320,16 +326,20 @@ public final class DialogueInterfaceGenerator {
                 endpointDef,
                 new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
-        // TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
-        TypeName returnType = ClassName.get(
-                packageName,
-                className.simpleName(),
-                ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
-        methodBuilder.returns(serviceCallType.switchBy(
-                returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType)));
-
-        if (TypeName.get(InputStream.class).equals(returnType)) {
-            methodBuilder.addAnnotation(MustBeClosed.class);
+        if (generateDialogueEndpointErrorResultTypes) {
+            TypeName returnType = ClassName.get(
+                    packageName,
+                    className.simpleName(),
+                    ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
+            methodBuilder.returns(serviceCallType.switchBy(
+                    returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType)));
+        } else {
+            TypeName returnType = serviceCallType.switchBy(
+                    returnTypes.baseType(endpointDef.getReturns()), returnTypes.async(endpointDef.getReturns()));
+            methodBuilder.returns(returnType);
+            if (TypeName.get(InputStream.class).equals(returnType)) {
+                methodBuilder.addAnnotation(MustBeClosed.class);
+            }
         }
 
         return methodBuilder.build();

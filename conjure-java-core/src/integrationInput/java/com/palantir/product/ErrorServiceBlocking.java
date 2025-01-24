@@ -2,6 +2,7 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.ConjureErrors;
 import com.palantir.dialogue.Channel;
@@ -18,8 +19,10 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
+import java.io.InputStream;
 import java.lang.Override;
 import java.lang.String;
+import java.util.Optional;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
@@ -40,6 +43,14 @@ public interface ErrorServiceBlocking {
     /** @apiNote {@code GET /base/empty} */
     @ClientEndpoint(method = "GET", path = "/base/empty")
     TestEmptyBodyResponse testEmptyBody(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /base/binary} */
+    @ClientEndpoint(method = "GET", path = "/base/binary")
+    TestBinaryResponse testBinary(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /base/optional-binary} */
+    @ClientEndpoint(method = "GET", path = "/base/optional-binary")
+    TestOptionalBinaryResponse testOptionalBinary(AuthHeader authHeader);
 
     /** Creates a synchronous/blocking client for a ErrorService service. */
     static ErrorServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -105,6 +116,30 @@ public interface ErrorServiceBlocking {
                                     new TypeMarker<TestEmptyBodyResponse.InvalidArgument>() {})
                             .build());
 
+            private final EndpointChannel testBinaryChannel =
+                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBinary);
+
+            private final Deserializer<TestBinaryResponse> testBinaryDeserializer = _runtime.bodySerDe()
+                    .inputStreamDeserializer(DeserializerArgs.<TestBinaryResponse>builder()
+                            .baseType(new TypeMarker<>() {})
+                            .success(new TypeMarker<TestBinaryResponse.Success>() {})
+                            .error(
+                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    new TypeMarker<TestBinaryResponse.InvalidArgument>() {})
+                            .build());
+
+            private final EndpointChannel testOptionalBinaryChannel =
+                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testOptionalBinary);
+
+            private final Deserializer<TestOptionalBinaryResponse> testOptionalBinaryDeserializer = _runtime.bodySerDe()
+                    .optionalInputStreamDeserializer(DeserializerArgs.<TestOptionalBinaryResponse>builder()
+                            .baseType(new TypeMarker<>() {})
+                            .success(new TypeMarker<TestOptionalBinaryResponse.Success>() {})
+                            .error(
+                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    new TypeMarker<TestOptionalBinaryResponse.InvalidArgument>() {})
+                            .build());
+
             @Override
             public TestBasicErrorResponse testBasicError(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
@@ -138,6 +173,21 @@ public interface ErrorServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
                         .callBlocking(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
+            }
+
+            @Override
+            public TestBinaryResponse testBinary(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().callBlocking(testBinaryChannel, _request.build(), testBinaryDeserializer);
+            }
+
+            @Override
+            public TestOptionalBinaryResponse testOptionalBinary(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
             }
 
             @Override
@@ -287,6 +337,45 @@ public interface ErrorServiceBlocking {
 
         final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestEmptyBodyResponse {
+            @JsonCreator
+            InvalidArgument(
+                    @JsonProperty("errorCode") String errorCode,
+                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
+                super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
+            }
+        }
+    }
+
+    sealed interface TestBinaryResponse permits TestBinaryResponse.Success, TestBinaryResponse.InvalidArgument {
+        record Success(@MustBeClosed InputStream value) implements TestBinaryResponse {
+            public Success {
+                Preconditions.checkArgumentNotNull(value, "value cannot be null");
+            }
+        }
+
+        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+                implements TestBinaryResponse {
+            @JsonCreator
+            InvalidArgument(
+                    @JsonProperty("errorCode") String errorCode,
+                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
+                super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
+            }
+        }
+    }
+
+    sealed interface TestOptionalBinaryResponse
+            permits TestOptionalBinaryResponse.Success, TestOptionalBinaryResponse.InvalidArgument {
+        record Success(Optional<InputStream> value) implements TestOptionalBinaryResponse {
+            public Success {
+                Preconditions.checkArgumentNotNull(value, "value cannot be null");
+            }
+        }
+
+        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+                implements TestOptionalBinaryResponse {
             @JsonCreator
             InvalidArgument(
                     @JsonProperty("errorCode") String errorCode,
