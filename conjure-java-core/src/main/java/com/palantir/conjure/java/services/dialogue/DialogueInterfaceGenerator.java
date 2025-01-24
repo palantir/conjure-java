@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureErrors;
 import com.palantir.conjure.java.lib.internal.ConjureErrors.BaseEndpointError;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
@@ -32,9 +33,11 @@ import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDo
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
 import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
+import com.palantir.conjure.java.util.ErrorGenerationUtils.ErrorNameToParameterExistenceMapping;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointError;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
@@ -66,12 +69,17 @@ public final class DialogueInterfaceGenerator {
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
+    private final ErrorNameToParameterExistenceMapping errorNameToParameterExistenceMapping;
 
     public DialogueInterfaceGenerator(
-            Options options, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+            Options options,
+            ParameterTypeMapper parameterTypes,
+            ReturnTypeMapper returnTypes,
+            ErrorNameToParameterExistenceMapping errorNameToParameterExistenceMapping) {
         this.options = options;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
+        this.errorNameToParameterExistenceMapping = errorNameToParameterExistenceMapping;
     }
 
     public JavaFile generateBlocking(
@@ -185,34 +193,12 @@ public final class DialogueInterfaceGenerator {
         ClassName responseTypeName = ClassName.get(
                 packageName,
                 className.simpleName(),
-                ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
+                ErrorGenerationUtils.endpointResponseResultTypeName(endpointDef.getEndpointName()));
         TypeSpec successRecord = createSuccessRecord(packageName, className, responseTypeName, endpointDef);
         // Create a record for each of the endpoint's errors
         List<TypeSpec> errorTypes = new ArrayList<>();
         for (EndpointError endpointError : endpointDef.getErrors()) {
-            String errorTypeName = CaseFormat.UPPER_CAMEL.to(
-                    CaseFormat.UPPER_UNDERSCORE, endpointError.getError().getName());
-            ClassName errorTypesClassName = ClassName.get(
-                    endpointError.getError().getPackage(),
-                    ErrorGenerationUtils.errorTypesClassName(
-                            endpointError.getError().getNamespace()),
-                    errorTypeName);
-            ClassName parametersClassName = ClassName.get(
-                    endpointError.getError().getPackage(),
-                    ErrorGenerationUtils.errorTypesClassName(
-                            endpointError.getError().getNamespace()),
-                    ErrorGenerationUtils.errorParametersClassName(
-                            endpointError.getError().getName()));
-            TypeSpec endpointErrorType = TypeSpec.classBuilder(ClassName.get(
-                            packageName,
-                            responseTypeName.simpleName(),
-                            endpointError.getError().getName()))
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                    .addSuperinterface(responseTypeName)
-                    .superclass(ParameterizedTypeName.get(ClassName.get(BaseEndpointError.class), parametersClassName))
-                    .addMethod(errorTypeConstructor(parametersClassName, errorTypesClassName))
-                    .build();
-            errorTypes.add(endpointErrorType);
+            errorTypes.add(constructEndpointErrorType(endpointError, packageName, responseTypeName));
         }
 
         // Get type from typespec
@@ -227,6 +213,39 @@ public final class DialogueInterfaceGenerator {
                 .addType(successRecord)
                 .addTypes(errorTypes)
                 .build();
+    }
+
+    private TypeSpec constructEndpointErrorType(
+            EndpointError endpointError, String packageName, ClassName responseTypeName) {
+        String errorTypeName = CaseFormat.UPPER_CAMEL.to(
+                CaseFormat.UPPER_UNDERSCORE, endpointError.getError().getName());
+        ClassName errorTypesClassName = ClassName.get(
+                endpointError.getError().getPackage(),
+                ErrorGenerationUtils.errorTypesClassName(
+                        endpointError.getError().getNamespace()),
+                errorTypeName);
+
+        TypeSpec.Builder endpointErrorTypeBuilder = TypeSpec.classBuilder(ClassName.get(
+                        packageName,
+                        responseTypeName.simpleName(),
+                        endpointError.getError().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(responseTypeName);
+        ClassName parametersClassName;
+        if (errorNameToParameterExistenceMapping.hasParameters(endpointError.getError())) {
+            parametersClassName = ClassName.get(
+                    endpointError.getError().getPackage(),
+                    ErrorGenerationUtils.errorTypesClassName(
+                            endpointError.getError().getNamespace()),
+                    ErrorGenerationUtils.errorParametersClassName(
+                            endpointError.getError().getName()));
+        } else {
+            parametersClassName = ClassName.get(ConjureErrors.EmptyErrorParameters.class);
+        }
+        endpointErrorTypeBuilder
+                .superclass(ParameterizedTypeName.get(ClassName.get(BaseEndpointError.class), parametersClassName))
+                .addMethod(errorTypeConstructor(endpointError.getError(), parametersClassName, errorTypesClassName));
+        return endpointErrorTypeBuilder.build();
     }
 
     private TypeSpec createSuccessRecord(
@@ -263,7 +282,8 @@ public final class DialogueInterfaceGenerator {
         return successRecordBuilder.build();
     }
 
-    private MethodSpec errorTypeConstructor(ClassName parametersClassName, ClassName errorTypesClassName) {
+    private MethodSpec errorTypeConstructor(
+            ErrorTypeName errorTypeName, ClassName parametersClassName, ClassName errorTypesClassName) {
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
                 .addAnnotation(JsonCreator.class)
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorCode")
@@ -275,16 +295,20 @@ public final class DialogueInterfaceGenerator {
                         .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                                 .addMember("value", "$S", "errorInstanceId")
                                 .build())
-                        .build())
-                // TODO(pm): Only add the parameters if the error has them. Plumb in error definitions.
-                .addParameter(ParameterSpec.builder(parametersClassName, "parameters")
-                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                .addMember("value", "$S", "parameters")
-                                .build())
-                        .build())
-                .addStatement(
-                        // TODO(pm): Perhaps these shouldn't be literals but names ($N).
-                        "super(errorCode, $T.name(), errorInstanceId, parameters)", errorTypesClassName);
+                        .build());
+        if (errorNameToParameterExistenceMapping.hasParameters(errorTypeName)) {
+            ctorBuilder.addParameter(ParameterSpec.builder(parametersClassName, "parameters")
+                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                            .addMember("value", "$S", "parameters")
+                            .build())
+                    .build());
+            ctorBuilder.addStatement("super(errorCode, $T.name(), errorInstanceId, parameters)", errorTypesClassName);
+        } else {
+            ctorBuilder.addStatement(
+                    "super(errorCode, $T.name(), errorInstanceId, $T.EMPTY_ERROR_PARAMETERS_INSTANCE)",
+                    errorTypesClassName,
+                    ClassName.get(ConjureErrors.class));
+        }
         return ctorBuilder.build();
     }
 
@@ -330,7 +354,7 @@ public final class DialogueInterfaceGenerator {
             TypeName returnType = ClassName.get(
                     packageName,
                     className.simpleName(),
-                    ErrorGenerationUtils.responseTypeName(endpointDef.getEndpointName()));
+                    ErrorGenerationUtils.endpointResponseResultTypeName(endpointDef.getEndpointName()));
             methodBuilder.returns(serviceCallType.switchBy(
                     returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType)));
         } else {

@@ -103,7 +103,8 @@ public final class UndertowServiceEteTest extends TestBase {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(port));
         this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
         this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
-        this.errorServiceClient = DialogueClients.create(com.palantir.product.ErrorServiceBlocking.class, clientConfiguration(port));
+        this.errorServiceClient =
+                DialogueClients.create(com.palantir.product.ErrorServiceBlocking.class, clientConfiguration(port));
     }
 
     @BeforeAll
@@ -584,21 +585,8 @@ public final class UndertowServiceEteTest extends TestBase {
                                 new ErrorGenerator(options),
                                 new CheckedErrorGenerator(options)))
                 .emit(def, folder);
-        // validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
+        TestBase.validateGeneratedOutput(folder.toPath(), files, Paths.get("src/integrationInput/java"));
     }
-
-    //    private static void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
-    //        for (Path file : files) {
-    //            Path relativePath = folder.toPath().relativize(file);
-    //            Path output = outputDir.resolve(relativePath);
-    //            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-    //                Files.createDirectories(relativePath.getParent());
-    //                Files.deleteIfExists(output);
-    //                Files.copy(file, output);
-    //            }
-    //            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-    //        }
-    //    }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
         URL url = new URL("http://localhost:" + port + "/test-example/api" + path);

@@ -188,8 +188,9 @@ public interface Options {
     }
 
     /**
-     * TODO(pm): flesh this out more. For errors associated with endpoints, this option enables the generated Dialogue
-     *  clients to return a result type.
+     * If enabled, endpoints that have associated errors will return a result type: a sealed interface permitting
+     * subclasses for the endpoint's return value, and each endpoint error. Each endpoint error is a subclass of
+     * {@link com.palantir.conjure.java.lib.internal.ConjureErrors.BaseEndpointError}.
      */
     @Value.Default
     default boolean generateDialogueEndpointErrorResultTypes() {

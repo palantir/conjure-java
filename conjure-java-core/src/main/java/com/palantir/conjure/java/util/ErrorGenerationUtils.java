@@ -39,6 +39,7 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,8 +57,7 @@ public final class ErrorGenerationUtils {
      * The name of the sealed interface returned by endpoints with associated errors, permitting implementations for a
      * successful result and each error type.
      */
-    // TODO(pm): Move these methods around.
-    public static String responseTypeName(EndpointName endpointName) {
+    public static String endpointResponseResultTypeName(EndpointName endpointName) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, endpointName.get()) + "Response";
     }
 
@@ -75,6 +75,29 @@ public final class ErrorGenerationUtils {
 
     public static String errorTypesClassName(ErrorNamespace namespace) {
         return namespace.get() + "Errors";
+    }
+
+    public record ErrorNameToParameterExistenceMapping(Map<ErrorTypeName, Boolean> errorTypeToHasParameters) {
+        public static ErrorNameToParameterExistenceMapping from(ConjureDefinition definition) {
+            return new ErrorNameToParameterExistenceMapping(definition.getErrors().stream()
+                    .collect(Collectors.toMap(
+                            error -> ErrorTypeName.builder()
+                                    .name(error.getErrorName().getName())
+                                    .package_(error.getErrorName().getPackage())
+                                    .namespace(error.getNamespace())
+                                    .build(),
+                            error -> !error.getUnsafeArgs().isEmpty()
+                                    || !error.getSafeArgs().isEmpty())));
+        }
+
+        public boolean hasParameters(ErrorTypeName errorTypeName) {
+            try {
+                return errorTypeToHasParameters.get(errorTypeName);
+            } catch (NullPointerException e) {
+                throw new SafeIllegalStateException(
+                        "Error type definition not found", e, SafeArg.of("errorTypeName", errorTypeName));
+            }
+        }
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {

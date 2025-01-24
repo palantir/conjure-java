@@ -120,7 +120,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                                     Packages.getPrefixedPackage(
                                             def.getServiceName().getPackage(), options.packagePrefix()),
                                     className.simpleName(),
-                                    ErrorGenerationUtils.responseTypeName(endpoint.getEndpointName())),
+                                    ErrorGenerationUtils.endpointResponseResultTypeName(endpoint.getEndpointName())),
                             endpoint,
                             endpoint.getEndpointName(),
                             endpoint.getReturns())
@@ -178,16 +178,19 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private Optional<FieldSpec> deserializer(
             TypeName responseType, EndpointDefinition endpointDef, EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
-        if (isBinaryOrOptionalBinary(className, returnTypes) && !options.generateDialogueEndpointErrorResultTypes()) {
+        boolean generateResultTypes = shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, endpointDef);
+
+        if (isBinaryOrOptionalBinary(className, returnTypes) && !generateResultTypes) {
             return Optional.empty();
         }
-        ParameterizedTypeName deserializerType =
-                ParameterizedTypeName.get(ClassName.get(Deserializer.class), responseType);
+
+        ParameterizedTypeName deserializerType = ParameterizedTypeName.get(
+                ClassName.get(Deserializer.class), generateResultTypes ? responseType : className);
 
         CodeBlock initializer = CodeBlock.of(
                 "$L.bodySerDe().$L",
                 StaticFactoryMethodGenerator.RUNTIME,
-                options.generateDialogueEndpointErrorResultTypes()
+                generateResultTypes
                         ? constructDeserializerWithEndpointErrors(endpointDef, className, responseType)
                         : constructDeserializer(type, className));
 
@@ -208,16 +211,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         CodeBlock.Builder deserializerArgsBuilder = CodeBlock.builder()
                 .add("$T.<$T>builder()", DeserializerArgs.class, responseType)
                 .add(".baseType(new $T<>() {})", TypeMarker.class)
-                // TODO(pm): consider making "Success" a constant string for re-use in the record creation.
                 .add(".success(new $T<$T.Success>() {})", TypeMarker.class, responseType);
         for (EndpointError err : endpointDef.getErrors()) {
             ErrorTypeName errorTypeName = err.getError();
             String errorName = errorTypeName.getName();
-            String errorType = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName);
             ClassName errorClass = ClassName.get(
                     errorTypeName.getPackage(),
                     ErrorGenerationUtils.errorTypesClassName(errorTypeName.getNamespace()),
-                    errorType);
+                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
             deserializerArgsBuilder.add(
                     ".error($T.name(), new $T<$T.$L>() {})", errorClass, TypeMarker.class, responseType, errorName);
         }
@@ -237,6 +238,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
     private static boolean isBinaryOrOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
         return isBinary(className, returnTypes) || isOptionalBinary(className, returnTypes);
+    }
+
+    private static boolean shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(
+            Options options, EndpointDefinition endpointDefinition) {
+        return options.generateDialogueEndpointErrorResultTypes()
+                && !endpointDefinition.getErrors().isEmpty();
     }
 
     private static boolean isBinary(TypeName className, ReturnTypeMapper returnTypes) {
@@ -280,13 +287,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build();
         String codeBlock = methodType.switchBy(
                 "$L.clients().callBlocking($L, $L.build(), $L);", "$L.clients().call($L, $L.build" + "(), $L);");
+        boolean generateResultTypes = shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, def);
         CodeBlock execute = CodeBlock.of(
                 codeBlock,
                 StaticFactoryMethodGenerator.RUNTIME,
                 Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
-                        .filter(type -> !options.generateDialogueEndpointErrorResultTypes()
+                        .filter(type -> !generateResultTypes
                                 && isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
                         .map(type -> StaticFactoryMethodGenerator.RUNTIME
                                 + (isOptionalBinary(returnTypes.baseType(type), returnTypes)
@@ -295,27 +303,22 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         methodBuilder.addCode(request);
-        methodBuilder.addCode(methodType.switchBy(
-                def.getReturns().isPresent()
-                                || (options.generateDialogueEndpointErrorResultTypes()
-                                        && !def.getErrors().isEmpty())
-                        ? "return "
-                        : "",
-                "return "));
+        methodBuilder.addCode(
+                methodType.switchBy(def.getReturns().isPresent() || generateResultTypes ? "return " : "", "return "));
         methodBuilder.addCode(execute);
 
         return methodBuilder.build();
     }
 
     private TypeName getReturnType(EndpointDefinition def, ClassName className) {
-        if (options.generateDialogueEndpointErrorResultTypes()
-                && !def.getErrors().isEmpty()) {
-            ClassName returnType = ClassName.get(
+        if (shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, def)) {
+            ClassName responseResultTypeName = ClassName.get(
                     className.packageName(),
                     className.simpleName(),
-                    ErrorGenerationUtils.responseTypeName(def.getEndpointName()));
+                    ErrorGenerationUtils.endpointResponseResultTypeName(def.getEndpointName()));
             return methodType.switchBy(
-                    returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType));
+                    responseResultTypeName,
+                    ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), responseResultTypeName));
         }
         return methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
     }

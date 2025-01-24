@@ -295,33 +295,31 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class DifferentNamespace
-                extends ConjureErrors.BaseEndpointError<EndpointSpecificTwoErrors.DifferentNamespaceParameters>
+        final class DifferentNamespace extends ConjureErrors.BaseEndpointError<ConjureErrors.EmptyErrorParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator
             DifferentNamespace(
                     @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
-                    @JsonProperty("parameters") EndpointSpecificTwoErrors.DifferentNamespaceParameters parameters) {
-                super(errorCode, EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(), errorInstanceId, parameters);
+                    @JsonProperty("errorInstanceId") String errorInstanceId) {
+                super(
+                        errorCode,
+                        EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
+                        errorInstanceId,
+                        ConjureErrors.EMPTY_ERROR_PARAMETERS_INSTANCE);
             }
         }
 
-        final class DifferentPackage
-                extends ConjureErrors.BaseEndpointError<
-                        com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
+        final class DifferentPackage extends ConjureErrors.BaseEndpointError<ConjureErrors.EmptyErrorParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator
             DifferentPackage(
                     @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
-                    @JsonProperty("parameters")
-                            com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters parameters) {
+                    @JsonProperty("errorInstanceId") String errorInstanceId) {
                 super(
                         errorCode,
                         com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
                         errorInstanceId,
-                        parameters);
+                        ConjureErrors.EMPTY_ERROR_PARAMETERS_INSTANCE);
             }
         }
     }

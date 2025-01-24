@@ -182,13 +182,15 @@ public final class ErrorGenerator implements Generator {
                 .toList();
     }
 
+    /**
+     * If the error has parameters, create a record holding error parameters.
+     */
     private static Optional<TypeSpec> generateErrorParameterRecord(
             ErrorDefinition errorDefinition, TypeMapper typeMapper) {
-        // TODO(pm): uncomment this.
-        //        if (errorDefinition.getSafeArgs().isEmpty()
-        //                && errorDefinition.getUnsafeArgs().isEmpty()) {
-        //            return Optional.empty();
-        //        }
+        if (errorDefinition.getSafeArgs().isEmpty()
+                && errorDefinition.getUnsafeArgs().isEmpty()) {
+            return Optional.empty();
+        }
         TypeSpec.Builder parametersRecordBuilder = TypeSpec.recordBuilder(ErrorGenerationUtils.errorParametersClassName(
                         errorDefinition.getErrorName().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
