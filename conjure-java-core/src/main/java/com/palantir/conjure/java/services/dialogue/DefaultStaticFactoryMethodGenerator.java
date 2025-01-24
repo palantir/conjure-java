@@ -178,7 +178,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private Optional<FieldSpec> deserializer(
             TypeName responseType, EndpointDefinition endpointDef, EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
-        if (isBinaryOrOptionalBinary(className, returnTypes)) {
+        if (isBinaryOrOptionalBinary(className, returnTypes) && !options.generateDialogueEndpointErrorResultTypes()) {
             return Optional.empty();
         }
         ParameterizedTypeName deserializerType =
@@ -188,7 +188,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 "$L.bodySerDe().$L",
                 StaticFactoryMethodGenerator.RUNTIME,
                 options.generateDialogueEndpointErrorResultTypes()
-                        ? constructDeserializerWithEndpointErrors(endpointDef, responseType)
+                        ? constructDeserializerWithEndpointErrors(endpointDef, className, responseType)
                         : constructDeserializer(type, className));
 
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
@@ -203,8 +203,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 : CodeBlock.of("emptyBodyDeserializer()");
     }
 
-    private CodeBlock constructDeserializerWithEndpointErrors(EndpointDefinition endpointDef, TypeName responseType) {
-        CodeBlock.Builder retBuilder = CodeBlock.builder()
+    private CodeBlock constructDeserializerWithEndpointErrors(
+            EndpointDefinition endpointDef, TypeName className, TypeName responseType) {
+        CodeBlock.Builder deserializerArgsBuilder = CodeBlock.builder()
                 .add("$T.<$T>builder()", DeserializerArgs.class, responseType)
                 .add(".baseType(new $T<>() {})", TypeMarker.class)
                 // TODO(pm): consider making "Success" a constant string for re-use in the record creation.
@@ -217,15 +218,21 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     errorTypeName.getPackage(),
                     ErrorGenerationUtils.errorTypesClassName(errorTypeName.getNamespace()),
                     errorType);
-            retBuilder.add(
+            deserializerArgsBuilder.add(
                     ".error($T.name(), new $T<$T.$L>() {})", errorClass, TypeMarker.class, responseType, errorName);
         }
-        retBuilder.add(".build()");
-        return CodeBlock.builder()
-                .add("deserializer(")
-                .add(retBuilder.build())
-                .add(")")
-                .build();
+        deserializerArgsBuilder.add(".build()");
+        CodeBlock.Builder deserializerBuilder = CodeBlock.builder();
+        if (isBinary(className, returnTypes)) {
+            deserializerBuilder.add("inputStreamDeserializer(");
+        } else if (isOptionalBinary(className, returnTypes)) {
+            deserializerBuilder.add("optionalInputStreamDeserializer(");
+        } else {
+            deserializerBuilder.add("deserializer(");
+        }
+        deserializerBuilder.add(deserializerArgsBuilder.build());
+        deserializerBuilder.add(")");
+        return deserializerBuilder.build();
     }
 
     private static boolean isBinaryOrOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
@@ -279,7 +286,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
-                        .filter(type -> isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
+                        .filter(type -> !options.generateDialogueEndpointErrorResultTypes()
+                                && isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
                         .map(type -> StaticFactoryMethodGenerator.RUNTIME
                                 + (isOptionalBinary(returnTypes.baseType(type), returnTypes)
                                         ? ".bodySerDe().optionalInputStreamDeserializer()"

@@ -2,6 +2,7 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.ConjureErrors;
@@ -26,35 +27,35 @@ import java.util.Optional;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-@DialogueService(ErrorServiceBlocking.Factory.class)
-public interface ErrorServiceBlocking {
+@DialogueService(ErrorServiceAsync.Factory.class)
+public interface ErrorServiceAsync {
     /** @apiNote {@code GET /base/basic} */
     @ClientEndpoint(method = "GET", path = "/base/basic")
-    TestBasicErrorResponse testBasicError(AuthHeader authHeader);
+    ListenableFuture<TestBasicErrorResponse> testBasicError(AuthHeader authHeader);
 
     /** @apiNote {@code GET /base/imported} */
     @ClientEndpoint(method = "GET", path = "/base/imported")
-    TestImportedErrorResponse testImportedError(AuthHeader authHeader);
+    ListenableFuture<TestImportedErrorResponse> testImportedError(AuthHeader authHeader);
 
     /** @apiNote {@code GET /base/multiple} */
     @ClientEndpoint(method = "GET", path = "/base/multiple")
-    TestMultipleErrorsAndPackagesResponse testMultipleErrorsAndPackages(AuthHeader authHeader);
+    ListenableFuture<TestMultipleErrorsAndPackagesResponse> testMultipleErrorsAndPackages(AuthHeader authHeader);
 
     /** @apiNote {@code GET /base/empty} */
     @ClientEndpoint(method = "GET", path = "/base/empty")
-    TestEmptyBodyResponse testEmptyBody(AuthHeader authHeader);
+    ListenableFuture<TestEmptyBodyResponse> testEmptyBody(AuthHeader authHeader);
 
     /** @apiNote {@code GET /base/binary} */
     @ClientEndpoint(method = "GET", path = "/base/binary")
-    TestBinaryResponse testBinary(AuthHeader authHeader);
+    ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader);
 
     /** @apiNote {@code GET /base/optional-binary} */
     @ClientEndpoint(method = "GET", path = "/base/optional-binary")
-    TestOptionalBinaryResponse testOptionalBinary(AuthHeader authHeader);
+    ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(AuthHeader authHeader);
 
-    /** Creates a synchronous/blocking client for a ErrorService service. */
-    static ErrorServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        return new ErrorServiceBlocking() {
+    /** Creates an asynchronous/non-blocking client for a ErrorService service. */
+    static ErrorServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
+        return new ErrorServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final EndpointChannel testBasicErrorChannel =
@@ -141,65 +142,64 @@ public interface ErrorServiceBlocking {
                             .build());
 
             @Override
-            public TestBasicErrorResponse testBasicError(AuthHeader authHeader) {
+            public ListenableFuture<TestBasicErrorResponse> testBasicError(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .callBlocking(testBasicErrorChannel, _request.build(), testBasicErrorDeserializer);
+                return _runtime.clients().call(testBasicErrorChannel, _request.build(), testBasicErrorDeserializer);
             }
 
             @Override
-            public TestImportedErrorResponse testImportedError(AuthHeader authHeader) {
+            public ListenableFuture<TestImportedErrorResponse> testImportedError(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
-                        .callBlocking(testImportedErrorChannel, _request.build(), testImportedErrorDeserializer);
+                        .call(testImportedErrorChannel, _request.build(), testImportedErrorDeserializer);
             }
 
             @Override
-            public TestMultipleErrorsAndPackagesResponse testMultipleErrorsAndPackages(AuthHeader authHeader) {
+            public ListenableFuture<TestMultipleErrorsAndPackagesResponse> testMultipleErrorsAndPackages(
+                    AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
-                        .callBlocking(
+                        .call(
                                 testMultipleErrorsAndPackagesChannel,
                                 _request.build(),
                                 testMultipleErrorsAndPackagesDeserializer);
             }
 
             @Override
-            public TestEmptyBodyResponse testEmptyBody(AuthHeader authHeader) {
+            public ListenableFuture<TestEmptyBodyResponse> testEmptyBody(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .callBlocking(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
+                return _runtime.clients().call(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
             }
 
             @Override
-            public TestBinaryResponse testBinary(AuthHeader authHeader) {
+            public ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().callBlocking(testBinaryChannel, _request.build(), testBinaryDeserializer);
+                return _runtime.clients().call(testBinaryChannel, _request.build(), testBinaryDeserializer);
             }
 
             @Override
-            public TestOptionalBinaryResponse testOptionalBinary(AuthHeader authHeader) {
+            public ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
-                        .callBlocking(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
+                        .call(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
             }
 
             @Override
             public String toString() {
-                return "ErrorServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
-                        + _runtime + '}';
+                return "ErrorServiceAsync{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime=" + _runtime
+                        + '}';
             }
         };
     }
 
     /** Creates an asynchronous/non-blocking client for a ErrorService service. */
-    static ErrorServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+    static ErrorServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);
         }
@@ -213,10 +213,10 @@ public interface ErrorServiceBlocking {
                 _runtime);
     }
 
-    final class Factory implements DialogueServiceFactory<ErrorServiceBlocking> {
+    final class Factory implements DialogueServiceFactory<ErrorServiceAsync> {
         @Override
-        public ErrorServiceBlocking create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
-            return ErrorServiceBlocking.of(endpointChannelFactory, runtime);
+        public ErrorServiceAsync create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return ErrorServiceAsync.of(endpointChannelFactory, runtime);
         }
     }
 
