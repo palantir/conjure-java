@@ -11,19 +11,19 @@ import javax.annotation.processing.Generated;
 @JsonSerialize
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class EmptyExampleNoStaticFactory {
-    private static final EmptyExampleNoStaticFactory INSTANCE = new EmptyExampleNoStaticFactory();
+public final class EmptyExample {
+    private static final EmptyExample INSTANCE = new EmptyExample();
 
-    private EmptyExampleNoStaticFactory() {}
+    private EmptyExample() {}
 
     @Override
     @Safe
     public String toString() {
-        return "EmptyExampleNoStaticFactory{}";
+        return "EmptyExample{}";
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public static EmptyExampleNoStaticFactory of() {
+    public static EmptyExample of() {
         return INSTANCE;
     }
 }

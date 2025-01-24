@@ -7,7 +7,7 @@ types:
   definitions:
     default-package: com.palantir.product
     objects:
-      EmptyExampleNoStaticFactory:
+      EmptyExample:
         fields: { }
         docs: There are no fields in this type. A static factory method (`of`) should be generated.
       StringExampleNoStaticFactory:
