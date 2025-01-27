@@ -177,27 +177,23 @@ public final class ErrorGenerator implements Generator {
             List<ErrorDefinition> errorTypeDefinitions, TypeMapper typeMapper) {
         return errorTypeDefinitions.stream()
                 .map(errorDefinition -> generateErrorParameterRecord(errorDefinition, typeMapper))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
                 .toList();
     }
 
-    private static Optional<TypeSpec> generateErrorParameterRecord(
-            ErrorDefinition errorDefinition, TypeMapper typeMapper) {
+    private static TypeSpec generateErrorParameterRecord(ErrorDefinition errorDefinition, TypeMapper typeMapper) {
         TypeSpec.Builder parametersRecordBuilder = TypeSpec.recordBuilder(ErrorGenerationUtils.errorParametersClassName(
                         errorDefinition.getErrorName().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder();
         for (FieldDefinition fieldDef : errorDefinition.getSafeArgs()) {
-            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationWithJsonProperty(
-                    typeMapper, fieldDef, true));
+            ctorBuilder.addParameter(
+                    ErrorGenerationUtils.buildParameterWithSafetyAnnotationAndJsonProperty(typeMapper, fieldDef, true));
         }
         for (FieldDefinition fieldDef : errorDefinition.getUnsafeArgs()) {
-            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationWithJsonProperty(
+            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationAndJsonProperty(
                     typeMapper, fieldDef, false));
         }
-        return Optional.of(
-                parametersRecordBuilder.recordConstructor(ctorBuilder.build()).build());
+        return parametersRecordBuilder.recordConstructor(ctorBuilder.build()).build();
     }
 
     private static MethodSpec generateExceptionFactory(

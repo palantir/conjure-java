@@ -208,11 +208,26 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
     private CodeBlock constructDeserializerWithEndpointErrors(
             EndpointDefinition endpointDef, TypeName className, TypeName responseType) {
+        CodeBlock.Builder deserializerBuilder = CodeBlock.builder();
+        if (returnTypes.isBinary(className)) {
+            deserializerBuilder.add("inputStreamDeserializer(");
+        } else if (returnTypes.isOptionalBinary(className)) {
+            deserializerBuilder.add("optionalInputStreamDeserializer(");
+        } else {
+            deserializerBuilder.add("deserializer(");
+        }
+        deserializerBuilder.add(buildArgsForEndpointErrorDeserializer(endpointDef, className, responseType));
+        deserializerBuilder.add(")");
+        return deserializerBuilder.build();
+    }
+
+    private CodeBlock buildArgsForEndpointErrorDeserializer(
+            EndpointDefinition endpointDefinition, TypeName className, TypeName responseType) {
         CodeBlock.Builder deserializerArgsBuilder = CodeBlock.builder()
                 .add("$T.<$T>builder()", DeserializerArgs.class, responseType)
                 .add(".baseType(new $T<>() {})", TypeMarker.class)
                 .add(".success(new $T<$T.Success>() {})", TypeMarker.class, responseType);
-        for (EndpointError err : endpointDef.getErrors()) {
+        for (EndpointError err : endpointDefinition.getErrors()) {
             ErrorTypeName errorTypeName = err.getError();
             String errorName = errorTypeName.getName();
             ClassName errorClass = ClassName.get(
@@ -223,17 +238,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     ".error($T.name(), new $T<$T.$L>() {})", errorClass, TypeMarker.class, responseType, errorName);
         }
         deserializerArgsBuilder.add(".build()");
-        CodeBlock.Builder deserializerBuilder = CodeBlock.builder();
-        if (returnTypes.isBinary(className)) {
-            deserializerBuilder.add("inputStreamDeserializer(");
-        } else if (returnTypes.isOptionalBinary(className)) {
-            deserializerBuilder.add("optionalInputStreamDeserializer(");
-        } else {
-            deserializerBuilder.add("deserializer(");
-        }
-        deserializerBuilder.add(deserializerArgsBuilder.build());
-        deserializerBuilder.add(")");
-        return deserializerBuilder.build();
+        return deserializerArgsBuilder.build();
     }
 
     private static boolean shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(

@@ -320,6 +320,8 @@ public final class DialogueInterfaceGenerator {
                                 .build())
                         .addAnnotation(Safe.class)
                         .build());
+        // If the definition for the error does not specify any parameters, we do not need to attempt to deserialize the
+        // parameters field.
         if (errorNameToParameterExistenceMapping.hasParameters(errorTypeName)) {
             ctorBuilder.addParameter(ParameterSpec.builder(parametersClassName, "parameters")
                     .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
