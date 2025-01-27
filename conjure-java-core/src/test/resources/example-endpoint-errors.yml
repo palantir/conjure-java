@@ -3,6 +3,12 @@ types:
     importedErrors: errors-for-endpoints.yml
   definitions:
     default-package: com.palantir.product
+    objects:
+      OptionalBinaryResponseMode:
+        values:
+          - PRESENT
+          - ABSENT
+          - ERROR
     errors:
       InvalidArgument:
         namespace: Test
@@ -21,20 +27,26 @@ services:
     name: Error Service
     package: com.palantir.product
     default-auth: header
-    base-path: /base
+    base-path: /errors
     endpoints:
       testBasicError:
-        http: GET /basic
+        http: POST /basic
+        args:
+          shouldThrowError: boolean
         returns: string
         errors:
           - InvalidArgument
       testImportedError:
-        http: GET /imported
+        http: POST /imported
+        args:
+          shouldThrowError: boolean
         returns: string
         errors:
           - importedErrors.EndpointError
       testMultipleErrorsAndPackages:
-        http: GET /multiple
+        http: POST /multiple
+        args:
+          errorToThrow: optional<string>
         returns: string
         errors:
           - InvalidArgument
@@ -43,16 +55,22 @@ services:
           - importedErrors.DifferentNamespace
           - importedErrors.DifferentPackage
       testEmptyBody:
-        http: GET /empty
+        http: POST /empty
+        args:
+          shouldThrowError: boolean
         errors:
           - InvalidArgument
       testBinary:
-        http: GET /binary
+        http: POST /binary
+        args:
+          shouldThrowError: boolean
         returns: binary
         errors:
           - InvalidArgument
       testOptionalBinary:
-        http: GET /optional-binary
+        http: POST /optional-binary
+        args:
+          mode: OptionalBinaryResponseMode
         returns: optional<binary>
         errors:
           - InvalidArgument

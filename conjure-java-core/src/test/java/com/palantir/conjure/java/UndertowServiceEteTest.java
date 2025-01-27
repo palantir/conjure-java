@@ -41,12 +41,30 @@ import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
+import com.palantir.product.EmptyPathService;
+import com.palantir.product.EmptyPathServiceEndpoints;
+import com.palantir.product.EndpointSpecificErrors;
+import com.palantir.product.EndpointSpecificTwoErrors;
+import com.palantir.product.ErrorServiceBlocking;
 import com.palantir.product.ErrorServiceBlocking.TestBasicErrorResponse;
+import com.palantir.product.ErrorServiceBlocking.TestBinaryResponse;
+import com.palantir.product.ErrorServiceBlocking.TestEmptyBodyResponse;
+import com.palantir.product.ErrorServiceBlocking.TestImportedErrorResponse;
+import com.palantir.product.ErrorServiceBlocking.TestMultipleErrorsAndPackagesResponse;
+import com.palantir.product.ErrorServiceBlocking.TestOptionalBinaryResponse;
+import com.palantir.product.ErrorServiceEndpoints;
+import com.palantir.product.EteBinaryServiceBlocking;
+import com.palantir.product.EteBinaryServiceEndpoints;
+import com.palantir.product.EteServiceAsync;
+import com.palantir.product.EteServiceBlocking;
+import com.palantir.product.EteServiceEndpoints;
+import com.palantir.product.NestedStringAliasExample;
+import com.palantir.product.OptionalBinaryResponseMode;
+import com.palantir.product.SimpleEnum;
+import com.palantir.product.StringAliasExample;
+import com.palantir.product.TestErrors;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
-import dialogue.com.palantir.product.EteBinaryServiceBlocking;
-import dialogue.com.palantir.product.EteServiceAsync;
-import dialogue.com.palantir.product.EteServiceBlocking;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -68,7 +86,6 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import jersey.com.palantir.product.EmptyPathService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -76,14 +93,11 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import undertow.com.palantir.product.EmptyPathServiceEndpoints;
-import undertow.com.palantir.product.ErrorServiceEndpoints;
-import undertow.com.palantir.product.EteBinaryServiceEndpoints;
-import undertow.com.palantir.product.EteServiceEndpoints;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final AuthHeader AUTH_HEADER = AuthHeader.valueOf("authHeader");
 
     @TempDir
     public static File folder;
@@ -91,11 +105,12 @@ public final class UndertowServiceEteTest extends TestBase {
     private static Undertow server;
 
     private final EteServiceBlocking client;
-    // TODO(pm): this should be in a different test.
-    private final com.palantir.product.ErrorServiceBlocking errorServiceClient;
+
     private final EteServiceAsync asyncClient;
 
     private final EteBinaryServiceBlocking binaryClient;
+
+    private final ErrorServiceBlocking errorServiceClient;
 
     private static int port;
 
@@ -140,14 +155,6 @@ public final class UndertowServiceEteTest extends TestBase {
         EmptyPathService emptyPathClient = JaxRsClient.create(
                 EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration(port));
         assertThat(emptyPathClient.emptyPath()).isTrue();
-    }
-
-    @Test
-    public void error_client_returns_result() {
-        TestBasicErrorResponse result = errorServiceClient.testBasicError(AuthHeader.valueOf("authHeader"));
-        assertThat(result).isInstanceOfSatisfying(TestBasicErrorResponse.Success.class, success -> {
-            assertThat(success.value()).isEqualTo("HELLO");
-        });
     }
 
     @Test
@@ -563,6 +570,172 @@ public final class UndertowServiceEteTest extends TestBase {
                 });
     }
 
+    @Test
+    public void error_client_returns_basic_result() {
+        TestBasicErrorResponse result = errorServiceClient.testBasicError(AUTH_HEADER, false);
+        assertThat(result).isInstanceOfSatisfying(TestBasicErrorResponse.Success.class, success -> {
+            assertThat(success.value()).isEqualTo(ErrorResource.Impl.SUCCESS);
+        });
+    }
+
+    @Test
+    public void error_client_returns_basic_error() {
+        TestBasicErrorResponse result = errorServiceClient.testBasicError(AUTH_HEADER, true);
+        assertThat(result).isInstanceOfSatisfying(TestBasicErrorResponse.InvalidArgument.class, error -> {
+            assertInvalidArgumentError(
+                    error.getErrorCode(),
+                    error.getErrorName(),
+                    error.getParams().field(),
+                    error.getParams().value());
+        });
+    }
+
+    @Test
+    public void error_client_returns_imported_error() {
+        TestImportedErrorResponse result = errorServiceClient.testImportedError(AUTH_HEADER, true);
+        assertThat(result).isInstanceOfSatisfying(TestImportedErrorResponse.EndpointError.class, error -> {
+            assertThat(error.getErrorCode())
+                    .isEqualTo(EndpointSpecificErrors.ENDPOINT_ERROR.code().name());
+            assertThat(error.getErrorName()).isEqualTo(EndpointSpecificErrors.ENDPOINT_ERROR.name());
+            assertThat(error.getParams()).satisfies(params -> {
+                assertThat(params.typeDef()).isEqualTo("type def");
+                assertThat(params.typeName()).isEqualTo("imported error");
+            });
+        });
+    }
+
+    @Test
+    public void error_client_returns_one_of_many_errors() {
+        assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("invalidArgument")))
+                .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.InvalidArgument.class, error -> {
+                    assertInvalidArgumentError(
+                            error.getErrorCode(),
+                            error.getErrorName(),
+                            error.getParams().field(),
+                            error.getParams().value());
+                });
+        assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("notFound")))
+                .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.NotFound.class, error -> {
+                    assertThat(error.getErrorCode())
+                            .isEqualTo(TestErrors.NOT_FOUND.code().name());
+                    assertThat(error.getErrorName()).isEqualTo(TestErrors.NOT_FOUND.name());
+                    assertThat(error.getParams()).satisfies(params -> {
+                        assertThat(params.resource()).isEqualTo("resource");
+                    });
+                });
+        assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("differentNamespace")))
+                .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.DifferentNamespace.class, error -> {
+                    assertThat(error.getErrorCode())
+                            .isEqualTo(EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE
+                                    .code()
+                                    .name());
+                    assertThat(error.getErrorName()).isEqualTo(EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name());
+                });
+        assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("differentPackage")))
+                .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.DifferentPackage.class, error -> {
+                    assertThat(error.getErrorCode())
+                            .isEqualTo(com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE
+                                    .code()
+                                    .name());
+                    assertThat(error.getErrorName())
+                            .isEqualTo(com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name());
+                });
+    }
+
+    @Test
+    public void error_client_test_empty() {
+        TestEmptyBodyResponse result = errorServiceClient.testEmptyBody(AUTH_HEADER, false);
+        assertThat(result).isInstanceOf(TestEmptyBodyResponse.Success.class);
+    }
+
+    @Test
+    public void error_client_test_empty_error() {
+        TestEmptyBodyResponse result = errorServiceClient.testEmptyBody(AUTH_HEADER, true);
+        assertThat(result).isInstanceOfSatisfying(TestEmptyBodyResponse.InvalidArgument.class, invalidArgument -> {
+            assertInvalidArgumentError(
+                    invalidArgument.getErrorCode(),
+                    invalidArgument.getErrorName(),
+                    invalidArgument.getParams().field(),
+                    invalidArgument.getParams().value());
+        });
+    }
+
+    @Test
+    public void error_client_binary_response() {
+        try (TestBinaryResponse result = errorServiceClient.testBinary(AUTH_HEADER, false)) {
+            assertThat(result).isInstanceOfSatisfying(TestBinaryResponse.Success.class, success -> {
+                try (InputStream is = success.value()) {
+                    assertThat(is.readAllBytes())
+                            .isEqualTo(ErrorResource.Impl.SUCCESS.getBytes(StandardCharsets.UTF_8));
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void error_client_binary_response_error() {
+        TestBinaryResponse result = errorServiceClient.testBinary(AUTH_HEADER, true);
+        assertThat(result).isInstanceOfSatisfying(TestBinaryResponse.InvalidArgument.class, invalidArgument -> {
+            assertInvalidArgumentError(
+                    invalidArgument.getErrorCode(),
+                    invalidArgument.getErrorName(),
+                    invalidArgument.getParams().field(),
+                    invalidArgument.getParams().value());
+        });
+    }
+
+    @Test
+    public void error_client_optional_binary_response() {
+        try (TestOptionalBinaryResponse result =
+                errorServiceClient.testOptionalBinary(AUTH_HEADER, OptionalBinaryResponseMode.PRESENT)) {
+            assertThat(result).isInstanceOfSatisfying(TestOptionalBinaryResponse.Success.class, success -> {
+                assertThat(success.value()).isPresent();
+                try (InputStream is = success.value().get()) {
+                    assertThat(is.readAllBytes())
+                            .isEqualTo(ErrorResource.Impl.SUCCESS.getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void error_client_optional_binary_response_absent() {
+        TestOptionalBinaryResponse result =
+                errorServiceClient.testOptionalBinary(AUTH_HEADER, OptionalBinaryResponseMode.ABSENT);
+        assertThat(result)
+                .isInstanceOfSatisfying(TestOptionalBinaryResponse.Success.class, success -> assertThat(success.value())
+                        .isEmpty());
+    }
+
+    @Test
+    public void error_client_optional_binary_response_error() {
+        TestOptionalBinaryResponse result =
+                errorServiceClient.testOptionalBinary(AUTH_HEADER, OptionalBinaryResponseMode.ERROR);
+        assertThat(result).isInstanceOfSatisfying(TestOptionalBinaryResponse.InvalidArgument.class, invalidArgument -> {
+            assertInvalidArgumentError(
+                    invalidArgument.getErrorCode(),
+                    invalidArgument.getErrorName(),
+                    invalidArgument.getParams().field(),
+                    invalidArgument.getParams().value());
+        });
+    }
+
+    private static void assertInvalidArgumentError(String errorCode, String errorName, String field, String value) {
+        assertThat(errorCode).isEqualTo(TestErrors.INVALID_ARGUMENT.code().name());
+        assertThat(errorName).isEqualTo(TestErrors.INVALID_ARGUMENT.name());
+        assertThat(field).isEqualTo("field");
+        assertThat(value).isEqualTo("value");
+    }
+
     @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
@@ -576,6 +749,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 .nonNullCollections(true)
                 .excludeEmptyOptionals(true)
                 .jetbrainsContractAnnotations(true)
+                .generateDialogueEndpointErrorResultTypes(true)
                 .build();
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),

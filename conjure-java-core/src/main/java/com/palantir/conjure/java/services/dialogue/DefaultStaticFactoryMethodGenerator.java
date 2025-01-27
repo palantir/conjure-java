@@ -180,7 +180,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         TypeName className = Primitives.box(returnTypes.baseType(type));
         boolean generateResultTypes = shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, endpointDef);
 
-        if (isBinaryOrOptionalBinary(className, returnTypes) && !generateResultTypes) {
+        if (returnTypes.isBinaryOrOptionalBinary(className) && !generateResultTypes) {
             return Optional.empty();
         }
 
@@ -224,9 +224,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         }
         deserializerArgsBuilder.add(".build()");
         CodeBlock.Builder deserializerBuilder = CodeBlock.builder();
-        if (isBinary(className, returnTypes)) {
+        if (returnTypes.isBinary(className)) {
             deserializerBuilder.add("inputStreamDeserializer(");
-        } else if (isOptionalBinary(className, returnTypes)) {
+        } else if (returnTypes.isOptionalBinary(className)) {
             deserializerBuilder.add("optionalInputStreamDeserializer(");
         } else {
             deserializerBuilder.add("deserializer(");
@@ -236,23 +236,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return deserializerBuilder.build();
     }
 
-    private static boolean isBinaryOrOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
-        return isBinary(className, returnTypes) || isOptionalBinary(className, returnTypes);
-    }
-
     private static boolean shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(
             Options options, EndpointDefinition endpointDefinition) {
         return options.generateDialogueEndpointErrorResultTypes()
                 && !endpointDefinition.getErrors().isEmpty();
-    }
-
-    private static boolean isBinary(TypeName className, ReturnTypeMapper returnTypes) {
-        return className.equals(returnTypes.baseType(Type.primitive(PrimitiveType.BINARY)));
-    }
-
-    private static boolean isOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
-        return className.equals(
-                returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))));
     }
 
     private MethodSpec clientImpl(ClassName className, EndpointDefinition def) {
@@ -295,9 +282,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 REQUEST,
                 def.getReturns()
                         .filter(type -> !generateResultTypes
-                                && isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
+                                && returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(type)))
                         .map(type -> StaticFactoryMethodGenerator.RUNTIME
-                                + (isOptionalBinary(returnTypes.baseType(type), returnTypes)
+                                + (returnTypes.isOptionalBinary(returnTypes.baseType(type))
                                         ? ".bodySerDe().optionalInputStreamDeserializer()"
                                         : ".bodySerDe().inputStreamDeserializer()"))
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));

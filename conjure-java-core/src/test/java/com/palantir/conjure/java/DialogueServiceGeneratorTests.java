@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
+import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +88,8 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
                         ImmutableSet.of(
+                                // To generate the OptionalBinaryResponseMode enum used in ete tests.
+                                new ObjectGenerator(Options.empty()),
                                 new ErrorGenerator(Options.builder()
                                         .useImmutableBytes(true)
                                         .excludeEmptyOptionals(true)

@@ -13,7 +13,7 @@ import javax.annotation.processing.Generated;
 enum DialogueErrorEndpoints implements Endpoint {
     testBasicError {
         private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("basic").build();
+                PathTemplate.builder().fixed("errors").fixed("basic").build();
 
         @Override
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
@@ -22,7 +22,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.GET;
+            return HttpMethod.POST;
         }
 
         @Override
@@ -43,7 +43,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
     testImportedError {
         private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("imported").build();
+                PathTemplate.builder().fixed("errors").fixed("imported").build();
 
         @Override
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
@@ -52,7 +52,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.GET;
+            return HttpMethod.POST;
         }
 
         @Override
@@ -73,7 +73,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
     testMultipleErrorsAndPackages {
         private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("multiple").build();
+                PathTemplate.builder().fixed("errors").fixed("multiple").build();
 
         @Override
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
@@ -82,7 +82,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.GET;
+            return HttpMethod.POST;
         }
 
         @Override
@@ -103,7 +103,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
     testEmptyBody {
         private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("empty").build();
+                PathTemplate.builder().fixed("errors").fixed("empty").build();
 
         @Override
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
@@ -112,7 +112,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.GET;
+            return HttpMethod.POST;
         }
 
         @Override
@@ -133,7 +133,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
     testBinary {
         private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("binary").build();
+                PathTemplate.builder().fixed("errors").fixed("binary").build();
 
         @Override
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
@@ -142,7 +142,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.GET;
+            return HttpMethod.POST;
         }
 
         @Override
@@ -163,7 +163,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
     testOptionalBinary {
         private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("optional-binary").build();
+                PathTemplate.builder().fixed("errors").fixed("optional-binary").build();
 
         @Override
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
@@ -172,7 +172,7 @@ enum DialogueErrorEndpoints implements Endpoint {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.GET;
+            return HttpMethod.POST;
         }
 
         @Override

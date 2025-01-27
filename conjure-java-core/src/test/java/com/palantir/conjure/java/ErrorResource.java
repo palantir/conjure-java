@@ -16,30 +16,86 @@
 
 package com.palantir.conjure.java;
 
-import com.palantir.another.EndpointSpecificServerErrors.DifferentPackage;
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.product.EndpointSpecificServerErrors;
 import com.palantir.product.EndpointSpecificServerErrors.EndpointError;
+import com.palantir.product.EndpointSpecificTwoServerErrors;
 import com.palantir.product.EndpointSpecificTwoServerErrors.DifferentNamespace;
+import com.palantir.product.OptionalBinaryResponseMode;
+import com.palantir.product.TestServerErrors;
 import com.palantir.product.TestServerErrors.InvalidArgument;
 import com.palantir.product.TestServerErrors.NotFound;
 import com.palantir.product.UndertowErrorService;
 import com.palantir.tokens.auth.AuthHeader;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 interface ErrorResource {
     class Impl implements UndertowErrorService {
+        public static final String SUCCESS = "success!";
+
         @Override
-        public String testBasicError(AuthHeader authHeader) {
-            return "HELLO";
+        public String testBasicError(AuthHeader authHeader, boolean shouldThrowError) throws InvalidArgument {
+            if (shouldThrowError) {
+                throw TestServerErrors.invalidArgument("field", "value");
+            }
+            return SUCCESS;
         }
 
         @Override
-        public String testImportedError(AuthHeader authHeader) throws EndpointError {
-            return "";
+        public String testImportedError(AuthHeader authHeader, boolean shouldThrowError) throws EndpointError {
+            if (shouldThrowError) {
+                throw EndpointSpecificServerErrors.endpointError("imported error", "type def");
+            }
+            return SUCCESS;
         }
 
         @Override
-        public String testMultipleErrorsAndPackages(AuthHeader authHeader)
-                throws InvalidArgument, NotFound, DifferentNamespace, DifferentPackage {
-            return "";
+        public String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
+                throws InvalidArgument, NotFound, DifferentNamespace,
+                        com.palantir.another.EndpointSpecificServerErrors.DifferentPackage {
+            if (errorToThrow.isPresent()) {
+                String error = errorToThrow.get();
+                switch (error) {
+                    case "invalidArgument":
+                        throw TestServerErrors.invalidArgument("field", "value");
+                    case "notFound":
+                        throw TestServerErrors.notFound("resource");
+                    case "differentNamespace":
+                        throw EndpointSpecificTwoServerErrors.differentNamespace();
+                    case "differentPackage":
+                        throw com.palantir.another.EndpointSpecificServerErrors.differentPackage();
+                    default:
+                        throw new IllegalArgumentException("Unknown error: " + error);
+                }
+            }
+            return SUCCESS;
+        }
+
+        @Override
+        public void testEmptyBody(AuthHeader authHeader, boolean shouldThrowError) throws InvalidArgument {
+            if (shouldThrowError) {
+                throw TestServerErrors.invalidArgument("field", "value");
+            }
+        }
+
+        @Override
+        public BinaryResponseBody testBinary(AuthHeader authHeader, boolean shouldThrowError) throws InvalidArgument {
+            if (shouldThrowError) {
+                throw TestServerErrors.invalidArgument("field", "value");
+            }
+            return output -> output.write(SUCCESS.getBytes(StandardCharsets.UTF_8));
+        }
+
+        @Override
+        public Optional<BinaryResponseBody> testOptionalBinary(AuthHeader authHeader, OptionalBinaryResponseMode mode)
+                throws InvalidArgument {
+            if (mode.equals(OptionalBinaryResponseMode.ERROR)) {
+                throw TestServerErrors.invalidArgument("field", "value");
+            } else if (mode.equals(OptionalBinaryResponseMode.PRESENT)) {
+                return Optional.of(output -> output.write(SUCCESS.getBytes(StandardCharsets.UTF_8)));
+            }
+            return Optional.empty();
         }
     }
 }
