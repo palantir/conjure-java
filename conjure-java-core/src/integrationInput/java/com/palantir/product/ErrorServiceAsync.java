@@ -2,11 +2,12 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureErrors;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureErrors;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.DeserializerArgs;
@@ -17,10 +18,15 @@ import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
+import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.tokens.auth.AuthHeader;
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Boolean;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Optional;
@@ -29,34 +35,39 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ErrorServiceAsync.Factory.class)
 public interface ErrorServiceAsync {
-    /** @apiNote {@code GET /base/basic} */
-    @ClientEndpoint(method = "GET", path = "/base/basic")
-    ListenableFuture<TestBasicErrorResponse> testBasicError(AuthHeader authHeader);
+    /** @apiNote {@code POST /errors/basic} */
+    @ClientEndpoint(method = "POST", path = "/errors/basic")
+    ListenableFuture<TestBasicErrorResponse> testBasicError(AuthHeader authHeader, boolean shouldThrowError);
 
-    /** @apiNote {@code GET /base/imported} */
-    @ClientEndpoint(method = "GET", path = "/base/imported")
-    ListenableFuture<TestImportedErrorResponse> testImportedError(AuthHeader authHeader);
+    /** @apiNote {@code POST /errors/imported} */
+    @ClientEndpoint(method = "POST", path = "/errors/imported")
+    ListenableFuture<TestImportedErrorResponse> testImportedError(AuthHeader authHeader, boolean shouldThrowError);
 
-    /** @apiNote {@code GET /base/multiple} */
-    @ClientEndpoint(method = "GET", path = "/base/multiple")
-    ListenableFuture<TestMultipleErrorsAndPackagesResponse> testMultipleErrorsAndPackages(AuthHeader authHeader);
+    /** @apiNote {@code POST /errors/multiple} */
+    @ClientEndpoint(method = "POST", path = "/errors/multiple")
+    ListenableFuture<TestMultipleErrorsAndPackagesResponse> testMultipleErrorsAndPackages(
+            AuthHeader authHeader, Optional<String> errorToThrow);
 
-    /** @apiNote {@code GET /base/empty} */
-    @ClientEndpoint(method = "GET", path = "/base/empty")
-    ListenableFuture<TestEmptyBodyResponse> testEmptyBody(AuthHeader authHeader);
+    /** @apiNote {@code POST /errors/empty} */
+    @ClientEndpoint(method = "POST", path = "/errors/empty")
+    ListenableFuture<TestEmptyBodyResponse> testEmptyBody(AuthHeader authHeader, boolean shouldThrowError);
 
-    /** @apiNote {@code GET /base/binary} */
-    @ClientEndpoint(method = "GET", path = "/base/binary")
-    ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader);
+    /** @apiNote {@code POST /errors/binary} */
+    @ClientEndpoint(method = "POST", path = "/errors/binary")
+    ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader, boolean shouldThrowError);
 
-    /** @apiNote {@code GET /base/optional-binary} */
-    @ClientEndpoint(method = "GET", path = "/base/optional-binary")
-    ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(AuthHeader authHeader);
+    /** @apiNote {@code POST /errors/optional-binary} */
+    @ClientEndpoint(method = "POST", path = "/errors/optional-binary")
+    ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(
+            AuthHeader authHeader, OptionalBinaryResponseMode mode);
 
     /** Creates an asynchronous/non-blocking client for a ErrorService service. */
     static ErrorServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ErrorServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Serializer<Boolean> testBasicErrorSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel testBasicErrorChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBasicError);
@@ -70,6 +81,9 @@ public interface ErrorServiceAsync {
                                     new TypeMarker<TestBasicErrorResponse.InvalidArgument>() {})
                             .build());
 
+            private final Serializer<Boolean> testImportedErrorSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
+
             private final EndpointChannel testImportedErrorChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testImportedError);
 
@@ -81,6 +95,9 @@ public interface ErrorServiceAsync {
                                     EndpointSpecificErrors.ENDPOINT_ERROR.name(),
                                     new TypeMarker<TestImportedErrorResponse.EndpointError>() {})
                             .build());
+
+            private final Serializer<Optional<String>> testMultipleErrorsAndPackagesSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testMultipleErrorsAndPackagesChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testMultipleErrorsAndPackages);
@@ -105,6 +122,9 @@ public interface ErrorServiceAsync {
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.DifferentPackage>() {})
                                     .build());
 
+            private final Serializer<Boolean> testEmptyBodySerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
+
             private final EndpointChannel testEmptyBodyChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testEmptyBody);
 
@@ -117,6 +137,9 @@ public interface ErrorServiceAsync {
                                     new TypeMarker<TestEmptyBodyResponse.InvalidArgument>() {})
                             .build());
 
+            private final Serializer<Boolean> testBinarySerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
+
             private final EndpointChannel testBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBinary);
 
@@ -128,6 +151,9 @@ public interface ErrorServiceAsync {
                                     TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestBinaryResponse.InvalidArgument>() {})
                             .build());
+
+            private final Serializer<OptionalBinaryResponseMode> testOptionalBinarySerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<OptionalBinaryResponseMode>() {});
 
             private final EndpointChannel testOptionalBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testOptionalBinary);
@@ -142,25 +168,30 @@ public interface ErrorServiceAsync {
                             .build());
 
             @Override
-            public ListenableFuture<TestBasicErrorResponse> testBasicError(AuthHeader authHeader) {
+            public ListenableFuture<TestBasicErrorResponse> testBasicError(
+                    AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testBasicErrorSerializer.serialize(shouldThrowError));
                 return _runtime.clients().call(testBasicErrorChannel, _request.build(), testBasicErrorDeserializer);
             }
 
             @Override
-            public ListenableFuture<TestImportedErrorResponse> testImportedError(AuthHeader authHeader) {
+            public ListenableFuture<TestImportedErrorResponse> testImportedError(
+                    AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testImportedErrorSerializer.serialize(shouldThrowError));
                 return _runtime.clients()
                         .call(testImportedErrorChannel, _request.build(), testImportedErrorDeserializer);
             }
 
             @Override
             public ListenableFuture<TestMultipleErrorsAndPackagesResponse> testMultipleErrorsAndPackages(
-                    AuthHeader authHeader) {
+                    AuthHeader authHeader, Optional<String> errorToThrow) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testMultipleErrorsAndPackagesSerializer.serialize(errorToThrow));
                 return _runtime.clients()
                         .call(
                                 testMultipleErrorsAndPackagesChannel,
@@ -169,23 +200,28 @@ public interface ErrorServiceAsync {
             }
 
             @Override
-            public ListenableFuture<TestEmptyBodyResponse> testEmptyBody(AuthHeader authHeader) {
+            public ListenableFuture<TestEmptyBodyResponse> testEmptyBody(
+                    AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testEmptyBodySerializer.serialize(shouldThrowError));
                 return _runtime.clients().call(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
             }
 
             @Override
-            public ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader) {
+            public ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testBinarySerializer.serialize(shouldThrowError));
                 return _runtime.clients().call(testBinaryChannel, _request.build(), testBinaryDeserializer);
             }
 
             @Override
-            public ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(AuthHeader authHeader) {
+            public ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(
+                    AuthHeader authHeader, OptionalBinaryResponseMode mode) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testOptionalBinarySerializer.serialize(mode));
                 return _runtime.clients()
                         .call(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
             }
@@ -222,7 +258,7 @@ public interface ErrorServiceAsync {
 
     sealed interface TestBasicErrorResponse
             permits TestBasicErrorResponse.Success, TestBasicErrorResponse.InvalidArgument {
-        record Success(String value) implements TestBasicErrorResponse {
+        record Success(@JsonValue String value) implements TestBasicErrorResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
             }
@@ -230,10 +266,10 @@ public interface ErrorServiceAsync {
 
         final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestBasicErrorResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
                 super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
             }
@@ -242,7 +278,7 @@ public interface ErrorServiceAsync {
 
     sealed interface TestImportedErrorResponse
             permits TestImportedErrorResponse.Success, TestImportedErrorResponse.EndpointError {
-        record Success(String value) implements TestImportedErrorResponse {
+        record Success(@JsonValue String value) implements TestImportedErrorResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
             }
@@ -251,10 +287,10 @@ public interface ErrorServiceAsync {
         final class EndpointError
                 extends ConjureErrors.BaseEndpointError<EndpointSpecificErrors.EndpointErrorParameters>
                 implements TestImportedErrorResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             EndpointError(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") EndpointSpecificErrors.EndpointErrorParameters parameters) {
                 super(errorCode, EndpointSpecificErrors.ENDPOINT_ERROR.name(), errorInstanceId, parameters);
             }
@@ -267,7 +303,7 @@ public interface ErrorServiceAsync {
                     TestMultipleErrorsAndPackagesResponse.NotFound,
                     TestMultipleErrorsAndPackagesResponse.DifferentNamespace,
                     TestMultipleErrorsAndPackagesResponse.DifferentPackage {
-        record Success(String value) implements TestMultipleErrorsAndPackagesResponse {
+        record Success(@JsonValue String value) implements TestMultipleErrorsAndPackagesResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
             }
@@ -275,10 +311,10 @@ public interface ErrorServiceAsync {
 
         final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
                 super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
             }
@@ -286,98 +322,115 @@ public interface ErrorServiceAsync {
 
         final class NotFound extends ConjureErrors.BaseEndpointError<TestErrors.NotFoundParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             NotFound(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.NotFoundParameters parameters) {
                 super(errorCode, TestErrors.NOT_FOUND.name(), errorInstanceId, parameters);
             }
         }
 
-        final class DifferentNamespace extends ConjureErrors.BaseEndpointError<ConjureErrors.EmptyErrorParameters>
+        final class DifferentNamespace
+                extends ConjureErrors.BaseEndpointError<EndpointSpecificTwoErrors.DifferentNamespaceParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             DifferentNamespace(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId) {
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId) {
                 super(
                         errorCode,
                         EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
                         errorInstanceId,
-                        ConjureErrors.EMPTY_ERROR_PARAMETERS_INSTANCE);
+                        new EndpointSpecificTwoErrors.DifferentNamespaceParameters());
             }
         }
 
-        final class DifferentPackage extends ConjureErrors.BaseEndpointError<ConjureErrors.EmptyErrorParameters>
+        final class DifferentPackage
+                extends ConjureErrors.BaseEndpointError<
+                        com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             DifferentPackage(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId) {
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId) {
                 super(
                         errorCode,
                         com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
                         errorInstanceId,
-                        ConjureErrors.EMPTY_ERROR_PARAMETERS_INSTANCE);
+                        new com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters());
             }
         }
     }
 
     sealed interface TestEmptyBodyResponse
             permits TestEmptyBodyResponse.Success, TestEmptyBodyResponse.InvalidArgument {
-        record Success() implements TestEmptyBodyResponse {
-            @JsonCreator
-            public static Success create() {
-                return new Success();
-            }
-        }
+        record Success() implements TestEmptyBodyResponse {}
 
         final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestEmptyBodyResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
                 super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
             }
         }
     }
 
-    sealed interface TestBinaryResponse permits TestBinaryResponse.Success, TestBinaryResponse.InvalidArgument {
-        record Success(@MustBeClosed InputStream value) implements TestBinaryResponse {
+    sealed interface TestBinaryResponse extends Closeable
+            permits TestBinaryResponse.Success, TestBinaryResponse.InvalidArgument {
+        @Override
+        default void close() throws IOException {}
+
+        record Success(@MustBeClosed @JsonValue InputStream value) implements TestBinaryResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
+            }
+
+            @Override
+            public void close() throws IOException {
+                value.close();
             }
         }
 
         final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestBinaryResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
                 super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
             }
         }
     }
 
-    sealed interface TestOptionalBinaryResponse
+    sealed interface TestOptionalBinaryResponse extends Closeable
             permits TestOptionalBinaryResponse.Success, TestOptionalBinaryResponse.InvalidArgument {
-        record Success(Optional<InputStream> value) implements TestOptionalBinaryResponse {
+        @Override
+        default void close() throws IOException {}
+
+        record Success(@JsonValue Optional<InputStream> value) implements TestOptionalBinaryResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
+            }
+
+            @Override
+            public void close() throws IOException {
+                if (value.isPresent()) {
+                    value.get().close();
+                }
             }
         }
 
         final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestOptionalBinaryResponse {
-            @JsonCreator
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
-                    @JsonProperty("errorCode") String errorCode,
-                    @JsonProperty("errorInstanceId") String errorInstanceId,
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
                 super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
             }

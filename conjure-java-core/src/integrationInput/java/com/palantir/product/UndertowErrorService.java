@@ -1,31 +1,54 @@
 package com.palantir.product;
 
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.tokens.auth.AuthHeader;
+import java.util.Optional;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowErrorService {
     /**
-     * @apiNote {@code GET /base/basic}
+     * @apiNote {@code POST /errors/basic}
      * @throws TestServerErrors.InvalidArgument
      */
-    String testBasicError(AuthHeader authHeader) throws TestServerErrors.InvalidArgument;
+    String testBasicError(AuthHeader authHeader, boolean shouldThrowError) throws TestServerErrors.InvalidArgument;
 
     /**
-     * @apiNote {@code GET /base/imported}
+     * @apiNote {@code POST /errors/imported}
      * @throws EndpointSpecificServerErrors.EndpointError
      */
-    String testImportedError(AuthHeader authHeader) throws EndpointSpecificServerErrors.EndpointError;
+    String testImportedError(AuthHeader authHeader, boolean shouldThrowError)
+            throws EndpointSpecificServerErrors.EndpointError;
 
     /**
-     * @apiNote {@code GET /base/multiple}
+     * @apiNote {@code POST /errors/multiple}
      * @throws TestServerErrors.InvalidArgument
      * @throws TestServerErrors.NotFound Something was not found.
      * @throws EndpointSpecificTwoServerErrors.DifferentNamespace
      * @throws com.palantir.another.EndpointSpecificServerErrors.DifferentPackage
      */
-    String testMultipleErrorsAndPackages(AuthHeader authHeader)
+    String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
             throws TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
                     EndpointSpecificTwoServerErrors.DifferentNamespace,
                     com.palantir.another.EndpointSpecificServerErrors.DifferentPackage;
+
+    /**
+     * @apiNote {@code POST /errors/empty}
+     * @throws TestServerErrors.InvalidArgument
+     */
+    void testEmptyBody(AuthHeader authHeader, boolean shouldThrowError) throws TestServerErrors.InvalidArgument;
+
+    /**
+     * @apiNote {@code POST /errors/binary}
+     * @throws TestServerErrors.InvalidArgument
+     */
+    BinaryResponseBody testBinary(AuthHeader authHeader, boolean shouldThrowError)
+            throws TestServerErrors.InvalidArgument;
+
+    /**
+     * @apiNote {@code POST /errors/optional-binary}
+     * @throws TestServerErrors.InvalidArgument
+     */
+    Optional<BinaryResponseBody> testOptionalBinary(AuthHeader authHeader, OptionalBinaryResponseMode mode)
+            throws TestServerErrors.InvalidArgument;
 }

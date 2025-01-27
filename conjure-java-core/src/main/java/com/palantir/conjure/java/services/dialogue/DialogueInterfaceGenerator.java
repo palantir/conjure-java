@@ -20,13 +20,12 @@ import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.CaseFormat;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.lib.internal.ConjureErrors;
-import com.palantir.conjure.java.lib.internal.ConjureErrors.BaseEndpointError;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
@@ -41,6 +40,7 @@ import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureErrors.BaseEndpointError;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
@@ -57,7 +57,10 @@ import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,8 +204,7 @@ public final class DialogueInterfaceGenerator {
             errorTypes.add(constructEndpointErrorType(endpointError, packageName, responseTypeName));
         }
 
-        // Get type from typespec
-        return TypeSpec.interfaceBuilder(responseTypeName)
+        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(responseTypeName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SEALED)
                 .addPermittedSubclass(
                         ClassName.get(packageName, className.simpleName(), responseTypeName.simpleName(), "Success"))
@@ -211,8 +213,19 @@ public final class DialogueInterfaceGenerator {
                                 packageName, className.simpleName(), responseTypeName.simpleName(), type.name()))
                         .toList())
                 .addType(successRecord)
-                .addTypes(errorTypes)
-                .build();
+                .addTypes(errorTypes);
+
+        if (returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(endpointDef.getReturns()))) {
+            builder.addSuperinterface(ClassName.get(Closeable.class))
+                    .addMethod(MethodSpec.methodBuilder("close")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                            .returns(TypeName.VOID)
+                            .addException(IOException.class)
+                            .build());
+        }
+
+        return builder.build();
     }
 
     private TypeSpec constructEndpointErrorType(
@@ -224,24 +237,18 @@ public final class DialogueInterfaceGenerator {
                 ErrorGenerationUtils.errorTypesClassName(
                         endpointError.getError().getNamespace()),
                 errorTypeName);
-
         TypeSpec.Builder endpointErrorTypeBuilder = TypeSpec.classBuilder(ClassName.get(
                         packageName,
                         responseTypeName.simpleName(),
                         endpointError.getError().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(responseTypeName);
-        ClassName parametersClassName;
-        if (errorNameToParameterExistenceMapping.hasParameters(endpointError.getError())) {
-            parametersClassName = ClassName.get(
-                    endpointError.getError().getPackage(),
-                    ErrorGenerationUtils.errorTypesClassName(
-                            endpointError.getError().getNamespace()),
-                    ErrorGenerationUtils.errorParametersClassName(
-                            endpointError.getError().getName()));
-        } else {
-            parametersClassName = ClassName.get(ConjureErrors.EmptyErrorParameters.class);
-        }
+        ClassName parametersClassName = ClassName.get(
+                endpointError.getError().getPackage(),
+                ErrorGenerationUtils.errorTypesClassName(
+                        endpointError.getError().getNamespace()),
+                ErrorGenerationUtils.errorParametersClassName(
+                        endpointError.getError().getName()));
         endpointErrorTypeBuilder
                 .superclass(ParameterizedTypeName.get(ClassName.get(BaseEndpointError.class), parametersClassName))
                 .addMethod(errorTypeConstructor(endpointError.getError(), parametersClassName, errorTypesClassName));
@@ -263,6 +270,9 @@ public final class DialogueInterfaceGenerator {
             if (TypeName.get(InputStream.class).equals(returnType)) {
                 parameterBuilder.addAnnotation(MustBeClosed.class);
             }
+            // The @JsonValue annotation ensures that deserialization delegates to the type of "value".
+            // https://github.com/FasterXML/jackson-databind/issues/3180
+            parameterBuilder.addAnnotation(JsonValue.class);
             successCtorBuilder.addParameter(parameterBuilder.build());
         }
 
@@ -271,13 +281,23 @@ public final class DialogueInterfaceGenerator {
                 .recordConstructor(successCtorBuilder.build())
                 .addSuperinterface(responseTypeName);
 
-        if (returnType.equals(TypeName.VOID)) {
-            successRecordBuilder.addMethod(MethodSpec.methodBuilder("create")
-                    .addAnnotation(JsonCreator.class)
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(successTypeClassName)
-                    .addStatement("return new $T()", successTypeClassName)
-                    .build());
+        if (returnTypes.isBinaryOrOptionalBinary(returnType)) {
+            MethodSpec.Builder closeOverride = MethodSpec.methodBuilder("close")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(TypeName.VOID)
+                    .addException(IOException.class);
+            if (returnTypes.isBinary(returnType)) {
+                closeOverride.addCode(
+                        CodeBlock.builder().addStatement("value.close()").build());
+            } else {
+                closeOverride.addCode(CodeBlock.builder()
+                        .beginControlFlow("if (value.isPresent())")
+                        .addStatement("value.get().close()")
+                        .endControlFlow()
+                        .build());
+            }
+            successRecordBuilder.addMethod(closeOverride.build());
         }
         return successRecordBuilder.build();
     }
@@ -285,16 +305,20 @@ public final class DialogueInterfaceGenerator {
     private MethodSpec errorTypeConstructor(
             ErrorTypeName errorTypeName, ClassName parametersClassName, ClassName errorTypesClassName) {
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
-                .addAnnotation(JsonCreator.class)
+                .addAnnotation(AnnotationSpec.builder(JsonCreator.class)
+                        .addMember("mode", "$T.$L", JsonCreator.Mode.class, JsonCreator.Mode.PROPERTIES)
+                        .build())
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorCode")
                         .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                                 .addMember("value", "$S", "errorCode")
                                 .build())
+                        .addAnnotation(Safe.class)
                         .build())
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorInstanceId")
                         .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                                 .addMember("value", "$S", "errorInstanceId")
                                 .build())
+                        .addAnnotation(Safe.class)
                         .build());
         if (errorNameToParameterExistenceMapping.hasParameters(errorTypeName)) {
             ctorBuilder.addParameter(ParameterSpec.builder(parametersClassName, "parameters")
@@ -305,9 +329,7 @@ public final class DialogueInterfaceGenerator {
             ctorBuilder.addStatement("super(errorCode, $T.name(), errorInstanceId, parameters)", errorTypesClassName);
         } else {
             ctorBuilder.addStatement(
-                    "super(errorCode, $T.name(), errorInstanceId, $T.EMPTY_ERROR_PARAMETERS_INSTANCE)",
-                    errorTypesClassName,
-                    ClassName.get(ConjureErrors.class));
+                    "super(errorCode, $T.name(), errorInstanceId, new $T())", errorTypesClassName, parametersClassName);
         }
         return ctorBuilder.build();
     }
