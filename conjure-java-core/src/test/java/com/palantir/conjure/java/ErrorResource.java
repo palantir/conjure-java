@@ -45,7 +45,7 @@ interface ErrorResource {
         @Override
         public String testImportedError(AuthHeader authHeader, boolean shouldThrowError) throws EndpointError {
             if (shouldThrowError) {
-                throw EndpointSpecificServerErrors.endpointError("imported error", "type def");
+                throw EndpointSpecificServerErrors.endpointError("typeName", "typeDef");
             }
             return SUCCESS;
         }

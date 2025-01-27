@@ -64,7 +64,7 @@ public abstract class TestBase {
         for (Path file : files) {
             Path relativePath = folder.relativize(file);
             Path output = outputDir.resolve(relativePath);
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+            if (Boolean.parseBoolean(System.getProperty("recreate", "false"))) {
                 Files.createDirectories(relativePath.getParent());
                 Files.deleteIfExists(output);
                 Files.copy(file, output);
@@ -72,6 +72,4 @@ public abstract class TestBase {
             assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
         }
     }
-
-
 }

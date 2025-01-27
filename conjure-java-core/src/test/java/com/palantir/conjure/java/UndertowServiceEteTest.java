@@ -598,8 +598,8 @@ public final class UndertowServiceEteTest extends TestBase {
                     .isEqualTo(EndpointSpecificErrors.ENDPOINT_ERROR.code().name());
             assertThat(error.getErrorName()).isEqualTo(EndpointSpecificErrors.ENDPOINT_ERROR.name());
             assertThat(error.getParams()).satisfies(params -> {
-                assertThat(params.typeDef()).isEqualTo("type def");
-                assertThat(params.typeName()).isEqualTo("imported error");
+                assertThat(params.typeDef()).isEqualTo("typeDef");
+                assertThat(params.typeName()).isEqualTo("typeName");
             });
         });
     }

@@ -53,18 +53,6 @@ import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 public final class ErrorGenerationUtils {
-    /**
-     * The name of the sealed interface returned by endpoints with associated errors, permitting implementations for a
-     * successful result and each error type.
-     */
-    public static String endpointResponseResultTypeName(EndpointName endpointName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, endpointName.get()) + "Response";
-    }
-
-    public static String errorParametersClassName(String errorName) {
-        return errorName + "Parameters";
-    }
-
     public static MethodSpec privateConstructor() {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
     }
@@ -77,6 +65,22 @@ public final class ErrorGenerationUtils {
         return namespace.get() + "Errors";
     }
 
+    public static String errorParametersClassName(String errorName) {
+        return errorName + "Parameters";
+    }
+
+    /**
+     * The name of the sealed interface returned by endpoints with associated errors, permitting implementations for a
+     * successful result and each error type.
+     */
+    public static String endpointResponseResultTypeName(EndpointName endpointName) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, endpointName.get()) + "Response";
+    }
+
+    /**
+     * This mapping from an error type to whether the error has parameters is used when constructing error records in
+     * Dialogue response types.
+     */
     public record ErrorNameToParameterExistenceMapping(Map<ErrorTypeName, Boolean> errorTypeToHasParameters) {
         public static ErrorNameToParameterExistenceMapping from(ConjureDefinition definition) {
             return new ErrorNameToParameterExistenceMapping(definition.getErrors().stream()
@@ -180,18 +184,21 @@ public final class ErrorGenerationUtils {
 
     public static ParameterSpec buildParameterWithSafetyAnnotation(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
-        Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
-        String argName = argDefinition.getFieldName().get();
-        TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
-        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
-        argDefinition
-                .getDocs()
-                .ifPresent(docs ->
-                        parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
+        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe)
+                .build();
+    }
+
+    public static ParameterSpec buildParameterWithSafetyAnnotationAndJsonProperty(
+            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
+        ParameterSpec.Builder parameterBuilder =
+                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe);
+        parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$S", argDefinition.getFieldName())
+                .build());
         return parameterBuilder.build();
     }
 
-    public static ParameterSpec buildParameterWithSafetyAnnotationWithJsonProperty(
+    private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
         String argName = argDefinition.getFieldName().get();
@@ -201,10 +208,7 @@ public final class ErrorGenerationUtils {
                 .getDocs()
                 .ifPresent(docs ->
                         parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
-        parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                .addMember("value", "$S", argDefinition.getFieldName())
-                .build());
-        return parameterBuilder.build();
+        return parameterBuilder;
     }
 
     // Conditional factory method

@@ -25,6 +25,9 @@ import com.palantir.tokens.auth.AuthHeader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Boolean;
+import java.lang.Override;
+import java.lang.String;
 import java.util.Optional;
 import javax.annotation.processing.Generated;
 
