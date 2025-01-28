@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
-import com.palantir.dialogue.ConjureErrors;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.DeserializerArgs;
@@ -15,6 +14,7 @@ import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.EndpointError;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -261,7 +261,7 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+        final class InvalidArgument extends EndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestBasicErrorResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
@@ -282,7 +282,7 @@ public interface ErrorServiceBlocking {
         }
 
         final class EndpointError
-                extends ConjureErrors.BaseEndpointError<EndpointSpecificErrors.EndpointErrorParameters>
+                extends com.palantir.dialogue.EndpointError<EndpointSpecificErrors.EndpointErrorParameters>
                 implements TestImportedErrorResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             EndpointError(
@@ -306,7 +306,7 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+        final class InvalidArgument extends EndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
@@ -317,7 +317,7 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class NotFound extends ConjureErrors.BaseEndpointError<TestErrors.NotFoundParameters>
+        final class NotFound extends EndpointError<TestErrors.NotFoundParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             NotFound(
@@ -328,8 +328,7 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class DifferentNamespace
-                extends ConjureErrors.BaseEndpointError<EndpointSpecificTwoErrors.DifferentNamespaceParameters>
+        final class DifferentNamespace extends EndpointError<EndpointSpecificTwoErrors.DifferentNamespaceParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             DifferentNamespace(
@@ -344,8 +343,7 @@ public interface ErrorServiceBlocking {
         }
 
         final class DifferentPackage
-                extends ConjureErrors.BaseEndpointError<
-                        com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
+                extends EndpointError<com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             DifferentPackage(
@@ -364,7 +362,7 @@ public interface ErrorServiceBlocking {
             permits TestEmptyBodyResponse.Success, TestEmptyBodyResponse.InvalidArgument {
         record Success() implements TestEmptyBodyResponse {}
 
-        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+        final class InvalidArgument extends EndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestEmptyBodyResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
@@ -392,7 +390,7 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+        final class InvalidArgument extends EndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestBinaryResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
@@ -422,7 +420,7 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final class InvalidArgument extends ConjureErrors.BaseEndpointError<TestErrors.InvalidArgumentParameters>
+        final class InvalidArgument extends EndpointError<TestErrors.InvalidArgumentParameters>
                 implements TestOptionalBinaryResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             InvalidArgument(
