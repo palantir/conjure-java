@@ -40,7 +40,6 @@ import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
-import com.palantir.dialogue.ConjureErrors.BaseEndpointError;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
@@ -250,7 +249,8 @@ public final class DialogueInterfaceGenerator {
                 ErrorGenerationUtils.errorParametersClassName(
                         endpointError.getError().getName()));
         endpointErrorTypeBuilder
-                .superclass(ParameterizedTypeName.get(ClassName.get(BaseEndpointError.class), parametersClassName))
+                .superclass(ParameterizedTypeName.get(
+                        ClassName.get(com.palantir.dialogue.EndpointError.class), parametersClassName))
                 .addMethod(errorTypeConstructor(endpointError.getError(), parametersClassName, errorTypesClassName));
         return endpointErrorTypeBuilder.build();
     }
