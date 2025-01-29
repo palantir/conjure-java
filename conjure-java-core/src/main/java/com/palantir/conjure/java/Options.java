@@ -183,7 +183,7 @@ public interface Options {
      * Note that for objects without any fields, static factory methods will still be generated.
      */
     @Value.Default
-    default boolean excludeStaticFactoryMethodsForObjectsWithAtLeastOneField() {
+    default boolean preferObjectBuilders() {
         return false;
     }
 

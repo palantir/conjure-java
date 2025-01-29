@@ -230,6 +230,13 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Java external type imports are generated using their fallback type.")
         private boolean externalFallbackTypes;
 
+        @CommandLine.Option(
+                names = "--preferObjectBuilders",
+                defaultValue = "false",
+                description = "Exclude static factory methods from generated objects with one or more fields. Note "
+                        + "that for objects without any fields, this will still generate the static factory method.")
+        private boolean preferObjectBuilders;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -300,6 +307,7 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
+                            .preferObjectBuilders(preferObjectBuilders)
                             .build())
                     .build();
         }

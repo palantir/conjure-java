@@ -130,10 +130,9 @@ public final class BeanGenerator {
                     .addAnnotations(safety)
                     .build());
 
-            // If the `excludeStaticFactoryMethods` is set, do not create a static factory method. The object is
-            // guaranteed to have at least one field here.
-            if (!options.excludeStaticFactoryMethodsForObjectsWithAtLeastOneField()
-                    && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+            // If the `preferObjectBuilders` is set, do not create a static factory method. The object is guaranteed to
+            // have at least one field here.
+            if (!options.preferObjectBuilders() && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
                 typeBuilder.addMethod(createStaticFactoryMethod(
                         fields,
                         objectClass,

@@ -140,9 +140,8 @@ public final class ObjectGeneratorTests {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types-no-static-factory.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .excludeStaticFactoryMethodsForObjectsWithAtLeastOneField(true)
-                                .build())))
+                        ImmutableSet.of(new ObjectGenerator(
+                                Options.builder().preferObjectBuilders(true).build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
