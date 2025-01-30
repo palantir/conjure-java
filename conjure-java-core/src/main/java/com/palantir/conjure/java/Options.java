@@ -178,6 +178,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * If set to true, static factory methods ('of') will be excluded from generated objects with one or more fields.
+     * Note that for objects without any fields, static factory methods will still be generated.
+     */
+    @Value.Default
+    default boolean preferObjectBuilders() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

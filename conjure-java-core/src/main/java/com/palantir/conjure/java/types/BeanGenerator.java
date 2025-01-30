@@ -130,7 +130,9 @@ public final class BeanGenerator {
                     .addAnnotations(safety)
                     .build());
 
-            if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+            // If the `preferObjectBuilders` is set, do not create a static factory method. The object is guaranteed to
+            // have at least one field here.
+            if (!options.preferObjectBuilders() && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
                 typeBuilder.addMethod(createStaticFactoryMethod(
                         fields,
                         objectClass,
@@ -176,8 +178,8 @@ public final class BeanGenerator {
                         options);
             }
         }
-        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
+        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(prefixedName.getPackage(), typeBuilder.build())
@@ -373,10 +375,6 @@ public final class BeanGenerator {
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
             boolean useNonStrictStagedBuilders) {
-        if (fields.isEmpty()) {
-            createStaticFactoryMethodForEmptyBean(objectClass);
-        }
-
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
