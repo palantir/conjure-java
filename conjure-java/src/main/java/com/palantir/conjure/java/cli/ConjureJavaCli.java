@@ -232,6 +232,13 @@ public final class ConjureJavaCli implements Runnable {
                         + "that for objects without any fields, this will still generate the static factory method.")
         private boolean preferObjectBuilders;
 
+        @CommandLine.Option(
+                names = "--defensiveCollectionAliases",
+                defaultValue = "false",
+                description = "When combined with --nonNullCollections, will fail to construct aliases of collections "
+                        + "with null values.")
+        private boolean defensiveCollectionAliases;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -303,6 +310,7 @@ public final class ConjureJavaCli implements Runnable {
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
                             .preferObjectBuilders(preferObjectBuilders)
+                            .defensiveCollectionAliases(defensiveCollectionAliases)
                             .build())
                     .build();
         }

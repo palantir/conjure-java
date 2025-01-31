@@ -187,6 +187,11 @@ public interface Options {
         return false;
     }
 
+    @Value.Default
+    default boolean defensiveCollectionAliases() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
