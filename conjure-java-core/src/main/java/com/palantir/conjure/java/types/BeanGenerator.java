@@ -26,6 +26,7 @@ import com.google.common.collect.Iterables;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -129,7 +130,9 @@ public final class BeanGenerator {
                     .addAnnotations(safety)
                     .build());
 
-            if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+            // If the `preferObjectBuilders` is set, do not create a static factory method. The object is guaranteed to
+            // have at least one field here.
+            if (!options.preferObjectBuilders() && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
                 typeBuilder.addMethod(createStaticFactoryMethod(
                         fields,
                         objectClass,
@@ -175,8 +178,8 @@ public final class BeanGenerator {
                         options);
             }
         }
-        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
+        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(prefixedName.getPackage(), typeBuilder.build())
@@ -259,7 +262,7 @@ public final class BeanGenerator {
             // is private and necessarily called from the builder, which does its own defensive copying.
             if (field.conjureDef().getType().accept(TypeVisitor.IS_LIST)) {
                 // TODO(melliot): contribute a fix to JavaPoet that parses $T correctly for a JavaPoet FieldSpec
-                body.addStatement("this.$1N = $2T.unmodifiableList($1N)", spec, Collections.class);
+                body.addStatement("this.$1N = $2T.unmodifiableList($1N)", spec, ConjureCollections.class);
             } else if (field.conjureDef().getType().accept(TypeVisitor.IS_SET)) {
                 body.addStatement("this.$1N = $2T.unmodifiableSet($1N)", spec, Collections.class);
             } else if (field.conjureDef().getType().accept(TypeVisitor.IS_MAP)) {
@@ -372,10 +375,6 @@ public final class BeanGenerator {
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
             boolean useNonStrictStagedBuilders) {
-        if (fields.isEmpty()) {
-            createStaticFactoryMethodForEmptyBean(objectClass);
-        }
-
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);

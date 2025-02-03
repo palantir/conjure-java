@@ -48,6 +48,9 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Java external type imports are generated using their fallback type.
         --excludeDialogueAsyncInterfaces
                      Exclude the generation of asynchronous interfaces for Dialogue clients.
+        --preferObjectBuilders
+                     Exclude static factory methods from generated objects with one or more fields. Note that for 
+                     objects without any fields, this will still generate the static factory method.
 
 ### Known Tag Values
 

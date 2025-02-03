@@ -11,7 +11,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,8 +28,8 @@ public final class CovariantListExample {
 
     private CovariantListExample(List<Object> items, List<ExampleExternalReference> externalItems) {
         validateFields(items, externalItems);
-        this.items = Collections.unmodifiableList(items);
-        this.externalItems = Collections.unmodifiableList(externalItems);
+        this.items = ConjureCollections.unmodifiableList(items);
+        this.externalItems = ConjureCollections.unmodifiableList(externalItems);
     }
 
     @JsonProperty("items")

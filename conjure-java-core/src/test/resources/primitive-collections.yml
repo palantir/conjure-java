@@ -1,0 +1,11 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      PrimitiveExample:
+        fields:
+          # staged builders don't generate the intermediary
+          # types without required fields
+          field: integer
+          ints: list<integer>
+          doubles: list<double>

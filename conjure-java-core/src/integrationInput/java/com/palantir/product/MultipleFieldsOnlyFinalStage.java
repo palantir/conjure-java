@@ -53,11 +53,11 @@ public final class MultipleFieldsOnlyFinalStage {
             Optional<String> optionalItemOld,
             Set<String> itemsSetOld) {
         validateFields(items, itemsMap, optionalItem, itemsSet, itemsOld, itemsMapOld, optionalItemOld, itemsSetOld);
-        this.items = Collections.unmodifiableList(items);
+        this.items = ConjureCollections.unmodifiableList(items);
         this.itemsMap = Collections.unmodifiableMap(itemsMap);
         this.optionalItem = optionalItem;
         this.itemsSet = Collections.unmodifiableSet(itemsSet);
-        this.itemsOld = Collections.unmodifiableList(itemsOld);
+        this.itemsOld = ConjureCollections.unmodifiableList(itemsOld);
         this.itemsMapOld = Collections.unmodifiableMap(itemsMapOld);
         this.optionalItemOld = optionalItemOld;
         this.itemsSetOld = Collections.unmodifiableSet(itemsSetOld);

@@ -33,7 +33,6 @@ import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.javapoet.ClassName;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
 import java.io.IOException;
@@ -50,10 +49,6 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         subcommands = ConjureJavaCli.GenerateCommand.class)
 public final class ConjureJavaCli implements Runnable {
-    // Load TypeName to prevent a deadlock
-    // https://github.com/square/javapoet/issues/637
-    @SuppressWarnings("unused")
-    private static final ClassName _loaded = ClassName.get(Runnable.class);
 
     public static void main(String[] args) {
         CommandLine.run(new ConjureJavaCli(), args);
@@ -230,6 +225,13 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Java external type imports are generated using their fallback type.")
         private boolean externalFallbackTypes;
 
+        @CommandLine.Option(
+                names = "--preferObjectBuilders",
+                defaultValue = "false",
+                description = "Exclude static factory methods from generated objects with one or more fields. Note "
+                        + "that for objects without any fields, this will still generate the static factory method.")
+        private boolean preferObjectBuilders;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -300,6 +302,7 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
+                            .preferObjectBuilders(preferObjectBuilders)
                             .build())
                     .build();
         }

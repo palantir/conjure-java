@@ -179,9 +179,18 @@ public interface Options {
     }
 
     /**
+     * If set to true, static factory methods ('of') will be excluded from generated objects with one or more fields.
+     * Note that for objects without any fields, static factory methods will still be generated.
+     */
+    @Value.Default
+    default boolean preferObjectBuilders() {
+        return false;
+    }
+
+    /**
      * If enabled, endpoints that have associated errors will return a result type: a sealed interface permitting
      * subclasses for the endpoint's return value, and each endpoint error. Each endpoint error is a subclass of
-     * {@link com.palantir.conjure.java.lib.internal.ConjureErrors.BaseEndpointError}.
+     * {@link com.palantir.dialogue.EndpointError}.
      */
     @Value.Default
     default boolean generateDialogueEndpointErrorResultTypes() {

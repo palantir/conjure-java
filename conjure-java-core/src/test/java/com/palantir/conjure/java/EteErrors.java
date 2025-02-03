@@ -54,8 +54,7 @@ public class EteErrors {
                 .map(parameters -> Arrays.stream(parameters)
                         .filter(parameter -> parameter.getName().equals("cause"))
                         .findAny())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .<Parameter>mapMulti(Optional::ifPresent)
                 .collect(Collectors.toUnmodifiableList());
         assertThat(causeParameters).isNotEmpty();
         for (Parameter causeParameter : causeParameters) {
