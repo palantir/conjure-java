@@ -178,7 +178,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private Optional<FieldSpec> deserializer(
             TypeName responseType, EndpointDefinition endpointDef, EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
-        boolean generateResultTypes = shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, endpointDef);
+        boolean generateResultTypes = ErrorGenerationUtils.shouldGenerateResultTypesForEndpoint(
+                options.generateDialogueEndpointErrorResultTypes(), endpointDef);
 
         if (returnTypes.isBinaryOrOptionalBinary(className) && !generateResultTypes) {
             return Optional.empty();
@@ -241,12 +242,6 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return deserializerArgsBuilder.build();
     }
 
-    private static boolean shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(
-            Options options, EndpointDefinition endpointDefinition) {
-        return options.generateDialogueEndpointErrorResultTypes()
-                && !endpointDefinition.getErrors().isEmpty();
-    }
-
     private MethodSpec clientImpl(ClassName className, EndpointDefinition def) {
         List<ParameterSpec> params = parameterTypes.implementationMethodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
@@ -279,7 +274,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build();
         String codeBlock = methodType.switchBy(
                 "$L.clients().callBlocking($L, $L.build(), $L);", "$L.clients().call($L, $L.build" + "(), $L);");
-        boolean generateResultTypes = shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, def);
+        boolean generateResultTypes = ErrorGenerationUtils.shouldGenerateResultTypesForEndpoint(
+                options.generateDialogueEndpointErrorResultTypes(), def);
         CodeBlock execute = CodeBlock.of(
                 codeBlock,
                 StaticFactoryMethodGenerator.RUNTIME,
@@ -303,7 +299,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     }
 
     private TypeName getReturnType(EndpointDefinition def, ClassName className) {
-        if (shouldGenerateDialogueEndpointErrorResultTypesForEndpoint(options, def)) {
+        if (ErrorGenerationUtils.shouldGenerateResultTypesForEndpoint(
+                options.generateDialogueEndpointErrorResultTypes(), def)) {
             ClassName responseResultTypeName = ClassName.get(
                     className.packageName(),
                     className.simpleName(),
