@@ -25,6 +25,7 @@ import com.palantir.conjure.java.types.Expressions;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ErrorDefinition;
@@ -75,6 +76,11 @@ public final class ErrorGenerationUtils {
      */
     public static String endpointResponseResultTypeName(EndpointName endpointName) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, endpointName.get()) + "Response";
+    }
+
+    public static boolean shouldGenerateResultTypesForEndpoint(
+            boolean generateResultTypesFlag, EndpointDefinition endpointDefinition) {
+        return generateResultTypesFlag && !endpointDefinition.getErrors().isEmpty();
     }
 
     /**

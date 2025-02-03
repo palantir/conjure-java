@@ -142,11 +142,16 @@ public final class DialogueInterfaceGenerator {
                         packageName, className, endpoint, generateDialogueEndpointErrorResultTypes, serviceCallType))
                 .collect(toList()));
 
+        // Create public sealed interface for the "response" type for each of the endpoints.
         if (generateDialogueEndpointErrorResultTypes) {
-            // Create public sealed interface for the "response" type for each of the endpoints.
-            serviceBuilder.addTypes(def.getEndpoints().stream()
-                    .map(endpointDef -> responseTypeForEndpoint(packageName, className, endpointDef))
-                    .toList());
+            List<TypeSpec> resultTypes = new ArrayList<>();
+            for (EndpointDefinition endpointDef : def.getEndpoints()) {
+                if (endpointDef.getErrors().isEmpty()) {
+                    continue;
+                }
+                resultTypes.add(responseTypeForEndpoint(packageName, className, endpointDef));
+            }
+            serviceBuilder.addTypes(resultTypes);
         }
 
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
@@ -374,7 +379,8 @@ public final class DialogueInterfaceGenerator {
                 endpointDef,
                 new EndpointJavaDocGenerationOptions(RequestLineJavaDoc.INCLUDE, EndpointErrorsJavaDoc.EXCLUDE));
 
-        if (generateDialogueEndpointErrorResultTypes) {
+        if (ErrorGenerationUtils.shouldGenerateResultTypesForEndpoint(
+                generateDialogueEndpointErrorResultTypes, endpointDef)) {
             TypeName returnType = ClassName.get(
                     packageName,
                     className.simpleName(),
