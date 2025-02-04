@@ -58,7 +58,6 @@ allprojects {
     group 'com.palantir.conjure.java'
 
     repositories {
-        mavenLocal()
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
