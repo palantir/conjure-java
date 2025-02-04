@@ -260,7 +260,7 @@ public final class AliasGenerator {
         private final Options options;
         private final CodeBlock nonNullValueExpression;
 
-        public DefensiveCollectionConstructorVisitor(ClassName thisClass, Options options) {
+        DefensiveCollectionConstructorVisitor(ClassName thisClass, Options options) {
             this.thisClass = thisClass;
             this.options = options;
             this.nonNullValueExpression = Expressions.requireNonNull("value", "value cannot be null");
