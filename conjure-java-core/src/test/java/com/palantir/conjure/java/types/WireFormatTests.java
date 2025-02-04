@@ -19,14 +19,21 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.product.BinaryAliasExample;
 import com.palantir.product.BinaryExample;
 import com.palantir.product.DateTimeExample;
@@ -67,6 +74,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -623,6 +631,56 @@ public final class WireFormatTests {
                         .optionalAlias(OptionalAlias.of(Optional.of("")))
                         .build()))
                 .isEqualTo("{\"optionalAlias\":\"\"}");
+    }
+
+    @Test
+    public void testMapAlias_nullKey() {
+        assertThatThrownBy(() -> mapper.readValue("{\"a\":null}", FakeMapAlias.class))
+                .isInstanceOf(InvalidNullException.class);
+    }
+
+    @Test
+    public void testMapAlias_nullValue() {
+        assertThatThrownBy(() -> mapper.readValue("{null:1}", FakeMapAlias.class))
+                .isInstanceOf(JsonParseException.class);
+    }
+
+    private static final class FakeMapAlias {
+
+        private final Map<String, Object> value;
+
+        private FakeMapAlias(Map<String, Object> value) {
+            this.value = value;
+        }
+
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        public static FakeMapAlias of(@Nonnull @JsonSetter(contentNulls = Nulls.FAIL) Map<String, Object> value) {
+            return new FakeMapAlias(Preconditions.checkNotNull(value, "value is required"));
+        }
+
+        @JsonValue
+        public Map<String, Object> get() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            FakeMapAlias that = (FakeMapAlias) other;
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "FakeMapAlias" + value;
+        }
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
