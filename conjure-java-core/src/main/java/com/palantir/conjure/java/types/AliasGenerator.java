@@ -18,8 +18,10 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -51,6 +53,7 @@ import com.palantir.logsafe.Safe;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -136,7 +139,7 @@ public final class AliasGenerator {
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
                 .returns(thisClass)
-                .addStatement("return new $T(value)", thisClass)
+                .addStatement(getStaticConstructor(typeDef.getAlias(), thisClass, options))
                 .build());
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
@@ -228,6 +231,14 @@ public final class AliasGenerator {
                 .build();
     }
 
+    private static CodeBlock getStaticConstructor(Type type, ClassName thisClass, Options options) {
+        if (options.defensiveCollectionAliases() && type.accept(MoreVisitors.IS_COLLECTION)) {
+            return type.accept(new DefensiveCollectionConstructorVisitor(thisClass, options))
+                    .orElseThrow();
+        }
+        return CodeBlock.of("return new $T(value)", thisClass);
+    }
+
     private static void addEmptyMethod(TypeSpec.Builder spec, TypeName thisClass) {
         spec.addField(FieldSpec.builder(thisClass, "EMPTY", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer(CodeBlock.of("new $T()", thisClass))
@@ -242,6 +253,79 @@ public final class AliasGenerator {
     private static boolean isAliasOfDouble(AliasDefinition typeDef) {
         return typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
+    }
+
+    private static final class DefensiveCollectionConstructorVisitor implements Visitor<Optional<CodeBlock>> {
+        private final ClassName thisClass;
+        private final Options options;
+        private final CodeBlock nonNullValueExpression;
+
+        public DefensiveCollectionConstructorVisitor(ClassName thisClass, Options options) {
+            this.thisClass = thisClass;
+            this.options = options;
+            this.nonNullValueExpression = Expressions.requireNonNull("value", "value cannot be null");
+        }
+
+        @Override
+        public Optional<CodeBlock> visitPrimitive(PrimitiveType _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<CodeBlock> visitOptional(OptionalType _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<CodeBlock> visitList(ListType value) {
+            if (options.nonNullCollections()) {
+                return Optional.of(CodeBlock.of(
+                        "return new $T($T.newNonNullList($L))",
+                        thisClass,
+                        ConjureCollections.class,
+                        nonNullValueExpression));
+            }
+            return Optional.of(CodeBlock.of(
+                    "return new $T($T.newList($L))", thisClass, ConjureCollections.class, nonNullValueExpression));
+        }
+
+        @Override
+        public Optional<CodeBlock> visitSet(SetType value) {
+            if (options.nonNullCollections()) {
+                return Optional.of(CodeBlock.of(
+                        "return new $T($T.newNonNullSet($L))",
+                        thisClass,
+                        ConjureCollections.class,
+                        nonNullValueExpression));
+            }
+            return Optional.of(CodeBlock.of(
+                    "return new $T($T.newSet($L))", thisClass, ConjureCollections.class, nonNullValueExpression));
+        }
+
+        @Override
+        public Optional<CodeBlock> visitMap(MapType value) {
+            if (options.nonNullCollections()) {
+                return Optional.of(CodeBlock.of(
+                        "return new $T($T.copyOf($L))", thisClass, ImmutableMap.class, nonNullValueExpression));
+            }
+            return Optional.of(CodeBlock.of(
+                    "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, nonNullValueExpression));
+        }
+
+        @Override
+        public Optional<CodeBlock> visitReference(com.palantir.conjure.spec.TypeName _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<CodeBlock> visitExternal(ExternalReference _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<CodeBlock> visitUnknown(@Safe String _unknownType) {
+            return Optional.empty();
+        }
     }
 
     private static final class DefaultConstructorVisitor implements Visitor<Optional<MethodSpec>> {

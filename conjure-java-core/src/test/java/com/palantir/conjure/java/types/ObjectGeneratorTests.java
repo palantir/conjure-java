@@ -214,6 +214,36 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_defensiveCollectionAliasesNonNull() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-defensive-alias-collections.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .defensiveCollectionAliases(true)
+                                .nonNullCollections(true)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
+    public void testObjectGenerator_defensiveCollectionAliases() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-defensive-alias-collections.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .packagePrefix("test.defensive.collections")
+                                .defensiveCollectionAliases(true)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),
