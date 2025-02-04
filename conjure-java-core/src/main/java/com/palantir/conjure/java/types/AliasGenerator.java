@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.lang.model.element.Modifier;
+import org.jetbrains.annotations.NotNull;
 
 public final class AliasGenerator {
 
@@ -139,7 +140,7 @@ public final class AliasGenerator {
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
                 .returns(thisClass)
-                .addStatement(getStaticConstructor(typeDef.getAlias(), thisClass, options))
+                .addStatement(typeDef.getAlias().accept(new AliasFactoryVisitor(thisClass, options)))
                 .build());
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
@@ -231,14 +232,6 @@ public final class AliasGenerator {
                 .build();
     }
 
-    private static CodeBlock getStaticConstructor(Type type, ClassName thisClass, Options options) {
-        if (options.defensiveCollectionAliases() && type.accept(MoreVisitors.IS_COLLECTION)) {
-            return type.accept(new DefensiveCollectionConstructorVisitor(thisClass, options))
-                    .orElseThrow();
-        }
-        return CodeBlock.of("return new $T(value)", thisClass);
-    }
-
     private static void addEmptyMethod(TypeSpec.Builder spec, TypeName thisClass) {
         spec.addField(FieldSpec.builder(thisClass, "EMPTY", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer(CodeBlock.of("new $T()", thisClass))
@@ -255,76 +248,94 @@ public final class AliasGenerator {
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
     }
 
-    private static final class DefensiveCollectionConstructorVisitor implements Visitor<Optional<CodeBlock>> {
+    private static final class AliasFactoryVisitor implements Visitor<CodeBlock> {
         private final ClassName thisClass;
         private final Options options;
-        private final CodeBlock nonNullValueExpression;
 
-        DefensiveCollectionConstructorVisitor(ClassName thisClass, Options options) {
+        AliasFactoryVisitor(ClassName thisClass, Options options) {
             this.thisClass = thisClass;
             this.options = options;
-            this.nonNullValueExpression = Expressions.requireNonNull("value", "value cannot be null");
+        }
+
+        private static @NotNull CodeBlock nonNullValueExpression() {
+            return Expressions.requireNonNull("value", "value cannot be null");
+        }
+
+        private @NotNull CodeBlock defaultFactoryStatement() {
+            return CodeBlock.of("return new $T(value)", thisClass);
         }
 
         @Override
-        public Optional<CodeBlock> visitPrimitive(PrimitiveType _value) {
-            return Optional.empty();
+        public CodeBlock visitPrimitive(PrimitiveType _value) {
+            return defaultFactoryStatement();
         }
 
         @Override
-        public Optional<CodeBlock> visitOptional(OptionalType _value) {
-            return Optional.empty();
+        public CodeBlock visitOptional(OptionalType _value) {
+            return defaultFactoryStatement();
         }
 
         @Override
-        public Optional<CodeBlock> visitList(ListType value) {
+        public CodeBlock visitList(ListType value) {
+            if (!options.defensiveCollectionAliases()) {
+                return defaultFactoryStatement();
+            }
+
             if (options.nonNullCollections()) {
-                return Optional.of(CodeBlock.of(
+                return CodeBlock.of(
                         "return new $T($T.newNonNullList($L))",
                         thisClass,
                         ConjureCollections.class,
-                        nonNullValueExpression));
+                        nonNullValueExpression());
             }
-            return Optional.of(CodeBlock.of(
-                    "return new $T($T.newList($L))", thisClass, ConjureCollections.class, nonNullValueExpression));
+            return CodeBlock.of(
+                    "return new $T($T.newList($L))", thisClass, ConjureCollections.class, nonNullValueExpression());
         }
 
         @Override
-        public Optional<CodeBlock> visitSet(SetType value) {
+        public CodeBlock visitSet(SetType value) {
+            if (!options.defensiveCollectionAliases()) {
+                return defaultFactoryStatement();
+            }
+
             if (options.nonNullCollections()) {
-                return Optional.of(CodeBlock.of(
+                return CodeBlock.of(
                         "return new $T($T.newNonNullSet($L))",
                         thisClass,
                         ConjureCollections.class,
-                        nonNullValueExpression));
+                        nonNullValueExpression());
             }
-            return Optional.of(CodeBlock.of(
-                    "return new $T($T.newSet($L))", thisClass, ConjureCollections.class, nonNullValueExpression));
+            return CodeBlock.of(
+                    "return new $T($T.newSet($L))", thisClass, ConjureCollections.class, nonNullValueExpression());
         }
 
         @Override
-        public Optional<CodeBlock> visitMap(MapType value) {
+        public CodeBlock visitMap(MapType value) {
+            if (!options.defensiveCollectionAliases()) {
+                return defaultFactoryStatement();
+            }
+
             if (options.nonNullCollections()) {
-                return Optional.of(CodeBlock.of(
-                        "return new $T($T.copyOf($L))", thisClass, ImmutableMap.class, nonNullValueExpression));
+                return CodeBlock.of(
+                        "return new $T($T.copyOf($L))", thisClass, ImmutableMap.class, nonNullValueExpression());
             }
-            return Optional.of(CodeBlock.of(
-                    "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, nonNullValueExpression));
+            return CodeBlock.of(
+                    "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, nonNullValueExpression());
         }
 
         @Override
-        public Optional<CodeBlock> visitReference(com.palantir.conjure.spec.TypeName _value) {
-            return Optional.empty();
+        public CodeBlock visitReference(com.palantir.conjure.spec.TypeName _value) {
+            return defaultFactoryStatement();
         }
 
         @Override
-        public Optional<CodeBlock> visitExternal(ExternalReference _value) {
-            return Optional.empty();
+        public CodeBlock visitExternal(ExternalReference _value) {
+            return defaultFactoryStatement();
         }
 
         @Override
-        public Optional<CodeBlock> visitUnknown(@Safe String _unknownType) {
-            return Optional.empty();
+        public CodeBlock visitUnknown(@Safe String _unknownType) {
+            return defaultFactoryStatement();
         }
     }
 
