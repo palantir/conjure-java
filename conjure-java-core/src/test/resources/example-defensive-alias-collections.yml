@@ -13,3 +13,7 @@ types:
         alias: set<integer>
       ExampleDefensiveAliasedMap:
         alias: map<string, boolean>
+      ExampleDefensiveAliasedMapOptionalValue:
+        alias: map<string, optional<string>>
+      ExampleDefensiveAliasedListOptionalValue:
+        alias: list<optional<string>>

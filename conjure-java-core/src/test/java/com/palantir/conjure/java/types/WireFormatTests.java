@@ -39,7 +39,9 @@ import com.palantir.product.DoubleExample;
 import com.palantir.product.EmptyObjectExample;
 import com.palantir.product.EnumExample;
 import com.palantir.product.ExampleDefensiveAliasedList;
+import com.palantir.product.ExampleDefensiveAliasedListOptionalValue;
 import com.palantir.product.ExampleDefensiveAliasedMap;
+import com.palantir.product.ExampleDefensiveAliasedMapOptionalValue;
 import com.palantir.product.ExampleDefensiveAliasedPrimitiveList;
 import com.palantir.product.ExampleDefensiveAliasedSet;
 import com.palantir.product.ExternalLongAliasExample;
@@ -642,6 +644,13 @@ public final class WireFormatTests {
     }
 
     @Test
+    void testNullContentCollectionDeserialization_listAliasOptionals() throws JsonProcessingException {
+        assertThat(mapper.readValue("[null]", ExampleDefensiveAliasedListOptionalValue.class)
+                        .get())
+                .isEqualTo(List.of(Optional.empty()));
+    }
+
+    @Test
     void testNullContentCollectionDeserialization_setAlias() {
         assertThatThrownBy(() -> mapper.readValue("[null]", ExampleDefensiveAliasedSet.class))
                 .isInstanceOf(JsonMappingException.class)
@@ -660,6 +669,13 @@ public final class WireFormatTests {
                 .isInstanceOf(InvalidNullException.class);
         assertThatThrownBy(() -> mapper.readValue("{null:true}", ExampleDefensiveAliasedMap.class))
                 .isInstanceOf(JsonParseException.class);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapAliasOptionals() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"test\":null}", ExampleDefensiveAliasedMapOptionalValue.class)
+                        .get())
+                .isEqualTo(Map.of("test", Optional.empty()));
     }
 
     @Test

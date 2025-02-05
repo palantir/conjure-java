@@ -40,12 +40,10 @@ import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
-import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
-import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
@@ -66,7 +64,6 @@ import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -663,7 +660,7 @@ public final class BeanBuilderGenerator {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
         } else if (isCollectionType(type)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
-            if (isOptionalInnerType(type)) {
+            if (TypeFunctions.isOptionalInnerType(type, typeMapper)) {
                 annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
             } else if (options.nonNullCollections()) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
@@ -951,56 +948,6 @@ public final class BeanBuilderGenerator {
 
     private static boolean isCollectionType(Type type) {
         return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP);
-    }
-
-    private boolean isOptionalInnerType(Type type) {
-        return type.accept(new Type.Visitor<>() {
-            @Override
-            public Boolean visitPrimitive(PrimitiveType value) {
-                return false;
-            }
-
-            @Override
-            public Boolean visitOptional(OptionalType value) {
-                return true;
-            }
-
-            @Override
-            public Boolean visitList(ListType value) {
-                return isOptionalInnerType(value.getItemType());
-            }
-
-            @Override
-            public Boolean visitSet(SetType value) {
-                return value.getItemType().accept(TypeVisitor.IS_OPTIONAL);
-            }
-
-            @Override
-            public Boolean visitMap(MapType value) {
-                return isOptionalInnerType(value.getValueType());
-            }
-
-            @Override
-            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
-                return typeMapper
-                        .getType(value)
-                        .map(typeDef -> typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)
-                                && typeDef.accept(TypeDefinitionVisitor.ALIAS)
-                                        .getAlias()
-                                        .accept(TypeVisitor.IS_OPTIONAL))
-                        .orElse(false);
-            }
-
-            @Override
-            public Boolean visitExternal(ExternalReference value) {
-                return false;
-            }
-
-            @Override
-            public Boolean visitUnknown(String unknownType) {
-                throw new SafeIllegalStateException("Encountered unknown type", SafeArg.of("type", unknownType));
-            }
-        });
     }
 
     private CollectionType getCollectionType(Type type) {

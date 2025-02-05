@@ -28,6 +28,7 @@ import com.palantir.conjure.java.types.CollectionType.ConjureCollectionType;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -140,7 +141,7 @@ public final class AliasGenerator {
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName, options))
+                .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName, typeMapper, options))
                 .returns(thisClass)
                 .addStatement(typeDef.getAlias().accept(new AliasFactoryVisitor(thisClass, options)))
                 .build());
@@ -250,16 +251,20 @@ public final class AliasGenerator {
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
     }
 
-    private static ParameterSpec getAliasFactoryParameter(Type aliasType, TypeName aliasTypeName, Options options) {
+    private static ParameterSpec getAliasFactoryParameter(
+            Type aliasType, TypeName aliasTypeName, TypeMapper typeMapper, Options options) {
         ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
         if (options.defensiveCollectionAliases()
                 && options.nonNullCollections()
                 && aliasType.accept(TypeVisitor.IS_MAP)) {
-            AnnotationSpec contentNullAnnotation = AnnotationSpec.builder(JsonSetter.class)
-                    .addMember("contentNulls", "$T.FAIL", Nulls.class)
-                    .build();
+            AnnotationSpec.Builder contentNullAnnotation = AnnotationSpec.builder(JsonSetter.class);
+            if (TypeFunctions.isOptionalInnerType(aliasType, typeMapper)) {
+                contentNullAnnotation.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
+            } else {
+                contentNullAnnotation.addMember("contentNulls", "$T.FAIL", Nulls.class);
+            }
             return parameterSpec.toBuilder()
-                    .addAnnotation(contentNullAnnotation)
+                    .addAnnotation(contentNullAnnotation.build())
                     .build();
         }
         return parameterSpec;

@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -164,6 +165,56 @@ public final class TypeFunctions {
                 ImmutableMap.builderWithExpectedSize(typeDefinitions.size());
         typeDefinitions.forEach(def -> builder.put(def.accept(TypeDefinitionVisitor.TYPE_NAME), def));
         return builder.buildOrThrow();
+    }
+
+    public static boolean isOptionalInnerType(Type type, TypeMapper typeMapper) {
+        return type.accept(new Type.Visitor<>() {
+            @Override
+            public Boolean visitPrimitive(PrimitiveType value) {
+                return false;
+            }
+
+            @Override
+            public Boolean visitOptional(OptionalType value) {
+                return true;
+            }
+
+            @Override
+            public Boolean visitList(ListType value) {
+                return isOptionalInnerType(value.getItemType(), typeMapper);
+            }
+
+            @Override
+            public Boolean visitSet(SetType value) {
+                return value.getItemType().accept(TypeVisitor.IS_OPTIONAL);
+            }
+
+            @Override
+            public Boolean visitMap(MapType value) {
+                return isOptionalInnerType(value.getValueType(), typeMapper);
+            }
+
+            @Override
+            public Boolean visitReference(TypeName value) {
+                return typeMapper
+                        .getType(value)
+                        .map(typeDef -> typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)
+                                && typeDef.accept(TypeDefinitionVisitor.ALIAS)
+                                        .getAlias()
+                                        .accept(TypeVisitor.IS_OPTIONAL))
+                        .orElse(false);
+            }
+
+            @Override
+            public Boolean visitExternal(ExternalReference value) {
+                return false;
+            }
+
+            @Override
+            public Boolean visitUnknown(String unknownType) {
+                throw new SafeIllegalStateException("Encountered unknown type", SafeArg.of("type", unknownType));
+            }
+        });
     }
 
     public static final GetTypeVisitor<PrimitiveType> PRIMITIVE_VISITOR = new GetTypeVisitor<PrimitiveType>() {
