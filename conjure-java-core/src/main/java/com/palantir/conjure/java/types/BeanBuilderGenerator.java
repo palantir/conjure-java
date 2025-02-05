@@ -30,6 +30,8 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
+import com.palantir.conjure.java.types.CollectionType.ConjureCollectionNullHandlingMode;
+import com.palantir.conjure.java.types.CollectionType.ConjureCollectionType;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
@@ -1074,61 +1076,6 @@ public final class BeanBuilderGenerator {
         });
     }
 
-    private static final class CollectionType {
-        private final ConjureCollectionType conjureCollectionType;
-
-        private final ConjureCollectionNullHandlingMode nullHandlingMode;
-
-        CollectionType(
-                ConjureCollectionType conjureCollectionType, ConjureCollectionNullHandlingMode nullHandlingMode) {
-            this.conjureCollectionType = conjureCollectionType;
-            this.nullHandlingMode = nullHandlingMode;
-        }
-
-        ConjureCollectionType getConjureCollectionType() {
-            return conjureCollectionType;
-        }
-
-        boolean useNonNullFactory() {
-            return nullHandlingMode.shouldUseNonNullFactory();
-        }
-    }
-
-    private enum ConjureCollectionType {
-        LIST("List", false),
-        DOUBLE_LIST("DoubleList", true),
-        INTEGER_LIST("IntegerList", true),
-        // Eclipse has a BooleanList type, but this use case implies
-        // bit mask and it doesn't serialize efficiently as a collection
-        // so let's just use the "naive" boxed collection
-        BOOLEAN_LIST("List", false),
-        // SafeLong is unique in this list. While it is technically backed with a long
-        // its logical limitations are captured in the boxed type SafeLong. Meaning,
-        // you must either expose this "implementation detail" on the public API or
-        // accept that you cannot optimize away the boxing. For now, given the focus
-        // on doubles, let's delay this optimization and have it as a separate discussion.
-        // Technically this type could be optimized at rest, but that would require a more
-        // complex enum to represent this trinary. So for now this is disabled.
-        SAFE_LONG_LIST("SafeLongList", false),
-        SET("Set", false);
-
-        private final String collectionName;
-        private final Boolean primitiveCollection;
-
-        ConjureCollectionType(String collectionName, boolean primitiveCollection) {
-            this.collectionName = collectionName;
-            this.primitiveCollection = primitiveCollection;
-        }
-
-        String getCollectionName() {
-            return collectionName;
-        }
-
-        Boolean isPrimitiveCollection() {
-            return primitiveCollection;
-        }
-    }
-
     private boolean isPrimitiveOptimized(Type type) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             // The if statement above guards the call to this method
@@ -1139,20 +1086,5 @@ public final class BeanBuilderGenerator {
         }
 
         return false;
-    }
-
-    private enum ConjureCollectionNullHandlingMode {
-        NON_NULL_COLLECTION_FACTORY(true),
-        NULLABLE_COLLECTION_FACTORY(false);
-
-        private final boolean useNonNullFactory;
-
-        ConjureCollectionNullHandlingMode(boolean useNonNullFactory) {
-            this.useNonNullFactory = useNonNullFactory;
-        }
-
-        boolean shouldUseNonNullFactory() {
-            return useNonNullFactory;
-        }
     }
 }

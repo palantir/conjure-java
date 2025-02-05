@@ -18,10 +18,11 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.types.CollectionType.ConjureCollectionNullHandlingMode;
+import com.palantir.conjure.java.types.CollectionType.ConjureCollectionType;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -261,6 +262,23 @@ public final class AliasGenerator {
             return Expressions.requireNonNull("value", "value cannot be null");
         }
 
+        private CodeBlock generateCollectionCodeBlock(CollectionType collectionType) {
+            if (collectionType.useNonNullFactory()) {
+                return CodeBlock.of(
+                        "return new $T($T.newNonNull$L($L))",
+                        thisClass,
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName(),
+                        nonNullValueExpression());
+            }
+            return CodeBlock.of(
+                    "return new $T($T.new$L($L))",
+                    thisClass,
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionType().getCollectionName(),
+                    nonNullValueExpression());
+        }
+
         private @NotNull CodeBlock defaultFactoryStatement() {
             return CodeBlock.of("return new $T(value)", thisClass);
         }
@@ -282,14 +300,37 @@ public final class AliasGenerator {
             }
 
             if (options.nonNullCollections()) {
-                return CodeBlock.of(
-                        "return new $T($T.newNonNullList($L))",
-                        thisClass,
-                        ConjureCollections.class,
-                        nonNullValueExpression());
+                if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                    switch (value.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
+                        case DOUBLE:
+                            return generateCollectionCodeBlock(new CollectionType(
+                                    ConjureCollectionType.DOUBLE_LIST,
+                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+                        case INTEGER:
+                            return generateCollectionCodeBlock(new CollectionType(
+                                    ConjureCollectionType.INTEGER_LIST,
+                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+                        case SAFELONG:
+                            return generateCollectionCodeBlock(new CollectionType(
+                                    ConjureCollectionType.SAFE_LONG_LIST,
+                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+                        case ANY:
+                        case BEARERTOKEN:
+                        case BINARY:
+                        case BOOLEAN:
+                        case DATETIME:
+                        case RID:
+                        case STRING:
+                        case UUID:
+                        case UNKNOWN:
+                            // Fall through to generic non-null List
+                    }
+                }
+                return generateCollectionCodeBlock(new CollectionType(
+                        ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
             }
-            return CodeBlock.of(
-                    "return new $T($T.newList($L))", thisClass, ConjureCollections.class, nonNullValueExpression());
+            return generateCollectionCodeBlock(new CollectionType(
+                    ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
         }
 
         @Override
@@ -299,14 +340,11 @@ public final class AliasGenerator {
             }
 
             if (options.nonNullCollections()) {
-                return CodeBlock.of(
-                        "return new $T($T.newNonNullSet($L))",
-                        thisClass,
-                        ConjureCollections.class,
-                        nonNullValueExpression());
+                return generateCollectionCodeBlock(new CollectionType(
+                        ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
             }
-            return CodeBlock.of(
-                    "return new $T($T.newSet($L))", thisClass, ConjureCollections.class, nonNullValueExpression());
+            return generateCollectionCodeBlock(new CollectionType(
+                    ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
         }
 
         @Override
@@ -315,10 +353,6 @@ public final class AliasGenerator {
                 return defaultFactoryStatement();
             }
 
-            if (options.nonNullCollections()) {
-                return CodeBlock.of(
-                        "return new $T($T.copyOf($L))", thisClass, ImmutableMap.class, nonNullValueExpression());
-            }
             return CodeBlock.of(
                     "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, nonNullValueExpression());
         }

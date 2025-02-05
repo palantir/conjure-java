@@ -1,0 +1,86 @@
+/*
+ * (c) Copyright 2025 Palantir Technologies Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.palantir.conjure.java.types;
+
+final class CollectionType {
+    private final ConjureCollectionType conjureCollectionType;
+
+    private final ConjureCollectionNullHandlingMode nullHandlingMode;
+
+    CollectionType(ConjureCollectionType conjureCollectionType, ConjureCollectionNullHandlingMode nullHandlingMode) {
+        this.conjureCollectionType = conjureCollectionType;
+        this.nullHandlingMode = nullHandlingMode;
+    }
+
+    ConjureCollectionType getConjureCollectionType() {
+        return conjureCollectionType;
+    }
+
+    boolean useNonNullFactory() {
+        return nullHandlingMode.shouldUseNonNullFactory();
+    }
+
+    enum ConjureCollectionType {
+        LIST("List", false),
+        DOUBLE_LIST("DoubleList", true),
+        INTEGER_LIST("IntegerList", true),
+        // Eclipse has a BooleanList type, but this use case implies
+        // bit mask and it doesn't serialize efficiently as a collection
+        // so let's just use the "naive" boxed collection
+        BOOLEAN_LIST("List", false),
+        // SafeLong is unique in this list. While it is technically backed with a long
+        // its logical limitations are captured in the boxed type SafeLong. Meaning,
+        // you must either expose this "implementation detail" on the public API or
+        // accept that you cannot optimize away the boxing. For now, given the focus
+        // on doubles, let's delay this optimization and have it as a separate discussion.
+        // Technically this type could be optimized at rest, but that would require a more
+        // complex enum to represent this trinary. So for now this is disabled.
+        SAFE_LONG_LIST("SafeLongList", false),
+        SET("Set", false);
+
+        private final String collectionName;
+        private final Boolean primitiveCollection;
+
+        ConjureCollectionType(String collectionName, boolean primitiveCollection) {
+            this.collectionName = collectionName;
+            this.primitiveCollection = primitiveCollection;
+        }
+
+        String getCollectionName() {
+            return collectionName;
+        }
+
+        Boolean isPrimitiveCollection() {
+            return primitiveCollection;
+        }
+    }
+
+    enum ConjureCollectionNullHandlingMode {
+        NON_NULL_COLLECTION_FACTORY(true),
+        NULLABLE_COLLECTION_FACTORY(false);
+
+        private final boolean useNonNullFactory;
+
+        ConjureCollectionNullHandlingMode(boolean useNonNullFactory) {
+            this.useNonNullFactory = useNonNullFactory;
+        }
+
+        boolean shouldUseNonNullFactory() {
+            return useNonNullFactory;
+        }
+    }
+}
