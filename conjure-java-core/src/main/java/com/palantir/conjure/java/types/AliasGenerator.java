@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.lang.model.element.Modifier;
-import org.jetbrains.annotations.NotNull;
 
 public final class AliasGenerator {
 
@@ -251,8 +250,7 @@ public final class AliasGenerator {
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
     }
 
-    private static @NotNull ParameterSpec getAliasFactoryParameter(
-            Type aliasType, TypeName aliasTypeName, Options options) {
+    private static ParameterSpec getAliasFactoryParameter(Type aliasType, TypeName aliasTypeName, Options options) {
         ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
         if (options.defensiveCollectionAliases()
                 && options.nonNullCollections()
@@ -276,7 +274,7 @@ public final class AliasGenerator {
             this.options = options;
         }
 
-        private static @NotNull CodeBlock nonNullValueExpression() {
+        private static CodeBlock nonNullValueExpression() {
             return Expressions.requireNonNull("value", "value cannot be null");
         }
 
@@ -297,7 +295,7 @@ public final class AliasGenerator {
                     nonNullValueExpression());
         }
 
-        private @NotNull CodeBlock defaultFactoryStatement() {
+        private CodeBlock defaultFactoryStatement() {
             return CodeBlock.of("return new $T(value)", thisClass);
         }
 
