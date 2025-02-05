@@ -19,9 +19,11 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -34,6 +36,10 @@ import com.palantir.product.DoubleAliasExample;
 import com.palantir.product.DoubleExample;
 import com.palantir.product.EmptyObjectExample;
 import com.palantir.product.EnumExample;
+import com.palantir.product.ExampleDefensiveAliasedList;
+import com.palantir.product.ExampleDefensiveAliasedMap;
+import com.palantir.product.ExampleDefensiveAliasedPrimitiveList;
+import com.palantir.product.ExampleDefensiveAliasedSet;
 import com.palantir.product.ExternalLongAliasExample;
 import com.palantir.product.ExternalStringAliasExample;
 import com.palantir.product.IntegerAliasExample;
@@ -623,6 +629,34 @@ public final class WireFormatTests {
                         .optionalAlias(OptionalAlias.of(Optional.of("")))
                         .build()))
                 .isEqualTo("{\"optionalAlias\":\"\"}");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listAlias() {
+        assertThatThrownBy(() -> mapper.readValue("[\"test\",null]", ExampleDefensiveAliasedList.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("iterable cannot contain null elements");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_setAlias() {
+        assertThatThrownBy(() -> mapper.readValue("[123,null]", ExampleDefensiveAliasedSet.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("iterable cannot contain null elements");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_primitiveListAlias() {
+        assertThatThrownBy(() -> mapper.readValue("[1.2,null]", ExampleDefensiveAliasedPrimitiveList.class))
+                .isInstanceOf(JsonMappingException.class);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapAlias() {
+        assertThatThrownBy(() -> mapper.readValue("{\"test\":null}", ExampleDefensiveAliasedMap.class))
+                .isInstanceOf(InvalidNullException.class);
+        assertThatThrownBy(() -> mapper.readValue("{null:true}", ExampleDefensiveAliasedMap.class))
+                .isInstanceOf(JsonParseException.class);
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
