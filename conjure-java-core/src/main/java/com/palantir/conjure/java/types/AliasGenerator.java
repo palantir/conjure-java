@@ -16,7 +16,9 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -139,7 +141,7 @@ public final class AliasGenerator {
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
+                .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName, options))
                 .returns(thisClass)
                 .addStatement(typeDef.getAlias().accept(new AliasFactoryVisitor(thisClass, options)))
                 .build());
@@ -247,6 +249,22 @@ public final class AliasGenerator {
     private static boolean isAliasOfDouble(AliasDefinition typeDef) {
         return typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
+    }
+
+    private static @NotNull ParameterSpec getAliasFactoryParameter(
+            Type aliasType, TypeName aliasTypeName, Options options) {
+        ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
+        if (options.defensiveCollectionAliases()
+                && options.nonNullCollections()
+                && aliasType.accept(TypeVisitor.IS_MAP)) {
+            AnnotationSpec contentNullAnnotation = AnnotationSpec.builder(JsonSetter.class)
+                    .addMember("contentNulls", "$T.FAIL", Nulls.class)
+                    .build();
+            return parameterSpec.toBuilder()
+                    .addAnnotation(contentNullAnnotation)
+                    .build();
+        }
+        return parameterSpec;
     }
 
     private static final class AliasFactoryVisitor implements Visitor<CodeBlock> {
