@@ -1,35 +1,33 @@
 package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.annotation.Nulls;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ExampleDefensiveAliasedMap {
-    private static final ExampleDefensiveAliasedMap EMPTY = new ExampleDefensiveAliasedMap();
+public final class ExampleDefensiveAliasedPrimitiveList {
+    private static final ExampleDefensiveAliasedPrimitiveList EMPTY = new ExampleDefensiveAliasedPrimitiveList();
 
-    private final Map<String, Boolean> value;
+    private final List<Double> value;
 
     private int memoizedHashCode;
 
-    private ExampleDefensiveAliasedMap(@Nonnull Map<String, Boolean> value) {
+    private ExampleDefensiveAliasedPrimitiveList(@Nonnull List<Double> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private ExampleDefensiveAliasedMap() {
-        this(Collections.emptyMap());
+    private ExampleDefensiveAliasedPrimitiveList() {
+        this(Collections.emptyList());
     }
 
     @JsonValue
-    public Map<String, Boolean> get() {
+    public List<Double> get() {
         return value;
     }
 
@@ -41,10 +39,11 @@ public final class ExampleDefensiveAliasedMap {
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof ExampleDefensiveAliasedMap && equalTo((ExampleDefensiveAliasedMap) other));
+                || (other instanceof ExampleDefensiveAliasedPrimitiveList
+                        && equalTo((ExampleDefensiveAliasedPrimitiveList) other));
     }
 
-    private boolean equalTo(ExampleDefensiveAliasedMap other) {
+    private boolean equalTo(ExampleDefensiveAliasedPrimitiveList other) {
         if (this.memoizedHashCode != 0
                 && other.memoizedHashCode != 0
                 && this.memoizedHashCode != other.memoizedHashCode) {
@@ -64,13 +63,12 @@ public final class ExampleDefensiveAliasedMap {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static ExampleDefensiveAliasedMap of(
-            @Nonnull @JsonSetter(contentNulls = Nulls.FAIL) Map<String, Boolean> value) {
-        return new ExampleDefensiveAliasedMap(
-                new LinkedHashMap<>(Preconditions.checkNotNull(value, "value cannot be null")));
+    public static ExampleDefensiveAliasedPrimitiveList of(@Nonnull List<Double> value) {
+        return new ExampleDefensiveAliasedPrimitiveList(
+                ConjureCollections.newNonNullDoubleList(Preconditions.checkNotNull(value, "value cannot be null")));
     }
 
-    public static ExampleDefensiveAliasedMap empty() {
+    public static ExampleDefensiveAliasedPrimitiveList empty() {
         return EMPTY;
     }
 }

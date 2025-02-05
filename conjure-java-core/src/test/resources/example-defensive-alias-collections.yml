@@ -7,6 +7,8 @@ types:
         alias: string
       ExampleDefensiveAliasedList:
         alias: list<string>
+      ExampleDefensiveAliasedPrimitiveList:
+        alias: list<double>
       ExampleDefensiveAliasedSet:
         alias: set<integer>
       ExampleDefensiveAliasedMap:
