@@ -21,6 +21,9 @@ conjure {
         addFlag 'undertow'
         addFlag 'undertowServicePrefixes'
         addFlag 'useStagedBuilders'
+        addFlag 'strictObjects'
+        addFlag 'nonNullCollections'
+        addFlag 'defensiveCollectionAliases'
     }
 }
 
