@@ -22,6 +22,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.java.expecttest.core.SnapshotTest;
+import com.palantir.conjure.java.expecttest.core.SnapshotTester;
+import com.palantir.conjure.java.expecttest.ext.ExpectTestExtension;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
@@ -32,12 +35,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @Execution(ExecutionMode.CONCURRENT)
+@ExtendWith(ExpectTestExtension.class)
 public final class UndertowServiceGeneratorTests extends TestBase {
+
     @TempDir
     public File tempDir;
 
@@ -79,6 +85,15 @@ public final class UndertowServiceGeneratorTests extends TestBase {
                         MoreExecutors.directExecutor(), ImmutableSet.of(new UndertowServiceGenerator(Options.empty())))
                 .emit(def, tempDir);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.binary");
+    }
+
+    @Test
+    public void testEndpointWithNameCollisionsSnapshot(@SnapshotTest SnapshotTester expect) throws IOException {
+        expect.expect(
+                tempDir.toPath(),
+                new UndertowServiceGenerator(
+                        Options.builder().undertowServicePrefix(true).build()),
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/dangerous-name-service.yml"))));
     }
 
     @Test
