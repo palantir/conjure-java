@@ -73,6 +73,5 @@ public final class SnapshotTester {
         return Path.of("src/expect/" + testClass + "/" + testMethod);
     }
 
-    // Smarter diff
-    private String diff(String contents1, String contents2) {}
+    // TODO(pm): smarter file diff.
 }
