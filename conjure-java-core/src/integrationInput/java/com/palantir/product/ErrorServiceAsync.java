@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
@@ -37,27 +38,33 @@ import javax.annotation.processing.Generated;
 public interface ErrorServiceAsync {
     /** @apiNote {@code POST /errors/basic} */
     @ClientEndpoint(method = "POST", path = "/errors/basic")
+    @CheckReturnValue
     ListenableFuture<TestBasicErrorResponse> testBasicError(AuthHeader authHeader, boolean shouldThrowError);
 
     /** @apiNote {@code POST /errors/imported} */
     @ClientEndpoint(method = "POST", path = "/errors/imported")
+    @CheckReturnValue
     ListenableFuture<TestImportedErrorResponse> testImportedError(AuthHeader authHeader, boolean shouldThrowError);
 
     /** @apiNote {@code POST /errors/multiple} */
     @ClientEndpoint(method = "POST", path = "/errors/multiple")
+    @CheckReturnValue
     ListenableFuture<TestMultipleErrorsAndPackagesResponse> testMultipleErrorsAndPackages(
             AuthHeader authHeader, Optional<String> errorToThrow);
 
     /** @apiNote {@code POST /errors/empty} */
     @ClientEndpoint(method = "POST", path = "/errors/empty")
+    @CheckReturnValue
     ListenableFuture<TestEmptyBodyResponse> testEmptyBody(AuthHeader authHeader, boolean shouldThrowError);
 
     /** @apiNote {@code POST /errors/binary} */
     @ClientEndpoint(method = "POST", path = "/errors/binary")
+    @CheckReturnValue
     ListenableFuture<TestBinaryResponse> testBinary(AuthHeader authHeader, boolean shouldThrowError);
 
     /** @apiNote {@code POST /errors/optional-binary} */
     @ClientEndpoint(method = "POST", path = "/errors/optional-binary")
+    @CheckReturnValue
     ListenableFuture<TestOptionalBinaryResponse> testOptionalBinary(
             AuthHeader authHeader, OptionalBinaryResponseMode mode);
 

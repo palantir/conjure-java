@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.CaseFormat;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -387,6 +388,8 @@ public final class DialogueInterfaceGenerator {
                     ErrorGenerationUtils.endpointResponseResultTypeName(endpointDef.getEndpointName()));
             methodBuilder.returns(serviceCallType.switchBy(
                     returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType)));
+            // The result type should be used by clients
+            methodBuilder.addAnnotation(CheckReturnValue.class);
         } else {
             TypeName returnType = serviceCallType.switchBy(
                     returnTypes.baseType(endpointDef.getReturns()), returnTypes.async(endpointDef.getReturns()));
