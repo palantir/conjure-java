@@ -58,6 +58,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
+    @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
