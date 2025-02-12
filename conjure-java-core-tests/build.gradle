@@ -26,7 +26,15 @@ sourceSets {
 
     sourceSetTest {
         java {
-            srcDirs 'src/main/exampleTest'
+            // iterate through directories in src/main
+            def srcMain = file("src/main")
+            if (srcMain.exists() && srcMain.isDirectory()) {
+                srcMain.listFiles().each { srcDir ->
+                    if (srcDir.isDirectory() && srcDir.name.startsWith("exampleTest")) {
+                        srcDirs srcDir
+                    }
+                }
+            }
         }
     }
 }
