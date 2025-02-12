@@ -23,27 +23,26 @@ sourceSets {
             srcDir 'src/tests'
         }
     }
-    myExample {
-        java {
-            srcDirs 'src/myExampleTest**'
-        }
-    }
 
-    example {
+    sourceSetTest {
         java {
-            srcDirs.each { dir->
-                srcDir dir
-            }
+            srcDirs 'src/main/exampleTest'
         }
     }
 }
+
+idea {
+    module {
+        sourceDirs += sourceSets.sourceSetTest.java.srcDirs
+    }
+}
+
 
 dependencies {
     compileOnly gradleApi()
     // verify that compileJava on conjure-java-core runs before this task
-    implementation project(':conjure-java-core')
+    // implementation project(':conjure-java-core')
 }
-
 
 import com.palantir.conjure.defs.Conjure
 import com.palantir.conjure.java.Options

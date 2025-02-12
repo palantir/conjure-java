@@ -21,7 +21,5 @@ import org.gradle.api.tasks.TaskAction;
 
 public final class TestTask extends DefaultTask {
     @TaskAction
-    void action() {
-        System.out.println("hello");
-    }
+    void action() {}
 }
