@@ -27,6 +27,7 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -72,6 +73,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             illegalArgumentException(exchange, throwable);
         } else if (throwable instanceof FrameworkException) {
             frameworkException(exchange, (FrameworkException) throwable);
+        } else if (throwable instanceof DeadlineExpiredException) {
+            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
@@ -181,6 +184,20 @@ public enum ConjureExceptions implements ExceptionHandler {
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
         log(exception, frameworkException);
         writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
+    }
+
+    private static void deadlineExpiredException(HttpServerExchange exchange, DeadlineExpiredException exception) {
+        // need to further narrow down to external versus internal exception types
+        if (exception instanceof DeadlineExpiredException.External externalException) {
+            log.info("external deadline exceeded", externalException);
+            writeResponse(exchange, Optional.empty(), 400);
+        } else if (exception instanceof DeadlineExpiredException.Internal internalException) {
+            log.error("internal deadline exceeded", internalException);
+            writeResponse(exchange, Optional.empty(), 500);
+        } else {
+            log.error("unknown deadline exception type", exception);
+            writeResponse(exchange, Optional.empty(), 500);
+        }
     }
 
     private static void error(HttpServerExchange exchange, Error error) {

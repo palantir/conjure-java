@@ -28,6 +28,7 @@ dependencies {
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.conjure.java.api:errors'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.palantir.deadlines:deadlines'
     implementation 'com.palantir.ri:resource-identifier'
     implementation 'com.palantir.safe-logging:logger'
     implementation 'com.palantir.safe-logging:preconditions'

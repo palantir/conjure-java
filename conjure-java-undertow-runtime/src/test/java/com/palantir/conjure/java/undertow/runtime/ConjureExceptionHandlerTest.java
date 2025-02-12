@@ -36,6 +36,7 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -291,6 +292,24 @@ public final class ConjureExceptionHandlerTest {
         assertThat(connection.getResponseCode()).isEqualTo(503);
         assertThat(connection.getHeaderFields()).containsEntry("Qos-Retry-Hint", ImmutableList.of("do-not-retry"));
         assertThat(connection.getHeaderFields()).containsEntry("Qos-Due-To", ImmutableList.of("custom"));
+        assertThat(connection.getErrorStream()).isNull();
+    }
+
+    @Test
+    public void handlesDeadlineExpiredExceptionExternal() throws IOException {
+        exception = DeadlineExpiredException.external();
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(400);
+        assertThat(connection.getErrorStream()).isNull();
+    }
+
+    @Test
+    public void handlesDeadlineExpiredExceptionInternal() throws IOException {
+        exception = DeadlineExpiredException.internal();
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(500);
         assertThat(connection.getErrorStream()).isNull();
     }
 
