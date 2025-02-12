@@ -12,6 +12,7 @@ rootProject.name = 'palantir-conjure-java'
 
 include 'conjure-java'
 include 'conjure-java-core'
+include 'conjure-java-core-tests'
 include 'conjure-java-client-verifier'
 include 'conjure-java-client-verifier:verification-server-api'
 include 'conjure-java-server-verifier'

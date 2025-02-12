@@ -1,0 +1,110 @@
+buildscript {
+    repositories {
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+    }
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.23'
+        classpath 'com.palantir.conjure:conjure-api-objects:4.50.0'
+        classpath 'com.palantir.conjure:conjure-core:4.50.0'
+        classpath 'com.palantir.javapoet:javapoet:0.5.0'
+        classpath 'com.atlassian.commonmark:commonmark:0.12.1'
+        classpath 'org.yaml:snakeyaml:2.3'
+        classpath files("${project(':conjure-java-core').buildDir}/classes/java/main")
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+sourceSets {
+    tests {
+        java {
+            srcDir 'src/tests'
+        }
+    }
+    myExample {
+        java {
+            srcDirs 'src/myExampleTest**'
+        }
+    }
+
+    example {
+        java {
+            srcDirs.each { dir->
+                srcDir dir
+            }
+        }
+    }
+}
+
+dependencies {
+    compileOnly gradleApi()
+    // verify that compileJava on conjure-java-core runs before this task
+    implementation project(':conjure-java-core')
+}
+
+
+import com.palantir.conjure.defs.Conjure
+import com.palantir.conjure.java.Options
+import com.palantir.conjure.spec.ConjureDefinition
+import com.palantir.conjure.java.types.ObjectGenerator
+import org.yaml.snakeyaml.LoaderOptions
+import org.yaml.snakeyaml.Yaml
+
+class TestTask extends DefaultTask {
+
+    private static Map<String, Object> parseYaml(String yaml) {
+        LoaderOptions options = new LoaderOptions()
+        return new Yaml(options).load(yaml)
+    }
+
+    @TaskAction
+    void run() {
+        String testSpec = """
+testNoStaticFactoryGenerated:
+  docs: 'some docs here'
+  path: example-types.yml
+  generators:
+    - object:
+        options:
+          preferObjectBuilders: true
+"""
+//        getLogger().lifecycle("hello from TestTask")
+//        def yamlDef = parseYaml(testSpec)
+//        // For each test case in the testSpec
+//        for (String testCase : yamlDef.keySet()) {
+//            getLogger().lifecycle("testCase: " + testCase)
+//            Map<String, Object> testCaseDef = yamlDef.get(testCase)
+//            getLogger().lifecycle("testCaseDef: " + testCaseDef)
+//
+//            // Create a new directory under src for the test case
+//            def directory = new File("${project.getRootDir()}/conjure-java-core-tests/src/${testCase}")
+//            directory.mkdirs()
+//
+//            getLogger().lifecycle("generators: " + testCaseDef.get("generators"))
+//            for (Map<String, Object> generator : testCaseDef.get("generators")) {
+//                getLogger().lifecycle("generator: " + generator)
+//                getLogger().lifecycle("options: " + generator.get("options"))
+//            }
+//        }
+
+
+
+        File defYaml = new File("${project.getRootDir()}/conjure-java-core-tests/src/test/resources/example-types.yml");
+        ConjureDefinition definition = Conjure.parse(List.of(defYaml))
+        ObjectGenerator objectGenerator = new ObjectGenerator(Options.builder()
+                .useImmutableBytes(true)
+                .strictObjects(true)
+                .nonNullCollections(true)
+                .excludeEmptyOptionals(true)
+                .unionsWithUnknownValues(true)
+                .jetbrainsContractAnnotations(true)
+                .build())
+        def files = objectGenerator.generate(definition).map {it -> it.toString()}
+        getLogger().lifecycle("Generated files: ${files.toList()}")
+
+    }
+}
+
+tasks.register("testTask", TestTask)

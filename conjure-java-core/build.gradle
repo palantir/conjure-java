@@ -122,3 +122,46 @@ tasks.withType(JavaCompile) {
     // this complains about the integrationInput directory
     options.errorprone.disable 'StrictUnusedVariable'
 }
+
+/**
+buildscript {
+    repositories {
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+    }
+    dependencies {
+        classpath files('build/classes/java/main')
+        classpath 'org.yaml:snakeyaml:1.23'
+        classpath 'com.palantir.conjure:conjure-api-objects:4.50.0'
+        classpath 'com.palantir.conjure:conjure-core:4.50.0'
+    }
+}
+
+import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.conjure.defs.Conjure;
+
+tasks.register('HelloTask') {
+    dependsOn tasks.compileJava
+    doLast {
+        def urls = sourceSets.main.runtimeClasspath.files.collect { it.toURI().toURL() } as URL[]
+        def classloader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader())
+        def GenerationCoordinator = classloader.loadClass('com.palantir.conjure.java.GenerationCoordinator')
+
+        def ObjectGenerator = classloader.loadClass('com.palantir.conjure.java.types.ObjectGenerator')
+        // def ConjureDefinition = classloader.loadClass('com.palantir.conjure.spec.ConjureDefinition')
+        // def Conjure = classloader.loadClass('com.palantir.conjure.defs.Conjure')
+        def Options = classloader.loadClass('com.palantir.conjure.java.Options')
+        // Construct an Options object
+        def options = Options.builder().nonNullCollections(true).strictObjects(true).build()
+        // Create a temp directory under build
+        def tempDir = file("src/test/generated")
+        def file = new File("${project.rootDir}/conjure-java-core/src/test/resources/example-types.yml")
+        def definition = Conjure.parse(List.of(file));
+        List<Path> files = GenerationCoordinator.getDeclaredConstructor()
+                .newInstance(MoreExecutors.directExecutor(),
+                        Set.of(ObjectGenerator.getDeclaredConstructor().newInstance(options)),
+                        Options.invokeMethod("empty"))
+                .invokeMethod("emit", definition, tempDir.toPath());
+        println("Hello from a gradle task!")
+    }
+}
+ */
