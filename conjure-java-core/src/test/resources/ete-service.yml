@@ -3,7 +3,7 @@ types:
     StringAliasExampleImport:
       base-type: string
       external:
-        java: com.palantir.product.StringAliasExample
+        java: allexamples.com.palantir.product.StringAliasExample
     Long:
       base-type: string
       external:

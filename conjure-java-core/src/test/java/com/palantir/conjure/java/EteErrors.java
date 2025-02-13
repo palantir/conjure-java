@@ -18,12 +18,12 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.another.ConjureJavaOtherErrors;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.product.ConjureErrors;
-import com.palantir.product.ConjureJavaErrors;
+import errors.com.palantir.another.ConjureJavaOtherErrors;
+import errors.com.palantir.product.ConjureErrors;
+import errors.com.palantir.product.ConjureJavaErrors;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

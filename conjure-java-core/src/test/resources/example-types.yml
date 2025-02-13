@@ -4,7 +4,7 @@ types:
     ExampleExternalReference:
       base-type: string
       external:
-        java: test.api.ExampleExternalReference
+        java: nongenerated.com.palantir.product.api.ExampleExternalReference
     ExternalLong:
       base-type: safelong
       external:

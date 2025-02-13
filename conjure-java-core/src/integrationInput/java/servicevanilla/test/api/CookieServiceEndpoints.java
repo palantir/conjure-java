@@ -1,0 +1,76 @@
+package servicevanilla.test.api;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.tokens.auth.BearerToken;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.io.IOException;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class CookieServiceEndpoints implements UndertowService {
+    private final CookieService delegate;
+
+    private CookieServiceEndpoints(CookieService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(CookieService delegate) {
+        return new CookieServiceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new EatCookiesEndpoint(runtime, delegate));
+    }
+
+    private static final class EatCookiesEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CookieService delegate;
+
+        EatCookiesEndpoint(UndertowRuntime runtime, CookieService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            BearerToken token = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
+            delegate.eatCookies(token);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/cookies";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CookieService";
+        }
+
+        @Override
+        public String name() {
+            return "eatCookies";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

@@ -20,15 +20,15 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.EmptyUnionTypeExample;
+import allexamples.com.palantir.product.Union;
+import allexamples.com.palantir.product.UnionTypeExample;
+import allexamples.com.palantir.product.UnionWithUnknownString;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.product.EmptyUnionTypeExample;
-import com.palantir.product.Union;
-import com.palantir.product.UnionTypeExample;
-import com.palantir.product.UnionWithUnknownString;
 import java.io.IOException;
 import java.util.List;
 import org.assertj.core.api.Fail;

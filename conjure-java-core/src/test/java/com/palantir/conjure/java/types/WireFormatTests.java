@@ -19,6 +19,35 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.BinaryAliasExample;
+import allexamples.com.palantir.product.BinaryExample;
+import allexamples.com.palantir.product.DateTimeExample;
+import allexamples.com.palantir.product.DoubleAliasExample;
+import allexamples.com.palantir.product.DoubleExample;
+import allexamples.com.palantir.product.EmptyObjectExample;
+import allexamples.com.palantir.product.EnumExample;
+import allexamples.com.palantir.product.ExternalLongAliasExample;
+import allexamples.com.palantir.product.ExternalStringAliasExample;
+import allexamples.com.palantir.product.IntegerAliasExample;
+import allexamples.com.palantir.product.ListAlias;
+import allexamples.com.palantir.product.ListExample;
+import allexamples.com.palantir.product.MapAliasExample;
+import allexamples.com.palantir.product.MapExample;
+import allexamples.com.palantir.product.OptionalAlias;
+import allexamples.com.palantir.product.OptionalAliasExample;
+import allexamples.com.palantir.product.OptionalExample;
+import allexamples.com.palantir.product.OptionalListAliasExample;
+import allexamples.com.palantir.product.OptionalMapAliasExample;
+import allexamples.com.palantir.product.OptionalSetAliasExample;
+import allexamples.com.palantir.product.PrimitiveOptionalsExample;
+import allexamples.com.palantir.product.SetAlias;
+import allexamples.com.palantir.product.SetExample;
+import allexamples.com.palantir.product.StringAliasExample;
+import allexamples.com.palantir.product.StringAliasOne;
+import allexamples.com.palantir.product.StringAliasTwo;
+import allexamples.com.palantir.product.StringExample;
+import allexamples.com.palantir.product.UnionTypeExample;
+import allexamples.com.palantir.product.UuidExample;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,35 +56,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.product.BinaryAliasExample;
-import com.palantir.product.BinaryExample;
-import com.palantir.product.DateTimeExample;
-import com.palantir.product.DoubleAliasExample;
-import com.palantir.product.DoubleExample;
-import com.palantir.product.EmptyObjectExample;
-import com.palantir.product.EnumExample;
-import com.palantir.product.ExternalLongAliasExample;
-import com.palantir.product.ExternalStringAliasExample;
-import com.palantir.product.IntegerAliasExample;
-import com.palantir.product.ListAlias;
-import com.palantir.product.ListExample;
-import com.palantir.product.MapAliasExample;
-import com.palantir.product.MapExample;
-import com.palantir.product.OptionalAlias;
-import com.palantir.product.OptionalAliasExample;
-import com.palantir.product.OptionalExample;
-import com.palantir.product.OptionalListAliasExample;
-import com.palantir.product.OptionalMapAliasExample;
-import com.palantir.product.OptionalSetAliasExample;
-import com.palantir.product.PrimitiveOptionalsExample;
-import com.palantir.product.SetAlias;
-import com.palantir.product.SetExample;
-import com.palantir.product.StringAliasExample;
-import com.palantir.product.StringAliasOne;
-import com.palantir.product.StringAliasTwo;
-import com.palantir.product.StringExample;
-import com.palantir.product.UnionTypeExample;
-import com.palantir.product.UuidExample;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
@@ -143,7 +143,7 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}", com.palantir.binary.BinaryExample.class)
+        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}", bytebuffer.com.palantir.binary.BinaryExample.class)
                         .getBinary())
                 .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
     }
@@ -158,7 +158,7 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryFieldsSerializeToBase64_legacy() throws Exception {
-        assertThat(mapper.writeValueAsString(com.palantir.binary.BinaryExample.builder()
+        assertThat(mapper.writeValueAsString(bytebuffer.com.palantir.binary.BinaryExample.builder()
                         .binary(ByteBuffer.wrap(new byte[] {0, 1, 2}))
                         .build()))
                 .isEqualTo("{\"binary\":\"AAEC\"}");
@@ -172,7 +172,7 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryAliasFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("\"AAEC\"", com.palantir.binary.BinaryAliasExample.class)
+        assertThat(mapper.readValue("\"AAEC\"", bytebuffer.com.palantir.binary.BinaryAliasExample.class)
                         .get())
                 .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
     }
@@ -186,7 +186,7 @@ public final class WireFormatTests {
     @Test
     public void testBinaryAliasFieldsSerializeToBase64_legacy() throws Exception {
         assertThat(mapper.writeValueAsString(
-                        com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
+                        bytebuffer.com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
                 .isEqualTo("\"AAEC\"");
     }
 
@@ -271,8 +271,8 @@ public final class WireFormatTests {
     @Test
     public void testAliasTypesEqualWhenInnerTypeEqual_legacyBinary() throws Exception {
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
-        assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer))
-                .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer));
+        assertThat(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer))
+                .isEqualTo(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer));
     }
 
     @Test
@@ -297,8 +297,10 @@ public final class WireFormatTests {
         assertThat(DoubleAliasExample.of(10.3).hashCode())
                 .isEqualTo(DoubleAliasExample.of(10.3).hashCode());
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
-        assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode())
-                .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode());
+        assertThat(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer)
+                        .hashCode())
+                .isEqualTo(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer)
+                        .hashCode());
     }
 
     @Test

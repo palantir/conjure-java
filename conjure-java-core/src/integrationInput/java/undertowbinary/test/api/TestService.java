@@ -1,0 +1,10 @@
+package undertowbinary.test.api;
+
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+public interface TestService {
+    /** @apiNote {@code GET /} */
+    BinaryResponseBody getBinary();
+}

@@ -49,8 +49,9 @@ public final class ParameterizedConjureGenerationTest {
     void testGeneratedCode(ParameterizedTestCase testCase) throws IOException {
         ConjureDefinition def =
                 Conjure.parse(testCase.files().stream().map(Path::toFile).toList());
-        List<Path> files =
-                new GenerationCoordinator(MoreExecutors.directExecutor(), testCase.generators()).emit(def, tempDir);
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), testCase.generators(), testCase.options())
+                .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, testCase);
     }
