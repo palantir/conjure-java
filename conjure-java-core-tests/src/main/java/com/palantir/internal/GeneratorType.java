@@ -54,8 +54,12 @@ public final class GeneratorType {
 
     public static final GeneratorType JERSEY = new GeneratorType(Value.JERSEY, "JERSEY");
 
+    public static final GeneratorType ERROR = new GeneratorType(Value.ERROR, "ERROR");
+
+    public static final GeneratorType CHECKED_ERROR = new GeneratorType(Value.CHECKED_ERROR, "CHECKED_ERROR");
+
     private static final List<GeneratorType> values =
-            Collections.unmodifiableList(Arrays.asList(OBJECT, DIALOGUE, UNDERTOW, JERSEY));
+            Collections.unmodifiableList(Arrays.asList(OBJECT, DIALOGUE, UNDERTOW, JERSEY, ERROR, CHECKED_ERROR));
 
     private final Value value;
 
@@ -102,6 +106,10 @@ public final class GeneratorType {
                 return UNDERTOW;
             case "JERSEY":
                 return JERSEY;
+            case "ERROR":
+                return ERROR;
+            case "CHECKED_ERROR":
+                return CHECKED_ERROR;
             default:
                 return new GeneratorType(Value.UNKNOWN, upperCasedValue);
         }
@@ -117,6 +125,10 @@ public final class GeneratorType {
                 return visitor.visitUndertow();
             case JERSEY:
                 return visitor.visitJersey();
+            case ERROR:
+                return visitor.visitError();
+            case CHECKED_ERROR:
+                return visitor.visitCheckedError();
             default:
                 return visitor.visitUnknown(string);
         }
@@ -136,6 +148,10 @@ public final class GeneratorType {
 
         JERSEY,
 
+        ERROR,
+
+        CHECKED_ERROR,
+
         UNKNOWN
     }
 
@@ -149,6 +165,10 @@ public final class GeneratorType {
 
         T visitJersey();
 
+        T visitError();
+
+        T visitCheckedError();
+
         T visitUnknown(String unknownValue);
 
         static <T> ObjectStageVisitorBuilder<T> builder() {
@@ -161,6 +181,8 @@ public final class GeneratorType {
                     DialogueStageVisitorBuilder<T>,
                     UndertowStageVisitorBuilder<T>,
                     JerseyStageVisitorBuilder<T>,
+                    ErrorStageVisitorBuilder<T>,
+                    CheckedErrorStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private Supplier<T> objectVisitor;
@@ -170,6 +192,10 @@ public final class GeneratorType {
         private Supplier<T> undertowVisitor;
 
         private Supplier<T> jerseyVisitor;
+
+        private Supplier<T> errorVisitor;
+
+        private Supplier<T> checkedErrorVisitor;
 
         private Function<@Safe String, T> unknownVisitor;
 
@@ -195,9 +221,23 @@ public final class GeneratorType {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> visitJersey(@Nonnull Supplier<T> jerseyVisitor) {
+        public ErrorStageVisitorBuilder<T> visitJersey(@Nonnull Supplier<T> jerseyVisitor) {
             Preconditions.checkNotNull(jerseyVisitor, "jerseyVisitor cannot be null");
             this.jerseyVisitor = jerseyVisitor;
+            return this;
+        }
+
+        @Override
+        public CheckedErrorStageVisitorBuilder<T> visitError(@Nonnull Supplier<T> errorVisitor) {
+            Preconditions.checkNotNull(errorVisitor, "errorVisitor cannot be null");
+            this.errorVisitor = errorVisitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> visitCheckedError(@Nonnull Supplier<T> checkedErrorVisitor) {
+            Preconditions.checkNotNull(checkedErrorVisitor, "checkedErrorVisitor cannot be null");
+            this.checkedErrorVisitor = checkedErrorVisitor;
             return this;
         }
 
@@ -223,6 +263,8 @@ public final class GeneratorType {
             final Supplier<T> dialogueVisitor = this.dialogueVisitor;
             final Supplier<T> undertowVisitor = this.undertowVisitor;
             final Supplier<T> jerseyVisitor = this.jerseyVisitor;
+            final Supplier<T> errorVisitor = this.errorVisitor;
+            final Supplier<T> checkedErrorVisitor = this.checkedErrorVisitor;
             final Function<@Safe String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
@@ -246,6 +288,16 @@ public final class GeneratorType {
                 }
 
                 @Override
+                public T visitError() {
+                    return errorVisitor.get();
+                }
+
+                @Override
+                public T visitCheckedError() {
+                    return checkedErrorVisitor.get();
+                }
+
+                @Override
                 public T visitUnknown(String unknownType) {
                     return unknownVisitor.apply(unknownType);
                 }
@@ -266,7 +318,15 @@ public final class GeneratorType {
     }
 
     public interface JerseyStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> visitJersey(@Nonnull Supplier<T> jerseyVisitor);
+        ErrorStageVisitorBuilder<T> visitJersey(@Nonnull Supplier<T> jerseyVisitor);
+    }
+
+    public interface ErrorStageVisitorBuilder<T> {
+        CheckedErrorStageVisitorBuilder<T> visitError(@Nonnull Supplier<T> errorVisitor);
+    }
+
+    public interface CheckedErrorStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> visitCheckedError(@Nonnull Supplier<T> checkedErrorVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {

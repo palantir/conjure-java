@@ -23,6 +23,11 @@ import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.JerseyServiceGenerator;
+import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
+import com.palantir.conjure.java.types.CheckedErrorGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.internal.GeneratorType;
@@ -35,6 +40,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -62,18 +68,27 @@ public final class ParameterizedConjureGenerationTest {
         Set<Generator> generators = getGenerators(testCase.getGenerators(), options);
         List<Path> files = new GenerationCoordinator(MoreExecutors.directExecutor(), generators).emit(def, tempDir);
 
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+        assertThatFilesAreTheSame(files);
     }
 
-    private Set<Generator> getGenerators(Set<GeneratorType> _generators, Options options) {
-        // Temporary
-        return Set.of(new ObjectGenerator(options));
+    private Set<Generator> getGenerators(Set<GeneratorType> generators, Options options) {
+        return generators.stream()
+                .map(generatorType -> generatorType.accept(GeneratorType.Visitor.<Generator>builder()
+                        .visitObject(() -> new ObjectGenerator(options))
+                        .visitDialogue(() -> new DialogueServiceGenerator(options))
+                        .visitUndertow(() -> new UndertowServiceGenerator(options))
+                        .visitJersey(() -> new JerseyServiceGenerator(options))
+                        .visitError(() -> new ErrorGenerator(options))
+                        .visitCheckedError(() -> new CheckedErrorGenerator(options))
+                        .throwOnUnknown()
+                        .build()))
+                .collect(Collectors.toSet());
     }
 
-    private void assertThatFilesAreTheSame(List<Path> files, String referenceFilesFolder) throws IOException {
+    private void assertThatFilesAreTheSame(List<Path> files) throws IOException {
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);
-            Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
+            Path expectedFile = Paths.get(REFERENCE_FILES_FOLDER, relativized.toString());
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 // help make shrink-wrapping output sane
                 Files.createDirectories(expectedFile.getParent());
