@@ -96,12 +96,6 @@ spotless {
 tasks.checkstyleMain.enabled = false
 """)
 
-            // TODO: is there a way to do this programmatically? project.subprojects is readonly
-            def settingsGradle = new File("${project.getRootDir()}/settings.gradle")
-            if (!settingsGradle.text.contains("include 'conjure-java-core-tests:${testCase}'")) {
-                settingsGradle.append("\ninclude 'conjure-java-core-tests:${testCase}'")
-            }
-
             // Construct the options object
             com.palantir.conjure.java.Options.Builder optionsBuilder = com.palantir.conjure.java.Options.builder();
             if (testCaseDef.containsKey("options")) {
