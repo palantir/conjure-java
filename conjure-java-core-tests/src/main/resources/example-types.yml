@@ -1,0 +1,7 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      StringExample:
+        fields:
+          string: string

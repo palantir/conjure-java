@@ -1,0 +1,130 @@
+buildscript {
+    repositories {
+        mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+    }
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.23'
+        classpath 'com.palantir.conjure:conjure-api-objects:4.50.0'
+        classpath 'com.palantir.conjure:conjure-core:4.50.0'
+        classpath 'com.palantir.javapoet:javapoet:0.5.0'
+        classpath 'com.atlassian.commonmark:commonmark:0.12.1'
+        classpath 'org.yaml:snakeyaml:2.3'
+        classpath 'com.palantir.goethe:goethe:0.14.0'
+        classpath files("${project(':conjure-java-core').buildDir}/classes/java/main")
+    }
+}
+
+dependencies {
+    implementation project(":conjure-java-core")
+}
+
+
+import org.yaml.snakeyaml.LoaderOptions
+import org.yaml.snakeyaml.Yaml
+
+class TestTask extends DefaultTask {
+    private static Map<String, Object> parseYaml(String yaml) {
+        LoaderOptions options = new LoaderOptions()
+        return new Yaml(options).load(yaml)
+    }
+
+    @TaskAction
+    void run() {
+        String testSpec = """
+test-no-static-factory-generated:
+  docs: 'some docs here'
+  path: example-types.yml
+  options:
+    preferObjectBuilders: true
+  generators:
+    - object
+"""
+        // TODO: figure out YAML validation. maybe use json schema?
+        getLogger().lifecycle("hello from TestTask")
+        def yamlDef = parseYaml(testSpec)
+        // For each test case in the testSpec
+        for (String testCase : yamlDef.keySet()) {
+            getLogger().lifecycle("testCase: " + testCase)
+            Map<String, Object> testCaseDef = yamlDef.get(testCase)
+            getLogger().lifecycle("testCaseDef: " + testCaseDef)
+
+            // Create a new subproject under conjure-java-core-tests
+            def directory = new File("${project.getRootDir()}/conjure-java-core-tests/${testCase}")
+            directory.mkdirs()
+
+            // Create {src/main/java, src/test/java} directories
+            def srcMainJava = new File(directory, "src/main/java")
+            srcMainJava.mkdirs()
+
+            def srcTestJava = new File(directory, "src/test/java")
+            srcTestJava.mkdirs()
+
+            // Create the build.gradle
+            def buildGradle = new File(directory, "build.gradle")
+
+            // TODO(pm): some dependencies are tied to the generator used/definitions. e.g. errors-api
+            buildGradle.write("""
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'javax.annotation:javax.annotation-api'
+    implementation 'org.jetbrains:annotations'
+}
+
+tasks.withType(JavaCompile) {
+    // _buildInvoked is unused in the generated code
+    options.errorprone.disable 'StrictUnusedVariable'
+}
+
+spotless {
+    java {
+        targetExclude sourceSets.main.allJava
+    }
+}
+
+tasks.checkstyleMain.enabled = false
+""")
+
+            // TODO: is there a way to do this programmatically? project.subprojects is readonly
+            def settingsGradle = new File("${project.getRootDir()}/settings.gradle")
+            if (!settingsGradle.text.contains("include 'conjure-java-core-tests:${testCase}'")) {
+                settingsGradle.append("\ninclude 'conjure-java-core-tests:${testCase}'")
+            }
+
+            // Construct the options object
+            com.palantir.conjure.java.Options.Builder optionsBuilder = com.palantir.conjure.java.Options.builder();
+            if (testCaseDef.containsKey("options")) {
+                Map<String, Object> optionsDef = testCaseDef.get("options")
+                if (optionsDef.containsKey("preferObjectBuilders")) {
+                    optionsBuilder.preferObjectBuilders((boolean) optionsDef.get("preferObjectBuilders"))
+                }
+            }
+
+            getLogger().lifecycle("generators: " + testCaseDef.get("generators"))
+            for (String generator : testCaseDef.get("generators")) {
+                if (generator == "object") {
+                    getLogger().lifecycle("object generator")
+                    com.palantir.conjure.java.types.ObjectGenerator objectGenerator = new com.palantir.conjure.java.types.ObjectGenerator(optionsBuilder.build())
+                    File defYaml = new File("${project.getRootDir()}/conjure-java-core-tests/src/main/resources/example-types.yml")
+                    com.palantir.conjure.spec.ConjureDefinition definition = com.palantir.conjure.defs.Conjure.parse(List.of(defYaml))
+                    def javaFiles = objectGenerator.generate(definition)
+                    // write files to src/main/java
+                    for (var file : javaFiles) {
+                        com.palantir.goethe.Goethe.formatAndEmit(file, srcMainJava.toPath())
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.register("testTask", TestTask) {
+    dependsOn ":conjure-java-core:build"
+}
+
+// Dynamically include the subproject in the settings.gradle file
+// rootProject.subprojects += project(":conjure-java-core-tests")

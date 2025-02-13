@@ -12,6 +12,7 @@ rootProject.name = 'palantir-conjure-java'
 
 include 'conjure-java'
 include 'conjure-java-core'
+include 'conjure-java-core-tests'
 include 'conjure-java-client-verifier'
 include 'conjure-java-client-verifier:verification-server-api'
 include 'conjure-java-server-verifier'
@@ -22,3 +23,7 @@ include 'conjure-undertow-annotations'
 include 'conjure-undertow-lib'
 include 'conjure-undertow-processor'
 include 'conjure-undertow-processor-example'
+
+include 'conjure-java-core-tests:example-test-one'
+
+include 'conjure-java-core-tests:test-no-static-factory-generated'

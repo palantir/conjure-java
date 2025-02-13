@@ -1,0 +1,24 @@
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'javax.annotation:javax.annotation-api'
+    implementation 'org.jetbrains:annotations'
+}
+
+tasks.withType(JavaCompile) {
+    // _buildInvoked is unused in the generated code
+    options.errorprone.disable 'StrictUnusedVariable'
+}
+
+spotless {
+    java {
+        targetExclude sourceSets.main.allJava
+    }
+}
+
+tasks.checkstyleMain.enabled = false
