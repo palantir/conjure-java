@@ -23,13 +23,20 @@ import org.yaml.snakeyaml.LoaderOptions
 import org.yaml.snakeyaml.Yaml
 
 class TestTask extends DefaultTask {
-    private static Map<String, Object> parseYaml(String yaml) {
+    static Map<String, Object> parseYaml(String yaml) {
         LoaderOptions options = new LoaderOptions()
         return new Yaml(options).load(yaml)
     }
 
     @TaskAction
     void run() {
+        getLogger().lifecycle("hello from TestTask")
+    }
+}
+
+tasks.register("testTask", TestTask) {
+    dependsOn ":conjure-java-core:build"
+    doLast {
         String testSpec = """
 test-no-static-factory-generated:
   docs: 'some docs here'
@@ -41,7 +48,7 @@ test-no-static-factory-generated:
 """
         // TODO: figure out YAML validation. maybe use json schema?
         getLogger().lifecycle("hello from TestTask")
-        def yamlDef = parseYaml(testSpec)
+        def yamlDef = TestTask.parseYaml(testSpec)
         // For each test case in the testSpec
         for (String testCase : yamlDef.keySet()) {
             getLogger().lifecycle("testCase: " + testCase)
@@ -121,10 +128,3 @@ tasks.checkstyleMain.enabled = false
         }
     }
 }
-
-tasks.register("testTask", TestTask) {
-    dependsOn ":conjure-java-core:build"
-}
-
-// Dynamically include the subproject in the settings.gradle file
-// rootProject.subprojects += project(":conjure-java-core-tests")
