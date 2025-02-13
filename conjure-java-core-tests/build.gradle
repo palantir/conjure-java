@@ -1,0 +1,125 @@
+/*
+ * (c) Copyright 2025 Palantir Technologies Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.palantir.external-publish-jar'
+
+sourceSets {
+    integrationInput
+}
+
+spotless {
+    java {
+        targetExclude sourceSets.integrationInput.allJava
+    }
+}
+
+idea {
+    module {
+        sourceDirs += sourceSets.integrationInput.java.srcDirs
+    }
+}
+
+tasks.checkstyleIntegrationInput.enabled = false
+
+dependencies {
+    api project(':conjure-undertow-lib')
+    api 'com.fasterxml.jackson.core:jackson-databind'
+    api 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    api 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    api 'com.google.guava:guava'
+    api 'com.palantir.conjure.java.api:errors'
+    api 'com.palantir.conjure:conjure-generator-common'
+    api 'com.palantir.javapoet:javapoet'
+    api 'com.palantir.ri:resource-identifier'
+    api 'com.palantir.syntactic-paths:syntactic-paths'
+    api 'com.palantir.tokens:auth-tokens'
+    api 'org.apache.commons:commons-lang3'
+    api 'org.slf4j:slf4j-api'
+    api 'com.atlassian.commonmark:commonmark'
+
+    implementation project(':conjure-lib')
+    implementation project(':conjure-java-core')
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.palantir.common:streams'
+    implementation 'com.palantir.conjure:conjure-api-objects'
+    implementation 'com.palantir.dialogue:dialogue-target'
+    implementation 'com.palantir.goethe:goethe'
+    implementation 'com.palantir.human-readable-types:human-readable-types'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'io.undertow:undertow-core'
+    implementation 'org.glassfish.jersey.core:jersey-common'
+
+    testImplementation sourceSets.integrationInput.output
+    testImplementation project(':conjure-java-undertow-runtime')
+    testImplementation 'com.fasterxml.jackson.core:jackson-core'
+    testImplementation 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
+    testImplementation 'com.palantir.conjure.java.api:service-config'
+    testImplementation 'com.palantir.conjure.java.api:ssl-config'
+    testImplementation 'com.palantir.conjure.java.runtime:client-config'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-legacy-clients'
+    testImplementation 'com.palantir.conjure.java.runtime:keystores'
+    testImplementation 'com.palantir.conjure:conjure-core'
+    testImplementation 'com.palantir.dialogue:dialogue-clients'
+    testImplementation 'com.palantir.safe-logging:preconditions-assertj'
+    testImplementation 'com.palantir.tracing:tracing'
+    testImplementation 'io.dropwizard:dropwizard-core'
+    testImplementation 'io.dropwizard:dropwizard-jersey'
+    testImplementation 'io.dropwizard:dropwizard-jetty'
+    testImplementation 'io.dropwizard:dropwizard-logging'
+    testImplementation 'io.dropwizard:dropwizard-testing'
+    testImplementation 'javax.validation:validation-api'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.glassfish.jersey.core:jersey-server'
+    testImplementation 'org.jboss.xnio:xnio-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'javax.ws.rs:javax.ws.rs-api'
+
+    integrationInputImplementation project(':conjure-lib')
+    integrationInputImplementation project(':conjure-undertow-lib')
+    integrationInputImplementation 'com.fasterxml.jackson.core:jackson-annotations'
+    integrationInputImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    integrationInputImplementation 'com.google.code.findbugs:jsr305'
+    integrationInputImplementation 'com.google.errorprone:error_prone_annotations'
+    integrationInputImplementation 'com.google.guava:guava'
+    integrationInputImplementation 'com.palantir.conjure.java.api:errors'
+    integrationInputImplementation 'com.palantir.dialogue:dialogue-target'
+    integrationInputImplementation 'com.palantir.ri:resource-identifier'
+    integrationInputImplementation 'com.palantir.safe-logging:preconditions'
+    integrationInputImplementation 'com.palantir.safe-logging:safe-logging'
+    integrationInputImplementation 'com.palantir.tokens:auth-tokens'
+    integrationInputImplementation 'io.undertow:undertow-core'
+    integrationInputImplementation 'javax.annotation:javax.annotation-api'
+    integrationInputImplementation 'javax.validation:validation-api'
+    integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
+    integrationInputImplementation 'org.jetbrains:annotations'
+
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+    testCompileOnly 'org.immutables:value::annotations'
+}
+
+tasks.withType(JavaCompile) {
+    // this complains about the integrationInput directory
+    options.errorprone.disable 'StrictUnusedVariable'
+}

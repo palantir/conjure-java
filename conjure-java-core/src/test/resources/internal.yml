@@ -1,0 +1,24 @@
+types:
+  imports:
+    Options:
+      base-type: string
+      external:
+        java: com.palantir.conjure.java.Options
+  definitions:
+    default-package: com.palantir.internal
+    objects:
+      ParameterizedTestCase:
+        fields:
+          docs: optional<string>
+          name: string
+          files: list<FilePath>
+          options: Options
+          generators: set<GeneratorType>
+      FilePath:
+        alias: string
+      GeneratorType:
+        values:
+          - OBJECT
+          - DIALOGUE
+          - UNDERTOW
+          - JERSEY
