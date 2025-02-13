@@ -3,7 +3,7 @@ types:
     ExampleExternalReference:
       base-type: string
       external:
-        java: test.api.ExampleExternalReference
+        java: com.external.test.ExampleExternalReference
   definitions:
     default-package: com.palantir.product
     objects:
