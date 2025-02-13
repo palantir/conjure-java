@@ -26,10 +26,8 @@ include 'conjure-undertow-processor-example'
 
 // Dynamically include all generated test subprojects
 def testSubprojectsDir = new File(rootDir, 'conjure-java-core-tests')
-if (testSubprojectsDir.exists() && testSubprojectsDir.isDirectory()) {
-    testSubprojectsDir.eachDir { dir ->
-        if (new File(dir, 'build.gradle').exists()) {
-            include "conjure-java-core-tests:${dir.name}"
-        }
+testSubprojectsDir.eachDir { dir ->
+    if (new File(dir, 'build.gradle').exists()) {
+        include "conjure-java-core-tests:${dir.name}"
     }
 }
