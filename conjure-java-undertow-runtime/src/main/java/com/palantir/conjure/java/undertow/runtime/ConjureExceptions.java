@@ -75,10 +75,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             illegalArgumentException(exchange, throwable);
         } else if (throwable instanceof FrameworkException) {
             frameworkException(exchange, (FrameworkException) throwable);
-        } else if (throwable instanceof DeadlineExpiredException.External) {
-            externalDeadlineExpiredException(exchange, (DeadlineExpiredException.External) throwable);
-        } else if (throwable instanceof DeadlineExpiredException.Internal) {
-            internalDeadlineExpiredException(exchange, (DeadlineExpiredException.Internal) throwable);
+        } else if (throwable instanceof DeadlineExpiredException) {
+            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
@@ -190,17 +188,8 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
     }
 
-    private static void externalDeadlineExpiredException(
-            HttpServerExchange exchange, DeadlineExpiredException.External exception) {
-        log.info("external deadline exceeded", exception);
-        // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
-        DeadlineExpiredReasons.encodeToResponse(
-                exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
-    }
-
-    private static void internalDeadlineExpiredException(
-            HttpServerExchange exchange, DeadlineExpiredException.Internal exception) {
-        log.error("internal deadline exceeded", exception);
+    private static void deadlineExpiredException(HttpServerExchange exchange, DeadlineExpiredException exception) {
+        log.info("deadline exceeded", exception);
         // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
         DeadlineExpiredReasons.encodeToResponse(
                 exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
