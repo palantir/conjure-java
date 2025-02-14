@@ -301,6 +301,7 @@ public final class ConjureExceptionHandlerTest {
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(400);
+        assertThat(connection.getHeaderFields()).containsEntry("Deadline-Expired-Reason", ImmutableList.of("external"));
         assertThat(connection.getErrorStream()).isNull();
     }
 
@@ -310,6 +311,7 @@ public final class ConjureExceptionHandlerTest {
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(500);
+        assertThat(connection.getHeaderFields()).containsEntry("Deadline-Expired-Reason", ImmutableList.of("internal"));
         assertThat(connection.getErrorStream()).isNull();
     }
 

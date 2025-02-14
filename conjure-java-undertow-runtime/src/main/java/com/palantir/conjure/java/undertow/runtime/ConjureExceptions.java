@@ -28,6 +28,7 @@ import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
+import com.palantir.deadlines.DeadlineExpiredReasons;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -74,8 +75,10 @@ public enum ConjureExceptions implements ExceptionHandler {
             illegalArgumentException(exchange, throwable);
         } else if (throwable instanceof FrameworkException) {
             frameworkException(exchange, (FrameworkException) throwable);
-        } else if (throwable instanceof DeadlineExpiredException) {
-            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
+        } else if (throwable instanceof DeadlineExpiredException.External) {
+            externalDeadlineExpiredException(exchange, (DeadlineExpiredException.External) throwable);
+        } else if (throwable instanceof DeadlineExpiredException.Internal) {
+            internalDeadlineExpiredException(exchange, (DeadlineExpiredException.Internal) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
@@ -187,18 +190,20 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
     }
 
-    private static void deadlineExpiredException(HttpServerExchange exchange, DeadlineExpiredException exception) {
-        // need to further narrow down to external versus internal exception types
-        if (exception instanceof DeadlineExpiredException.External externalException) {
-            log.info("external deadline exceeded", externalException);
-            writeResponse(exchange, Optional.empty(), 400);
-        } else if (exception instanceof DeadlineExpiredException.Internal internalException) {
-            log.error("internal deadline exceeded", internalException);
-            writeResponse(exchange, Optional.empty(), 500);
-        } else {
-            log.error("unknown deadline exception type", exception);
-            writeResponse(exchange, Optional.empty(), 500);
-        }
+    private static void externalDeadlineExpiredException(
+            HttpServerExchange exchange, DeadlineExpiredException.External exception) {
+        log.info("external deadline exceeded", exception);
+        // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
+        DeadlineExpiredReasons.encodeToResponse(
+                exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
+    }
+
+    private static void internalDeadlineExpiredException(
+            HttpServerExchange exchange, DeadlineExpiredException.Internal exception) {
+        log.error("internal deadline exceeded", exception);
+        // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
+        DeadlineExpiredReasons.encodeToResponse(
+                exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
@@ -339,6 +344,21 @@ public enum ConjureExceptions implements ExceptionHandler {
         @Override
         public void setHeader(HttpServerExchange exchange, String headerName, String headerValue) {
             exchange.getResponseHeaders().put(HttpString.tryFromString(headerName), headerValue);
+        }
+    }
+
+    private enum UndertowDeadlineReasonResponseEncodingAdapter
+            implements DeadlineExpiredReasons.ResponseEncodingAdapter<HttpServerExchange> {
+        INSTANCE;
+
+        @Override
+        public void setHeader(HttpServerExchange exchange, String headerName, String headerValue) {
+            exchange.getResponseHeaders().put(HttpString.tryFromString(headerName), headerValue);
+        }
+
+        @Override
+        public void setStatus(HttpServerExchange exchange, int status) {
+            writeResponse(exchange, Optional.empty(), status);
         }
     }
 }
