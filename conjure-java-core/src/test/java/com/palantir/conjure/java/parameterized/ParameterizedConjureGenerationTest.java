@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
+import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;

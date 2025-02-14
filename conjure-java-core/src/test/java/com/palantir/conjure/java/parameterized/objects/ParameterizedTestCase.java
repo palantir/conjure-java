@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.parameterized;
+package com.palantir.conjure.java.parameterized.objects;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.Generator;

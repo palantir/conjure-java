@@ -18,6 +18,9 @@ package com.palantir.conjure.java.parameterized;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.parameterized.objects.FilePath;
+import com.palantir.conjure.java.parameterized.objects.GeneratorType;
+import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
 import java.util.List;
 
 public final class TestCases {
