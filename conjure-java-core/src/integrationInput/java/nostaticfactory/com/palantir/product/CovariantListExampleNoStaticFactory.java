@@ -1,6 +1,5 @@
 package nostaticfactory.com.palantir.product;
 
-import com.external.test.ExampleExternalReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -17,6 +16,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
+import test.api.ExampleExternalReference;
 
 @JsonDeserialize(builder = CovariantListExampleNoStaticFactory.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -56,7 +56,7 @@ public final class CovariantListExampleNoStaticFactory {
     public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof CovariantListExampleNoStaticFactory
-                && equalTo((CovariantListExampleNoStaticFactory) other));
+                        && equalTo((CovariantListExampleNoStaticFactory) other));
     }
 
     private boolean equalTo(CovariantListExampleNoStaticFactory other) {
@@ -128,8 +128,7 @@ public final class CovariantListExampleNoStaticFactory {
 
         private Optional<String> optionalField = Optional.empty();
 
-        private Builder() {
-        }
+        private Builder() {}
 
         public Builder from(CovariantListExampleNoStaticFactory other) {
             checkNotBuilt();

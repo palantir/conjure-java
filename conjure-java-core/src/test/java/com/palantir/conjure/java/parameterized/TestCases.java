@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure;
+package com.palantir.conjure.java.parameterized;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.Options;
-import com.palantir.internal.FilePath;
-import com.palantir.internal.GeneratorType;
-import com.palantir.internal.ParameterizedTestCase;
 import java.util.List;
 
 public final class TestCases {
     private static final List<ParameterizedTestCase> CASES = ImmutableList.<ParameterizedTestCase>builder()
             .add(ParameterizedTestCase.builder()
-                    .name("noStaticFactory")
-                    .docs("Test")
+                    .name("no-static-factory")
+                    .docs("Test generating objects without the static factory methods.")
                     .files(FilePath.of("src/test/resources/example-types-no-static-factory.yml"))
                     .options(Options.builder().preferObjectBuilders(true).build())
                     .generators(GeneratorType.OBJECT)

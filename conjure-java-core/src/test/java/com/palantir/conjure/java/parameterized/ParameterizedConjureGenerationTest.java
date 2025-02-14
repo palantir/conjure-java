@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure;
+package com.palantir.conjure.java.parameterized;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
-import com.palantir.conjure.java.Generator;
-import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.services.UndertowServiceGenerator;
-import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
-import com.palantir.conjure.java.types.CheckedErrorGenerator;
-import com.palantir.conjure.java.types.ErrorGenerator;
-import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.internal.GeneratorType;
-import com.palantir.internal.ParameterizedTestCase;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -58,31 +45,12 @@ public final class ParameterizedConjureGenerationTest {
     @ParameterizedTest
     @MethodSource("getTestCases")
     void testGeneratedCode(ParameterizedTestCase testCase) throws IOException {
-        ConjureDefinition def = Conjure.parse(testCase.getFiles().stream()
+        ConjureDefinition def = Conjure.parse(testCase.files().stream()
                 .map(filePath -> new File(filePath.get()))
                 .toList());
-        Options options = Options.builder()
-                .from(testCase.getOptions())
-                .packagePrefix(testCase.getName().toLowerCase(Locale.ROOT))
-                .build();
-        Set<Generator> generators = getGenerators(testCase.getGenerators(), options);
-        List<Path> files = new GenerationCoordinator(MoreExecutors.directExecutor(), generators).emit(def, tempDir);
+        List<Path> files = new GenerationCoordinator(MoreExecutors.directExecutor(), testCase.getGenerators()).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files);
-    }
-
-    private Set<Generator> getGenerators(Set<GeneratorType> generators, Options options) {
-        return generators.stream()
-                .map(generatorType -> generatorType.accept(GeneratorType.Visitor.<Generator>builder()
-                        .visitObject(() -> new ObjectGenerator(options))
-                        .visitDialogue(() -> new DialogueServiceGenerator(options))
-                        .visitUndertow(() -> new UndertowServiceGenerator(options))
-                        .visitJersey(() -> new JerseyServiceGenerator(options))
-                        .visitError(() -> new ErrorGenerator(options))
-                        .visitCheckedError(() -> new CheckedErrorGenerator(options))
-                        .throwOnUnknown()
-                        .build()))
-                .collect(Collectors.toSet());
     }
 
     private void assertThatFilesAreTheSame(List<Path> files) throws IOException {
