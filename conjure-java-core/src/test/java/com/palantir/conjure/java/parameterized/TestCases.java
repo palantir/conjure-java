@@ -51,4 +51,6 @@ public final class TestCases {
     public static List<ParameterizedTestCase> get() {
         return CASES;
     }
+
+    private TestCases() {}
 }

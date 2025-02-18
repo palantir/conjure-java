@@ -42,6 +42,7 @@ import javax.annotation.processing.Generated;
  *
  * <p>There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
+@SuppressWarnings("checkstyle:HiddenField")
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
 @Immutable
@@ -184,7 +185,7 @@ public final class GeneratorType {
                     ErrorStageVisitorBuilder<T>,
                     CheckedErrorStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
-                    Completed_StageVisitorBuilder<T> {
+                    CompletedStageVisitorBuilder<T> {
         private Supplier<T> objectVisitor;
 
         private Supplier<T> dialogueVisitor;
@@ -242,14 +243,14 @@ public final class GeneratorType {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownType -> unknownVisitor.apply(unknownType);
             return this;
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
+        public CompletedStageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
                         "Unknown variant of the 'GeneratorType' union", SafeArg.of("unknownType", unknownType));
@@ -330,12 +331,12 @@ public final class GeneratorType {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
-        Completed_StageVisitorBuilder<T> throwOnUnknown();
+        CompletedStageVisitorBuilder<T> throwOnUnknown();
     }
 
-    public interface Completed_StageVisitorBuilder<T> {
+    public interface CompletedStageVisitorBuilder<T> {
         Visitor<T> build();
     }
 }

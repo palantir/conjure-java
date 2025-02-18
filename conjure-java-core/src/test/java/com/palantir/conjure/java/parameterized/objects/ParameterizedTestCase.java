@@ -70,8 +70,9 @@ public record ParameterizedTestCase(
     }
 
     // Hand-rolled the Builder definition to improve the creation pattern
+    @SuppressWarnings("checkstyle:HiddenField")
     public static final class Builder {
-        boolean _buildInvoked;
+        boolean buildInvoked;
 
         private String name;
 
@@ -143,12 +144,12 @@ public record ParameterizedTestCase(
         @CheckReturnValue
         public ParameterizedTestCase build() {
             checkNotBuilt();
-            this._buildInvoked = true;
+            this.buildInvoked = true;
             return new ParameterizedTestCase(name, docs, files, options, generators);
         }
 
         private void checkNotBuilt() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            Preconditions.checkState(!buildInvoked, "Build has already been called");
         }
     }
 }
