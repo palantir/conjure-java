@@ -29,20 +29,16 @@ import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.logsafe.Preconditions;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
-public record ParameterizedTestCase(String name, Optional<String> docs, List<FilePath> files, Options options,
-                                    Set<GeneratorType> generators) {
+public record ParameterizedTestCase(
+        String name, String docs, List<FilePath> files, Options options, Set<GeneratorType> generators) {
 
     @Override
     public Options options() {
-        return Options.builder()
-                .from(options)
-                .packagePrefix(getPackageName())
-                .build();
+        return Options.builder().from(options).packagePrefix(getPackageName()).build();
     }
 
     private String getPackageName() {
@@ -65,7 +61,7 @@ public record ParameterizedTestCase(String name, Optional<String> docs, List<Fil
 
     @Override
     public String toString() {
-        return "ParameterizedTestCase{docs: " + docs + ", name: " + name + ", files: " + files + ", options: " + options
+        return "ParameterizedTestCase{name: " + name + ", docs: " + docs + ", files: " + files + ", options: " + options
                 + ", generators: " + generators + '}';
     }
 
@@ -79,7 +75,7 @@ public record ParameterizedTestCase(String name, Optional<String> docs, List<Fil
 
         private String name;
 
-        private Optional<String> docs = Optional.empty();
+        private String docs;
 
         private List<FilePath> files = ConjureCollections.newNonNullList();
 
@@ -87,8 +83,7 @@ public record ParameterizedTestCase(String name, Optional<String> docs, List<Fil
 
         private Set<GeneratorType> generators = ConjureCollections.newNonNullSet();
 
-        private Builder() {
-        }
+        private Builder() {}
 
         public Builder from(ParameterizedTestCase other) {
             checkNotBuilt();
@@ -106,15 +101,9 @@ public record ParameterizedTestCase(String name, Optional<String> docs, List<Fil
             return this;
         }
 
-        public Builder docs(@Nonnull Optional<String> docs) {
-            checkNotBuilt();
-            this.docs = Preconditions.checkNotNull(docs, "docs cannot be null");
-            return this;
-        }
-
         public Builder docs(@Nonnull String docs) {
             checkNotBuilt();
-            this.docs = Optional.of(Preconditions.checkNotNull(docs, "docs cannot be null"));
+            this.docs = Preconditions.checkNotNull(docs, "docs cannot be null");
             return this;
         }
 

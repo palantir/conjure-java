@@ -49,22 +49,23 @@ public final class ParameterizedConjureGenerationTest {
         ConjureDefinition def = Conjure.parse(testCase.files().stream()
                 .map(filePath -> new File(filePath.get()))
                 .toList());
-        List<Path> files = new GenerationCoordinator(MoreExecutors.directExecutor(), testCase.getGenerators()).emit(def, tempDir);
+        List<Path> files =
+                new GenerationCoordinator(MoreExecutors.directExecutor(), testCase.getGenerators()).emit(def, tempDir);
 
-        assertThatFilesAreTheSame(files);
+        assertThatFilesAreTheSame(files, testCase.docs());
     }
 
-    private void assertThatFilesAreTheSame(List<Path> files) throws IOException {
+    private void assertThatFilesAreTheSame(List<Path> files, String testCaseDocs) throws IOException {
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);
             Path expectedFile = Paths.get(REFERENCE_FILES_FOLDER, relativized.toString());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+            if (Boolean.parseBoolean(System.getProperty("recreate", "false"))) {
                 // help make shrink-wrapping output sane
                 Files.createDirectories(expectedFile.getParent());
                 Files.deleteIfExists(expectedFile);
                 Files.copy(file, expectedFile);
             }
-            assertThat(file).hasSameContentAs(expectedFile);
+            assertThat(file).describedAs(testCaseDocs).hasSameTextualContentAs(expectedFile);
         }
     }
 }

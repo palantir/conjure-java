@@ -84,8 +84,8 @@ public final class GeneratorType {
     public boolean equals(@Nullable Object other) {
         return (this == other)
                 || (this.value == Value.UNKNOWN
-                && other instanceof GeneratorType
-                && this.string.equals(((GeneratorType) other).string));
+                        && other instanceof GeneratorType
+                        && this.string.equals(((GeneratorType) other).string));
     }
 
     @Override
@@ -178,13 +178,13 @@ public final class GeneratorType {
 
     private static final class VisitorBuilder<T>
             implements ObjectStageVisitorBuilder<T>,
-            DialogueStageVisitorBuilder<T>,
-            UndertowStageVisitorBuilder<T>,
-            JerseyStageVisitorBuilder<T>,
-            ErrorStageVisitorBuilder<T>,
-            CheckedErrorStageVisitorBuilder<T>,
-            UnknownStageVisitorBuilder<T>,
-            Completed_StageVisitorBuilder<T> {
+                    DialogueStageVisitorBuilder<T>,
+                    UndertowStageVisitorBuilder<T>,
+                    JerseyStageVisitorBuilder<T>,
+                    ErrorStageVisitorBuilder<T>,
+                    CheckedErrorStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    Completed_StageVisitorBuilder<T> {
         private Supplier<T> objectVisitor;
 
         private Supplier<T> dialogueVisitor;
