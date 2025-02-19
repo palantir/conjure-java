@@ -18,9 +18,9 @@ package com.palantir.conjure.java.parameterized;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.parameterized.objects.FilePath;
 import com.palantir.conjure.java.parameterized.objects.GeneratorType;
 import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
+import java.nio.file.Path;
 import java.util.List;
 
 public final class TestCases {
@@ -28,7 +28,7 @@ public final class TestCases {
             .add(ParameterizedTestCase.builder()
                     .name("template")
                     .docs("Testing compilation of example objects with the base set of options from our templates.")
-                    .files(FilePath.of("src/test/resources/example-types.yml"))
+                    .files(Path.of("example-types.yml"))
                     .options(Options.builder()
                             .useImmutableBytes(true)
                             .strictObjects(true)
@@ -42,7 +42,7 @@ public final class TestCases {
             .add(ParameterizedTestCase.builder()
                     .name("no-static-factory")
                     .docs("Test generating objects without the static factory methods.")
-                    .files(FilePath.of("src/test/resources/example-types-no-static-factory.yml"))
+                    .files(Path.of("example-types-no-static-factory.yml"))
                     .options(Options.builder().preferObjectBuilders(true).build())
                     .generators(GeneratorType.OBJECT)
                     .build())

@@ -122,4 +122,3 @@ tasks.withType(JavaCompile) {
     // this complains about the integrationInput directory
     options.errorprone.disable 'StrictUnusedVariable'
 }
-compileJava.dependsOn compileIntegrationInputJava

@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,26 +47,35 @@ public final class ParameterizedConjureGenerationTest {
     @ParameterizedTest
     @MethodSource("getTestCases")
     void testGeneratedCode(ParameterizedTestCase testCase) throws IOException {
-        ConjureDefinition def = Conjure.parse(testCase.files().stream()
-                .map(filePath -> new File(filePath.get()))
-                .toList());
+        ConjureDefinition def =
+                Conjure.parse(testCase.files().stream().map(Path::toFile).toList());
         List<Path> files =
                 new GenerationCoordinator(MoreExecutors.directExecutor(), testCase.getGenerators()).emit(def, tempDir);
 
-        assertThatFilesAreTheSame(files, testCase.docs());
+        assertThatFilesAreTheSame(files, testCase);
     }
 
-    private void assertThatFilesAreTheSame(List<Path> files, String testCaseDocs) throws IOException {
+    private void assertThatFilesAreTheSame(List<Path> files, ParameterizedTestCase testCase) throws IOException {
+        boolean recreate = Boolean.parseBoolean(System.getProperty("recreate", "false"));
+
+        if (recreate) {
+            // Delete directory contents if exists
+            Path testCaseDirectory = Paths.get(REFERENCE_FILES_FOLDER, testCase.packagePrefix());
+            if (Files.exists(testCaseDirectory)) {
+                try (Stream<Path> filePaths = Files.walk(testCaseDirectory)) {
+                    filePaths.filter(Files::isRegularFile).map(Path::toFile).forEach(File::delete);
+                }
+            }
+        }
+
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);
             Path expectedFile = Paths.get(REFERENCE_FILES_FOLDER, relativized.toString());
-            if (Boolean.parseBoolean(System.getProperty("recreate", "false"))) {
-                // help make shrink-wrapping output sane
+            if (recreate) {
                 Files.createDirectories(expectedFile.getParent());
-                Files.deleteIfExists(expectedFile);
                 Files.copy(file, expectedFile);
             }
-            assertThat(file).describedAs(testCaseDocs).hasSameTextualContentAs(expectedFile);
+            assertThat(file).describedAs(testCase.docs()).hasSameTextualContentAs(expectedFile);
         }
     }
 }

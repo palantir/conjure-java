@@ -27,6 +27,7 @@ import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.logsafe.Preconditions;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -34,28 +35,37 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public record ParameterizedTestCase(
-        String name, String docs, List<FilePath> files, Options options, Set<GeneratorType> generators) {
+        String name, String docs, List<Path> files, Options options, Set<GeneratorType> generators) {
+
+    private static final Path TEST_RESOURCES_FOLDER = Path.of("src/test/resources");
+
+    @Override
+    public List<Path> files() {
+        return files.stream()
+                .map(filePath ->
+                        filePath.startsWith(TEST_RESOURCES_FOLDER) ? filePath : TEST_RESOURCES_FOLDER.resolve(filePath))
+                .toList();
+    }
 
     @Override
     public Options options() {
-        return Options.builder().from(options).packagePrefix(getPackageName()).build();
+        return Options.builder().from(options).packagePrefix(packagePrefix()).build();
     }
 
-    private String getPackageName() {
+    public String packagePrefix() {
         return name.toLowerCase(Locale.ROOT).replaceAll("-", "");
     }
 
     public Set<Generator> getGenerators() {
         return generators.stream()
-                .map(generatorType -> generatorType.accept(GeneratorType.Visitor.<Generator>builder()
-                        .visitObject(() -> new ObjectGenerator(options()))
-                        .visitDialogue(() -> new DialogueServiceGenerator(options()))
-                        .visitUndertow(() -> new UndertowServiceGenerator(options()))
-                        .visitJersey(() -> new JerseyServiceGenerator(options()))
-                        .visitError(() -> new ErrorGenerator(options()))
-                        .visitCheckedError(() -> new CheckedErrorGenerator(options()))
-                        .throwOnUnknown()
-                        .build()))
+                .map(generatorType -> switch (generatorType) {
+                    case OBJECT -> new ObjectGenerator(options());
+                    case DIALOGUE -> new DialogueServiceGenerator(options());
+                    case UNDERTOW -> new UndertowServiceGenerator(options());
+                    case JERSEY -> new JerseyServiceGenerator(options());
+                    case ERROR -> new ErrorGenerator(options());
+                    case CHECKED_ERROR -> new CheckedErrorGenerator(options());
+                })
                 .collect(Collectors.toSet());
     }
 
@@ -78,7 +88,7 @@ public record ParameterizedTestCase(
 
         private String docs;
 
-        private List<FilePath> files = ConjureCollections.newNonNullList();
+        private List<Path> files = ConjureCollections.newNonNullList();
 
         private Options options;
 
@@ -108,13 +118,13 @@ public record ParameterizedTestCase(
             return this;
         }
 
-        public Builder files(@Nonnull Iterable<FilePath> files) {
+        public Builder files(@Nonnull Iterable<Path> files) {
             checkNotBuilt();
             this.files = ConjureCollections.newNonNullList(Preconditions.checkNotNull(files, "files cannot be null"));
             return this;
         }
 
-        public Builder files(FilePath files) {
+        public Builder files(Path files) {
             checkNotBuilt();
             Preconditions.checkNotNull(files, "files cannot be null");
             this.files.add(files);
