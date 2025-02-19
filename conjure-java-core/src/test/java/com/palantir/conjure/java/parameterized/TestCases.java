@@ -37,14 +37,14 @@ public final class TestCases {
                             .excludeEmptyOptionals(true)
                             .preferObjectBuilders(true)
                             .build())
-                    .generators(GeneratorType.OBJECT)
+                    .generatorTypes(GeneratorType.OBJECT)
                     .build())
             .add(ParameterizedTestCase.builder()
                     .name("no-static-factory")
                     .docs("Test generating objects without the static factory methods.")
                     .files(Path.of("example-types-no-static-factory.yml"))
                     .options(Options.builder().preferObjectBuilders(true).build())
-                    .generators(GeneratorType.OBJECT)
+                    .generatorTypes(GeneratorType.OBJECT)
                     .build())
             .build();
 

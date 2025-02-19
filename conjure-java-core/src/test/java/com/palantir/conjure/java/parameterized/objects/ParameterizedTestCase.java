@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public record ParameterizedTestCase(
-        String name, String docs, List<Path> files, Options options, Set<GeneratorType> generators) {
+        String name, String docs, List<Path> files, Options options, Set<GeneratorType> generatorTypes) {
 
     private static final Path TEST_RESOURCES_FOLDER = Path.of("src/test/resources");
 
@@ -56,8 +56,8 @@ public record ParameterizedTestCase(
         return name.toLowerCase(Locale.ROOT).replaceAll("-", "");
     }
 
-    public Set<Generator> getGenerators() {
-        return generators.stream()
+    public Set<Generator> generators() {
+        return generatorTypes.stream()
                 .map(generatorType -> switch (generatorType) {
                     case OBJECT -> new ObjectGenerator(options());
                     case DIALOGUE -> new DialogueServiceGenerator(options());
@@ -72,7 +72,7 @@ public record ParameterizedTestCase(
     @Override
     public String toString() {
         return "ParameterizedTestCase{name: " + name + ", docs: " + docs + ", files: " + files + ", options: " + options
-                + ", generators: " + generators + '}';
+                + ", generatorTypes: " + generatorTypes + '}';
     }
 
     public static Builder builder() {
@@ -92,7 +92,7 @@ public record ParameterizedTestCase(
 
         private Options options;
 
-        private Set<GeneratorType> generators = ConjureCollections.newNonNullSet();
+        private Set<GeneratorType> generatorTypes = ConjureCollections.newNonNullSet();
 
         private Builder() {}
 
@@ -102,7 +102,7 @@ public record ParameterizedTestCase(
             docs(other.docs);
             files(other.files);
             options(other.options);
-            generators(other.generators);
+            generatorTypes(other.generatorTypes);
             return this;
         }
 
@@ -137,17 +137,17 @@ public record ParameterizedTestCase(
             return this;
         }
 
-        public Builder generators(@Nonnull Iterable<GeneratorType> generators) {
+        public Builder generatorTypes(@Nonnull Iterable<GeneratorType> generatorTypes) {
             checkNotBuilt();
-            this.generators = ConjureCollections.newNonNullSet(
-                    Preconditions.checkNotNull(generators, "generators cannot be null"));
+            this.generatorTypes = ConjureCollections.newNonNullSet(
+                    Preconditions.checkNotNull(generatorTypes, "generatorTypes cannot be null"));
             return this;
         }
 
-        public Builder generators(GeneratorType generators) {
+        public Builder generatorTypes(GeneratorType generatorTypes) {
             checkNotBuilt();
-            Preconditions.checkNotNull(generators, "generators cannot be null");
-            this.generators.add(generators);
+            Preconditions.checkNotNull(generatorTypes, "generatorTypes cannot be null");
+            this.generatorTypes.add(generatorTypes);
             return this;
         }
 
@@ -155,7 +155,7 @@ public record ParameterizedTestCase(
         public ParameterizedTestCase build() {
             checkNotBuilt();
             this.buildInvoked = true;
-            return new ParameterizedTestCase(name, docs, files, options, generators);
+            return new ParameterizedTestCase(name, docs, files, options, generatorTypes);
         }
 
         private void checkNotBuilt() {
