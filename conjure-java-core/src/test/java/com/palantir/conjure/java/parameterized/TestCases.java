@@ -46,11 +46,13 @@ public final class TestCases {
                     .options(Options.builder().preferObjectBuilders(true).build())
                     .generatorTypes(GeneratorType.OBJECT)
                     .build())
-            .add(ParameterizedTestCase.builder() // TODO(kkak): This feels slightly redundant to the template case
+            // TODO(kkak): This feels slightly redundant to the template case, maybe we could pull out only union types
+            .add(ParameterizedTestCase.builder()
                     .name("all-examples")
                     .docs("Test generation of all example objects")
                     .files(Path.of("example-types.yml"))
-                    .options(Options.builder().useImmutableBytes(true)
+                    .options(Options.builder()
+                            .useImmutableBytes(true)
                             .strictObjects(true)
                             .nonNullCollections(true)
                             .excludeEmptyOptionals(true)
@@ -93,7 +95,8 @@ public final class TestCases {
                     .build())
             .add(ParameterizedTestCase.builder()
                     .name("both-strict-staged-builder")
-                    .docs("Validate that enabling both staged and strict staged builders is equivalent to only enabling strict staged builders.")
+                    .docs("Validate that enabling both staged and strict staged builders is equivalent to only"
+                            + " enabling strict staged builders.")
                     .files(Path.of("example-strict-staged-types.yml"))
                     .options(Options.builder()
                             .useStagedBuilders(true)
@@ -137,7 +140,8 @@ public final class TestCases {
                     .build())
             .add(ParameterizedTestCase.builder()
                     .name("strict-false")
-                    .docs("Validating extra properties on empty objects are allowed when the strict objects feature flag is disabled.")
+                    .docs("Validating extra properties on empty objects are allowed when the strict objects feature"
+                            + " flag is disabled.")
                     .files(Path.of("example-types-strict-objects.yml"))
                     .options(Options.builder()
                             .useImmutableBytes(true)
@@ -164,6 +168,5 @@ public final class TestCases {
         return CASES;
     }
 
-    private TestCases() {
-    }
+    private TestCases() {}
 }

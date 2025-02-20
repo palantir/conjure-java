@@ -58,12 +58,12 @@ public final class ObjectGeneratorTests {
                 new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         new GenerationCoordinator(
-                MoreExecutors.directExecutor(),
-                ImmutableSet.of(new ObjectGenerator(Options.builder()
-                        .useImmutableBytes(true)
-                        .excludeEmptyOptionals(true)
-                        .jetbrainsContractAnnotations(true)
-                        .build())))
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useImmutableBytes(true)
+                                .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
+                                .build())))
                 .emit(conjure, src);
 
         // Generated files contain imports
