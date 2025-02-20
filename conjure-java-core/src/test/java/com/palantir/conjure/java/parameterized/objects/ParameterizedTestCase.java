@@ -53,7 +53,7 @@ public record ParameterizedTestCase(
     }
 
     public String packagePrefix() {
-        return name.toLowerCase(Locale.ROOT).replaceAll("-", "");
+        return name.toLowerCase(Locale.ROOT).replaceAll("[^a-zA-Z]", "");
     }
 
     public Set<Generator> generators() {
