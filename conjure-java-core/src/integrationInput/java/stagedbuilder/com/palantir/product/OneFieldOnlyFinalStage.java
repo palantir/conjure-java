@@ -1,62 +1,64 @@
-package com.palantir.binary;
+package stagedbuilder.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@JsonDeserialize(builder = BinaryExample.Builder.class)
+@JsonDeserialize(builder = OneFieldOnlyFinalStage.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class BinaryExample {
-    private final ByteBuffer binary;
+public final class OneFieldOnlyFinalStage {
+    private final Optional<String> optionalItem;
 
-    private BinaryExample(ByteBuffer binary) {
-        validateFields(binary);
-        this.binary = binary;
+    private OneFieldOnlyFinalStage(Optional<String> optionalItem) {
+        validateFields(optionalItem);
+        this.optionalItem = optionalItem;
     }
 
-    @JsonProperty("binary")
-    public ByteBuffer getBinary() {
-        return this.binary.asReadOnlyBuffer();
+    @JsonProperty("optionalItem")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<String> getOptionalItem() {
+        return this.optionalItem;
     }
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof BinaryExample && equalTo((BinaryExample) other));
+        return this == other || (other instanceof OneFieldOnlyFinalStage && equalTo((OneFieldOnlyFinalStage) other));
     }
 
-    private boolean equalTo(BinaryExample other) {
-        return this.binary.equals(other.binary);
+    private boolean equalTo(OneFieldOnlyFinalStage other) {
+        return this.optionalItem.equals(other.optionalItem);
     }
 
     @Override
     public int hashCode() {
-        return this.binary.hashCode();
+        return this.optionalItem.hashCode();
     }
 
     @Override
     public String toString() {
-        return "BinaryExample{binary: " + binary + '}';
+        return "OneFieldOnlyFinalStage{optionalItem: " + optionalItem + '}';
     }
 
-    public static BinaryExample of(ByteBuffer binary) {
-        return builder().binary(binary).build();
+    public static OneFieldOnlyFinalStage of(String optionalItem) {
+        return builder().optionalItem(Optional.of(optionalItem)).build();
     }
 
-    private static void validateFields(ByteBuffer binary) {
+    private static void validateFields(Optional<String> optionalItem) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, binary, "binary");
+        missingFields = addFieldIfMissing(missingFields, optionalItem, "optionalItem");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -83,30 +85,34 @@ public final class BinaryExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private ByteBuffer binary;
+        private Optional<String> optionalItem = Optional.empty();
 
         private Builder() {}
 
-        public Builder from(BinaryExample other) {
+        public Builder from(OneFieldOnlyFinalStage other) {
             checkNotBuilt();
-            binary(other.getBinary());
+            optionalItem(other.getOptionalItem());
             return this;
         }
 
-        @JsonSetter("binary")
-        public Builder binary(@Nonnull ByteBuffer binary) {
+        @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
+        public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
             checkNotBuilt();
-            Preconditions.checkNotNull(binary, "binary cannot be null");
-            this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
-            ((Buffer) this.binary).rewind();
+            this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
+            return this;
+        }
+
+        public Builder optionalItem(@Nonnull String optionalItem) {
+            checkNotBuilt();
+            this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
         @CheckReturnValue
-        public BinaryExample build() {
+        public OneFieldOnlyFinalStage build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new BinaryExample(binary);
+            return new OneFieldOnlyFinalStage(optionalItem);
         }
 
         private void checkNotBuilt() {

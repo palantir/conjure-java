@@ -143,7 +143,7 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}", com.palantir.binary.BinaryExample.class)
+        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}", bytebuffer.com.palantir.binary.BinaryExample.class)
                         .getBinary())
                 .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
     }
@@ -158,7 +158,7 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryFieldsSerializeToBase64_legacy() throws Exception {
-        assertThat(mapper.writeValueAsString(com.palantir.binary.BinaryExample.builder()
+        assertThat(mapper.writeValueAsString(bytebuffer.com.palantir.binary.BinaryExample.builder()
                         .binary(ByteBuffer.wrap(new byte[] {0, 1, 2}))
                         .build()))
                 .isEqualTo("{\"binary\":\"AAEC\"}");
@@ -172,7 +172,7 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryAliasFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("\"AAEC\"", com.palantir.binary.BinaryAliasExample.class)
+        assertThat(mapper.readValue("\"AAEC\"", bytebuffer.com.palantir.binary.BinaryAliasExample.class)
                         .get())
                 .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
     }
@@ -186,7 +186,7 @@ public final class WireFormatTests {
     @Test
     public void testBinaryAliasFieldsSerializeToBase64_legacy() throws Exception {
         assertThat(mapper.writeValueAsString(
-                        com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
+                        bytebuffer.com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
                 .isEqualTo("\"AAEC\"");
     }
 
@@ -271,8 +271,8 @@ public final class WireFormatTests {
     @Test
     public void testAliasTypesEqualWhenInnerTypeEqual_legacyBinary() throws Exception {
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
-        assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer))
-                .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer));
+        assertThat(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer))
+                .isEqualTo(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer));
     }
 
     @Test
@@ -297,8 +297,10 @@ public final class WireFormatTests {
         assertThat(DoubleAliasExample.of(10.3).hashCode())
                 .isEqualTo(DoubleAliasExample.of(10.3).hashCode());
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
-        assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode())
-                .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode());
+        assertThat(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer)
+                        .hashCode())
+                .isEqualTo(bytebuffer.com.palantir.binary.BinaryAliasExample.of(byteBuffer)
+                        .hashCode());
     }
 
     @Test

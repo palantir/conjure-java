@@ -30,7 +30,8 @@ public class BinaryExampleTest {
     public void cannotMutateForSubsequentGets() {
         ByteBuffer buffer = ByteBuffer.allocate(1).put((byte) 1);
         buffer.rewind();
-        com.palantir.binary.BinaryExample binaryExample = com.palantir.binary.BinaryExample.of(buffer);
+        bytebuffer.com.palantir.binary.BinaryExample binaryExample =
+                bytebuffer.com.palantir.binary.BinaryExample.of(buffer);
 
         ByteBuffer firstGet = binaryExample.getBinary();
         ByteBuffer secondGet = binaryExample.getBinary();
@@ -44,7 +45,8 @@ public class BinaryExampleTest {
         byte value = (byte) 1;
         ByteBuffer buffer = ByteBuffer.allocate(1).put(value);
         buffer.rewind();
-        com.palantir.binary.BinaryExample binaryExample = com.palantir.binary.BinaryExample.of(buffer);
+        bytebuffer.com.palantir.binary.BinaryExample binaryExample =
+                bytebuffer.com.palantir.binary.BinaryExample.of(buffer);
         buffer.put((byte) (value + 1));
         buffer.rewind();
         assertThat(binaryExample.getBinary().get()).isEqualTo(value);

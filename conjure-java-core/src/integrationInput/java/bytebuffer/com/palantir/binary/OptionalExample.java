@@ -1,4 +1,4 @@
-package com.palantir.binary;
+package bytebuffer.com.palantir.binary;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
