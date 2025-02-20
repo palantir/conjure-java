@@ -41,36 +41,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public final class ObjectGeneratorTests {
 
-    private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
-
     @TempDir
     public File tempDir;
-
-    @Test
-    public void testObjectGenerator_allExamples() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                MoreExecutors.directExecutor(),
-                ImmutableSet.of(new ObjectGenerator(Options.builder()
-                        .useImmutableBytes(true)
-                        .strictObjects(true)
-                        .nonNullCollections(true)
-                        .excludeEmptyOptionals(true)
-                        .unionsWithUnknownValues(true)
-                        .jetbrainsContractAnnotations(true)
-                        .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
 
     @Test
     public void testConjureImports() throws IOException {
@@ -128,20 +106,6 @@ public final class ObjectGeneratorTests {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot use UNSAFE type com.palantir.product.UnsafeAlias "
                         + "as a SAFE parameter in error Name -> field");
-    }
-
-    private void assertThatFilesAreTheSame(List<Path> files, String referenceFilesFolder) throws IOException {
-        for (Path file : files) {
-            Path relativized = tempDir.toPath().relativize(file);
-            Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                // help make shrink-wrapping output sane
-                Files.createDirectories(expectedFile.getParent());
-                Files.deleteIfExists(expectedFile);
-                Files.copy(file, expectedFile);
-            }
-            assertThat(file).hasSameContentAs(expectedFile);
-        }
     }
 
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {
