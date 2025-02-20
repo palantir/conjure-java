@@ -189,7 +189,11 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     private static void deadlineExpiredException(HttpServerExchange exchange, DeadlineExpiredException exception) {
-        log.info("deadline exceeded", exception);
+        if (exception instanceof DeadlineExpiredException.Internal) {
+            log.error("internal deadline exceeded", exception);
+        } else {
+            log.error("deadline exceeded", exception);
+        }
         // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
         DeadlineExpiredReasons.encodeToResponse(
                 exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
