@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Initializes a new framework for snapshot testing
+  links:
+  - https://github.com/palantir/conjure-java/pull/2456

@@ -1,6 +1,5 @@
-package com.palantir.product;
+package template.com.palantir.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -14,12 +13,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@JsonDeserialize(builder = StringExampleNoStaticFactory.Builder.class)
+@JsonDeserialize(builder = StringExample.DefaultBuilder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class StringExampleNoStaticFactory {
+public final class StringExample {
     private final String string;
 
-    private StringExampleNoStaticFactory(String string) {
+    private StringExample(String string) {
         validateFields(string);
         this.string = string;
     }
@@ -31,11 +30,10 @@ public final class StringExampleNoStaticFactory {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof StringExampleNoStaticFactory && equalTo((StringExampleNoStaticFactory) other));
+        return this == other || (other instanceof StringExample && equalTo((StringExample) other));
     }
 
-    private boolean equalTo(StringExampleNoStaticFactory other) {
+    private boolean equalTo(StringExample other) {
         return this.string.equals(other.string);
     }
 
@@ -46,7 +44,7 @@ public final class StringExampleNoStaticFactory {
 
     @Override
     public String toString() {
-        return "StringExampleNoStaticFactory{string: " + string + '}';
+        return "StringExample{string: " + string + '}';
     }
 
     private static void validateFields(String string) {
@@ -69,25 +67,49 @@ public final class StringExampleNoStaticFactory {
         return missingFields;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static StringStageBuilder builder() {
+        return new DefaultBuilder();
+    }
+
+    public interface StringStageBuilder {
+        Completed_StageBuilder string(@Nonnull String string);
+
+        Builder from(StringExample other);
+    }
+
+    public interface Completed_StageBuilder {
+        @CheckReturnValue
+        StringExample build();
+    }
+
+    public interface Builder extends StringStageBuilder, Completed_StageBuilder {
+        @Override
+        Builder string(@Nonnull String string);
+
+        @Override
+        Builder from(StringExample other);
+
+        @CheckReturnValue
+        @Override
+        StringExample build();
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder {
+    static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
         private String string;
 
-        private Builder() {}
+        private DefaultBuilder() {}
 
-        public Builder from(StringExampleNoStaticFactory other) {
+        @Override
+        public Builder from(StringExample other) {
             checkNotBuilt();
             string(other.getString());
             return this;
         }
 
+        @Override
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
             checkNotBuilt();
@@ -95,11 +117,12 @@ public final class StringExampleNoStaticFactory {
             return this;
         }
 
+        @Override
         @CheckReturnValue
-        public StringExampleNoStaticFactory build() {
+        public StringExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new StringExampleNoStaticFactory(string);
+            return new StringExample(string);
         }
 
         private void checkNotBuilt() {

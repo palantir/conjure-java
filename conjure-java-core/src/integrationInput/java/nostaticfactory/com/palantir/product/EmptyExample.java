@@ -1,4 +1,4 @@
-package com.palantir.product;
+package nostaticfactory.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

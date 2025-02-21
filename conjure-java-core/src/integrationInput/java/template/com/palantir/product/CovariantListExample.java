@@ -1,6 +1,5 @@
-package com.palantir.product;
+package template.com.palantir.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -12,29 +11,24 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import test.api.ExampleExternalReference;
 
-@JsonDeserialize(builder = CovariantListExampleNoStaticFactory.Builder.class)
+@JsonDeserialize(builder = CovariantListExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class CovariantListExampleNoStaticFactory {
+public final class CovariantListExample {
     private final List<Object> items;
 
     private final List<ExampleExternalReference> externalItems;
 
-    private final Optional<String> optionalField;
-
     private int memoizedHashCode;
 
-    private CovariantListExampleNoStaticFactory(
-            List<Object> items, List<ExampleExternalReference> externalItems, Optional<String> optionalField) {
-        validateFields(items, externalItems, optionalField);
+    private CovariantListExample(List<Object> items, List<ExampleExternalReference> externalItems) {
+        validateFields(items, externalItems);
         this.items = ConjureCollections.unmodifiableList(items);
         this.externalItems = ConjureCollections.unmodifiableList(externalItems);
-        this.optionalField = optionalField;
     }
 
     @JsonProperty("items")
@@ -47,27 +41,18 @@ public final class CovariantListExampleNoStaticFactory {
         return this.externalItems;
     }
 
-    @JsonProperty("optionalField")
-    public Optional<String> getOptionalField() {
-        return this.optionalField;
-    }
-
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof CovariantListExampleNoStaticFactory
-                        && equalTo((CovariantListExampleNoStaticFactory) other));
+        return this == other || (other instanceof CovariantListExample && equalTo((CovariantListExample) other));
     }
 
-    private boolean equalTo(CovariantListExampleNoStaticFactory other) {
+    private boolean equalTo(CovariantListExample other) {
         if (this.memoizedHashCode != 0
                 && other.memoizedHashCode != 0
                 && this.memoizedHashCode != other.memoizedHashCode) {
             return false;
         }
-        return this.items.equals(other.items)
-                && this.externalItems.equals(other.externalItems)
-                && this.optionalField.equals(other.optionalField);
+        return this.items.equals(other.items) && this.externalItems.equals(other.externalItems);
     }
 
     @Override
@@ -77,7 +62,6 @@ public final class CovariantListExampleNoStaticFactory {
             int hash = 1;
             hash = 31 * hash + this.items.hashCode();
             hash = 31 * hash + this.externalItems.hashCode();
-            hash = 31 * hash + this.optionalField.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -86,16 +70,13 @@ public final class CovariantListExampleNoStaticFactory {
 
     @Override
     public String toString() {
-        return "CovariantListExampleNoStaticFactory{items: " + items + ", externalItems: " + externalItems
-                + ", optionalField: " + optionalField + '}';
+        return "CovariantListExample{items: " + items + ", externalItems: " + externalItems + '}';
     }
 
-    private static void validateFields(
-            List<Object> items, List<ExampleExternalReference> externalItems, Optional<String> optionalField) {
+    private static void validateFields(List<Object> items, List<ExampleExternalReference> externalItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, externalItems, "externalItems");
-        missingFields = addFieldIfMissing(missingFields, optionalField, "optionalField");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -106,7 +87,7 @@ public final class CovariantListExampleNoStaticFactory {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(3);
+                missingFields = new ArrayList<>(2);
             }
             missingFields.add(fieldName);
         }
@@ -118,84 +99,70 @@ public final class CovariantListExampleNoStaticFactory {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<Object> items = ConjureCollections.newList();
+        private List<Object> items = ConjureCollections.newNonNullList();
 
-        private List<ExampleExternalReference> externalItems = ConjureCollections.newList();
-
-        private Optional<String> optionalField = Optional.empty();
+        private List<ExampleExternalReference> externalItems = ConjureCollections.newNonNullList();
 
         private Builder() {}
 
-        public Builder from(CovariantListExampleNoStaticFactory other) {
+        public Builder from(CovariantListExample other) {
             checkNotBuilt();
             items(other.getItems());
             externalItems(other.getExternalItems());
-            optionalField(other.getOptionalField());
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<?> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNonNullList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<?> items) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(Object items) {
             checkNotBuilt();
+            Preconditions.checkNotNull(items, "items cannot be null");
             this.items.add(items);
             return this;
         }
 
-        @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
+        @JsonSetter(value = "externalItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
-            this.externalItems = ConjureCollections.newList(
+            this.externalItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
         public Builder addAllExternalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
         public Builder externalItems(ExampleExternalReference externalItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(externalItems, "externalItems cannot be null");
             this.externalItems.add(externalItems);
             return this;
         }
 
-        @JsonSetter(value = "optionalField", nulls = Nulls.SKIP)
-        public Builder optionalField(@Nonnull Optional<String> optionalField) {
-            checkNotBuilt();
-            this.optionalField = Preconditions.checkNotNull(optionalField, "optionalField cannot be null");
-            return this;
-        }
-
-        public Builder optionalField(@Nonnull String optionalField) {
-            checkNotBuilt();
-            this.optionalField = Optional.of(Preconditions.checkNotNull(optionalField, "optionalField cannot be null"));
-            return this;
-        }
-
         @CheckReturnValue
-        public CovariantListExampleNoStaticFactory build() {
+        public CovariantListExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new CovariantListExampleNoStaticFactory(items, externalItems, optionalField);
+            return new CovariantListExample(items, externalItems);
         }
 
         private void checkNotBuilt() {
