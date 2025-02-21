@@ -1,0 +1,755 @@
+package servicevanilla.com.palantir.another;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.HttpMethod;
+import com.palantir.dialogue.PathTemplate;
+import com.palantir.dialogue.UrlBuilder;
+import java.lang.Override;
+import java.lang.String;
+import java.util.Optional;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
+enum DialogueTestEndpoints implements Endpoint {
+    /** Returns a mapping from file system id to backing file system configuration. */
+    getFileSystems {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("catalog").fixed("fileSystems").build();
+
+        private final ImmutableSet<String> tags = ImmutableSet.of("incubating");
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getFileSystems";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+
+        @Override
+        public Set<String> tags() {
+            return tags;
+        }
+    },
+
+    /** foo $bar */
+    createDataset {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("catalog").fixed("datasets").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "createDataset";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    getDataset {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getDataset";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    getRawData {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("raw")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getRawData";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    getAliasedRawData {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("raw-aliased")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getAliasedRawData";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    maybeGetRawData {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("raw-maybe")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "maybeGetRawData";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    getAliasedString {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("string-aliased")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getAliasedString";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    uploadRawData {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .fixed("upload-raw")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "uploadRawData";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    uploadAliasedRawData {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .fixed("upload-raw-aliased")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "uploadAliasedRawData";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    getBranches {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branches")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getBranches";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    /** Gets all branches of this dataset. */
+    getBranchesDeprecated {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branchesDeprecated")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getBranchesDeprecated";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    /** Gets all branches of this dataset. */
+    getBranchesDeprecatedForRemoval {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branchesDeprecatedForRemoval")
+                .build();
+
+        private final ImmutableSet<String> tags = ImmutableSet.of("deprecated-for-removal");
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getBranchesDeprecatedForRemoval";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+
+        @Override
+        public Set<String> tags() {
+            return tags;
+        }
+    },
+
+    resolveBranch {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branches")
+                .variable("branch")
+                .fixed("resolve")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "resolveBranch";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testParam {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("testParam")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testParam";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testQueryParams {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("test-query-params")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testQueryParams";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testNoResponseQueryParams {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("test-no-response-query-params")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testNoResponseQueryParams";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testBoolean {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("catalog").fixed("boolean").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testBoolean";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testDouble {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("catalog").fixed("double").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testDouble";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testInteger {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("catalog").fixed("integer").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testInteger";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testPostOptional {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("catalog").fixed("optional").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testPostOptional";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    testOptionalIntegerAndDouble {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("optional-integer-double")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testOptionalIntegerAndDouble";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
+    getForStrings {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("strings")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getForStrings";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    };
+
+    private static final String VERSION = Optional.ofNullable(
+                    DialogueTestEndpoints.class.getPackage().getImplementationVersion())
+            .orElse("0.0.0");
+}

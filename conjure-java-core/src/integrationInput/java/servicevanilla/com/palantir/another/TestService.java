@@ -1,0 +1,128 @@
+package servicevanilla.com.palantir.another;
+
+import com.palantir.conjure.java.lib.internal.Incubating;
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.logsafe.Safe;
+import com.palantir.ri.ResourceIdentifier;
+import com.palantir.tokens.auth.AuthHeader;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+import servicevanilla.com.palantir.product.AliasedString;
+import servicevanilla.com.palantir.product.CreateDatasetRequest;
+import servicevanilla.com.palantir.product.datasets.BackingFileSystem;
+import servicevanilla.com.palantir.product.datasets.Dataset;
+
+/** A Markdown description of the service. */
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+public interface TestService {
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     *
+     * @apiNote {@code GET /catalog/fileSystems}
+     */
+    @Incubating
+    Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
+
+    /**
+     * foo $bar
+     *
+     * @apiNote {@code POST /catalog/datasets}
+     */
+    Dataset createDataset(AuthHeader authHeader, @Safe String testHeaderArg, CreateDatasetRequest request);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}} */
+    Optional<Dataset> getDataset(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw} */
+    BinaryResponseBody getRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased} */
+    BinaryResponseBody getAliasedRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe} */
+    Optional<BinaryResponseBody> maybeGetRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased} */
+    AliasedString getAliasedString(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code POST /catalog/datasets/upload-raw} */
+    void uploadRawData(AuthHeader authHeader, @Safe InputStream input);
+
+    /** @apiNote {@code POST /catalog/datasets/upload-raw-aliased} */
+    void uploadAliasedRawData(AuthHeader authHeader, InputStream input);
+
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches}
+     * @param datasetRid A valid dataset resource identifier.
+     */
+    Set<String> getBranches(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecated}
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @Deprecated
+    Set<String> getBranchesDeprecated(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval}
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @Deprecated
+    Set<String> getBranchesDeprecatedForRemoval(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve} */
+    Optional<String> resolveBranch(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, String branch);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam} */
+    Optional<String> testParam(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code POST /catalog/test-query-params} */
+    int testQueryParams(
+            AuthHeader authHeader,
+            @Safe ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query);
+
+    /** @apiNote {@code POST /catalog/test-no-response-query-params} */
+    void testNoResponseQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query);
+
+    /** @apiNote {@code GET /catalog/boolean} */
+    boolean testBoolean(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /catalog/double} */
+    double testDouble(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /catalog/integer} */
+    int testInteger(AuthHeader authHeader);
+
+    /** @apiNote {@code POST /catalog/optional} */
+    Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
+
+    /** @apiNote {@code GET /catalog/optional-integer-double} */
+    void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/strings} */
+    void getForStrings(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, Set<AliasedString> strings);
+}

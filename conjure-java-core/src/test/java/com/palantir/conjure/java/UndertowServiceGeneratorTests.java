@@ -46,16 +46,6 @@ public final class UndertowServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    public void testServiceGeneration_exampleService() throws IOException {
-        testServiceGeneration("example-service");
-    }
-
-    @Test
-    public void testServiceGeneration_cookieService() throws IOException {
-        testServiceGeneration("cookie-service");
-    }
-
-    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),
@@ -73,15 +63,6 @@ public final class UndertowServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    public void testBinaryReturnInputStream() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(), ImmutableSet.of(new UndertowServiceGenerator(Options.empty())))
-                .emit(def, tempDir);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.binary");
-    }
-
-    @Test
     public void testEndpointWithNameCollisions() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/dangerous-name-service.yml")));
@@ -92,17 +73,6 @@ public final class UndertowServiceGeneratorTests extends TestBase {
                                 Options.builder().undertowServicePrefix(true).build())))
                 .emit(def, src);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
-    }
-
-    @Test
-    void testPrefixedServices() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new UndertowServiceGenerator(
-                                Options.builder().packagePrefix("test.prefix").build())))
-                .emit(def, tempDir);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.prefix");
     }
 
     @Test
@@ -123,14 +93,6 @@ public final class UndertowServiceGeneratorTests extends TestBase {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
         // Without FeatureFlags.ExperimentalUndertowAsyncMarkers this should generate blocking methods
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(), ImmutableSet.of(new UndertowServiceGenerator(Options.empty())))
-                .emit(def, tempDir);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
-    }
-
-    private void testServiceGeneration(String conjureFile) throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(), ImmutableSet.of(new UndertowServiceGenerator(Options.empty())))
                 .emit(def, tempDir);
