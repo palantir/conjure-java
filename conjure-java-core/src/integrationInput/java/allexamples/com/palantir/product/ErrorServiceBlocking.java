@@ -23,12 +23,13 @@ import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificErrors;
+import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoErrors;
+import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
+import dialogueendpointresulttypes.com.palantir.product.TestErrors;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Boolean;
-import java.lang.Override;
-import java.lang.String;
 import java.util.Optional;
 import javax.annotation.processing.Generated;
 
@@ -75,7 +76,7 @@ public interface ErrorServiceBlocking {
                     _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel testBasicErrorChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBasicError);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testBasicError);
 
             private final Deserializer<TestBasicErrorResponse> testBasicErrorDeserializer = _runtime.bodySerDe()
                     .deserializer(DeserializerArgs.<TestBasicErrorResponse>builder()
@@ -90,7 +91,7 @@ public interface ErrorServiceBlocking {
                     _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel testImportedErrorChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testImportedError);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testImportedError);
 
             private final Deserializer<TestImportedErrorResponse> testImportedErrorDeserializer = _runtime.bodySerDe()
                     .deserializer(DeserializerArgs.<TestImportedErrorResponse>builder()
@@ -105,7 +106,7 @@ public interface ErrorServiceBlocking {
                     _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testMultipleErrorsAndPackagesChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testMultipleErrorsAndPackages);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testMultipleErrorsAndPackages);
 
             private final Deserializer<TestMultipleErrorsAndPackagesResponse>
                     testMultipleErrorsAndPackagesDeserializer = _runtime.bodySerDe()
@@ -131,7 +132,7 @@ public interface ErrorServiceBlocking {
                     _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel testEmptyBodyChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testEmptyBody);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testEmptyBody);
 
             private final Deserializer<TestEmptyBodyResponse> testEmptyBodyDeserializer = _runtime.bodySerDe()
                     .deserializer(DeserializerArgs.<TestEmptyBodyResponse>builder()
@@ -146,7 +147,7 @@ public interface ErrorServiceBlocking {
                     _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel testBinaryChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBinary);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testBinary);
 
             private final Deserializer<TestBinaryResponse> testBinaryDeserializer = _runtime.bodySerDe()
                     .inputStreamDeserializer(DeserializerArgs.<TestBinaryResponse>builder()
@@ -161,7 +162,7 @@ public interface ErrorServiceBlocking {
                     _runtime.bodySerDe().serializer(new TypeMarker<OptionalBinaryResponseMode>() {});
 
             private final EndpointChannel testOptionalBinaryChannel =
-                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testOptionalBinary);
+                    _endpointChannelFactory.endpoint(com.palantir.product.DialogueErrorEndpoints.testOptionalBinary);
 
             private final Deserializer<TestOptionalBinaryResponse> testOptionalBinaryDeserializer = _runtime.bodySerDe()
                     .optionalInputStreamDeserializer(DeserializerArgs.<TestOptionalBinaryResponse>builder()

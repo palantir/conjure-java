@@ -2,38 +2,34 @@ package undertow.com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.tokens.auth.AuthHeader;
-import java.util.Optional;
+import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowErrorService {
     /**
-     * @apiNote {@code POST /errors/basic}
+     * @apiNote {@code GET /base/basic}
      * @throws TestServerErrors.InvalidArgument
      */
-    String testBasicError(AuthHeader authHeader, boolean shouldThrowError) throws TestServerErrors.InvalidArgument;
+    String testBasicError(AuthHeader authHeader) throws TestServerErrors.InvalidArgument;
 
     /**
-     * @apiNote {@code POST /errors/imported}
+     * @apiNote {@code GET /base/imported}
      * @throws EndpointSpecificServerErrors.EndpointError
      */
-    String testImportedError(AuthHeader authHeader, boolean shouldThrowError)
-            throws EndpointSpecificServerErrors.EndpointError;
+    String testImportedError(AuthHeader authHeader) throws EndpointSpecificServerErrors.EndpointError;
 
     /**
-     * @apiNote {@code POST /errors/multiple}
+     * @apiNote {@code GET /base/multiple}
      * @throws TestServerErrors.InvalidArgument
      * @throws TestServerErrors.NotFound Something was not found.
      * @throws EndpointSpecificTwoServerErrors.DifferentNamespace
      * @throws undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage
      */
-    String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
+    String testMultipleErrorsAndPackages(AuthHeader authHeader)
             throws TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
                     EndpointSpecificTwoServerErrors.DifferentNamespace,
-<<<<<<< HEAD:conjure-java-core/src/integrationInput/java/undertow/com/palantir/product/UndertowErrorService.java
                     undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage;
-=======
-                    com.palantir.another.EndpointSpecificServerErrors.DifferentPackage;
 
     /**
      * @apiNote {@code POST /errors/empty}
@@ -54,5 +50,4 @@ public interface UndertowErrorService {
      */
     Optional<BinaryResponseBody> testOptionalBinary(AuthHeader authHeader, OptionalBinaryResponseMode mode)
             throws TestServerErrors.InvalidArgument;
->>>>>>> 2629616c (review changes):conjure-java-core/src/integrationInput/java/com/palantir/product/UndertowErrorService.java
 }

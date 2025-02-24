@@ -353,7 +353,7 @@ public interface ErrorServiceBlocking {
         }
 
         final class DifferentPackage
-                extends EndpointError<com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
+                extends EndpointErrorcom.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             DifferentPackage(
