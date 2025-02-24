@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java;
+package dialogueendpointresulttypes.com.palantir.conjure.java;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.EndpointSpecificServerErrors;
