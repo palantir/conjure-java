@@ -28,6 +28,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
+import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Deque;
@@ -111,6 +112,11 @@ final class ConjureContexts implements Contexts {
                 }
             }
             return ImmutableList.of();
+        }
+
+        @Override
+        public InetSocketAddress sourceAddress() {
+            return exchange.getSourceAddress();
         }
 
         private ImmutableListMultimap<String, String> buildQueryParameters() {

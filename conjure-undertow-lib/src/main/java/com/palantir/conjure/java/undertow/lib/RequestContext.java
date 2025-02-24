@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Unsafe;
+import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Optional;
@@ -76,4 +77,6 @@ public interface RequestContext {
      * @see javax.net.ssl.SSLSession#getPeerCertificates()
      */
     ImmutableList<Certificate> peerCertificates();
+
+    InetSocketAddress sourceAddress();
 }
