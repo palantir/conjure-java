@@ -23,8 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
-import com.palantir.conjure.java.types.ErrorGenerator;
-import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
@@ -78,30 +76,23 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                     .toList();
             assertThat(fileNames)
                     .noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
-            }
+        }
     }
 
     @Test
-    public void generateServiceWithResultTypes() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-endpoint-errors.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(
-                                // To generate the OptionalBinaryResponseMode enum used in ete tests.
-                                new ObjectGenerator(Options.empty()),
-                                new ErrorGenerator(Options.builder()
-                                        .useImmutableBytes(true)
-                                        .excludeEmptyOptionals(true)
-                                        .jetbrainsContractAnnotations(true)
-                                        .generateDialogueEndpointErrorResultTypes(true)
-                                        .build()),
-                                new DialogueServiceGenerator(Options.builder()
-                                        .apiVersion("1.2.3")
-                                        .excludeDialogueAsyncInterfaces(false)
-                                        .generateDialogueEndpointErrorResultTypes(true)
-                                        .build())))
+    public void testServiceGeneration_excludeDialogueAsyncInterfaces() {
+        List<Path> files = getGeneratedFilesForDef(
+                "example-service",
+                Options.builder().excludeDialogueAsyncInterfaces(true).build());
+        List<String> fileNames =
+                files.stream().map(Path::getFileName).map(Path::toString).toList();
+        assertThat(fileNames).noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
+    }
+
+    private List<Path> getGeneratedFilesForDef(String conjureFile, Options options) {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
+        return new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(options)))
                 .emit(def, folder);
-        TestBase.validateGeneratedOutput(folder.toPath(), files, Paths.get("src/integrationInput/java"));
     }
 }

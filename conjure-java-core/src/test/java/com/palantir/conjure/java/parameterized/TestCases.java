@@ -22,6 +22,7 @@ import com.palantir.conjure.java.parameterized.objects.GeneratorType;
 import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public final class TestCases {
     private static final List<ParameterizedTestCase> CASES = ImmutableList.<ParameterizedTestCase>builder()
@@ -302,6 +303,17 @@ public final class TestCases {
                             .externalFallbackTypes(true)
                             .build())
                     .generatorTypes(List.of(GeneratorType.UNDERTOW, GeneratorType.DIALOGUE, GeneratorType.OBJECT))
+                    .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("dialogue-endpoint-result-types")
+                    .docs("Test generating dialogue interfaces with methods which return endpoint results")
+                    .files(List.of(
+                            Path.of("src/test/resources/example-endpoint-errors.yml"),
+                            Path.of("src/test/resources/example-endpoint-errors.yml")))
+                    .options(Options.builder()
+                            .generateDialogueEndpointErrorResultTypes(true)
+                            .build())
+                    .generatorTypes(Set.of(GeneratorType.OBJECT, GeneratorType.ERROR, GeneratorType.DIALOGUE))
                     .build())
             .build();
 

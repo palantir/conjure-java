@@ -190,7 +190,7 @@ public interface Options {
     /**
      * If enabled, endpoints that have associated errors will return a result type: a sealed interface permitting
      * subclasses for the endpoint's return value, and each endpoint error. Each endpoint error is a subclass of
-     * {@link com.palantir.conjure.java.lib.internal.ConjureErrors.BaseEndpointError}.
+     * {@link com.palantir.dialogue.EndpointError}.
      */
     @Value.Default
     default boolean generateDialogueEndpointErrorResultTypes() {
