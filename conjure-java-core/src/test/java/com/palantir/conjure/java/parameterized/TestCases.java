@@ -202,11 +202,33 @@ public final class TestCases {
                     .options(Options.builder().undertowServicePrefix(true).build())
                     .generatorTypes(List.of(GeneratorType.UNDERTOW, GeneratorType.OBJECT))
                     .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("undertow-name-collisions")
+                    .docs("Generate undertow service objects for definition with name collisions.")
+                    .files(Path.of("dangerous-name-service.yml"))
+                    .options(Options.builder().undertowServicePrefix(true).build())
+                    .generatorTypes(List.of(GeneratorType.UNDERTOW, GeneratorType.OBJECT))
+                    .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("undertow-async")
+                    .docs("Generate undertow service objects with experimental async flag enabled.")
+                    .files(Path.of("undertow-async-endpoint.yml"))
+                    .options(Options.builder().experimentalUndertowAsyncMarkers(true).build())
+                    .generatorTypes(List.of(GeneratorType.UNDERTOW))
+                    .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("undertow-async-disabled")
+                    .docs("Generate undertow service objects with experimental async flag disabled.")
+                    .files(Path.of("undertow-async-endpoint.yml"))
+                    .options(Options.empty())
+                    .generatorTypes(List.of(GeneratorType.UNDERTOW))
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {
         return CASES;
     }
 
-    private TestCases() {}
+    private TestCases() {
+    }
 }
