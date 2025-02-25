@@ -43,7 +43,7 @@ public final class EteTestServer extends Application<Configuration> {
         // Must be higher priority than the default writer provided by Dropwizard, otherwise empty optionals
         // result in 404 response codes.
         environment.jersey().getResourceConfig().register(Java8OptionalMessageBodyWriter.class, 1);
-        environment.jersey().register(new EteResource());
+        environment.jersey().register(new JerseyEteResource());
         environment.jersey().register(new EteBinaryResource());
         environment.jersey().register(new EmptyPathResource());
     }

@@ -18,11 +18,6 @@ package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
-import com.palantir.product.EteService;
-import com.palantir.product.LongAlias;
-import com.palantir.product.NestedStringAliasExample;
-import com.palantir.product.SimpleEnum;
-import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -36,9 +31,14 @@ import java.util.Optional;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
+import jersey.com.palantir.product.EteService;
+import jersey.com.palantir.product.LongAlias;
+import jersey.com.palantir.product.NestedStringAliasExample;
+import jersey.com.palantir.product.SimpleEnum;
+import jersey.com.palantir.product.StringAliasExample;
 
 @SuppressWarnings("checkstyle:designforextension")
-public class EteResource implements EteService {
+public class JerseyEteResource implements EteService {
     @Override
     public String string(AuthHeader _authHeader) {
         return "Hello, world!";
@@ -131,19 +131,20 @@ public class EteResource implements EteService {
     }
 
     @Override
-    public StringAliasExample notNullBodyExternalImport(AuthHeader _authHeader, StringAliasExample notNullBody) {
+    public allexamples.com.palantir.product.StringAliasExample notNullBodyExternalImport(
+            AuthHeader _authHeader, allexamples.com.palantir.product.StringAliasExample notNullBody) {
         return notNullBody;
     }
 
     @Override
-    public Optional<StringAliasExample> optionalBodyExternalImport(
-            AuthHeader _authHeader, Optional<StringAliasExample> body) {
+    public Optional<allexamples.com.palantir.product.StringAliasExample> optionalBodyExternalImport(
+            AuthHeader _authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> body) {
         return body;
     }
 
     @Override
-    public Optional<StringAliasExample> optionalQueryExternalImport(
-            AuthHeader _authHeader, Optional<StringAliasExample> query) {
+    public Optional<allexamples.com.palantir.product.StringAliasExample> optionalQueryExternalImport(
+            AuthHeader _authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> query) {
         return query;
     }
 

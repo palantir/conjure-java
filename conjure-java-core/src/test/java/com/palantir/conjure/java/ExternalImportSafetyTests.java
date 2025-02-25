@@ -18,11 +18,10 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import allexamples.com.palantir.product.ExternalLongUnionExample;
+import allexamples.com.palantir.product.SafeExternalLongExample;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
-import com.palantir.product.ExternalLongUnionExample;
-import com.palantir.product.SafeExternalLongExample;
-import com.palantir.product.UndertowExternalLongTestService;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -36,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import test.prefix.com.palantir.product.SafeExternalLongAlias;
+import undertow.com.palantir.product.UndertowExternalLongTestService;
 
 public class ExternalImportSafetyTests {
     @Test

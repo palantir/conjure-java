@@ -19,18 +19,18 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import allexamples.com.palantir.product.CovariantListExample;
+import allexamples.com.palantir.product.ListExample;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.product.CovariantListExample;
-import com.palantir.product.ListExample;
-import com.palantir.product.PrimitiveExample;
-import com.palantir.product.PrimitiveStrictExample;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import primitivecollections.com.palantir.product.PrimitiveExample;
+import strictprimitivecollections.com.palantir.product.PrimitiveStrictExample;
 
 public class NonNullCollectionsTest {
     private static final ObjectMapper clientMapper = ObjectMappers.newClientObjectMapper();

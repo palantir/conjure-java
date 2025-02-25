@@ -230,6 +230,8 @@ public final class TestCases {
                     .docs("Generate jersey service objects.")
                     .files(Path.of("example-service.yml"))
                     .files(Path.of("cookie-service.yml"))
+                    .files(Path.of("ete-service.yml"))
+                    .files(Path.of("ete-binary.yml"))
                     .options(Options.builder()
                             .requireNotNullAuthAndBodyParams(true)
                             .build())
@@ -257,6 +259,36 @@ public final class TestCases {
             //                    .options(Options.builder().jakartaPackages(true).build())
             //                    .generatorTypes(List.of(GeneratorType.JERSEY, GeneratorType.OBJECT))
             //                    .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("undertow")
+                    .docs("Generate undertow service objects for ete tests.")
+                    .files(Path.of("ete-service.yml"))
+                    .files(Path.of("ete-binary.yml"))
+                    .files(Path.of("alias-test-service.yml"))
+                    .files(Path.of("external-long-test-service.yml"))
+                    .files(Path.of("example-endpoint-errors.yml"))
+                    .options(Options.builder()
+                            .undertowServicePrefix(true)
+                            .nonNullCollections(true)
+                            .excludeEmptyOptionals(true)
+                            .jetbrainsContractAnnotations(true)
+                            .build())
+                    .generatorTypes(List.of(
+                            GeneratorType.UNDERTOW,
+                            GeneratorType.OBJECT,
+                            GeneratorType.ERROR,
+                            GeneratorType.CHECKED_ERROR))
+                    .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("async-request")
+                    .docs("Generate undertow and jersey objects to test processing async requests.")
+                    .files(Path.of("async-request-processing-test.yml"))
+                    .options(Options.builder()
+                            .undertowServicePrefix(true)
+                            .undertowListenableFutures(true)
+                            .build())
+                    .generatorTypes(List.of(GeneratorType.UNDERTOW, GeneratorType.JERSEY))
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {

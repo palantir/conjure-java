@@ -133,18 +133,18 @@ public interface EteServiceAsync {
 
     /** @apiNote {@code POST /base/external/notNullBody} */
     @ClientEndpoint(method = "POST", path = "/base/external/notNullBody")
-    ListenableFuture<com.palantir.product.StringAliasExample> notNullBodyExternalImport(
-            AuthHeader authHeader, com.palantir.product.StringAliasExample notNullBody);
+    ListenableFuture<allexamples.com.palantir.product.StringAliasExample> notNullBodyExternalImport(
+            AuthHeader authHeader, allexamples.com.palantir.product.StringAliasExample notNullBody);
 
     /** @apiNote {@code POST /base/external/optional-body} */
     @ClientEndpoint(method = "POST", path = "/base/external/optional-body")
-    ListenableFuture<Optional<com.palantir.product.StringAliasExample>> optionalBodyExternalImport(
-            AuthHeader authHeader, Optional<com.palantir.product.StringAliasExample> body);
+    ListenableFuture<Optional<allexamples.com.palantir.product.StringAliasExample>> optionalBodyExternalImport(
+            AuthHeader authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> body);
 
     /** @apiNote {@code POST /base/external/optional-query} */
     @ClientEndpoint(method = "POST", path = "/base/external/optional-query")
-    ListenableFuture<Optional<com.palantir.product.StringAliasExample>> optionalQueryExternalImport(
-            AuthHeader authHeader, Optional<com.palantir.product.StringAliasExample> query);
+    ListenableFuture<Optional<allexamples.com.palantir.product.StringAliasExample>> optionalQueryExternalImport(
+            AuthHeader authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> query);
 
     /** @apiNote {@code POST /base/no-return} */
     @ClientEndpoint(method = "POST", path = "/base/no-return")
@@ -301,32 +301,37 @@ public interface EteServiceAsync {
             private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<NestedStringAliasExample>() {});
 
-            private final Serializer<com.palantir.product.StringAliasExample> notNullBodyExternalImportSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<com.palantir.product.StringAliasExample>() {});
+            private final Serializer<allexamples.com.palantir.product.StringAliasExample>
+                    notNullBodyExternalImportSerializer = _runtime.bodySerDe()
+                            .serializer(new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {});
 
             private final EndpointChannel notNullBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBodyExternalImport);
 
-            private final Deserializer<com.palantir.product.StringAliasExample> notNullBodyExternalImportDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<com.palantir.product.StringAliasExample>() {});
+            private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
+                    notNullBodyExternalImportDeserializer = _runtime.bodySerDe()
+                            .deserializer(new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {});
 
-            private final Serializer<Optional<com.palantir.product.StringAliasExample>>
+            private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportSerializer = _runtime.bodySerDe()
-                            .serializer(new TypeMarker<Optional<com.palantir.product.StringAliasExample>>() {});
+                            .serializer(
+                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel optionalBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalBodyExternalImport);
 
-            private final Deserializer<Optional<com.palantir.product.StringAliasExample>>
+            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(new TypeMarker<Optional<com.palantir.product.StringAliasExample>>() {});
+                            .deserializer(
+                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel optionalQueryExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalQueryExternalImport);
 
-            private final Deserializer<Optional<com.palantir.product.StringAliasExample>>
+            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalQueryExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(new TypeMarker<Optional<com.palantir.product.StringAliasExample>>() {});
+                            .deserializer(
+                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
@@ -552,8 +557,8 @@ public interface EteServiceAsync {
             }
 
             @Override
-            public ListenableFuture<com.palantir.product.StringAliasExample> notNullBodyExternalImport(
-                    AuthHeader authHeader, com.palantir.product.StringAliasExample notNullBody) {
+            public ListenableFuture<allexamples.com.palantir.product.StringAliasExample> notNullBodyExternalImport(
+                    AuthHeader authHeader, allexamples.com.palantir.product.StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
@@ -565,8 +570,9 @@ public interface EteServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<com.palantir.product.StringAliasExample>> optionalBodyExternalImport(
-                    AuthHeader authHeader, Optional<com.palantir.product.StringAliasExample> body) {
+            public ListenableFuture<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalBodyExternalImport(
+                            AuthHeader authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> body) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(optionalBodyExternalImportSerializer.serialize(body));
@@ -578,8 +584,10 @@ public interface EteServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<com.palantir.product.StringAliasExample>> optionalQueryExternalImport(
-                    AuthHeader authHeader, Optional<com.palantir.product.StringAliasExample> query) {
+            public ListenableFuture<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalQueryExternalImport(
+                            AuthHeader authHeader,
+                            Optional<allexamples.com.palantir.product.StringAliasExample> query) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 if (query.isPresent()) {

@@ -18,9 +18,9 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import allexamples.com.palantir.product.CovariantListExample;
+import allexamples.com.palantir.product.CovariantOptionalExample;
 import com.google.common.collect.ImmutableList;
-import com.palantir.product.CovariantListExample;
-import com.palantir.product.CovariantOptionalExample;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class CovariantsTest {
     }
 
     @Test
-    public void covarianListBuilderTest() {
+    public void covariantListBuilderTest() {
         String value = "foo";
         List<String> values = ImmutableList.of(value);
 

@@ -18,13 +18,13 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import asyncrequest.com.palantir.product.AsyncRequestProcessingTestService;
+import asyncrequest.com.palantir.product.AsyncRequestProcessingTestServiceEndpoints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -34,13 +34,8 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
-import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.product.AsyncRequestProcessingTestService;
-import com.palantir.product.AsyncRequestProcessingTestServiceEndpoints;
 import com.palantir.tracing.Tracer;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -50,15 +45,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -78,22 +70,6 @@ public final class AsyncRequestProcessingTest extends TestBase {
     private ListeningScheduledExecutorService executor;
     private Undertow server;
     private AsyncRequestProcessingTestService client;
-
-    @BeforeAll
-    public static void beforeClass() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/async-request-processing-test.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(
-                                new UndertowServiceGenerator(Options.builder()
-                                        .undertowServicePrefix(true)
-                                        .undertowListenableFutures(true)
-                                        .build()),
-                                new JerseyServiceGenerator(Options.empty())))
-                .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
-    }
 
     @BeforeEach
     public void before() {

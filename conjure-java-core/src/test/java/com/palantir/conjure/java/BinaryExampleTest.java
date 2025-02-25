@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import bytebuffer.com.palantir.binary.BinaryExample;
 import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -30,8 +31,7 @@ public class BinaryExampleTest {
     public void cannotMutateForSubsequentGets() {
         ByteBuffer buffer = ByteBuffer.allocate(1).put((byte) 1);
         buffer.rewind();
-        bytebuffer.com.palantir.binary.BinaryExample binaryExample =
-                bytebuffer.com.palantir.binary.BinaryExample.of(buffer);
+        BinaryExample binaryExample = BinaryExample.of(buffer);
 
         ByteBuffer firstGet = binaryExample.getBinary();
         ByteBuffer secondGet = binaryExample.getBinary();
@@ -45,8 +45,7 @@ public class BinaryExampleTest {
         byte value = (byte) 1;
         ByteBuffer buffer = ByteBuffer.allocate(1).put(value);
         buffer.rewind();
-        bytebuffer.com.palantir.binary.BinaryExample binaryExample =
-                bytebuffer.com.palantir.binary.BinaryExample.of(buffer);
+        BinaryExample binaryExample = BinaryExample.of(buffer);
         buffer.put((byte) (value + 1));
         buffer.rewind();
         assertThat(binaryExample.getBinary().get()).isEqualTo(value);

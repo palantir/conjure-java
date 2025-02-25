@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java;
 
-import com.palantir.product.EmptyPathService;
+import jersey.com.palantir.product.EmptyPathService;
 
 public final class EmptyPathResource implements EmptyPathService {
     @Override

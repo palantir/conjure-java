@@ -44,18 +44,14 @@ import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
-import com.palantir.product.EmptyPathService;
-import com.palantir.product.EmptyPathServiceEndpoints;
-import com.palantir.product.EteBinaryServiceBlocking;
-import com.palantir.product.EteBinaryServiceEndpoints;
-import com.palantir.product.EteServiceAsync;
-import com.palantir.product.EteServiceBlocking;
-import com.palantir.product.EteServiceEndpoints;
-import com.palantir.product.NestedStringAliasExample;
-import com.palantir.product.SimpleEnum;
-import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogue.com.palantir.product.EteBinaryServiceBlocking;
+import dialogue.com.palantir.product.EteServiceAsync;
+import dialogue.com.palantir.product.EteServiceBlocking;
+import dialogue.com.palantir.product.NestedStringAliasExample;
+import dialogue.com.palantir.product.SimpleEnum;
+import dialogue.com.palantir.product.StringAliasExample;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -81,6 +77,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import jersey.com.palantir.product.EmptyPathService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -88,6 +85,9 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import undertow.com.palantir.product.EmptyPathServiceEndpoints;
+import undertow.com.palantir.product.EteBinaryServiceEndpoints;
+import undertow.com.palantir.product.EteServiceEndpoints;
 
 // MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
@@ -298,14 +298,16 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportBody() {
-        StringAliasExample expected = StringAliasExample.of("value");
+        allexamples.com.palantir.product.StringAliasExample expected =
+                allexamples.com.palantir.product.StringAliasExample.of("value");
         assertThat(client.notNullBodyExternalImport(AuthHeader.valueOf("authHeader"), expected))
                 .isEqualTo(expected);
     }
 
     @Test
     public void testExternalImportOptionalQueryParameter() {
-        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        Optional<allexamples.com.palantir.product.StringAliasExample> expected =
+                Optional.of(allexamples.com.palantir.product.StringAliasExample.of("value"));
         assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), expected))
                 .isEqualTo(expected);
     }
@@ -318,7 +320,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportOptionalBody() {
-        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        Optional<allexamples.com.palantir.product.StringAliasExample> expected =
+                Optional.of(allexamples.com.palantir.product.StringAliasExample.of("value"));
         assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), expected))
                 .isEqualTo(expected);
     }
