@@ -32,6 +32,7 @@ import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
+import com.palantir.conjure.java.types.ReachabilityMetadataGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
@@ -239,6 +240,13 @@ public final class ConjureJavaCli implements Runnable {
                         "Generate result types in Dialogue clients for endpoints with errors associated with them.")
         private boolean generateDialogueEndpointErrorResultTypes;
 
+        @CommandLine.Option(
+                names = "--generateReachabilityMetadata",
+                defaultValue = "false",
+                description = "Generate reachability-metadata.json files for Conjure generated types which are used by "
+                        + "Graal's native-image")
+        private boolean generateReachabilityMetadata;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -259,7 +267,15 @@ public final class ConjureJavaCli implements Runnable {
                 ImmutableSet.Builder<Generator> generatorBuilder = ImmutableSet.builder();
                 if (config.generateObjects()) {
                     generatorBuilder.add(new ObjectGenerator(config.options()), new ErrorGenerator(config.options()));
+                    if (config.options().generateReachabilityMetadata()) {
+                        generatorBuilder.add(new ReachabilityMetadataGenerator(
+                                config.options().packagePrefix()));
+                    }
+                } else if (config.options().generateReachabilityMetadata()) {
+                    System.err.println(
+                            "[WARNING] Skipping reachability-metadata generation as objects are not being generated");
                 }
+
                 if (config.generateJersey()) {
                     generatorBuilder.add(new JerseyServiceGenerator(config.options()));
                 }
@@ -311,6 +327,7 @@ public final class ConjureJavaCli implements Runnable {
                             .externalFallbackTypes(externalFallbackTypes)
                             .preferObjectBuilders(preferObjectBuilders)
                             .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
+                            .generateReachabilityMetadata(generateReachabilityMetadata)
                             .build())
                     .build();
         }

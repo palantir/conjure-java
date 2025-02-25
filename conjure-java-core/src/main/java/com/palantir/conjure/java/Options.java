@@ -202,6 +202,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * If set to true, generates reachability-metadata.json files for all types in the Conjure definition. These are
+     * needed by Graal's native-image feature to support reflection.
+     */
+    @Value.Default
+    default boolean generateReachabilityMetadata() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

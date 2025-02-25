@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.services;
 
+import com.palantir.conjure.java.GeneratedFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
@@ -29,7 +31,6 @@ import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.javapoet.ClassName;
-import com.palantir.javapoet.JavaFile;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -43,7 +44,7 @@ public final class UndertowServiceGenerator implements Generator {
     }
 
     @Override
-    public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public Stream<GeneratedFile> generate(ConjureDefinition conjureDefinition) {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
@@ -61,6 +62,7 @@ public final class UndertowServiceGenerator implements Generator {
                         interfaceGenerator.generateServiceInterface(
                                 serviceDef, safetyEvaluator, typeMapper, returnTypeMapper),
                         handlerGenerator.generateServiceHandler(
-                                serviceDef, types, typeMapper, returnTypeMapper, safetyEvaluator)));
+                                serviceDef, types, typeMapper, returnTypeMapper, safetyEvaluator)))
+                .map(GeneratedJavaFile::of);
     }
 }

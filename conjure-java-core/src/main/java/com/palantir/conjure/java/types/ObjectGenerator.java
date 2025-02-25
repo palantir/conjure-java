@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.GeneratedFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.TypeFunctions;
@@ -36,12 +38,14 @@ public final class ObjectGenerator implements Generator {
     }
 
     @Override
-    public Stream<JavaFile> generate(ConjureDefinition definition) {
+    public Stream<GeneratedFile> generate(ConjureDefinition definition) {
         List<TypeDefinition> types = definition.getTypes();
         Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
         TypeMapper typeMapper = new TypeMapper(typesMap, options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(typesMap);
-        return types.stream().map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef));
+        return types.stream()
+                .map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef))
+                .map(GeneratedJavaFile::of);
     }
 
     private JavaFile generateInner(

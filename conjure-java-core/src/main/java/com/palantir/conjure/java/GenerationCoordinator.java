@@ -16,10 +16,18 @@
 
 package com.palantir.conjure.java;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
 import com.palantir.common.streams.MoreStreams;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedReachabilityMetadataFile;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.goethe.Goethe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +35,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 public class GenerationCoordinator {
-
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final Executor executor;
     private final Set<Generator> generators;
     private final Options options;
@@ -50,9 +58,39 @@ public class GenerationCoordinator {
         ConjureDefinition definition = new ExternalImportFilter(options).filter(conjureDefinition);
         return MoreStreams.inCompletionOrder(
                         generators.stream().flatMap(generator -> generator.generate(definition)),
-                        f -> Goethe.formatAndEmit(f, outputDir.toPath()),
+                        f -> formatAndEmit(f, outputDir.toPath()),
                         executor,
                         Runtime.getRuntime().availableProcessors())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * TODO(pm): decide if we'll do one file per type? or one file per package?
+     *  no harm in creating loads of files + they're localized. these aren't really going to be read by humans so we
+     *  don't need to worry about "people can more easily see all the info in one file". it'd be easy to concat all the
+     *  reachability-metadata.json files as well.
+     */
+    private static Path formatAndEmit(GeneratedFile generatedFile, Path outputDirectoryPath) {
+        if (generatedFile instanceof GeneratedJavaFile generatedJavaFile) {
+            return Goethe.formatAndEmit(generatedJavaFile.javaFile(), outputDirectoryPath);
+        } else if (generatedFile instanceof GeneratedReachabilityMetadataFile generatedReachabilityMetadataFile) {
+            try {
+                Path outputDirectory = outputDirectoryPath;
+                for (String packageComponent :
+                        Splitter.on(".").split(generatedReachabilityMetadataFile.packageName())) {
+                    outputDirectory = outputDirectory.resolve(packageComponent);
+                }
+                outputDirectory = outputDirectory.resolve(generatedReachabilityMetadataFile.typeName());
+                Files.createDirectories(outputDirectory);
+                Path output = outputDirectory.resolve("reachability-metadata.json");
+                OBJECT_MAPPER.writeValue(output.toFile(), generatedReachabilityMetadataFile.reachabilityMetadata());
+                return output;
+            } catch (IOException e) {
+                throw new SafeRuntimeException("Failed to emit reachability metadata file", e);
+            }
+        } else {
+            throw new SafeRuntimeException(
+                    "Unknown generated file type", SafeArg.of("class", generatedFile.getClass()));
+        }
     }
 }

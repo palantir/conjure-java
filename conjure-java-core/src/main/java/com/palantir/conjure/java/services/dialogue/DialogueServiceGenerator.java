@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
+import com.palantir.conjure.java.GeneratedFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -49,7 +51,7 @@ public final class DialogueServiceGenerator implements Generator {
     }
 
     @Override
-    public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public Stream<GeneratedFile> generate(ConjureDefinition conjureDefinition) {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
@@ -95,7 +97,8 @@ public final class DialogueServiceGenerator implements Generator {
                         endpoints,
                         interfaceGenerator,
                         blockingGenerator,
-                        asyncGenerator));
+                        asyncGenerator))
+                .map(GeneratedJavaFile::of);
     }
 
     private static Stream<JavaFile> generateFilesForService(

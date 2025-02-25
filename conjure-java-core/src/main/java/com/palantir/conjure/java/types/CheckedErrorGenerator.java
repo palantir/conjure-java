@@ -18,6 +18,8 @@ package com.palantir.conjure.java.types;
 
 import com.google.common.base.CaseFormat;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.GeneratedFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
@@ -53,7 +55,7 @@ public final class CheckedErrorGenerator implements Generator {
     }
 
     @Override
-    public Stream<JavaFile> generate(ConjureDefinition definition) {
+    public Stream<GeneratedFile> generate(ConjureDefinition definition) {
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
@@ -72,7 +74,8 @@ public final class CheckedErrorGenerator implements Generator {
                             Packages.getPrefixedPackage(namespacedErrors.javaPackage(), options.packagePrefix()),
                             namespacedErrors.namespace(),
                             filteredErrorDefinitions));
-                });
+                })
+                .map(GeneratedJavaFile::of);
     }
 
     private JavaFile generateErrorExceptionsForNamespace(

@@ -20,6 +20,8 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
+import com.palantir.conjure.java.GeneratedFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
@@ -86,7 +88,7 @@ public final class JerseyServiceGenerator implements Generator {
     }
 
     @Override
-    public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public Stream<GeneratedFile> generate(ConjureDefinition conjureDefinition) {
         ClassName binaryReturnType =
                 options.jerseyBinaryAsResponse() ? binaryReturnTypeResponse : binaryReturnTypeOutput;
 
@@ -105,7 +107,8 @@ public final class JerseyServiceGenerator implements Generator {
                 types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
-                .map(serviceDef -> generateService(serviceDef, safetyEvaluator, returnTypeMapper, argumentTypeMapper));
+                .map(serviceDef -> generateService(serviceDef, safetyEvaluator, returnTypeMapper, argumentTypeMapper))
+                .map(GeneratedJavaFile::of);
     }
 
     private static boolean hasEndpointErrorsDefined(ServiceDefinition serviceDefinition) {

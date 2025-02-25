@@ -19,6 +19,8 @@ package com.palantir.conjure.java.types;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.GeneratedFile;
+import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -58,7 +60,7 @@ public final class ErrorGenerator implements Generator {
     }
 
     @Override
-    public Stream<JavaFile> generate(ConjureDefinition definition) {
+    public Stream<GeneratedFile> generate(ConjureDefinition definition) {
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
         TypeMapper typeMapper = new TypeMapper(types, options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
@@ -70,7 +72,8 @@ public final class ErrorGenerator implements Generator {
                         endpointErrors,
                         Packages.getPrefixedPackage(namespacedErrors.javaPackage(), options.packagePrefix()),
                         namespacedErrors.namespace(),
-                        namespacedErrors.errors())));
+                        namespacedErrors.errors())))
+                .map(GeneratedJavaFile::of);
     }
 
     private static ImmutableList<FieldSpec> generateErrorTypeFields(

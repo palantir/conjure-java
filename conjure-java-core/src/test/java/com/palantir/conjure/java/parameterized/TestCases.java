@@ -319,6 +319,14 @@ public final class TestCases {
                             GeneratorType.DIALOGUE,
                             GeneratorType.UNDERTOW))
                     .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("reachability-metadata")
+                    .docs("Graal native-image reachability-metadata generation")
+                    .files(Path.of("example-types.yml"))
+                    .options(
+                            Options.builder().generateReachabilityMetadata(true).build())
+                    .generatorTypes(GeneratorType.REACHABILITY_METADATA)
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {

@@ -21,5 +21,6 @@ public enum GeneratorType {
     UNDERTOW,
     JERSEY,
     ERROR,
-    CHECKED_ERROR;
+    CHECKED_ERROR,
+    REACHABILITY_METADATA;
 }
