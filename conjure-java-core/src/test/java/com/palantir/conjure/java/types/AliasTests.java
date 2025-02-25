@@ -19,16 +19,16 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.DoubleAliasExample;
+import allexamples.com.palantir.product.ExternalLongAliasOne;
+import allexamples.com.palantir.product.ExternalLongAliasTwo;
+import allexamples.com.palantir.product.SafeDoubleAliasExample;
+import allexamples.com.palantir.product.UuidAliasExample;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
-import com.palantir.product.DoubleAliasExample;
-import com.palantir.product.ExternalLongAliasOne;
-import com.palantir.product.ExternalLongAliasTwo;
-import com.palantir.product.SafeDoubleAliasExample;
-import com.palantir.product.UuidAliasExample;
 import org.junit.jupiter.api.Test;
 
 public class AliasTests {

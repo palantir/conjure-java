@@ -64,6 +64,7 @@ public final class ExternalTypeFallbackTests {
                         options)
                 .emit(def, tempDir);
 
+        // TODO(kkak): Move to TestCases
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
