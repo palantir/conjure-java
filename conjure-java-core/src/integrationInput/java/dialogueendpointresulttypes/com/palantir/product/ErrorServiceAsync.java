@@ -23,9 +23,6 @@ import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
-import com.palantir.product.EndpointSpecificErrors;
-import com.palantir.product.EndpointSpecificTwoErrors;
-import com.palantir.product.TestErrors;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -87,7 +84,7 @@ public interface ErrorServiceAsync {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestBasicErrorResponse.Success>() {})
                             .error(
-                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestBasicErrorResponse.InvalidArgument>() {})
                             .build());
 
@@ -102,7 +99,7 @@ public interface ErrorServiceAsync {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestImportedErrorResponse.Success>() {})
                             .error(
-                                    EndpointSpecificErrors.ENDPOINT_ERROR.name(),
+                                    com.palantir.product.EndpointSpecificErrors.ENDPOINT_ERROR.name(),
                                     new TypeMarker<TestImportedErrorResponse.EndpointError>() {})
                             .build());
 
@@ -118,13 +115,13 @@ public interface ErrorServiceAsync {
                                     .baseType(new TypeMarker<>() {})
                                     .success(new TypeMarker<TestMultipleErrorsAndPackagesResponse.Success>() {})
                                     .error(
-                                            TestErrors.INVALID_ARGUMENT.name(),
+                                            com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.InvalidArgument>() {})
                                     .error(
-                                            TestErrors.NOT_FOUND.name(),
+                                            com.palantir.product.TestErrors.NOT_FOUND.name(),
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.NotFound>() {})
                                     .error(
-                                            EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
+                                            com.palantir.product.EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
                                             new TypeMarker<
                                                     TestMultipleErrorsAndPackagesResponse.DifferentNamespace>() {})
                                     .error(
@@ -143,7 +140,7 @@ public interface ErrorServiceAsync {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestEmptyBodyResponse.Success>() {})
                             .error(
-                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestEmptyBodyResponse.InvalidArgument>() {})
                             .build());
 
@@ -158,7 +155,7 @@ public interface ErrorServiceAsync {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestBinaryResponse.Success>() {})
                             .error(
-                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestBinaryResponse.InvalidArgument>() {})
                             .build());
 
@@ -173,7 +170,7 @@ public interface ErrorServiceAsync {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestOptionalBinaryResponse.Success>() {})
                             .error(
-                                    TestErrors.INVALID_ARGUMENT.name(),
+                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestOptionalBinaryResponse.InvalidArgument>() {})
                             .build());
 
@@ -356,7 +353,9 @@ public interface ErrorServiceAsync {
         }
 
         final class DifferentPackage
-                extends EndpointError<com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters>
+                extends EndpointError<
+                        dialogueendpointresulttypes.com.palantir.another.EndpointSpecificErrors
+                                .DifferentPackageParameters>
                 implements TestMultipleErrorsAndPackagesResponse {
             @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
             DifferentPackage(
@@ -364,9 +363,11 @@ public interface ErrorServiceAsync {
                     @JsonProperty("errorInstanceId") @Safe String errorInstanceId) {
                 super(
                         errorCode,
-                        com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
+                        dialogueendpointresulttypes.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE
+                                .name(),
                         errorInstanceId,
-                        new com.palantir.another.EndpointSpecificErrors.DifferentPackageParameters());
+                        new dialogueendpointresulttypes.com.palantir.another.EndpointSpecificErrors
+                                .DifferentPackageParameters());
             }
         }
     }

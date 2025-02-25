@@ -64,6 +64,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -206,7 +207,8 @@ public final class DialogueInterfaceGenerator {
         // Create a record for each of the endpoint's errors
         List<TypeSpec> errorTypes = new ArrayList<>();
         for (EndpointError endpointError : endpointDef.getErrors()) {
-            errorTypes.add(constructEndpointErrorType(endpointError, packageName, responseTypeName));
+            errorTypes.add(
+                    constructEndpointErrorType(endpointError, packageName, options.packagePrefix(), responseTypeName));
         }
 
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(responseTypeName)
@@ -234,11 +236,16 @@ public final class DialogueInterfaceGenerator {
     }
 
     private TypeSpec constructEndpointErrorType(
-            EndpointError endpointError, String packageName, ClassName responseTypeName) {
+            EndpointError endpointError,
+            String packageName,
+            Optional<String> packagePrefix,
+            ClassName responseTypeName) {
         String errorTypeName = CaseFormat.UPPER_CAMEL.to(
                 CaseFormat.UPPER_UNDERSCORE, endpointError.getError().getName());
+        String endpointErrorPackage =
+                Packages.getPrefixedPackage(endpointError.getError().getPackage(), packagePrefix);
         ClassName errorTypesClassName = ClassName.get(
-                endpointError.getError().getPackage(),
+                endpointErrorPackage,
                 ErrorGenerationUtils.errorTypesClassName(
                         endpointError.getError().getNamespace()),
                 errorTypeName);
@@ -249,7 +256,7 @@ public final class DialogueInterfaceGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(responseTypeName);
         ClassName parametersClassName = ClassName.get(
-                endpointError.getError().getPackage(),
+                endpointErrorPackage,
                 ErrorGenerationUtils.errorTypesClassName(
                         endpointError.getError().getNamespace()),
                 ErrorGenerationUtils.errorParametersClassName(

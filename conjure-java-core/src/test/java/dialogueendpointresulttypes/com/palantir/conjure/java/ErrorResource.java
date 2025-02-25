@@ -17,25 +17,25 @@
 package dialogueendpointresulttypes.com.palantir.conjure.java;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
-import com.palantir.product.EndpointSpecificServerErrors;
-import com.palantir.product.EndpointSpecificServerErrors.EndpointError;
-import com.palantir.product.EndpointSpecificTwoServerErrors;
-import com.palantir.product.EndpointSpecificTwoServerErrors.DifferentNamespace;
-import com.palantir.product.OptionalBinaryResponseMode;
-import com.palantir.product.TestServerErrors;
-import com.palantir.product.TestServerErrors.InvalidArgument;
-import com.palantir.product.TestServerErrors.NotFound;
-import com.palantir.product.UndertowErrorService;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificServerErrors;
+import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificServerErrors.EndpointError;
+import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoServerErrors;
+import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoServerErrors.DifferentNamespace;
+import dialogueendpointresulttypes.com.palantir.product.ErrorService;
+import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
+import dialogueendpointresulttypes.com.palantir.product.TestServerErrors;
+import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.InvalidArgument;
+import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.NotFound;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 interface ErrorResource {
-    class Impl implements UndertowErrorService {
+    final class Impl implements ErrorService {
         public static final String SUCCESS = "success!";
 
         @Override
-        public String testBasicError(AuthHeader authHeader, boolean shouldThrowError) throws InvalidArgument {
+        public String testBasicError(AuthHeader _authHeader, boolean shouldThrowError) throws InvalidArgument {
             if (shouldThrowError) {
                 throw TestServerErrors.invalidArgument("field", "value");
             }
@@ -53,7 +53,7 @@ interface ErrorResource {
         @Override
         public String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
                 throws InvalidArgument, NotFound, DifferentNamespace,
-                        com.palantir.another.EndpointSpecificServerErrors.DifferentPackage {
+                        dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage {
             if (errorToThrow.isPresent()) {
                 String error = errorToThrow.get();
                 switch (error) {
@@ -64,7 +64,8 @@ interface ErrorResource {
                     case "differentNamespace":
                         throw EndpointSpecificTwoServerErrors.differentNamespace();
                     case "differentPackage":
-                        throw com.palantir.another.EndpointSpecificServerErrors.differentPackage();
+                        throw dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors
+                                .differentPackage();
                     default:
                         throw new IllegalArgumentException("Unknown error: " + error);
                 }

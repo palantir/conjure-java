@@ -86,7 +86,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-// MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -562,8 +561,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml"),
                 new File("src/test/resources/alias-test-service.yml"),
-                new File("src/test/resources/external-long-test-service.yml"),
-                new File("src/test/resources/example-endpoint-errors.yml")));
+                new File("src/test/resources/external-long-test-service.yml")));
         Options options = Options.builder()
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)

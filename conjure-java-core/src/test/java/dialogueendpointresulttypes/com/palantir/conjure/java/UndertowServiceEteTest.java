@@ -23,7 +23,6 @@ import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.TestBase;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.dialogue.clients.DialogueClients;
-import com.palantir.product.ErrorServiceEndpoints;
 import com.palantir.tokens.auth.AuthHeader;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificErrors;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoErrors;
@@ -34,6 +33,7 @@ import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking.Tes
 import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking.TestImportedErrorResponse;
 import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking.TestMultipleErrorsAndPackagesResponse;
 import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking.TestOptionalBinaryResponse;
+import dialogueendpointresulttypes.com.palantir.product.ErrorServiceEndpoints;
 import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
 import dialogueendpointresulttypes.com.palantir.product.TestErrors;
 import io.undertow.Handlers;
@@ -125,21 +125,20 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void error_client_returns_one_of_many_errors() {
         assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("invalidArgument")))
-                .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.InvalidArgument.class, error ->
-                    assertInvalidArgumentError(
-                            error.getErrorCode(),
-                            error.getErrorName(),
-                            error.getParams().field(),
-                            error.getParams().value())
-                );
+                .isInstanceOfSatisfying(
+                        TestMultipleErrorsAndPackagesResponse.InvalidArgument.class,
+                        error -> assertInvalidArgumentError(
+                                error.getErrorCode(),
+                                error.getErrorName(),
+                                error.getParams().field(),
+                                error.getParams().value()));
         assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("notFound")))
                 .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.NotFound.class, error -> {
                     assertThat(error.getErrorCode())
                             .isEqualTo(TestErrors.NOT_FOUND.code().name());
                     assertThat(error.getErrorName()).isEqualTo(TestErrors.NOT_FOUND.name());
-                    assertThat(error.getParams()).satisfies(params ->
-                        assertThat(params.resource()).isEqualTo("resource")
-                    );
+                    assertThat(error.getParams())
+                            .satisfies(params -> assertThat(params.resource()).isEqualTo("resource"));
                 });
         assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("differentNamespace")))
                 .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.DifferentNamespace.class, error -> {
@@ -169,13 +168,14 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void error_client_test_empty_error() {
         TestEmptyBodyResponse result = errorServiceClient.testEmptyBody(AUTH_HEADER, true);
-        assertThat(result).isInstanceOfSatisfying(TestEmptyBodyResponse.InvalidArgument.class, invalidArgument ->
-            assertInvalidArgumentError(
-                    invalidArgument.getErrorCode(),
-                    invalidArgument.getErrorName(),
-                    invalidArgument.getParams().field(),
-                    invalidArgument.getParams().value())
-        );
+        assertThat(result)
+                .isInstanceOfSatisfying(
+                        TestEmptyBodyResponse.InvalidArgument.class,
+                        invalidArgument -> assertInvalidArgumentError(
+                                invalidArgument.getErrorCode(),
+                                invalidArgument.getErrorName(),
+                                invalidArgument.getParams().field(),
+                                invalidArgument.getParams().value()));
     }
 
     @Test
@@ -198,13 +198,14 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void error_client_binary_response_error() {
         TestBinaryResponse result = errorServiceClient.testBinary(AUTH_HEADER, true);
-        assertThat(result).isInstanceOfSatisfying(TestBinaryResponse.InvalidArgument.class, invalidArgument ->
-            assertInvalidArgumentError(
-                    invalidArgument.getErrorCode(),
-                    invalidArgument.getErrorName(),
-                    invalidArgument.getParams().field(),
-                    invalidArgument.getParams().value())
-        );
+        assertThat(result)
+                .isInstanceOfSatisfying(
+                        TestBinaryResponse.InvalidArgument.class,
+                        invalidArgument -> assertInvalidArgumentError(
+                                invalidArgument.getErrorCode(),
+                                invalidArgument.getErrorName(),
+                                invalidArgument.getParams().field(),
+                                invalidArgument.getParams().value()));
     }
 
     @Test
@@ -238,13 +239,14 @@ public final class UndertowServiceEteTest extends TestBase {
     public void error_client_optional_binary_response_error() {
         TestOptionalBinaryResponse result =
                 errorServiceClient.testOptionalBinary(AUTH_HEADER, OptionalBinaryResponseMode.ERROR);
-        assertThat(result).isInstanceOfSatisfying(TestOptionalBinaryResponse.InvalidArgument.class, invalidArgument ->
-            assertInvalidArgumentError(
-                    invalidArgument.getErrorCode(),
-                    invalidArgument.getErrorName(),
-                    invalidArgument.getParams().field(),
-                    invalidArgument.getParams().value())
-        );
+        assertThat(result)
+                .isInstanceOfSatisfying(
+                        TestOptionalBinaryResponse.InvalidArgument.class,
+                        invalidArgument -> assertInvalidArgumentError(
+                                invalidArgument.getErrorCode(),
+                                invalidArgument.getErrorName(),
+                                invalidArgument.getParams().field(),
+                                invalidArgument.getParams().value()));
     }
 
     private static void assertInvalidArgumentError(String errorCode, String errorName, String field, String value) {
