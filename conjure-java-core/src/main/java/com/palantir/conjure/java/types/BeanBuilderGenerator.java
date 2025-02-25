@@ -172,9 +172,8 @@ public final class BeanBuilderGenerator {
         addJsonDeserializeUsingBuilderAnnotation(specBuilder, STAGED_BUILDER_IMPLEMENTATION_NAME);
 
         List<EnrichedField> allFields = enrichFields(typeDef.getFields());
-        List<TypeSpec> interfaces =
-                generateIntermediateStageInterfaces(objectClass, builderClass, typeMapper, allFields, safetyEvaluator);
-        interfaces.add(generateBuilderFinalStageInterface(List.of()));
+        List<TypeSpec> interfaces = generateIntermediateStageInterfaces(allFields, true);
+        interfaces.add(generateBuilderFinalStageInterface(List.of(), true));
         specBuilder.addTypes(interfaces);
 
         addBuilderInterfaceAndMethod(specBuilder, interfaces);
@@ -203,11 +202,12 @@ public final class BeanBuilderGenerator {
 
         addJsonDeserializeUsingBuilderAnnotation(specBuilder, STAGED_BUILDER_IMPLEMENTATION_NAME);
 
-        List<TypeSpec> interfaces = generateIntermediateStageInterfaces(
-                objectClass, builderClass, typeMapper, fieldsNeedingBuilderStage, safetyEvaluator);
-        interfaces.add(generateBuilderFinalStageInterface(allFields.stream()
-                .filter(field -> !fieldsNeedingBuilderStage.contains(field))
-                .collect(Collectors.toList())));
+        List<TypeSpec> interfaces = generateIntermediateStageInterfaces(fieldsNeedingBuilderStage, false);
+        interfaces.add(generateBuilderFinalStageInterface(
+                allFields.stream()
+                        .filter(field -> !fieldsNeedingBuilderStage.contains(field))
+                        .collect(Collectors.toList()),
+                false));
         specBuilder.addTypes(interfaces);
         addBuilderInterfaceAndMethod(specBuilder, interfaces);
 
@@ -264,12 +264,8 @@ public final class BeanBuilderGenerator {
                         .build());
     }
 
-    private static List<TypeSpec> generateIntermediateStageInterfaces(
-            ClassName objectClass,
-            ClassName builderClass,
-            TypeMapper typeMapper,
-            List<EnrichedField> fieldsNeedingBuilderStage,
-            SafetyEvaluator safetyEvaluator) {
+    private List<TypeSpec> generateIntermediateStageInterfaces(
+            List<EnrichedField> fieldsNeedingBuilderStage, boolean strict) {
         List<TypeSpec.Builder> interfaces = new ArrayList<>();
 
         PeekingIterator<EnrichedField> fieldPeekingIterator =
@@ -277,6 +273,7 @@ public final class BeanBuilderGenerator {
 
         while (fieldPeekingIterator.hasNext()) {
             EnrichedField field = fieldPeekingIterator.next();
+            Type type = field.conjureDef().getType();
             String nextBuilderStageName = fieldPeekingIterator.hasNext()
                     ? JavaNameSanitizer.sanitize(fieldPeekingIterator.peek().fieldName())
                     : "completed_";
@@ -290,7 +287,7 @@ public final class BeanBuilderGenerator {
                     .addParameter(ParameterSpec.builder(
                                     BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
                                             field.poetSpec().type(),
-                                            field.conjureDef().getType(),
+                                            type,
                                             typeMapper,
                                             safetyEvaluator.getUsageTimeSafety(field.conjureDef())),
                                     JavaNameSanitizer.sanitize(field.fieldName()))
@@ -300,12 +297,20 @@ public final class BeanBuilderGenerator {
                     .returns(Primitives.box(nextStageClassName))
                     .build());
 
-            if (field.conjureDef().getType().accept(TypeVisitor.IS_OPTIONAL)) {
+            if (type.accept(TypeVisitor.IS_OPTIONAL)) {
                 stageInterface.addMethod(BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(
                                 field, typeMapper, nextStageClassName, safetyEvaluator)
                         .addModifiers(Modifier.ABSTRACT)
                         .build());
             }
+
+            if (isPrimitiveOptimized(type)) {
+                stageInterface.addMethod(BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
+                                field, typeMapper, nextStageClassName, safetyEvaluator, strict)
+                        .addModifiers(Modifier.ABSTRACT)
+                        .build());
+            }
+
             interfaces.add(stageInterface);
         }
 
@@ -320,7 +325,7 @@ public final class BeanBuilderGenerator {
         return interfaces.stream().map(TypeSpec.Builder::build).collect(Collectors.toList());
     }
 
-    private TypeSpec generateBuilderFinalStageInterface(List<EnrichedField> fields) {
+    private TypeSpec generateBuilderFinalStageInterface(List<EnrichedField> fields, boolean strict) {
         ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
         return TypeSpec.interfaceBuilder(completedStageClass)
                 .addModifiers(Modifier.PUBLIC)
@@ -330,7 +335,7 @@ public final class BeanBuilderGenerator {
                         .returns(Primitives.box(objectClass))
                         .build())
                 .addMethods(fields.stream()
-                        .map(field -> generateMethodsForFinalStageInterfaceField(field, completedStageClass))
+                        .map(field -> generateMethodsForFinalStageInterfaceField(field, completedStageClass, strict))
                         .flatMap(List::stream)
                         .collect(Collectors.toList()))
                 .build();
@@ -340,7 +345,8 @@ public final class BeanBuilderGenerator {
         return enclosingClass.nestedClass(StringUtils.capitalize(stageName) + "StageBuilder");
     }
 
-    private List<MethodSpec> generateMethodsForFinalStageInterfaceField(EnrichedField enriched, ClassName returnClass) {
+    private List<MethodSpec> generateMethodsForFinalStageInterfaceField(
+            EnrichedField enriched, ClassName returnClass, boolean strict) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         Type type = enriched.conjureDef().getType();
         FieldDefinition definition = enriched.conjureDef();
@@ -368,7 +374,7 @@ public final class BeanBuilderGenerator {
                     .build());
             if (isPrimitiveOptimized(type)) {
                 methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
-                                enriched, typeMapper, returnClass, safetyEvaluator)
+                                enriched, typeMapper, returnClass, safetyEvaluator, strict)
                         .addModifiers(Modifier.ABSTRACT)
                         .build());
             }
@@ -596,9 +602,17 @@ public final class BeanBuilderGenerator {
         // Each field tends to fan out into many setters
         Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size() * 5);
         for (EnrichedField field : fields) {
-            setters.add(createSetter(field, typesMap, override, strict));
-            if (!strict || field.conjureDef().getType().accept(TypeVisitor.IS_OPTIONAL)) {
-                setters.addAll(createAuxiliarySetters(field, typesMap, override));
+            Type type = field.conjureDef().getType();
+
+            // Add all the base required setters
+            setters.add(createSetter(field, typesMap, override));
+            // Add any primitive setters, which are required when optimized as they handle deserialization
+            if (isPrimitiveOptimized(type)) {
+                setters.add(createPrimitiveCollectionSetter(field, typesMap, override, strict));
+            }
+            // Non-strict builders have various additional QOL overloads
+            if (!strict || type.accept(TypeVisitor.IS_OPTIONAL)) {
+                setters.addAll(createAuxiliarySetters(field, override));
             }
         }
         return setters;
@@ -607,8 +621,7 @@ public final class BeanBuilderGenerator {
     private MethodSpec createSetter(
             EnrichedField enriched,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            boolean override,
-            boolean strict) {
+            boolean override) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
 
@@ -633,12 +646,7 @@ public final class BeanBuilderGenerator {
         // Certain type combinations and feature flags may produce highly optimized code paths.
         // These optimized paths include deserialization, so if it isn't enabled we should add the
         // simple deserializer.
-        //
-        // At the moment we are excluding strict staged builders from the optimization
-        // however there was an issue that when generating strict builders we assumed
-        // that another setter would be added later. This is not the case for strict staged
-        // builders.
-        if (!isPrimitiveOptimized(type) || strict) {
+        if (!isPrimitiveOptimized(type)) {
             setterBuilder.addAnnotation(createJacksonSetterAnnotation(enriched, typesMap));
         }
 
@@ -684,26 +692,42 @@ public final class BeanBuilderGenerator {
     private MethodSpec createPrimitiveCollectionSetter(
             EnrichedField enriched,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            boolean override) {
+            boolean override,
+            boolean strict) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
 
         CollectionType collectionType = getCollectionType(type);
-        return BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
-                        enriched, typeMapper, builderClass, safetyEvaluator)
+        MethodSpec.Builder methodBuilder = BeanBuilderAuxiliarySettersUtils.createPrimitiveCollectionSetterBuilder(
+                        enriched, typeMapper, builderClass, safetyEvaluator, strict)
                 .addAnnotations(ConjureAnnotations.override(override))
                 // Unlike the other setter, when this setter is present it is always responsible for deserialization
                 .addAnnotation(createJacksonSetterAnnotation(enriched, typesMap))
-                .addCode(verifyNotBuilt())
-                .addCode(CodeBlocks.statement(
-                        "$1T.addAllTo$2L(this.$3N, $4L)",
-                        ConjureCollections.class,
-                        collectionType.getConjureCollectionType().getCollectionName(),
-                        field.name(),
-                        Expressions.requireNonNull(
-                                field.name(), enriched.fieldName().get() + " cannot be null")))
-                .addStatement("return this")
-                .build();
+                .addCode(verifyNotBuilt());
+
+        if (strict) {
+            // the primitive collection overload inside of a strict builder cannot allow
+            // for modification as such we should create a new container on every call.
+            // This is admittedly very defensive as it would involve someone explicitly casting
+            // away the strict builder safety, but its not impossible...
+            methodBuilder.addCode(CodeBlocks.statement(
+                    "this.$1N = $2T.newNonNull$3L($4L)",
+                    field.name(),
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionType().getCollectionName(),
+                    Expressions.requireNonNull(
+                            field.name(), enriched.fieldName().get() + " cannot be null")));
+        } else {
+            methodBuilder.addCode(CodeBlocks.statement(
+                    "$1T.addAllTo$2L(this.$3N, $4L)",
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionType().getCollectionName(),
+                    field.name(),
+                    Expressions.requireNonNull(
+                            field.name(), enriched.fieldName().get() + " cannot be null")));
+        }
+
+        return methodBuilder.addStatement("return this").build();
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
@@ -798,20 +822,13 @@ public final class BeanBuilderGenerator {
         return type.accept(TypeVisitor.IS_BINARY) && !options.useImmutableBytes();
     }
 
-    private List<MethodSpec> createAuxiliarySetters(
-            EnrichedField enriched,
-            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            boolean override) {
+    private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
         Type type = enriched.conjureDef().getType();
         Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
         ImmutableList.Builder<MethodSpec> builder = ImmutableList.builder();
 
         if (type.accept(TypeVisitor.IS_LIST)) {
-            if (isPrimitiveOptimized(type)) {
-                builder.add(createPrimitiveCollectionSetter(enriched, typesMap, override));
-            }
-
             builder.add(
                     createCollectionSetter("addAll", enriched, override),
                     createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));

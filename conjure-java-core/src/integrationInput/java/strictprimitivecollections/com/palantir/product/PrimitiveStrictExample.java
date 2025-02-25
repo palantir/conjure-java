@@ -143,11 +143,15 @@ public final class PrimitiveStrictExample {
     public interface IntsStageBuilder {
         DoublesStageBuilder ints(@Nonnull Iterable<Integer> ints);
 
+        DoublesStageBuilder ints(@Nonnull int... ints);
+
         Builder from(PrimitiveStrictExample other);
     }
 
     public interface DoublesStageBuilder {
         LongsStageBuilder doubles(@Nonnull Iterable<Double> doubles);
+
+        LongsStageBuilder doubles(@Nonnull double... doubles);
     }
 
     public interface LongsStageBuilder {
@@ -173,10 +177,16 @@ public final class PrimitiveStrictExample {
         Builder ints(@Nonnull Iterable<Integer> ints);
 
         @Override
+        Builder ints(@Nonnull int... ints);
+
+        @Override
         Builder from(PrimitiveStrictExample other);
 
         @Override
         Builder doubles(@Nonnull Iterable<Double> doubles);
+
+        @Override
+        Builder doubles(@Nonnull double... doubles);
 
         @Override
         Builder longs(@Nonnull Iterable<SafeLong> longs);
@@ -215,7 +225,6 @@ public final class PrimitiveStrictExample {
         }
 
         @Override
-        @JsonSetter(value = "ints", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder ints(@Nonnull Iterable<Integer> ints) {
             checkNotBuilt();
             this.ints =
@@ -224,8 +233,25 @@ public final class PrimitiveStrictExample {
         }
 
         @Override
-        @JsonSetter(value = "doubles", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "ints", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder ints(@Nonnull int... ints) {
+            checkNotBuilt();
+            this.ints =
+                    ConjureCollections.newNonNullIntegerList(Preconditions.checkNotNull(ints, "ints cannot be null"));
+            return this;
+        }
+
+        @Override
         public Builder doubles(@Nonnull Iterable<Double> doubles) {
+            checkNotBuilt();
+            this.doubles = ConjureCollections.newNonNullDoubleList(
+                    Preconditions.checkNotNull(doubles, "doubles cannot be null"));
+            return this;
+        }
+
+        @Override
+        @JsonSetter(value = "doubles", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder doubles(@Nonnull double... doubles) {
             checkNotBuilt();
             this.doubles = ConjureCollections.newNonNullDoubleList(
                     Preconditions.checkNotNull(doubles, "doubles cannot be null"));
