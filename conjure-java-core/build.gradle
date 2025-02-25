@@ -112,8 +112,6 @@ dependencies {
     integrationInputImplementation 'javax.validation:validation-api'
     integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
     integrationInputImplementation 'org.jetbrains:annotations'
-    integrationInputImplementation 'jakarta.annotation:jakarta.annotation-api'
-    integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
     integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
 
     annotationProcessor 'org.immutables:value'
