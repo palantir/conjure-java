@@ -52,7 +52,7 @@ public final class UndertowServiceGeneratorTests extends TestBase {
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
 
         new GenerationCoordinator(
-                MoreExecutors.directExecutor(), ImmutableSet.of(new UndertowServiceGenerator(Options.empty())))
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new UndertowServiceGenerator(Options.empty())))
                 .emit(conjure, src);
 
         // Generated files contain imports

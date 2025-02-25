@@ -52,7 +52,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();
         new GenerationCoordinator(
-                MoreExecutors.directExecutor(), ImmutableSet.of(new JerseyServiceGenerator(Options.empty())))
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new JerseyServiceGenerator(Options.empty())))
                 .emit(conjure, src);
 
         // Generated files contain imports

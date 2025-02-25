@@ -213,7 +213,9 @@ public final class TestCases {
                     .name("undertow-async")
                     .docs("Generate undertow service objects with experimental async flag enabled.")
                     .files(Path.of("undertow-async-endpoint.yml"))
-                    .options(Options.builder().experimentalUndertowAsyncMarkers(true).build())
+                    .options(Options.builder()
+                            .experimentalUndertowAsyncMarkers(true)
+                            .build())
                     .generatorTypes(List.of(GeneratorType.UNDERTOW))
                     .build())
             .add(ParameterizedTestCase.builder()
@@ -228,7 +230,9 @@ public final class TestCases {
                     .docs("Generate jersey service objects.")
                     .files(Path.of("example-service.yml"))
                     .files(Path.of("cookie-service.yml"))
-                    .options(Options.builder().requireNotNullAuthAndBodyParams(true).build())
+                    .options(Options.builder()
+                            .requireNotNullAuthAndBodyParams(true)
+                            .build())
                     .generatorTypes(List.of(GeneratorType.JERSEY, GeneratorType.OBJECT))
                     .build())
             .add(ParameterizedTestCase.builder()
@@ -245,19 +249,19 @@ public final class TestCases {
                     .options(Options.builder().jerseyBinaryAsResponse(true).build())
                     .generatorTypes(List.of(GeneratorType.JERSEY, GeneratorType.OBJECT))
                     .build())
-            .add(ParameterizedTestCase.builder()
-                    .name("jakarta-service")
-                    .docs("Generate jersey service objects with jakarta packages.")
-                    .files(Path.of("example-service.yml"))
-                    .options(Options.builder().jakartaPackages(true).build())
-                    .generatorTypes(List.of(GeneratorType.JERSEY, GeneratorType.OBJECT))
-                    .build())
+            // TODO(kkak): This doesn't compile due to missing jakarta dependencies, should we add them to the project?
+            //            .add(ParameterizedTestCase.builder()
+            //                    .name("jakarta-service")
+            //                    .docs("Generate jersey service objects with jakarta packages.")
+            //                    .files(Path.of("example-service.yml"))
+            //                    .options(Options.builder().jakartaPackages(true).build())
+            //                    .generatorTypes(List.of(GeneratorType.JERSEY, GeneratorType.OBJECT))
+            //                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {
         return CASES;
     }
 
-    private TestCases() {
-    }
+    private TestCases() {}
 }
