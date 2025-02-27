@@ -59,17 +59,4 @@ public abstract class TestBase {
             assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
         }
     }
-
-    protected static void validateGeneratedOutput(Path folder, List<Path> files, Path outputDir) throws IOException {
-        for (Path file : files) {
-            Path relativePath = folder.relativize(file);
-            Path output = outputDir.resolve(relativePath);
-            if (Boolean.parseBoolean(System.getProperty("recreate", "false"))) {
-                Files.createDirectories(relativePath.getParent());
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
-    }
 }

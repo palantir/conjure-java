@@ -26,6 +26,9 @@ import com.palantir.tokens.auth.AuthHeader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Boolean;
+import java.lang.Override;
+import java.lang.String;
 import java.util.Optional;
 import javax.annotation.processing.Generated;
 
@@ -79,7 +82,7 @@ public interface ErrorServiceBlocking {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestBasicErrorResponse.Success>() {})
                             .error(
-                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
+                                    TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestBasicErrorResponse.InvalidArgument>() {})
                             .build());
 
@@ -94,7 +97,7 @@ public interface ErrorServiceBlocking {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestImportedErrorResponse.Success>() {})
                             .error(
-                                    com.palantir.product.EndpointSpecificErrors.ENDPOINT_ERROR.name(),
+                                    EndpointSpecificErrors.ENDPOINT_ERROR.name(),
                                     new TypeMarker<TestImportedErrorResponse.EndpointError>() {})
                             .build());
 
@@ -110,17 +113,19 @@ public interface ErrorServiceBlocking {
                                     .baseType(new TypeMarker<>() {})
                                     .success(new TypeMarker<TestMultipleErrorsAndPackagesResponse.Success>() {})
                                     .error(
-                                            com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
+                                            TestErrors.INVALID_ARGUMENT.name(),
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.InvalidArgument>() {})
                                     .error(
-                                            com.palantir.product.TestErrors.NOT_FOUND.name(),
+                                            TestErrors.NOT_FOUND.name(),
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.NotFound>() {})
                                     .error(
-                                            com.palantir.product.EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
+                                            EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
                                             new TypeMarker<
                                                     TestMultipleErrorsAndPackagesResponse.DifferentNamespace>() {})
                                     .error(
-                                            com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
+                                            dialogueendpointresulttypes.com.palantir.another.EndpointSpecificErrors
+                                                    .DIFFERENT_PACKAGE
+                                                    .name(),
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.DifferentPackage>() {})
                                     .build());
 
@@ -135,7 +140,7 @@ public interface ErrorServiceBlocking {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestEmptyBodyResponse.Success>() {})
                             .error(
-                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
+                                    TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestEmptyBodyResponse.InvalidArgument>() {})
                             .build());
 
@@ -150,7 +155,7 @@ public interface ErrorServiceBlocking {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestBinaryResponse.Success>() {})
                             .error(
-                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
+                                    TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestBinaryResponse.InvalidArgument>() {})
                             .build());
 
@@ -165,7 +170,7 @@ public interface ErrorServiceBlocking {
                             .baseType(new TypeMarker<>() {})
                             .success(new TypeMarker<TestOptionalBinaryResponse.Success>() {})
                             .error(
-                                    com.palantir.product.TestErrors.INVALID_ARGUMENT.name(),
+                                    TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestOptionalBinaryResponse.InvalidArgument>() {})
                             .build());
 

@@ -98,7 +98,6 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
     @Override
     public MethodSpec generate(ServiceDefinition def) {
-        // Need: 1) the name of the response type (static), 2) all the error types (declaredEndpointErrors)
         ClassName className = getClassName(def);
         TypeSpec.Builder impl = TypeSpec.anonymousClassBuilder("").addSuperinterface(className);
 
@@ -217,13 +216,13 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         } else {
             deserializerBuilder.add("deserializer(");
         }
-        deserializerBuilder.add(buildArgsForEndpointErrorDeserializer(endpointDef, className, responseType));
+        deserializerBuilder.add(buildArgsForEndpointErrorDeserializer(endpointDef, responseType));
         deserializerBuilder.add(")");
         return deserializerBuilder.build();
     }
 
     private CodeBlock buildArgsForEndpointErrorDeserializer(
-            EndpointDefinition endpointDefinition, TypeName className, TypeName responseType) {
+            EndpointDefinition endpointDefinition, TypeName responseType) {
         CodeBlock.Builder deserializerArgsBuilder = CodeBlock.builder()
                 .add("$T.<$T>builder()", DeserializerArgs.class, responseType)
                 .add(".baseType(new $T<>() {})", TypeMarker.class)
@@ -232,7 +231,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             ErrorTypeName errorTypeName = err.getError();
             String errorName = errorTypeName.getName();
             ClassName errorClass = ClassName.get(
-                    errorTypeName.getPackage(),
+                    Packages.getPrefixedPackage(errorTypeName.getPackage(), options.packagePrefix()),
                     ErrorGenerationUtils.errorTypesClassName(errorTypeName.getNamespace()),
                     CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
             deserializerArgsBuilder.add(

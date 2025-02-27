@@ -78,21 +78,4 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                     .noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
         }
     }
-
-    @Test
-    public void testServiceGeneration_excludeDialogueAsyncInterfaces() {
-        List<Path> files = getGeneratedFilesForDef(
-                "example-service",
-                Options.builder().excludeDialogueAsyncInterfaces(true).build());
-        List<String> fileNames =
-                files.stream().map(Path::getFileName).map(Path::toString).toList();
-        assertThat(fileNames).noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
-    }
-
-    private List<Path> getGeneratedFilesForDef(String conjureFile, Options options) {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        return new GenerationCoordinator(
-                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(options)))
-                .emit(def, folder);
-    }
 }

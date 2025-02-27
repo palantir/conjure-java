@@ -22,7 +22,6 @@ import com.palantir.conjure.java.parameterized.objects.GeneratorType;
 import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 
 public final class TestCases {
     private static final List<ParameterizedTestCase> CASES = ImmutableList.<ParameterizedTestCase>builder()
@@ -313,7 +312,7 @@ public final class TestCases {
                     .options(Options.builder()
                             .generateDialogueEndpointErrorResultTypes(true)
                             .build())
-                    .generatorTypes(Set.of(
+                    .generatorTypes(List.of(
                             GeneratorType.OBJECT,
                             GeneratorType.ERROR,
                             GeneratorType.CHECKED_ERROR,
