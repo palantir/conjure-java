@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java;
 
+import asyncrequest.com.palantir.product.UndertowAsyncRequestProcessingTestService;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -24,7 +25,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
-import com.palantir.product.UndertowAsyncRequestProcessingTestService;
 import com.palantir.tracing.Tracer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;

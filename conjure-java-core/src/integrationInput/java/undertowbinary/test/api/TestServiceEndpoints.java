@@ -1,0 +1,74 @@
+package undertowbinary.test.api;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class TestServiceEndpoints implements UndertowService {
+    private final TestService delegate;
+
+    private TestServiceEndpoints(TestService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(TestService delegate) {
+        return new TestServiceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new GetBinaryEndpoint(runtime, delegate));
+    }
+
+    private static final class GetBinaryEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetBinaryEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            BinaryResponseBody result = delegate.getBinary();
+            runtime.bodySerDe().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getBinary";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

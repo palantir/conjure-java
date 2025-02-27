@@ -1,0 +1,605 @@
+package servicevanilla.com.palantir.another;
+
+import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.Incubating;
+import com.palantir.dialogue.BinaryRequestBody;
+import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.PlainSerDe;
+import com.palantir.dialogue.Request;
+import com.palantir.dialogue.Serializer;
+import com.palantir.dialogue.TypeMarker;
+import com.palantir.logsafe.Safe;
+import com.palantir.ri.ResourceIdentifier;
+import com.palantir.tokens.auth.AuthHeader;
+import java.io.InputStream;
+import java.lang.Boolean;
+import java.lang.Deprecated;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.SuppressWarnings;
+import java.lang.Void;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
+import servicevanilla.com.palantir.product.AliasedString;
+import servicevanilla.com.palantir.product.CreateDatasetRequest;
+import servicevanilla.com.palantir.product.datasets.BackingFileSystem;
+import servicevanilla.com.palantir.product.datasets.Dataset;
+
+/** A Markdown description of the service. */
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@DialogueService(TestServiceBlocking.Factory.class)
+public interface TestServiceBlocking {
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     *
+     * @apiNote {@code GET /catalog/fileSystems}
+     */
+    @Incubating
+    @ClientEndpoint(method = "GET", path = "/catalog/fileSystems")
+    @Nonnull
+    Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
+
+    /**
+     * foo $bar
+     *
+     * @apiNote {@code POST /catalog/datasets}
+     */
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets")
+    Dataset createDataset(AuthHeader authHeader, @Safe String testHeaderArg, CreateDatasetRequest request);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
+    Optional<Dataset> getDataset(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
+    @MustBeClosed
+    InputStream getRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
+    @MustBeClosed
+    InputStream getAliasedRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
+    Optional<InputStream> maybeGetRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
+    AliasedString getAliasedString(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code POST /catalog/datasets/upload-raw} */
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
+    void uploadRawData(AuthHeader authHeader, @Safe BinaryRequestBody input);
+
+    /** @apiNote {@code POST /catalog/datasets/upload-raw-aliased} */
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
+    void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
+
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches}
+     * @param datasetRid A valid dataset resource identifier.
+     */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
+    Set<String> getBranches(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecated}
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
+    @Deprecated
+    Set<String> getBranchesDeprecated(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval}
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
+    @Deprecated(forRemoval = true)
+    Set<String> getBranchesDeprecatedForRemoval(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
+    Optional<String> resolveBranch(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, String branch);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
+    Optional<String> testParam(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
+    /** @apiNote {@code POST /catalog/test-query-params} */
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    int testQueryParams(
+            AuthHeader authHeader,
+            @Safe ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query);
+
+    /** @apiNote {@code POST /catalog/test-no-response-query-params} */
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    void testNoResponseQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query);
+
+    /** @apiNote {@code GET /catalog/boolean} */
+    @ClientEndpoint(method = "GET", path = "/catalog/boolean")
+    boolean testBoolean(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /catalog/double} */
+    @ClientEndpoint(method = "GET", path = "/catalog/double")
+    double testDouble(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /catalog/integer} */
+    @ClientEndpoint(method = "GET", path = "/catalog/integer")
+    int testInteger(AuthHeader authHeader);
+
+    /** @apiNote {@code POST /catalog/optional} */
+    @ClientEndpoint(method = "POST", path = "/catalog/optional")
+    Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
+
+    /** @apiNote {@code GET /catalog/optional-integer-double} */
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
+
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/strings} */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    void getForStrings(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, Set<AliasedString> strings);
+
+    /** Creates a synchronous/blocking client for a TestService service. */
+    static TestServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
+        return new TestServiceBlocking() {
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final EndpointChannel getFileSystemsChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getFileSystems);
+
+            private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
+
+            private final Serializer<CreateDatasetRequest> createDatasetSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<CreateDatasetRequest>() {});
+
+            private final EndpointChannel createDatasetChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.createDataset);
+
+            private final Deserializer<Dataset> createDatasetDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Dataset>() {});
+
+            private final EndpointChannel getDatasetChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getDataset);
+
+            private final Deserializer<Optional<Dataset>> getDatasetDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Dataset>>() {});
+
+            private final EndpointChannel getRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getRawData);
+
+            private final EndpointChannel getAliasedRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getAliasedRawData);
+
+            private final EndpointChannel maybeGetRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.maybeGetRawData);
+
+            private final EndpointChannel getAliasedStringChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getAliasedString);
+
+            private final Deserializer<AliasedString> getAliasedStringDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
+
+            private final EndpointChannel uploadRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.uploadRawData);
+
+            private final Deserializer<Void> uploadRawDataDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<InputStream> uploadAliasedRawDataSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<InputStream>() {});
+
+            private final EndpointChannel uploadAliasedRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.uploadAliasedRawData);
+
+            private final Deserializer<Void> uploadAliasedRawDataDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel getBranchesChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranches);
+
+            private final Deserializer<Set<String>> getBranchesDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+
+            private final EndpointChannel getBranchesDeprecatedChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranchesDeprecated);
+
+            private final Deserializer<Set<String>> getBranchesDeprecatedDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+
+            private final EndpointChannel getBranchesDeprecatedForRemovalChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranchesDeprecatedForRemoval);
+
+            private final Deserializer<Set<String>> getBranchesDeprecatedForRemovalDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+
+            private final EndpointChannel resolveBranchChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.resolveBranch);
+
+            private final Deserializer<Optional<String>> resolveBranchDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final EndpointChannel testParamChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testParam);
+
+            private final Deserializer<Optional<String>> testParamDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final Serializer<String> testQueryParamsSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+
+            private final EndpointChannel testQueryParamsChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testQueryParams);
+
+            private final Deserializer<Integer> testQueryParamsDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
+
+            private final Serializer<String> testNoResponseQueryParamsSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+
+            private final EndpointChannel testNoResponseQueryParamsChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testNoResponseQueryParams);
+
+            private final Deserializer<Void> testNoResponseQueryParamsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel testBooleanChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testBoolean);
+
+            private final Deserializer<Boolean> testBooleanDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
+
+            private final EndpointChannel testDoubleChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testDouble);
+
+            private final Deserializer<Double> testDoubleDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
+
+            private final EndpointChannel testIntegerChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testInteger);
+
+            private final Deserializer<Integer> testIntegerDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
+
+            private final Serializer<Optional<String>> testPostOptionalSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
+
+            private final EndpointChannel testPostOptionalChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testPostOptional);
+
+            private final Deserializer<Optional<String>> testPostOptionalDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final EndpointChannel testOptionalIntegerAndDoubleChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testOptionalIntegerAndDouble);
+
+            private final Deserializer<Void> testOptionalIntegerAndDoubleDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel getForStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getForStrings);
+
+            private final Deserializer<Void> getForStringsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            @Override
+            public Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(getFileSystemsChannel, _request.build(), getFileSystemsDeserializer);
+            }
+
+            @Override
+            public Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(createDatasetSerializer.serialize(request));
+                _request.putHeaderParams("Test-Header", _plainSerDe.serializeString(testHeaderArg));
+                return _runtime.clients()
+                        .callBlocking(createDatasetChannel, _request.build(), createDatasetDeserializer);
+            }
+
+            @Override
+            public Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients().callBlocking(getDatasetChannel, _request.build(), getDatasetDeserializer);
+            }
+
+            @Override
+            public InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(
+                                getRawDataChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
+            }
+
+            @Override
+            public InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(
+                                getAliasedRawDataChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
+            }
+
+            @Override
+            public Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(
+                                maybeGetRawDataChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
+            }
+
+            @Override
+            public AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(getAliasedStringChannel, _request.build(), getAliasedStringDeserializer);
+            }
+
+            @Override
+            public void uploadRawData(AuthHeader authHeader, BinaryRequestBody input) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(_runtime.bodySerDe().serialize(input));
+                _runtime.clients().callBlocking(uploadRawDataChannel, _request.build(), uploadRawDataDeserializer);
+            }
+
+            @Override
+            public void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(_runtime.bodySerDe().serialize(input));
+                _runtime.clients()
+                        .callBlocking(uploadAliasedRawDataChannel, _request.build(), uploadAliasedRawDataDeserializer);
+            }
+
+            @Override
+            public Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients().callBlocking(getBranchesChannel, _request.build(), getBranchesDeserializer);
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(
+                                getBranchesDeprecatedChannel, _request.build(), getBranchesDeprecatedDeserializer);
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public Set<String> getBranchesDeprecatedForRemoval(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(
+                                getBranchesDeprecatedForRemovalChannel,
+                                _request.build(),
+                                getBranchesDeprecatedForRemovalDeserializer);
+            }
+
+            @Override
+            public Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                _request.putPathParams("branch", _plainSerDe.serializeString(branch));
+                return _runtime.clients()
+                        .callBlocking(resolveBranchChannel, _request.build(), resolveBranchDeserializer);
+            }
+
+            @Override
+            public Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients().callBlocking(testParamChannel, _request.build(), testParamDeserializer);
+            }
+
+            @Override
+            public int testQueryParams(
+                    AuthHeader authHeader,
+                    ResourceIdentifier something,
+                    ResourceIdentifier implicit,
+                    Optional<ResourceIdentifier> optionalMiddle,
+                    Set<String> setEnd,
+                    Optional<ResourceIdentifier> optionalEnd,
+                    String query) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testQueryParamsSerializer.serialize(query));
+                _request.putQueryParams("different", _plainSerDe.serializeRid(something));
+                if (optionalMiddle.isPresent()) {
+                    _request.putQueryParams("optionalMiddle", _plainSerDe.serializeRid(optionalMiddle.get()));
+                }
+                _request.putQueryParams("implicit", _plainSerDe.serializeRid(implicit));
+                for (String setEndElement : setEnd) {
+                    _request.putQueryParams("setEnd", _plainSerDe.serializeString(setEndElement));
+                }
+                if (optionalEnd.isPresent()) {
+                    _request.putQueryParams("optionalEnd", _plainSerDe.serializeRid(optionalEnd.get()));
+                }
+                return _runtime.clients()
+                        .callBlocking(testQueryParamsChannel, _request.build(), testQueryParamsDeserializer);
+            }
+
+            @Override
+            public void testNoResponseQueryParams(
+                    AuthHeader authHeader,
+                    ResourceIdentifier something,
+                    ResourceIdentifier implicit,
+                    Optional<ResourceIdentifier> optionalMiddle,
+                    Set<String> setEnd,
+                    Optional<ResourceIdentifier> optionalEnd,
+                    String query) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testNoResponseQueryParamsSerializer.serialize(query));
+                _request.putQueryParams("different", _plainSerDe.serializeRid(something));
+                if (optionalMiddle.isPresent()) {
+                    _request.putQueryParams("optionalMiddle", _plainSerDe.serializeRid(optionalMiddle.get()));
+                }
+                _request.putQueryParams("implicit", _plainSerDe.serializeRid(implicit));
+                for (String setEndElement : setEnd) {
+                    _request.putQueryParams("setEnd", _plainSerDe.serializeString(setEndElement));
+                }
+                if (optionalEnd.isPresent()) {
+                    _request.putQueryParams("optionalEnd", _plainSerDe.serializeRid(optionalEnd.get()));
+                }
+                _runtime.clients()
+                        .callBlocking(
+                                testNoResponseQueryParamsChannel,
+                                _request.build(),
+                                testNoResponseQueryParamsDeserializer);
+            }
+
+            @Override
+            public boolean testBoolean(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().callBlocking(testBooleanChannel, _request.build(), testBooleanDeserializer);
+            }
+
+            @Override
+            public double testDouble(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().callBlocking(testDoubleChannel, _request.build(), testDoubleDeserializer);
+            }
+
+            @Override
+            public int testInteger(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().callBlocking(testIntegerChannel, _request.build(), testIntegerDeserializer);
+            }
+
+            @Override
+            public Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testPostOptionalSerializer.serialize(maybeString));
+                return _runtime.clients()
+                        .callBlocking(testPostOptionalChannel, _request.build(), testPostOptionalDeserializer);
+            }
+
+            @Override
+            public void testOptionalIntegerAndDouble(
+                    AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                if (maybeInteger.isPresent()) {
+                    _request.putQueryParams("maybeInteger", _plainSerDe.serializeInteger(maybeInteger.getAsInt()));
+                }
+                if (maybeDouble.isPresent()) {
+                    _request.putQueryParams("maybeDouble", _plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
+                }
+                _runtime.clients()
+                        .callBlocking(
+                                testOptionalIntegerAndDoubleChannel,
+                                _request.build(),
+                                testOptionalIntegerAndDoubleDeserializer);
+            }
+
+            @Override
+            public void getForStrings(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                for (AliasedString stringsElement : strings) {
+                    _request.putQueryParams("strings", _plainSerDe.serializeString(stringsElement.get()));
+                }
+                _runtime.clients().callBlocking(getForStringsChannel, _request.build(), getForStringsDeserializer);
+            }
+
+            @Override
+            public String toString() {
+                return "TestServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
+            }
+        };
+    }
+
+    /** Creates an asynchronous/non-blocking client for a TestService service. */
+    static TestServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
+    }
+
+    final class Factory implements DialogueServiceFactory<TestServiceBlocking> {
+        @Override
+        public TestServiceBlocking create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return TestServiceBlocking.of(endpointChannelFactory, runtime);
+        }
+    }
+}

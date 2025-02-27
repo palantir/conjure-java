@@ -27,6 +27,8 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.deadlines.DeadlineExpiredException;
+import com.palantir.deadlines.DeadlineExpiredReasons;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -57,6 +59,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
+    @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
@@ -72,6 +75,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             illegalArgumentException(exchange, throwable);
         } else if (throwable instanceof FrameworkException) {
             frameworkException(exchange, (FrameworkException) throwable);
+        } else if (throwable instanceof DeadlineExpiredException) {
+            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
@@ -181,6 +186,17 @@ public enum ConjureExceptions implements ExceptionHandler {
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
         log(exception, frameworkException);
         writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
+    }
+
+    private static void deadlineExpiredException(HttpServerExchange exchange, DeadlineExpiredException exception) {
+        if (exception instanceof DeadlineExpiredException.Internal) {
+            log.error("internal deadline exceeded", exception);
+        } else {
+            log.error("deadline exceeded", exception);
+        }
+        // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
+        DeadlineExpiredReasons.encodeToResponse(
+                exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
@@ -321,6 +337,21 @@ public enum ConjureExceptions implements ExceptionHandler {
         @Override
         public void setHeader(HttpServerExchange exchange, String headerName, String headerValue) {
             exchange.getResponseHeaders().put(HttpString.tryFromString(headerName), headerValue);
+        }
+    }
+
+    private enum UndertowDeadlineReasonResponseEncodingAdapter
+            implements DeadlineExpiredReasons.ResponseEncodingAdapter<HttpServerExchange> {
+        INSTANCE;
+
+        @Override
+        public void setHeader(HttpServerExchange exchange, String headerName, String headerValue) {
+            exchange.getResponseHeaders().put(HttpString.tryFromString(headerName), headerValue);
+        }
+
+        @Override
+        public void setStatus(HttpServerExchange exchange, int status) {
+            writeResponse(exchange, Optional.empty(), status);
         }
     }
 }

@@ -4,7 +4,7 @@ types:
     ExampleExternalReference:
       base-type: string
       external:
-        java: test.api.ExampleExternalReference
+        java: nongenerated.com.palantir.product.api.ExampleExternalReference
     ExternalLong:
       base-type: safelong
       external:
@@ -532,3 +532,6 @@ types:
           u98: string
           u99: string
           u100: string
+      NestedOptionalSetExample:
+        fields:
+          set: set<set<optional<string>>>

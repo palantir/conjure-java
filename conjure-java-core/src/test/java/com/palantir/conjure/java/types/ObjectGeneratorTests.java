@@ -41,207 +41,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public final class ObjectGeneratorTests {
 
-    private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
-
     @TempDir
     public File tempDir;
-
-    @Test
-    public void testObjectGenerator_allExamples() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .useImmutableBytes(true)
-                                .strictObjects(true)
-                                .nonNullCollections(true)
-                                .excludeEmptyOptionals(true)
-                                .unionsWithUnknownValues(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_byteBufferCompatibility() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .excludeEmptyOptionals(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_allExamples_with_prefix() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .packagePrefix("test.prefix")
-                                .excludeEmptyOptionals(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_stagedBuilder() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-staged-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .useStagedBuilders(true)
-                                .excludeEmptyOptionals(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_strictStagedBuilder() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-strict-staged-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .useStrictStagedBuilders(true)
-                                .excludeEmptyOptionals(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_noStaticFactory() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types-no-static-factory.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
-                                Options.builder().preferObjectBuilders(true).build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_stagedBuilderAndStrictStagedBuilder() throws IOException {
-        // Check that setting enabling staged and strict staged builders is equivalent to only enabling strict staged
-        // builders.
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-strict-staged-types.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .useStagedBuilders(true)
-                                .useStrictStagedBuilders(true)
-                                .excludeEmptyOptionals(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_excludeEmptyCollections() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/exclude-empty-collections.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .excludeEmptyCollections(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_primitiveCollections() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/primitive-collections.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .excludeEmptyCollections(true)
-                                .nonNullCollections(true)
-                                .useStagedBuilders(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_primitiveCollectionsStrictStaged() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/primitive-collections-strict.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .excludeEmptyCollections(true)
-                                .nonNullCollections(true)
-                                .useStrictStagedBuilders(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_defensiveCollectionAliasesNonNull() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-defensive-alias-collections.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .defensiveCollectionAliases(true)
-                                .nonNullCollections(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    @Test
-    public void testObjectGenerator_defensiveCollectionAliases() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-defensive-alias-collections.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .packagePrefix("test.defensive.collections")
-                                .defensiveCollectionAliases(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
 
     @Test
     public void testConjureImports() throws IOException {
@@ -267,23 +74,6 @@ public final class ObjectGeneratorTests {
         assertThat(new File(src, "com/palantir/foundry/catalog/api/datasets/BackingFileSystem.java"))
                 .doesNotExist();
         assertThat(new File(src, "test/api/StringExample.java")).doesNotExist();
-    }
-
-    @Test
-    public void testConjureErrors() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/example-errors.yml"),
-                new File("src/test/resources/example-errors-other.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ErrorGenerator(Options.builder()
-                                .useImmutableBytes(true)
-                                .excludeEmptyOptionals(true)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
     @Test
@@ -316,36 +106,6 @@ public final class ObjectGeneratorTests {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot use UNSAFE type com.palantir.product.UnsafeAlias "
                         + "as a SAFE parameter in error Name -> field");
-    }
-
-    @Test
-    public void testStrictFalse() throws IOException {
-        ConjureDefinition def =
-                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types-strict-objects.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .useImmutableBytes(true)
-                                .strictObjects(false)
-                                .jetbrainsContractAnnotations(true)
-                                .build())))
-                .emit(def, tempDir);
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
-    private void assertThatFilesAreTheSame(List<Path> files, String referenceFilesFolder) throws IOException {
-        for (Path file : files) {
-            Path relativized = tempDir.toPath().relativize(file);
-            Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                // help make shrink-wrapping output sane
-                Files.createDirectories(expectedFile.getParent());
-                Files.deleteIfExists(expectedFile);
-                Files.copy(file, expectedFile);
-            }
-            assertThat(file).hasSameContentAs(expectedFile);
-        }
     }
 
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {

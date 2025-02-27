@@ -10,6 +10,7 @@ com.palantir.conjure.java.api:* = 2.56.0
 com.palantir.conjure.java.runtime:* = 8.7.0
 com.palantir.conjure.verification:* = 0.19.0
 com.palantir.conjure:* = 4.50.0
+com.palantir.deadlines:* = 0.8.0
 com.palantir.dialogue:* = 3.135.0
 com.palantir.goethe:* = 0.14.0
 com.palantir.human-readable-types:* = 1.7.0
@@ -39,6 +40,7 @@ org.junit.jupiter:* = 5.10.2
 org.mockito:* = 5.11.0
 org.slf4j:* = 1.7.36
 org.wildfly.common:wildfly-common = 1.7.0.Final
+jakarta.ws.rs:jakarta.ws.rs-api = 4.0.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
