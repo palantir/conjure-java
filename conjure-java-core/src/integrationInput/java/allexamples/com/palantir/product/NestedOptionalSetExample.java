@@ -107,7 +107,7 @@ public final class NestedOptionalSetExample {
             return this;
         }
 
-        @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder set(@Nonnull Iterable<? extends Set<Optional<String>>> set) {
             checkNotBuilt();
             this.set = ConjureCollections.newNonNullSet(Preconditions.checkNotNull(set, "set cannot be null"));
