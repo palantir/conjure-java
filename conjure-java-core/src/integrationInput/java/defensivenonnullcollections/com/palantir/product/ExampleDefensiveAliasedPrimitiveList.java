@@ -2,6 +2,7 @@ package defensivenonnullcollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +64,8 @@ public final class ExampleDefensiveAliasedPrimitiveList {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExampleDefensiveAliasedPrimitiveList of(@Nonnull List<Double> value) {
-        return new ExampleDefensiveAliasedPrimitiveList(value);
+        return new ExampleDefensiveAliasedPrimitiveList(
+                ConjureCollections.newNonNullDoubleList(Preconditions.checkNotNull(value, "value cannot be null")));
     }
 
     public static ExampleDefensiveAliasedPrimitiveList empty() {

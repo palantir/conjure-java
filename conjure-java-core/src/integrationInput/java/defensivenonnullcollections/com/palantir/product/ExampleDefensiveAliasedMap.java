@@ -1,9 +1,12 @@
 package defensivenonnullcollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,8 +64,10 @@ public final class ExampleDefensiveAliasedMap {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static ExampleDefensiveAliasedMap of(@Nonnull Map<String, Boolean> value) {
-        return new ExampleDefensiveAliasedMap(value);
+    public static ExampleDefensiveAliasedMap of(
+            @Nonnull @JsonSetter(contentNulls = Nulls.FAIL) Map<String, Boolean> value) {
+        return new ExampleDefensiveAliasedMap(
+                new LinkedHashMap<>(Preconditions.checkNotNull(value, "value cannot be null")));
     }
 
     public static ExampleDefensiveAliasedMap empty() {

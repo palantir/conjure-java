@@ -308,7 +308,7 @@ public final class TestCases {
                     .docs("Generate objects with the defensive collections and non null collections flags enabled.")
                     .files(Path.of("defensive-collections.yml"))
                     .options(Options.builder()
-                            .defensiveCollections(false) // Creating initial objects so we can see diff
+                            .defensiveCollections(true)
                             .nonNullCollections(true)
                             .build())
                     .generatorTypes(List.of(GeneratorType.OBJECT))
@@ -318,7 +318,7 @@ public final class TestCases {
                     .docs("Generate objects with just the defensive collections flag enabled.")
                     .files(Path.of("defensive-collections.yml"))
                     .options(Options.builder()
-                            .defensiveCollections(false) // Creating initial objects so we can see diff
+                            .defensiveCollections(true)
                             .nonNullCollections(false)
                             .build())
                     .generatorTypes(List.of(GeneratorType.OBJECT))

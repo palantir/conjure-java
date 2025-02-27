@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -64,7 +65,8 @@ public final class ExampleDefensiveAliasedMapOptionalValue {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExampleDefensiveAliasedMapOptionalValue of(@Nonnull Map<String, Optional<String>> value) {
-        return new ExampleDefensiveAliasedMapOptionalValue(value);
+        return new ExampleDefensiveAliasedMapOptionalValue(
+                new LinkedHashMap<>(Preconditions.checkNotNull(value, "value cannot be null")));
     }
 
     public static ExampleDefensiveAliasedMapOptionalValue empty() {

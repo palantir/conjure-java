@@ -2,6 +2,7 @@ package defensivenullablecollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,8 @@ public final class ExampleDefensiveAliasedListOptionalValue {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExampleDefensiveAliasedListOptionalValue of(@Nonnull List<Optional<String>> value) {
-        return new ExampleDefensiveAliasedListOptionalValue(value);
+        return new ExampleDefensiveAliasedListOptionalValue(
+                ConjureCollections.newList(Preconditions.checkNotNull(value, "value cannot be null")));
     }
 
     public static ExampleDefensiveAliasedListOptionalValue empty() {

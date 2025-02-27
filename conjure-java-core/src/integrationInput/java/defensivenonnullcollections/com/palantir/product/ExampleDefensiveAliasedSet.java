@@ -2,6 +2,7 @@ package defensivenonnullcollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.Set;
@@ -62,7 +63,8 @@ public final class ExampleDefensiveAliasedSet {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExampleDefensiveAliasedSet of(@Nonnull Set<Integer> value) {
-        return new ExampleDefensiveAliasedSet(value);
+        return new ExampleDefensiveAliasedSet(
+                ConjureCollections.newNonNullSet(Preconditions.checkNotNull(value, "value cannot be null")));
     }
 
     public static ExampleDefensiveAliasedSet empty() {
