@@ -233,11 +233,11 @@ public final class ConjureJavaCli implements Runnable {
         private boolean preferObjectBuilders;
 
         @CommandLine.Option(
-                names = "--defensiveCollectionAliases",
+                names = "--defensiveCollections",
                 defaultValue = "false",
-                description = "When combined with --nonNullCollections, will fail to construct aliases of collections "
-                        + "with null values.")
-        private boolean defensiveCollectionAliases;
+                description = " Makes immutable copies of collections for union and alias types, respecting the " +
+                        "--nonNullCollections flag.")
+        private boolean defensiveCollections;
 
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
@@ -310,7 +310,7 @@ public final class ConjureJavaCli implements Runnable {
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
                             .preferObjectBuilders(preferObjectBuilders)
-                            .defensiveCollectionAliases(defensiveCollectionAliases)
+                            .defensiveCollections(defensiveCollections)
                             .build())
                     .build();
         }

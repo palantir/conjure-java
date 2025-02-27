@@ -188,7 +188,7 @@ public interface Options {
     }
 
     @Value.Default
-    default boolean defensiveCollectionAliases() {
+    default boolean defensiveCollections() {
         return false;
     }
 
@@ -196,7 +196,8 @@ public interface Options {
 
     Optional<String> apiVersion();
 
-    class Builder extends ImmutableOptions.Builder {}
+    class Builder extends ImmutableOptions.Builder {
+    }
 
     static Builder builder() {
         return new Builder();

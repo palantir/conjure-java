@@ -52,8 +52,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Exclude static factory methods from generated objects with one or more fields. Note that for 
                      objects without any fields, this will still generate the static factory method.
         --defensiveCollectionAliases
-                     When combined with --nonNullCollections, will fail to construct aliases of collections with
-                     null values.
+                      Makes immutable copies of collections for union and alias types, respecting the 
+                      --nonNullCollections flag.
 
 ### Known Tag Values
 
