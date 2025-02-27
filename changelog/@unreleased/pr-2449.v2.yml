@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Sets recursively handle inspecting inner types.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2449

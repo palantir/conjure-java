@@ -970,7 +970,7 @@ public final class BeanBuilderGenerator {
 
             @Override
             public Boolean visitSet(SetType value) {
-                return value.getItemType().accept(TypeVisitor.IS_OPTIONAL);
+                return isOptionalInnerType(value.getItemType());
             }
 
             @Override
