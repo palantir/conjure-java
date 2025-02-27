@@ -21,23 +21,16 @@ import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.dialogue.clients.DialogueClients;
-import com.palantir.product.EmptyPathService;
-import com.palantir.product.EteBinaryServiceBlocking;
-import com.palantir.product.EteServiceBlocking;
-import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogue.com.palantir.product.EteBinaryServiceBlocking;
+import dialogue.com.palantir.product.EteServiceBlocking;
+import dialogue.com.palantir.product.StringAliasExample;
 import io.dropwizard.Configuration;
 import io.dropwizard.logging.ExternalLoggingFactory;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
@@ -49,15 +42,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeAll;
+import jersey.com.palantir.product.EmptyPathService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -183,19 +173,6 @@ public final class JerseyServiceEteTest extends TestBase {
     public void test_optionalBinary_empty() throws IOException {
         Optional<InputStream> response = binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader"));
         assertThat(response).isNotPresent();
-    }
-
-    @BeforeAll
-    public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new JerseyServiceGenerator(Options.builder()
-                                .requireNotNullAuthAndBodyParams(true)
-                                .build())))
-                .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {

@@ -34,6 +34,10 @@ idea {
 
 tasks.checkstyleIntegrationInput.enabled = false
 
+tasks.named('compileIntegrationInputJava', JavaCompile) {
+    options.errorprone.disable 'IncubatingMethod'
+}
+
 dependencies {
     api project(':conjure-undertow-lib')
     api 'com.fasterxml.jackson.core:jackson-databind'
@@ -112,6 +116,7 @@ dependencies {
     integrationInputImplementation 'javax.validation:validation-api'
     integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
     integrationInputImplementation 'org.jetbrains:annotations'
+    integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'

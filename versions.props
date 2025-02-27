@@ -40,6 +40,7 @@ org.junit.jupiter:* = 5.10.2
 org.mockito:* = 5.11.0
 org.slf4j:* = 1.7.36
 org.wildfly.common:wildfly-common = 1.7.0.Final
+jakarta.ws.rs:jakarta.ws.rs-api = 4.0.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson

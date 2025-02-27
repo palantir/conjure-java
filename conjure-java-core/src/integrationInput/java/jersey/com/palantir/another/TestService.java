@@ -1,0 +1,298 @@
+package jersey.com.palantir.another;
+
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.Incubating;
+import com.palantir.logsafe.Safe;
+import com.palantir.ri.ResourceIdentifier;
+import com.palantir.tokens.auth.AuthHeader;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.StreamingOutput;
+import jersey.com.palantir.product.AliasedString;
+import jersey.com.palantir.product.CreateDatasetRequest;
+import jersey.com.palantir.product.datasets.BackingFileSystem;
+import jersey.com.palantir.product.datasets.Dataset;
+
+/** A Markdown description of the service. */
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Path("/")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+public interface TestService {
+    /** Returns a mapping from file system id to backing file system configuration. */
+    @GET
+    @Path("catalog/fileSystems")
+    @Incubating
+    @ClientEndpoint(method = "GET", path = "/catalog/fileSystems")
+    Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
+    /** foo $bar */
+    @POST
+    @Path("catalog/datasets")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets")
+    Dataset createDataset(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @HeaderParam("Test-Header") String testHeaderArg,
+            @NotNull CreateDatasetRequest request);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
+    Optional<Dataset> getDataset(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/raw")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
+    StreamingOutput getRawData(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/raw-aliased")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
+    StreamingOutput getAliasedRawData(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/raw-maybe")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
+    Optional<StreamingOutput> maybeGetRawData(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") @Nonnull ResourceIdentifier datasetRid);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/string-aliased")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
+    AliasedString getAliasedString(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    @POST
+    @Path("catalog/datasets/upload-raw")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
+    void uploadRawData(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @Safe @NotNull InputStream input);
+
+    @POST
+    @Path("catalog/datasets/upload-raw-aliased")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
+    void uploadAliasedRawData(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull InputStream input);
+
+    /** @param datasetRid A valid dataset resource identifier. */
+    @GET
+    @Path("catalog/datasets/{datasetRid}/branches")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
+    Set<String> getBranches(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @GET
+    @Path("catalog/datasets/{datasetRid}/branchesDeprecated")
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
+    Set<String> getBranchesDeprecated(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @GET
+    @Path("catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
+    Set<String> getBranchesDeprecatedForRemoval(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
+    Optional<String> resolveBranch(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid,
+            @PathParam("branch") String branch);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/testParam")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
+    Optional<String> testParam(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
+    @POST
+    @Path("catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    int testQueryParams(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @QueryParam("different") ResourceIdentifier something,
+            @QueryParam("implicit") ResourceIdentifier implicit,
+            @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @QueryParam("setEnd") Set<String> setEnd,
+            @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
+            @NotNull String query);
+
+    @POST
+    @Path("catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    void testNoResponseQueryParams(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("different") ResourceIdentifier something,
+            @QueryParam("implicit") ResourceIdentifier implicit,
+            @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @QueryParam("setEnd") Set<String> setEnd,
+            @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
+            @NotNull String query);
+
+    @GET
+    @Path("catalog/boolean")
+    @ClientEndpoint(method = "GET", path = "/catalog/boolean")
+    boolean testBoolean(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
+    @GET
+    @Path("catalog/double")
+    @ClientEndpoint(method = "GET", path = "/catalog/double")
+    double testDouble(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
+    @GET
+    @Path("catalog/integer")
+    @ClientEndpoint(method = "GET", path = "/catalog/integer")
+    int testInteger(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
+    @POST
+    @Path("catalog/optional")
+    @ClientEndpoint(method = "POST", path = "/catalog/optional")
+    Optional<String> testPostOptional(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, Optional<String> maybeString);
+
+    @GET
+    @Path("catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    void testOptionalIntegerAndDouble(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("maybeInteger") OptionalInt maybeInteger,
+            @QueryParam("maybeDouble") OptionalDouble maybeDouble);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/strings")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    void getForStrings(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid,
+            @QueryParam("strings") Set<AliasedString> strings);
+
+    @Deprecated
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    default int testQueryParams(
+            AuthHeader authHeader, @Safe ResourceIdentifier something, ResourceIdentifier implicit, String query) {
+        return testQueryParams(
+                authHeader, something, implicit, Optional.empty(), Collections.emptySet(), Optional.empty(), query);
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    default int testQueryParams(
+            AuthHeader authHeader,
+            @Safe ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            String query) {
+        return testQueryParams(
+                authHeader, something, implicit, optionalMiddle, Collections.emptySet(), Optional.empty(), query);
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    default int testQueryParams(
+            AuthHeader authHeader,
+            @Safe ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            String query) {
+        return testQueryParams(authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    default void testNoResponseQueryParams(
+            AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit, String query) {
+        testNoResponseQueryParams(
+                authHeader, something, implicit, Optional.empty(), Collections.emptySet(), Optional.empty(), query);
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    default void testNoResponseQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            String query) {
+        testNoResponseQueryParams(
+                authHeader, something, implicit, optionalMiddle, Collections.emptySet(), Optional.empty(), query);
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    default void testNoResponseQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            String query) {
+        testNoResponseQueryParams(authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    default void testOptionalIntegerAndDouble(AuthHeader authHeader) {
+        testOptionalIntegerAndDouble(authHeader, OptionalInt.empty(), OptionalDouble.empty());
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    default void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger) {
+        testOptionalIntegerAndDouble(authHeader, maybeInteger, OptionalDouble.empty());
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    default void getForStrings(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid) {
+        getForStrings(authHeader, datasetRid, Collections.emptySet());
+    }
+}

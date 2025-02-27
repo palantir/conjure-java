@@ -20,8 +20,8 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.EnumExample;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.product.EnumExample;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;

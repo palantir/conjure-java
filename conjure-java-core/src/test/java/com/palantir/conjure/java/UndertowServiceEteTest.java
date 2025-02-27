@@ -22,40 +22,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.services.UndertowServiceGenerator;
-import com.palantir.conjure.java.types.CheckedErrorGenerator;
-import com.palantir.conjure.java.types.ErrorGenerator;
-import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
-import com.palantir.product.EmptyPathService;
-import com.palantir.product.EmptyPathServiceEndpoints;
-import com.palantir.product.EteBinaryServiceBlocking;
-import com.palantir.product.EteBinaryServiceEndpoints;
-import com.palantir.product.EteServiceAsync;
-import com.palantir.product.EteServiceBlocking;
-import com.palantir.product.EteServiceEndpoints;
-import com.palantir.product.NestedStringAliasExample;
-import com.palantir.product.SimpleEnum;
-import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogue.com.palantir.product.EteBinaryServiceBlocking;
+import dialogue.com.palantir.product.EteServiceAsync;
+import dialogue.com.palantir.product.EteServiceBlocking;
+import dialogue.com.palantir.product.NestedStringAliasExample;
+import dialogue.com.palantir.product.SimpleEnum;
+import dialogue.com.palantir.product.StringAliasExample;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -70,17 +57,14 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import jersey.com.palantir.product.EmptyPathService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -88,6 +72,9 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import undertow.com.palantir.product.EmptyPathServiceEndpoints;
+import undertow.com.palantir.product.EteBinaryServiceEndpoints;
+import undertow.com.palantir.product.EteServiceEndpoints;
 
 // MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
@@ -298,14 +285,16 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportBody() {
-        StringAliasExample expected = StringAliasExample.of("value");
+        allexamples.com.palantir.product.StringAliasExample expected =
+                allexamples.com.palantir.product.StringAliasExample.of("value");
         assertThat(client.notNullBodyExternalImport(AuthHeader.valueOf("authHeader"), expected))
                 .isEqualTo(expected);
     }
 
     @Test
     public void testExternalImportOptionalQueryParameter() {
-        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        Optional<allexamples.com.palantir.product.StringAliasExample> expected =
+                Optional.of(allexamples.com.palantir.product.StringAliasExample.of("value"));
         assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), expected))
                 .isEqualTo(expected);
     }
@@ -318,7 +307,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportOptionalBody() {
-        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        Optional<allexamples.com.palantir.product.StringAliasExample> expected =
+                Optional.of(allexamples.com.palantir.product.StringAliasExample.of("value"));
         assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), expected))
                 .isEqualTo(expected);
     }
@@ -554,44 +544,6 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isInstanceOfSatisfying(RemoteException.class, re -> {
                     assertThat(re.getStatus()).isEqualTo(422);
                 });
-    }
-
-    @BeforeAll
-    public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml"),
-                new File("src/test/resources/alias-test-service.yml"),
-                new File("src/test/resources/external-long-test-service.yml"),
-                new File("src/test/resources/example-endpoint-errors.yml")));
-        Options options = Options.builder()
-                .undertowServicePrefix(true)
-                .nonNullCollections(true)
-                .excludeEmptyOptionals(true)
-                .jetbrainsContractAnnotations(true)
-                .build();
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(
-                                new UndertowServiceGenerator(options),
-                                new ObjectGenerator(options),
-                                new ErrorGenerator(options),
-                                new CheckedErrorGenerator(options)))
-                .emit(def, folder);
-        validateGeneratedOutput(files, Paths.get("src/integrationInput/java"));
-    }
-
-    private static void validateGeneratedOutput(List<Path> files, Path outputDir) throws IOException {
-        for (Path file : files) {
-            Path relativePath = folder.toPath().relativize(file);
-            Path output = outputDir.resolve(relativePath);
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.createDirectories(relativePath.getParent());
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {

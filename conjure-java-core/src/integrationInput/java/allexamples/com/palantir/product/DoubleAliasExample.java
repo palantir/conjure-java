@@ -1,0 +1,83 @@
+package allexamples.com.palantir.product;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.math.BigDecimal;
+import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
+public final class DoubleAliasExample implements Comparable<DoubleAliasExample> {
+    private final double value;
+
+    private DoubleAliasExample(double value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public double get() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+        return this == other || (other instanceof DoubleAliasExample && equalTo((DoubleAliasExample) other));
+    }
+
+    private boolean equalTo(DoubleAliasExample other) {
+        return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Double.hashCode(this.value);
+    }
+
+    @Override
+    public int compareTo(DoubleAliasExample other) {
+        return Double.compare(value, other.get());
+    }
+
+    public static DoubleAliasExample valueOf(String value) {
+        return of(Double.parseDouble(value));
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static DoubleAliasExample of(double value) {
+        return new DoubleAliasExample(value);
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static DoubleAliasExample of(long value) {
+        return new DoubleAliasExample((double) value);
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static DoubleAliasExample of(int value) {
+        return new DoubleAliasExample((double) value);
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    private static DoubleAliasExample of(BigDecimal value) {
+        return new DoubleAliasExample(value.doubleValue());
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    public static DoubleAliasExample of(String value) {
+        switch (value) {
+            case "NaN":
+                return DoubleAliasExample.of(Double.NaN);
+            case "Infinity":
+                return DoubleAliasExample.of(Double.POSITIVE_INFINITY);
+            case "-Infinity":
+                return DoubleAliasExample.of(Double.NEGATIVE_INFINITY);
+            default:
+                throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+        }
+    }
+}

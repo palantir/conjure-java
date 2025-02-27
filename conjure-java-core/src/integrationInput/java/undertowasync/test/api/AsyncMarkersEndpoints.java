@@ -1,0 +1,192 @@
+package undertowasync.test.api;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class AsyncMarkersEndpoints implements UndertowService {
+    private final AsyncMarkers delegate;
+
+    private AsyncMarkersEndpoints(AsyncMarkers delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(AsyncMarkers delegate) {
+        return new AsyncMarkersEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(
+                new AsyncMarkerEndpoint(runtime, delegate),
+                new AsyncTagEndpoint(runtime, delegate),
+                new SyncEndpoint(runtime, delegate));
+    }
+
+    private static final class AsyncMarkerEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final AsyncMarkers delegate;
+
+        private final Serializer<String> serializer;
+
+        AsyncMarkerEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            ListenableFuture<String> result = delegate.asyncMarker();
+            runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(String result, HttpServerExchange exchange) throws IOException {
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/async/marker";
+        }
+
+        @Override
+        public String serviceName() {
+            return "AsyncMarkers";
+        }
+
+        @Override
+        public String name() {
+            return "asyncMarker";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class AsyncTagEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("server-async");
+
+        private final UndertowRuntime runtime;
+
+        private final AsyncMarkers delegate;
+
+        private final Serializer<String> serializer;
+
+        AsyncTagEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+        }
+
+        @Override
+        public Set<String> tags() {
+            return TAGS;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            ListenableFuture<String> result = delegate.asyncTag();
+            runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(String result, HttpServerExchange exchange) throws IOException {
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/async/tag";
+        }
+
+        @Override
+        public String serviceName() {
+            return "AsyncMarkers";
+        }
+
+        @Override
+        public String name() {
+            return "asyncTag";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class SyncEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final AsyncMarkers delegate;
+
+        private final Serializer<String> serializer;
+
+        SyncEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            String result = delegate.sync();
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/sync";
+        }
+
+        @Override
+        public String serviceName() {
+            return "AsyncMarkers";
+        }
+
+        @Override
+        public String name() {
+            return "sync";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

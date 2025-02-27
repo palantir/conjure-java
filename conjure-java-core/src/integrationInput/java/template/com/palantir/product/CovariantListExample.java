@@ -14,7 +14,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
-import test.api.ExampleExternalReference;
+import nongenerated.com.palantir.product.api.ExampleExternalReference;
 
 @JsonDeserialize(builder = CovariantListExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")

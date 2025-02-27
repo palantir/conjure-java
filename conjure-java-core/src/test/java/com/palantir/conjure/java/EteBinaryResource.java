@@ -21,7 +21,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.product.EteBinaryService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +29,7 @@ import java.util.Optional;
 import java.util.Random;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
+import jersey.com.palantir.product.EteBinaryService;
 
 final class EteBinaryResource implements EteBinaryService {
     @Override

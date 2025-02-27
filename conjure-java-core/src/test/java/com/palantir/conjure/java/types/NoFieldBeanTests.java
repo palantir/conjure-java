@@ -18,9 +18,9 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import allexamples.com.palantir.product.EmptyObjectExample;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.product.EmptyObjectExample;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 

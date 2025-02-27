@@ -18,11 +18,11 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import allexamples.com.palantir.product.ExternalLongUnionExample;
+import allexamples.com.palantir.product.SafeExternalLongAlias;
+import allexamples.com.palantir.product.SafeExternalLongExample;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
-import com.palantir.product.ExternalLongUnionExample;
-import com.palantir.product.SafeExternalLongExample;
-import com.palantir.product.UndertowExternalLongTestService;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
-import test.prefix.com.palantir.product.SafeExternalLongAlias;
+import undertow.com.palantir.product.UndertowExternalLongTestService;
 
 public class ExternalImportSafetyTests {
     @Test
@@ -80,12 +80,13 @@ public class ExternalImportSafetyTests {
         assertMethodParamHasAnnotation(ExternalLongUnionExample.class, "unknown", "type", Safe.class);
 
         Class<?> visitor = getExactlyMatchingSubclass(
-                ExternalLongUnionExample.class, "com.palantir.product.ExternalLongUnionExample$Visitor");
+                ExternalLongUnionExample.class, "allexamples.com.palantir.product.ExternalLongUnionExample$Visitor");
         assertMethodParamHasAnnotation(visitor, "visitSafeLong", "value", Safe.class);
         assertMethodParamHasAnnotation(visitor, "visitUnknown", "unknownType", Safe.class);
 
         Class<?> visitorBuilder = getExactlyMatchingSubclass(
-                ExternalLongUnionExample.class, "com.palantir.product.ExternalLongUnionExample$VisitorBuilder");
+                ExternalLongUnionExample.class,
+                "allexamples.com.palantir.product.ExternalLongUnionExample$VisitorBuilder");
         assertFieldTypeParamHasAnnotation(visitorBuilder, "safeLongVisitor", "Long", Safe.class);
         assertFieldTypeParamHasAnnotation(visitorBuilder, "unknownVisitor", "String", Safe.class);
         assertMethodParamWithTypeParameterHasAnnotation(visitorBuilder, "safeLong", "safeLong", "Long", Safe.class);

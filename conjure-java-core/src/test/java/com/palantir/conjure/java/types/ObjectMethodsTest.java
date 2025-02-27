@@ -19,10 +19,10 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatComparable;
 
+import allexamples.com.palantir.product.MapExample;
+import allexamples.com.palantir.product.OptionalAlias;
+import allexamples.com.palantir.product.StringExample;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.product.MapExample;
-import com.palantir.product.OptionalAlias;
-import com.palantir.product.StringExample;
 import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

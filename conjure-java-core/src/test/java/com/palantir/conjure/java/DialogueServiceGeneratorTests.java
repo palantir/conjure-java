@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
@@ -39,33 +40,13 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class DialogueServiceGeneratorTests extends TestBase {
+    private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
     @TempDir
     public File folder;
 
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {
         return new String(Files.readAllBytes(Paths.get(srcDir.getPath(), clazz)), StandardCharsets.UTF_8);
-    }
-
-    @Test
-    public void testServiceGeneration_exampleService() throws IOException {
-        testServiceGeneration("example-service");
-    }
-
-    @Test
-    public void testServiceGeneration_cookieService() throws IOException {
-        testServiceGeneration("cookie-service");
-    }
-
-    @Test
-    void testPrefixedServices() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new DialogueServiceGenerator(
-                                Options.builder().packagePrefix("test.prefix").build())))
-                .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".dialogue.prefix");
     }
 
     @Test
@@ -85,40 +66,16 @@ public final class DialogueServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    public void generateEteServices() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/cookie-service.yml"),
-                new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new DialogueServiceGenerator(
-                                Options.builder().apiVersion("1.2.3").build())))
-                .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
-    }
-
-    @Test
-    public void testServiceGeneration_excludeDialogueAsyncInterfaces() {
-        List<Path> files = getGeneratedFilesForDef(
-                "example-service",
-                Options.builder().excludeDialogueAsyncInterfaces(true).build());
-        List<String> fileNames =
-                files.stream().map(Path::getFileName).map(Path::toString).toList();
-        assertThat(fileNames).noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
-    }
-
-    private void testServiceGeneration(String conjureFile) throws IOException {
-        validateGeneratorOutput(
-                getGeneratedFilesForDef(conjureFile, Options.empty()),
-                Paths.get("src/test/resources/test/api"),
-                ".dialogue");
-    }
-
-    private List<Path> getGeneratedFilesForDef(String conjureFile, Options options) {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        return new GenerationCoordinator(
-                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(options)))
-                .emit(def, folder);
+    public void testServiceGeneration_excludeDialogueAsyncInterfaces() throws IOException {
+        Path testCaseDirectory = Paths.get(REFERENCE_FILES_FOLDER, "excludeasyncinterfaces");
+        try (Stream<Path> filePaths = Files.walk(testCaseDirectory)) {
+            List<String> fileNames = filePaths
+                    .filter(Files::isRegularFile)
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .toList();
+            assertThat(fileNames)
+                    .noneMatch(name -> name.toLowerCase(Locale.ROOT).contains("async"));
+        }
     }
 }
