@@ -3,7 +3,7 @@ types:
     default-package: com.palantir.product
     objects:
       ExampleDefensiveAliasedString:
-        docs: This class should remain unchanged with the defensiveCollectionAliases flag.
+        docs: This class should remain unchanged with the defensiveCollections flag.
         alias: string
       ExampleDefensiveAliasedList:
         alias: list<string>
@@ -17,3 +17,12 @@ types:
         alias: map<string, optional<string>>
       ExampleDefensiveAliasedListOptionalValue:
         alias: list<optional<string>>
+      ExampleDefensiveCollectionUnion:
+        union:
+          string: string
+          list: list<string>
+          primitiveList: list<double>
+          listOptional: list<optional<string>>
+          set: set<string>
+          map: map<string, string>
+          mapOptional: map<string, optional<string>>

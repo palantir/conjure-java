@@ -235,8 +235,8 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--defensiveCollections",
                 defaultValue = "false",
-                description = " Makes immutable copies of collections for union and alias types, respecting the " +
-                        "--nonNullCollections flag.")
+                description = " Makes immutable copies of collections for union and alias types, respecting the "
+                        + "--nonNullCollections flag.")
         private boolean defensiveCollections;
 
         @SuppressWarnings("unused")

@@ -65,8 +65,7 @@ import javax.lang.model.element.Modifier;
 
 public final class AliasGenerator {
 
-    private AliasGenerator() {
-    }
+    private AliasGenerator() {}
 
     @SuppressWarnings("checkstyle:MethodLength")
     public static JavaFile generateAliasType(
@@ -255,9 +254,7 @@ public final class AliasGenerator {
     private static ParameterSpec getAliasFactoryParameter(
             Type aliasType, TypeName aliasTypeName, TypeMapper typeMapper, Options options) {
         ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
-        if (options.defensiveCollections()
-                && options.nonNullCollections()
-                && aliasType.accept(TypeVisitor.IS_MAP)) {
+        if (options.defensiveCollections() && options.nonNullCollections() && aliasType.accept(TypeVisitor.IS_MAP)) {
             AnnotationSpec.Builder contentNullAnnotation = AnnotationSpec.builder(JsonSetter.class);
             if (TypeFunctions.isOptionalInnerType(aliasType, typeMapper)) {
                 contentNullAnnotation.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
@@ -475,7 +472,7 @@ public final class AliasGenerator {
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
                     .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
                     .flatMap(type -> valueOfFactoryMethod(
-                            type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper, options)
+                                    type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper, options)
                             .map(ignored -> {
                                 ClassName className = ClassName.get(
                                         Packages.getPrefixedPackage(
@@ -489,11 +486,11 @@ public final class AliasGenerator {
             ExternalReference reference = conjureType.accept(MoreVisitors.EXTERNAL);
             // Only generate valueOf methods for external type imports if the fallback type is valid
             if (valueOfFactoryMethod(
-                    reference.getFallback(),
-                    typeMapper.getClassName(reference.getFallback()),
-                    typeMapper,
-                    options)
-                    .isPresent()
+                                    reference.getFallback(),
+                                    typeMapper.getClassName(reference.getFallback()),
+                                    typeMapper,
+                                    options)
+                            .isPresent()
                     && hasValueOfFactory(reference.getExternalReference())
                     && Primitives.isPrimitive(aliasTypeName)) {
                 return Optional.of(CodeBlock.builder()

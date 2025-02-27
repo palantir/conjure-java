@@ -196,8 +196,7 @@ public interface Options {
 
     Optional<String> apiVersion();
 
-    class Builder extends ImmutableOptions.Builder {
-    }
+    class Builder extends ImmutableOptions.Builder {}
 
     static Builder builder() {
         return new Builder();

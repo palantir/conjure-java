@@ -303,6 +303,26 @@ public final class TestCases {
                             .build())
                     .generatorTypes(List.of(GeneratorType.UNDERTOW, GeneratorType.DIALOGUE, GeneratorType.OBJECT))
                     .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("defensive-non-null-collections")
+                    .docs("Generate objects with the defensive collections and non null collections flags enabled.")
+                    .files(Path.of("defensive-collections.yml"))
+                    .options(Options.builder()
+                            .defensiveCollections(false) // Creating initial objects so we can see diff
+                            .nonNullCollections(true)
+                            .build())
+                    .generatorTypes(List.of(GeneratorType.OBJECT))
+                    .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("defensive-nullable-collections")
+                    .docs("Generate objects with just the defensive collections flag enabled.")
+                    .files(Path.of("defensive-collections.yml"))
+                    .options(Options.builder()
+                            .defensiveCollections(false) // Creating initial objects so we can see diff
+                            .nonNullCollections(false)
+                            .build())
+                    .generatorTypes(List.of(GeneratorType.OBJECT))
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {
