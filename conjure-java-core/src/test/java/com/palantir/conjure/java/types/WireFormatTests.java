@@ -48,6 +48,7 @@ import allexamples.com.palantir.product.StringAliasTwo;
 import allexamples.com.palantir.product.StringExample;
 import allexamples.com.palantir.product.UnionTypeExample;
 import allexamples.com.palantir.product.UuidExample;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +61,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -625,6 +627,24 @@ public final class WireFormatTests {
                         .optionalAlias(OptionalAlias.of(Optional.of("")))
                         .build()))
                 .isEqualTo("{\"optionalAlias\":\"\"}");
+    }
+
+    @Test
+    void testRoundTripSetOrderPreservation_alias() throws JsonProcessingException {
+        SetAlias original = SetAlias.of(new LinkedHashSet<>(List.of("one", "two", "3", "four", "5")));
+        String originalJson = mapper.writeValueAsString(original);
+        SetAlias recreated = mapper.readValue(originalJson, SetAlias.class);
+        String recreatedJson = mapper.writeValueAsString(recreated);
+        assertThat(recreatedJson).isEqualTo(originalJson);
+    }
+
+    @Test
+    void testRoundTripSetOrderPreservation_union() throws JsonProcessingException {
+        UnionTypeExample original = UnionTypeExample.set(new LinkedHashSet<>(List.of("one", "two", "3", "four", "5")));
+        String originalJson = mapper.writeValueAsString(original);
+        UnionTypeExample recreated = mapper.readValue(originalJson, UnionTypeExample.class);
+        String recreatedJson = mapper.writeValueAsString(recreated);
+        assertThat(recreatedJson).isEqualTo(originalJson);
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
