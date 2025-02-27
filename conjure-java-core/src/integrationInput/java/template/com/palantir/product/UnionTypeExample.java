@@ -18,6 +18,7 @@ import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -86,7 +87,7 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new ListWrapper(value));
     }
 
-    public static UnionTypeExample set(Set<String> value) {
+    public static UnionTypeExample set(LinkedHashSet<String> value) {
         return new UnionTypeExample(new SetWrapper(value));
     }
 
