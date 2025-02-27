@@ -51,6 +51,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --preferObjectBuilders
                      Exclude static factory methods from generated objects with one or more fields. Note that for 
                      objects without any fields, this will still generate the static factory method.
+	--generateDialogueEndpointErrorResultTypes
+		     For endpoints with errors associated with them, generate methods which return result types in Dialogue clients
 
 ### Known Tag Values
 
