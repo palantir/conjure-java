@@ -532,3 +532,6 @@ types:
           u98: string
           u99: string
           u100: string
+      NestedOptionalSetExample:
+        fields:
+          set: set<set<optional<string>>>
