@@ -2,8 +2,10 @@ package allexamples.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,7 +62,7 @@ public final class SetAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static SetAlias of(@Nonnull Set<String> value) {
+    public static SetAlias of(@Nonnull @JsonDeserialize(as = LinkedHashSet.class) Set<String> value) {
         return new SetAlias(value);
     }
 

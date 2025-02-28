@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -43,6 +44,7 @@ import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -61,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -743,6 +746,7 @@ public final class UnionGenerator {
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(
                                                     wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
+                                            .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
                                             .build())
                                     .addStatement(
@@ -790,6 +794,15 @@ public final class UnionGenerator {
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field) {
+        if (field.getType().accept(TypeVisitor.IS_SET)) {
+            return List.of(AnnotationSpec.builder(JsonDeserialize.class)
+                    .addMember("as", "$T.class", LinkedHashSet.class)
+                    .build());
+        }
+        return List.of();
     }
 
     private static AnnotationSpec wrapperConstructorParameterAnnotation(
