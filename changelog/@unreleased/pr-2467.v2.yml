@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Instructs Jackson to deserialize sets within union and alias types
+    as `LinkedHashSet`s in order to preserve element ordering.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2467
