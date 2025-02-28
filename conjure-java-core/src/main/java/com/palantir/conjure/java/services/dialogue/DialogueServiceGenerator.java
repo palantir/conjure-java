@@ -106,7 +106,7 @@ public final class DialogueServiceGenerator implements Generator {
             DialogueInterfaceGenerator interfaceGenerator,
             StaticFactoryMethodGenerator blockingGenerator,
             StaticFactoryMethodGenerator asyncGenerator) {
-        List<JavaFile> files = new ArrayList<>(/* initialCapacity= */ 4);
+        List<JavaFile> files = new ArrayList<>(/* initialCapacity= */ 3);
         if (!serviceDef.getEndpoints().isEmpty()) {
             files.add(endpointsGenerator.endpointsClass(serviceDef));
         }

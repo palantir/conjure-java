@@ -47,15 +47,15 @@ public final class ReturnTypeMapper {
         return ParameterizedTypeName.get(LISTENABLE_FUTURE, Primitives.box(baseType(type)));
     }
 
-    public boolean isBinaryOrOptionalBinary(TypeName returnType) {
+    boolean isBinaryOrOptionalBinary(TypeName returnType) {
         return isBinary(returnType) || isOptionalBinary(returnType);
     }
 
-    public boolean isOptionalBinary(TypeName returnType) {
+    boolean isOptionalBinary(TypeName returnType) {
         return returnType.equals(baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))));
     }
 
-    public boolean isBinary(TypeName returnType) {
+    boolean isBinary(TypeName returnType) {
         return returnType.equals(baseType(Type.primitive(PrimitiveType.BINARY)));
     }
 }
