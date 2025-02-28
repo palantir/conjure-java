@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -87,7 +88,7 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new ListWrapper(value));
     }
 
-    public static UnionTypeExample set(LinkedHashSet<String> value) {
+    public static UnionTypeExample set(Set<String> value) {
         return new UnionTypeExample(new SetWrapper(value));
     }
 
@@ -1173,7 +1174,9 @@ public final class UnionTypeExample {
         private final Set<String> value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private SetWrapper(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull Set<String> value) {
+        private SetWrapper(
+                @JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @JsonDeserialize(as = LinkedHashSet.class) @Nonnull
+                        Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
             this.value = value;
         }
