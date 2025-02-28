@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -51,6 +52,7 @@ import com.palantir.logsafe.Safe;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -134,7 +136,7 @@ public final class AliasGenerator {
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
+                .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName))
                 .returns(thisClass)
                 .addStatement("return new $T(value)", thisClass)
                 .build());
@@ -226,6 +228,19 @@ public final class AliasGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static ParameterSpec getAliasFactoryParameter(Type aliasType, TypeName aliasTypeName) {
+        ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
+        if (aliasType.accept(TypeVisitor.IS_SET)) {
+            AnnotationSpec deserializeAnnotation = AnnotationSpec.builder(JsonDeserialize.class)
+                    .addMember("as", "$T.class", LinkedHashSet.class)
+                    .build();
+            return parameterSpec.toBuilder()
+                    .addAnnotation(deserializeAnnotation)
+                    .build();
+        }
+        return parameterSpec;
     }
 
     private static void addEmptyMethod(TypeSpec.Builder spec, TypeName thisClass) {
