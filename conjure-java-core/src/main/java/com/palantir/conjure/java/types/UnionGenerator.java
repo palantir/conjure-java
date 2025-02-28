@@ -746,7 +746,7 @@ public final class UnionGenerator {
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(
                                                     wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
-                                            .addAnnotations(maybeAddDeserializationAnnotation(memberTypeDef))
+                                            .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
                                             .build())
                                     .addStatement(
@@ -796,7 +796,7 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    private static Iterable<AnnotationSpec> maybeAddDeserializationAnnotation(FieldDefinition field) {
+    private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field) {
         if (field.getType().accept(TypeVisitor.IS_SET)) {
             return List.of(AnnotationSpec.builder(JsonDeserialize.class)
                     .addMember("as", "$T.class", LinkedHashSet.class)
