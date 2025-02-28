@@ -647,6 +647,16 @@ public final class WireFormatTests {
         assertThat(recreatedJson).isEqualTo(originalJson);
     }
 
+    @Test
+    void testRoundTripSetOrderPreservation_union_alias() throws JsonProcessingException {
+        UnionTypeExample original =
+                UnionTypeExample.setAlias(SetAlias.of(new LinkedHashSet<>(List.of("one", "two", "3", "four", "5"))));
+        String originalJson = mapper.writeValueAsString(original);
+        UnionTypeExample recreated = mapper.readValue(originalJson, UnionTypeExample.class);
+        String recreatedJson = mapper.writeValueAsString(recreated);
+        assertThat(recreatedJson).isEqualTo(originalJson);
+    }
+
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
         @Override
         public Integer visitStringExample(StringExample stringExampleValue) {
