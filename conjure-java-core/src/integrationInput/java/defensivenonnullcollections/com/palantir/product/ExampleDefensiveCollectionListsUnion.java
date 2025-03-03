@@ -1,4 +1,4 @@
-package defensivenullablecollections.com.palantir.product;
+package defensivenonnullcollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -20,18 +20,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-public final class ExampleDefensiveCollectionUnion {
+public final class ExampleDefensiveCollectionListsUnion {
     private final Base value;
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    private ExampleDefensiveCollectionUnion(Base value) {
+    private ExampleDefensiveCollectionListsUnion(Base value) {
         this.value = value;
     }
 
@@ -40,39 +39,20 @@ public final class ExampleDefensiveCollectionUnion {
         return value;
     }
 
-    public static ExampleDefensiveCollectionUnion string(String value) {
-        return new ExampleDefensiveCollectionUnion(new StringWrapper(value));
+    public static ExampleDefensiveCollectionListsUnion list(List<String> value) {
+        return new ExampleDefensiveCollectionListsUnion(new ListWrapper(value));
     }
 
-    public static ExampleDefensiveCollectionUnion list(List<String> value) {
-        return new ExampleDefensiveCollectionUnion(new ListWrapper(value));
+    public static ExampleDefensiveCollectionListsUnion primitiveList(List<Double> value) {
+        return new ExampleDefensiveCollectionListsUnion(new PrimitiveListWrapper(value));
     }
 
-    public static ExampleDefensiveCollectionUnion primitiveList(List<Double> value) {
-        return new ExampleDefensiveCollectionUnion(new PrimitiveListWrapper(value));
+    public static ExampleDefensiveCollectionListsUnion listOptional(List<Optional<String>> value) {
+        return new ExampleDefensiveCollectionListsUnion(new ListOptionalWrapper(value));
     }
 
-    public static ExampleDefensiveCollectionUnion listOptional(List<Optional<String>> value) {
-        return new ExampleDefensiveCollectionUnion(new ListOptionalWrapper(value));
-    }
-
-    public static ExampleDefensiveCollectionUnion set(Set<String> value) {
-        return new ExampleDefensiveCollectionUnion(new SetWrapper(value));
-    }
-
-    public static ExampleDefensiveCollectionUnion map(Map<String, String> value) {
-        return new ExampleDefensiveCollectionUnion(new MapWrapper(value));
-    }
-
-    public static ExampleDefensiveCollectionUnion mapOptional(Map<String, Optional<String>> value) {
-        return new ExampleDefensiveCollectionUnion(new MapOptionalWrapper(value));
-    }
-
-    public static ExampleDefensiveCollectionUnion unknown(@Safe String type, Object value) {
+    public static ExampleDefensiveCollectionListsUnion unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
-            case "string":
-                throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: string");
             case "list":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: list");
@@ -82,17 +62,8 @@ public final class ExampleDefensiveCollectionUnion {
             case "listOptional":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: listOptional");
-            case "set":
-                throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: set");
-            case "map":
-                throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: map");
-            case "mapOptional":
-                throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: mapOptional");
             default:
-                return new ExampleDefensiveCollectionUnion(
+                return new ExampleDefensiveCollectionListsUnion(
                         new UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
     }
@@ -104,11 +75,11 @@ public final class ExampleDefensiveCollectionUnion {
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof ExampleDefensiveCollectionUnion
-                        && equalTo((ExampleDefensiveCollectionUnion) other));
+                || (other instanceof ExampleDefensiveCollectionListsUnion
+                        && equalTo((ExampleDefensiveCollectionListsUnion) other));
     }
 
-    private boolean equalTo(ExampleDefensiveCollectionUnion other) {
+    private boolean equalTo(ExampleDefensiveCollectionListsUnion other) {
         return this.value.equals(other.value);
     }
 
@@ -119,23 +90,15 @@ public final class ExampleDefensiveCollectionUnion {
 
     @Override
     public String toString() {
-        return "ExampleDefensiveCollectionUnion{value: " + value + '}';
+        return "ExampleDefensiveCollectionListsUnion{value: " + value + '}';
     }
 
     public interface Visitor<T> {
-        T visitString(String value);
-
         T visitList(List<String> value);
 
         T visitPrimitiveList(List<Double> value);
 
         T visitListOptional(List<Optional<String>> value);
-
-        T visitSet(Set<String> value);
-
-        T visitMap(Map<String, String> value);
-
-        T visitMapOptional(Map<String, Optional<String>> value);
 
         T visitUnknown(@Safe String unknownType);
 
@@ -147,26 +110,14 @@ public final class ExampleDefensiveCollectionUnion {
     private static final class VisitorBuilder<T>
             implements ListStageVisitorBuilder<T>,
                     ListOptionalStageVisitorBuilder<T>,
-                    MapStageVisitorBuilder<T>,
-                    MapOptionalStageVisitorBuilder<T>,
                     PrimitiveListStageVisitorBuilder<T>,
-                    SetStageVisitorBuilder<T>,
-                    StringStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private Function<List<String>, T> listVisitor;
 
         private Function<List<Optional<String>>, T> listOptionalVisitor;
 
-        private Function<Map<String, String>, T> mapVisitor;
-
-        private Function<Map<String, Optional<String>>, T> mapOptionalVisitor;
-
         private Function<List<Double>, T> primitiveListVisitor;
-
-        private Function<Set<String>, T> setVisitor;
-
-        private Function<String, T> stringVisitor;
 
         private Function<String, T> unknownVisitor;
 
@@ -178,7 +129,7 @@ public final class ExampleDefensiveCollectionUnion {
         }
 
         @Override
-        public MapStageVisitorBuilder<T> listOptional(
+        public PrimitiveListStageVisitorBuilder<T> listOptional(
                 @Nonnull Function<List<Optional<String>>, T> listOptionalVisitor) {
             Preconditions.checkNotNull(listOptionalVisitor, "listOptionalVisitor cannot be null");
             this.listOptionalVisitor = listOptionalVisitor;
@@ -186,38 +137,9 @@ public final class ExampleDefensiveCollectionUnion {
         }
 
         @Override
-        public MapOptionalStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor) {
-            Preconditions.checkNotNull(mapVisitor, "mapVisitor cannot be null");
-            this.mapVisitor = mapVisitor;
-            return this;
-        }
-
-        @Override
-        public PrimitiveListStageVisitorBuilder<T> mapOptional(
-                @Nonnull Function<Map<String, Optional<String>>, T> mapOptionalVisitor) {
-            Preconditions.checkNotNull(mapOptionalVisitor, "mapOptionalVisitor cannot be null");
-            this.mapOptionalVisitor = mapOptionalVisitor;
-            return this;
-        }
-
-        @Override
-        public SetStageVisitorBuilder<T> primitiveList(@Nonnull Function<List<Double>, T> primitiveListVisitor) {
+        public UnknownStageVisitorBuilder<T> primitiveList(@Nonnull Function<List<Double>, T> primitiveListVisitor) {
             Preconditions.checkNotNull(primitiveListVisitor, "primitiveListVisitor cannot be null");
             this.primitiveListVisitor = primitiveListVisitor;
-            return this;
-        }
-
-        @Override
-        public StringStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor) {
-            Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
-            this.setVisitor = setVisitor;
-            return this;
-        }
-
-        @Override
-        public UnknownStageVisitorBuilder<T> string(@Nonnull Function<String, T> stringVisitor) {
-            Preconditions.checkNotNull(stringVisitor, "stringVisitor cannot be null");
-            this.stringVisitor = stringVisitor;
             return this;
         }
 
@@ -232,7 +154,7 @@ public final class ExampleDefensiveCollectionUnion {
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
-                        "Unknown variant of the 'ExampleDefensiveCollectionUnion' union",
+                        "Unknown variant of the 'ExampleDefensiveCollectionListsUnion' union",
                         SafeArg.of("unknownType", unknownType));
             };
             return this;
@@ -242,11 +164,7 @@ public final class ExampleDefensiveCollectionUnion {
         public Visitor<T> build() {
             final Function<List<String>, T> listVisitor = this.listVisitor;
             final Function<List<Optional<String>>, T> listOptionalVisitor = this.listOptionalVisitor;
-            final Function<Map<String, String>, T> mapVisitor = this.mapVisitor;
-            final Function<Map<String, Optional<String>>, T> mapOptionalVisitor = this.mapOptionalVisitor;
             final Function<List<Double>, T> primitiveListVisitor = this.primitiveListVisitor;
-            final Function<Set<String>, T> setVisitor = this.setVisitor;
-            final Function<String, T> stringVisitor = this.stringVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
@@ -260,28 +178,8 @@ public final class ExampleDefensiveCollectionUnion {
                 }
 
                 @Override
-                public T visitMap(Map<String, String> value) {
-                    return mapVisitor.apply(value);
-                }
-
-                @Override
-                public T visitMapOptional(Map<String, Optional<String>> value) {
-                    return mapOptionalVisitor.apply(value);
-                }
-
-                @Override
                 public T visitPrimitiveList(List<Double> value) {
                     return primitiveListVisitor.apply(value);
-                }
-
-                @Override
-                public T visitSet(Set<String> value) {
-                    return setVisitor.apply(value);
-                }
-
-                @Override
-                public T visitString(String value) {
-                    return stringVisitor.apply(value);
                 }
 
                 @Override
@@ -297,28 +195,12 @@ public final class ExampleDefensiveCollectionUnion {
     }
 
     public interface ListOptionalStageVisitorBuilder<T> {
-        MapStageVisitorBuilder<T> listOptional(@Nonnull Function<List<Optional<String>>, T> listOptionalVisitor);
-    }
-
-    public interface MapStageVisitorBuilder<T> {
-        MapOptionalStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor);
-    }
-
-    public interface MapOptionalStageVisitorBuilder<T> {
-        PrimitiveListStageVisitorBuilder<T> mapOptional(
-                @Nonnull Function<Map<String, Optional<String>>, T> mapOptionalVisitor);
+        PrimitiveListStageVisitorBuilder<T> listOptional(
+                @Nonnull Function<List<Optional<String>>, T> listOptionalVisitor);
     }
 
     public interface PrimitiveListStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> primitiveList(@Nonnull Function<List<Double>, T> primitiveListVisitor);
-    }
-
-    public interface SetStageVisitorBuilder<T> {
-        StringStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor);
-    }
-
-    public interface StringStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> string(@Nonnull Function<String, T> stringVisitor);
+        UnknownStageVisitorBuilder<T> primitiveList(@Nonnull Function<List<Double>, T> primitiveListVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
@@ -338,62 +220,13 @@ public final class ExampleDefensiveCollectionUnion {
             visible = true,
             defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
-        @JsonSubTypes.Type(StringWrapper.class),
         @JsonSubTypes.Type(ListWrapper.class),
         @JsonSubTypes.Type(PrimitiveListWrapper.class),
-        @JsonSubTypes.Type(ListOptionalWrapper.class),
-        @JsonSubTypes.Type(SetWrapper.class),
-        @JsonSubTypes.Type(MapWrapper.class),
-        @JsonSubTypes.Type(MapOptionalWrapper.class)
+        @JsonSubTypes.Type(ListOptionalWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
-    }
-
-    @JsonTypeName("string")
-    private static final class StringWrapper implements Base {
-        private final String value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private StringWrapper(@JsonSetter("string") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "string cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty(value = "type", index = 0)
-        private String getType() {
-            return "string";
-        }
-
-        @JsonProperty("string")
-        private String getValue() {
-            return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitString(value);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof StringWrapper && equalTo((StringWrapper) other));
-        }
-
-        private boolean equalTo(StringWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "StringWrapper{value: " + value + '}';
-        }
     }
 
     @JsonTypeName("list")
@@ -530,143 +363,6 @@ public final class ExampleDefensiveCollectionUnion {
         @Override
         public String toString() {
             return "ListOptionalWrapper{value: " + value + '}';
-        }
-    }
-
-    @JsonTypeName("set")
-    private static final class SetWrapper implements Base {
-        private final Set<String> value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private SetWrapper(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull Set<String> value) {
-            Preconditions.checkNotNull(value, "set cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty(value = "type", index = 0)
-        private String getType() {
-            return "set";
-        }
-
-        @JsonProperty("set")
-        private Set<String> getValue() {
-            return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitSet(value);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof SetWrapper && equalTo((SetWrapper) other));
-        }
-
-        private boolean equalTo(SetWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "SetWrapper{value: " + value + '}';
-        }
-    }
-
-    @JsonTypeName("map")
-    private static final class MapWrapper implements Base {
-        private final Map<String, String> value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private MapWrapper(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull Map<String, String> value) {
-            Preconditions.checkNotNull(value, "map cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty(value = "type", index = 0)
-        private String getType() {
-            return "map";
-        }
-
-        @JsonProperty("map")
-        private Map<String, String> getValue() {
-            return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitMap(value);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof MapWrapper && equalTo((MapWrapper) other));
-        }
-
-        private boolean equalTo(MapWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "MapWrapper{value: " + value + '}';
-        }
-    }
-
-    @JsonTypeName("mapOptional")
-    private static final class MapOptionalWrapper implements Base {
-        private final Map<String, Optional<String>> value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private MapOptionalWrapper(
-                @JsonSetter(value = "mapOptional", nulls = Nulls.AS_EMPTY) @Nonnull
-                        Map<String, Optional<String>> value) {
-            Preconditions.checkNotNull(value, "mapOptional cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty(value = "type", index = 0)
-        private String getType() {
-            return "mapOptional";
-        }
-
-        @JsonProperty("mapOptional")
-        private Map<String, Optional<String>> getValue() {
-            return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitMapOptional(value);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof MapOptionalWrapper && equalTo((MapOptionalWrapper) other));
-        }
-
-        private boolean equalTo(MapOptionalWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
-        public String toString() {
-            return "MapOptionalWrapper{value: " + value + '}';
         }
     }
 

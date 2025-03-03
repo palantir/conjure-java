@@ -18,6 +18,7 @@ package com.palantir.conjure.java.types;
 
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import allexamples.com.palantir.product.EmptyUnionTypeExample;
@@ -29,8 +30,11 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 
@@ -116,6 +120,28 @@ class UnionTests {
                 .unknown_(value -> failOnKnownType("unknown", value))
                 .unknown((type, value) -> verifyUnknownType(type, value, expectedUnknownType, expectedUnknownValue))
                 .build());
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsCopiesCollection_set() {
+        Set<String> original = Set.of("foo", "bar");
+        Set<String> mutableSet = new HashSet<>(original);
+
+        ExampleDefensiveCollectionSetsUnion union = ExampleDefensiveCollectionSetsUnion.set(mutableSet);
+        mutableSet.add("update");
+        assertThat(union).isEqualTo(ExampleDefensiveCollectionSetsUnion.set(original));
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsIsImmutable_set() {
+        Set<String> original = Set.of("foo", "bar");
+        ExampleDefensiveCollectionSetsUnion union = ExampleDefensiveCollectionSetsUnion.set(original);
+
+        Set<String> internal = union.accept(ExampleDefensiveCollectionSetsUnion.Visitor.<Set<String>>builder()
+                .set(set -> set)
+                .throwOnUnknown()
+                .build());
+        assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.add("update"));
     }
 
     private Void failOnKnownType(String type, Object value) {

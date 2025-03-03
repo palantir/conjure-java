@@ -17,12 +17,15 @@ types:
         alias: map<string, optional<string>>
       ExampleDefensiveAliasedListOptionalValue:
         alias: list<optional<string>>
-      ExampleDefensiveCollectionUnion:
+      ExampleDefensiveCollectionListsUnion:
         union:
-          string: string
           list: list<string>
           primitiveList: list<double>
           listOptional: list<optional<string>>
+      ExampleDefensiveCollectionSetsUnion:
+        union:
           set: set<string>
+      ExampleDefensiveCollectionMapsUnion:
+        union:
           map: map<string, string>
           mapOptional: map<string, optional<string>>
