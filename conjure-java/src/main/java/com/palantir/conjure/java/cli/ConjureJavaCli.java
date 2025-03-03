@@ -232,6 +232,13 @@ public final class ConjureJavaCli implements Runnable {
                         + "that for objects without any fields, this will still generate the static factory method.")
         private boolean preferObjectBuilders;
 
+        @CommandLine.Option(
+                names = "--generateDialogueEndpointErrorResultTypes",
+                defaultValue = "false",
+                description =
+                        "Generate result types in Dialogue clients for endpoints with errors associated with them.")
+        private boolean generateDialogueEndpointErrorResultTypes;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -303,6 +310,7 @@ public final class ConjureJavaCli implements Runnable {
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
                             .preferObjectBuilders(preferObjectBuilders)
+                            .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
                             .build())
                     .build();
         }

@@ -1,4 +1,4 @@
-package undertow.com.palantir.product;
+package dialogueendpointresulttypes.com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.tokens.auth.AuthHeader;
@@ -6,7 +6,7 @@ import java.util.Optional;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface UndertowErrorService {
+public interface ErrorService {
     /**
      * @apiNote {@code POST /errors/basic}
      * @throws TestServerErrors.InvalidArgument
@@ -25,13 +25,13 @@ public interface UndertowErrorService {
      * @throws TestServerErrors.InvalidArgument
      * @throws TestServerErrors.NotFound Something was not found.
      * @throws EndpointSpecificTwoServerErrors.DifferentNamespace
-     * @throws undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage
+     * @throws dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage
      * @throws TestServerErrors.ComplicatedParameters
      */
     String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
             throws TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
                     EndpointSpecificTwoServerErrors.DifferentNamespace,
-                    undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
+                    dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
                     TestServerErrors.ComplicatedParameters;
 
     /**

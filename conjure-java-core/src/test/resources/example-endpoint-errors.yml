@@ -3,6 +3,18 @@ types:
     importedErrors: errors-for-endpoints.yml
   definitions:
     default-package: com.palantir.product
+    objects:
+      OptionalBinaryResponseMode:
+        values:
+          - PRESENT
+          - ABSENT
+          - ERROR
+      StringAlias:
+        alias: string
+      ComplicatedObject:
+        fields:
+          fieldOne: list<string>
+          fieldTwo: optional<StringAlias>
     errors:
       InvalidArgument:
         namespace: Test
@@ -16,25 +28,36 @@ types:
         code: NOT_FOUND
         safe-args:
           resource: string
+      ComplicatedParameters:
+        namespace: Test
+        code: INTERNAL
+        safe-args:
+          complicatedObjectMap: map<integer, ComplicatedObject>
 services:
   ErrorService:
     name: Error Service
     package: com.palantir.product
     default-auth: header
-    base-path: /base
+    base-path: /errors
     endpoints:
       testBasicError:
-        http: GET /basic
+        http: POST /basic
+        args:
+          shouldThrowError: boolean
         returns: string
         errors:
           - InvalidArgument
       testImportedError:
-        http: GET /imported
+        http: POST /imported
+        args:
+          shouldThrowError: boolean
         returns: string
         errors:
           - importedErrors.EndpointError
       testMultipleErrorsAndPackages:
-        http: GET /multiple
+        http: POST /multiple
+        args:
+          errorToThrow: optional<string>
         returns: string
         errors:
           - InvalidArgument
@@ -42,3 +65,24 @@ services:
             docs: Something was not found.
           - importedErrors.DifferentNamespace
           - importedErrors.DifferentPackage
+          - ComplicatedParameters
+      testEmptyBody:
+        http: POST /empty
+        args:
+          shouldThrowError: boolean
+        errors:
+          - InvalidArgument
+      testBinary:
+        http: POST /binary
+        args:
+          shouldThrowError: boolean
+        returns: binary
+        errors:
+          - InvalidArgument
+      testOptionalBinary:
+        http: POST /optional-binary
+        args:
+          mode: OptionalBinaryResponseMode
+        returns: optional<binary>
+        errors:
+          - InvalidArgument

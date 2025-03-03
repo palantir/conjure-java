@@ -187,6 +187,21 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Warning: This is an experimental feature that may cause compilation failures!
+     * <p>
+     * If enabled, endpoints that have associated errors will return a result type: a sealed interface permitting
+     * subclasses for the endpoint's return value, and each endpoint error. Each endpoint error is a subclass of
+     * {@link com.palantir.dialogue.EndpointError}.
+     *<p>
+     * Producing JARs with this feature enabled will result in a compile-time break when consumers bump their dependency
+     * on the JAR. This is because the return types of every endpoint with associated errors will change.
+     */
+    @Value.Default
+    default boolean generateDialogueEndpointErrorResultTypes() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

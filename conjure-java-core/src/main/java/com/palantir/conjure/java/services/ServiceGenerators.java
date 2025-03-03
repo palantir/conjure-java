@@ -70,7 +70,7 @@ public final class ServiceGenerators {
                             ClassName.get(
                                     Packages.getPrefixedPackage(
                                             endpointError.getError().getPackage(), maybePackagePrefix),
-                                    ErrorGenerationUtils.errorExceptionsClassName(
+                                    ErrorGenerationUtils.serverErrorsClassName(
                                             endpointError.getError().getNamespace()),
                                     endpointError.getError().getName()),
                             endpointError

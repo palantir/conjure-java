@@ -1,4 +1,4 @@
-package undertow.com.palantir.product;
+package dialogueendpointresulttypes.com.palantir.product;
 
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.logsafe.Safe;
@@ -8,7 +8,6 @@ import com.palantir.logsafe.UnsafeArg;
 import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
-import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
 public final class TestServerErrors {
@@ -46,7 +45,6 @@ public final class TestServerErrors {
      * @param shouldThrow Cause the method to throw when true
      * @param complicatedObjectMap
      */
-    @Contract("true, _ -> fail")
     public static void throwIfComplicatedParameters(
             boolean shouldThrow, @Safe Map<Integer, ComplicatedObject> complicatedObjectMap)
             throws ComplicatedParameters {
@@ -62,7 +60,6 @@ public final class TestServerErrors {
      * @param field
      * @param value
      */
-    @Contract("true, _, _ -> fail")
     public static void throwIfInvalidArgument(boolean shouldThrow, @Safe String field, @Unsafe String value)
             throws InvalidArgument {
         if (shouldThrow) {
@@ -76,7 +73,6 @@ public final class TestServerErrors {
      * @param shouldThrow Cause the method to throw when true
      * @param resource
      */
-    @Contract("true, _ -> fail")
     public static void throwIfNotFound(boolean shouldThrow, @Safe String resource) throws NotFound {
         if (shouldThrow) {
             throw notFound(resource);

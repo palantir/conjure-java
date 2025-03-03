@@ -303,6 +303,22 @@ public final class TestCases {
                             .build())
                     .generatorTypes(List.of(GeneratorType.UNDERTOW, GeneratorType.DIALOGUE, GeneratorType.OBJECT))
                     .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("dialogue-endpoint-result-types")
+                    .docs("Test generating dialogue interfaces with methods which return endpoint results")
+                    .files(List.of(
+                            Path.of("src/test/resources/example-endpoint-errors.yml"),
+                            Path.of("src/test/resources/errors-for-endpoints.yml")))
+                    .options(Options.builder()
+                            .generateDialogueEndpointErrorResultTypes(true)
+                            .build())
+                    .generatorTypes(List.of(
+                            GeneratorType.OBJECT,
+                            GeneratorType.ERROR,
+                            GeneratorType.CHECKED_ERROR,
+                            GeneratorType.DIALOGUE,
+                            GeneratorType.UNDERTOW))
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {

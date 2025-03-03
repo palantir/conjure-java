@@ -1,8 +1,12 @@
-package undertow.com.palantir.product;
+package dialogueendpointresulttypes.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.Unsafe;
+import java.util.Map;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
@@ -34,4 +38,12 @@ public final class TestErrors {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return NOT_FOUND.name().equals(remoteException.getError().errorName());
     }
+
+    public static record ComplicatedParametersParameters(
+            @JsonProperty("complicatedObjectMap") @Safe Map<Integer, ComplicatedObject> complicatedObjectMap) {}
+
+    public static record InvalidArgumentParameters(
+            @JsonProperty("field") @Safe String field, @JsonProperty("value") @Unsafe String value) {}
+
+    public static record NotFoundParameters(@JsonProperty("resource") @Safe String resource) {}
 }
