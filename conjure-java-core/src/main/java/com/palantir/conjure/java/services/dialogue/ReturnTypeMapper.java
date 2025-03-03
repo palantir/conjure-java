@@ -25,23 +25,23 @@ import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import java.util.Optional;
 
-public final class ReturnTypeMapper {
+final class ReturnTypeMapper {
     private static final ClassName LISTENABLE_FUTURE = ClassName.get(ListenableFuture.class);
     private final TypeMapper returnTypes;
 
-    public ReturnTypeMapper(TypeMapper returnTypes) {
+    ReturnTypeMapper(TypeMapper returnTypes) {
         this.returnTypes = returnTypes;
     }
 
-    public TypeName baseType(Type type) {
+    TypeName baseType(Type type) {
         return returnTypes.getClassName(type);
     }
 
-    public TypeName baseType(Optional<Type> type) {
+    TypeName baseType(Optional<Type> type) {
         return type.map(this::baseType).orElse(TypeName.VOID);
     }
 
-    public TypeName async(Optional<Type> type) {
+    TypeName async(Optional<Type> type) {
         return ParameterizedTypeName.get(LISTENABLE_FUTURE, Primitives.box(baseType(type)));
     }
 }
