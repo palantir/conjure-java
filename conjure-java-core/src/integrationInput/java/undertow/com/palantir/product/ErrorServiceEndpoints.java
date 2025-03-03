@@ -163,7 +163,8 @@ public final class ErrorServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange)
                 throws IOException, TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
                         EndpointSpecificTwoServerErrors.DifferentNamespace,
-                        undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage {
+                        undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
+                        TestServerErrors.ComplicatedParameters {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Optional<String> errorToThrow = deserializer.deserialize(exchange);
             String result = delegate.testMultipleErrorsAndPackages(authHeader, errorToThrow);

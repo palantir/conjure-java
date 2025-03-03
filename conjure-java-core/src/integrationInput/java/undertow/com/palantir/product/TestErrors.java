@@ -7,12 +7,21 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class TestErrors {
+    public static final ErrorType COMPLICATED_PARAMETERS =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Test:ComplicatedParameters");
+
     public static final ErrorType INVALID_ARGUMENT =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Test:InvalidArgument");
 
     public static final ErrorType NOT_FOUND = ErrorType.create(ErrorType.Code.NOT_FOUND, "Test:NotFound");
 
     private TestErrors() {}
+
+    /** Returns true if the {@link RemoteException} is named Test:ComplicatedParameters */
+    public static boolean isComplicatedParameters(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return COMPLICATED_PARAMETERS.name().equals(remoteException.getError().errorName());
+    }
 
     /** Returns true if the {@link RemoteException} is named Test:InvalidArgument */
     public static boolean isInvalidArgument(RemoteException remoteException) {

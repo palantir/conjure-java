@@ -18,16 +18,21 @@ package dialogueendpointresulttypes.com.palantir.conjure.java;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogueendpointresulttypes.com.palantir.product.ComplicatedObject;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificServerErrors;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificServerErrors.EndpointError;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoServerErrors;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoServerErrors.DifferentNamespace;
 import dialogueendpointresulttypes.com.palantir.product.ErrorService;
 import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
+import dialogueendpointresulttypes.com.palantir.product.StringAlias;
 import dialogueendpointresulttypes.com.palantir.product.TestServerErrors;
+import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.ComplicatedParameters;
 import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.InvalidArgument;
 import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.NotFound;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 interface ErrorResource {
@@ -53,7 +58,8 @@ interface ErrorResource {
         @Override
         public String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
                 throws InvalidArgument, NotFound, DifferentNamespace,
-                        dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage {
+                        dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
+                        ComplicatedParameters {
             if (errorToThrow.isPresent()) {
                 String error = errorToThrow.get();
                 switch (error) {
@@ -66,6 +72,9 @@ interface ErrorResource {
                     case "differentPackage":
                         throw dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors
                                 .differentPackage();
+                    case "complicatedParameters":
+                        throw TestServerErrors.complicatedParameters(
+                                Map.of(1, ComplicatedObject.of(List.of("string"), StringAlias.of("alias"))));
                     default:
                         throw new IllegalArgumentException("Unknown error: " + error);
                 }

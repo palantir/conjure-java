@@ -24,6 +24,7 @@ import com.palantir.conjure.java.TestBase;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogueendpointresulttypes.com.palantir.product.ComplicatedObject;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificErrors;
 import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoErrors;
 import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking;
@@ -35,6 +36,7 @@ import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking.Tes
 import dialogueendpointresulttypes.com.palantir.product.ErrorServiceBlocking.TestOptionalBinaryResponse;
 import dialogueendpointresulttypes.com.palantir.product.ErrorServiceEndpoints;
 import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
+import dialogueendpointresulttypes.com.palantir.product.StringAlias;
 import dialogueendpointresulttypes.com.palantir.product.TestErrors;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -44,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -161,6 +164,14 @@ public final class UndertowServiceEteTest extends TestBase {
                                     dialogueendpointresulttypes.com.palantir.another.EndpointSpecificErrors
                                             .DIFFERENT_PACKAGE
                                             .name());
+                });
+        assertThat(errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("complicatedParameters")))
+                .isInstanceOfSatisfying(TestMultipleErrorsAndPackagesResponse.ComplicatedParameters.class, error -> {
+                    assertThat(error.getErrorCode())
+                            .isEqualTo(TestErrors.COMPLICATED_PARAMETERS.code().name());
+                    assertThat(error.getErrorName()).isEqualTo(TestErrors.COMPLICATED_PARAMETERS.name());
+                    assertThat(error.getParams()).satisfies(params -> assertThat(params.complicatedObjectMap())
+                            .containsEntry(1, ComplicatedObject.of(List.of("string"), StringAlias.of("alias"))));
                 });
     }
 

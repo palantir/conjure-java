@@ -9,6 +9,12 @@ types:
           - PRESENT
           - ABSENT
           - ERROR
+      StringAlias:
+        alias: string
+      ComplicatedObject:
+        fields:
+          fieldOne: list<string>
+          fieldTwo: optional<StringAlias>
     errors:
       InvalidArgument:
         namespace: Test
@@ -22,6 +28,11 @@ types:
         code: NOT_FOUND
         safe-args:
           resource: string
+      ComplicatedParameters:
+        namespace: Test
+        code: INTERNAL
+        safe-args:
+          complicatedObjectMap: map<integer, ComplicatedObject>
 services:
   ErrorService:
     name: Error Service
@@ -54,6 +65,7 @@ services:
             docs: Something was not found.
           - importedErrors.DifferentNamespace
           - importedErrors.DifferentPackage
+          - ComplicatedParameters
       testEmptyBody:
         http: POST /empty
         args:

@@ -26,11 +26,13 @@ public interface ErrorService {
      * @throws TestServerErrors.NotFound Something was not found.
      * @throws EndpointSpecificTwoServerErrors.DifferentNamespace
      * @throws dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage
+     * @throws TestServerErrors.ComplicatedParameters
      */
     String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
             throws TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
                     EndpointSpecificTwoServerErrors.DifferentNamespace,
-                    dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage;
+                    dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
+                    TestServerErrors.ComplicatedParameters;
 
     /**
      * @apiNote {@code POST /errors/empty}

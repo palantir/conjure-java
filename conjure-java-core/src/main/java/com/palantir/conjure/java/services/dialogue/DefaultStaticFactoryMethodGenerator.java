@@ -120,9 +120,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                                             def.getServiceName().getPackage(), options.packagePrefix()),
                                     className.simpleName(),
                                     ErrorGenerationUtils.endpointResponseResultTypeName(endpoint.getEndpointName())),
-                            endpoint,
-                            endpoint.getEndpointName(),
-                            endpoint.getReturns())
+                            endpoint)
                     .ifPresent(impl::addField);
             impl.addMethod(clientImpl(className, endpoint));
         });
@@ -174,8 +172,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build());
     }
 
-    private Optional<FieldSpec> deserializer(
-            TypeName responseType, EndpointDefinition endpointDef, EndpointName endpointName, Optional<Type> type) {
+    private Optional<FieldSpec> deserializer(TypeName responseType, EndpointDefinition endpointDef) {
+        Optional<Type> type = endpointDef.getReturns();
         TypeName className = Primitives.box(returnTypes.baseType(type));
         boolean generateResultTypes = ErrorGenerationUtils.shouldGenerateResultTypesForEndpoint(
                 options.generateDialogueEndpointErrorResultTypes(), endpointDef);
@@ -194,7 +192,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         ? constructDeserializerWithEndpointErrors(endpointDef, className, responseType)
                         : constructDeserializer(type, className));
 
-        return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
+        return Optional.of(FieldSpec.builder(deserializerType, endpointDef.getEndpointName() + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(initializer)
                 .build());

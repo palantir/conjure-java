@@ -127,6 +127,10 @@ public interface ErrorServiceBlocking {
                                                     .DIFFERENT_PACKAGE
                                                     .name(),
                                             new TypeMarker<TestMultipleErrorsAndPackagesResponse.DifferentPackage>() {})
+                                    .error(
+                                            TestErrors.COMPLICATED_PARAMETERS.name(),
+                                            new TypeMarker<
+                                                    TestMultipleErrorsAndPackagesResponse.ComplicatedParameters>() {})
                                     .build());
 
             private final Serializer<Boolean> testEmptyBodySerializer =
@@ -308,7 +312,8 @@ public interface ErrorServiceBlocking {
                     TestMultipleErrorsAndPackagesResponse.InvalidArgument,
                     TestMultipleErrorsAndPackagesResponse.NotFound,
                     TestMultipleErrorsAndPackagesResponse.DifferentNamespace,
-                    TestMultipleErrorsAndPackagesResponse.DifferentPackage {
+                    TestMultipleErrorsAndPackagesResponse.DifferentPackage,
+                    TestMultipleErrorsAndPackagesResponse.ComplicatedParameters {
         record Success(@JsonValue String value) implements TestMultipleErrorsAndPackagesResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
@@ -367,6 +372,17 @@ public interface ErrorServiceBlocking {
                         errorInstanceId,
                         new dialogueendpointresulttypes.com.palantir.another.EndpointSpecificErrors
                                 .DifferentPackageParameters());
+            }
+        }
+
+        final class ComplicatedParameters extends EndpointError<TestErrors.ComplicatedParametersParameters>
+                implements TestMultipleErrorsAndPackagesResponse {
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+            ComplicatedParameters(
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                    @JsonProperty("parameters") TestErrors.ComplicatedParametersParameters parameters) {
+                super(errorCode, TestErrors.COMPLICATED_PARAMETERS.name(), errorInstanceId, parameters);
             }
         }
     }
