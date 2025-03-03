@@ -51,7 +51,7 @@ public final class ParameterizedConjureGenerationTest {
                 Conjure.parse(testCase.files().stream().map(Path::toFile).toList());
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(), testCase.generators(), testCase.options())
-                .emit(def, tempDir);
+                .emitForTests(def, tempDir);
 
         assertThatFilesAreTheSame(files, testCase);
     }

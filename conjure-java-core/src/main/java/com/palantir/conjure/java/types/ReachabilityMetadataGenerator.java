@@ -39,7 +39,6 @@ public final class ReachabilityMetadataGenerator implements Generator {
         this.packagePrefix = packagePrefix;
     }
 
-    // TODO(pm): generate it in the META-INF/native-image directory
     @Override
     public Stream<GeneratedFile> generate(ConjureDefinition definition) {
         return getPackagesAndTypes(definition).stream()

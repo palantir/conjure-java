@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
-public class GenerationCoordinator {
+public final class GenerationCoordinator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final Executor executor;
     private final Set<Generator> generators;
@@ -64,20 +64,24 @@ public class GenerationCoordinator {
                 .collect(Collectors.toList());
     }
 
+    public List<Path> emitForTests(ConjureDefinition conjureDefinition, File outputDir) {
+        ConjureDefinition definition = new ExternalImportFilter(options).filter(conjureDefinition);
+        return MoreStreams.inCompletionOrder(
+                        generators.stream().flatMap(generator -> generator.generate(definition)),
+                        f -> formatAndEmitForTests(f, outputDir.toPath()),
+                        executor,
+                        Runtime.getRuntime().availableProcessors())
+                .collect(Collectors.toList());
+    }
+
     private static Path formatAndEmit(GeneratedFile generatedFile, Path outputDirectoryPath) {
         if (generatedFile instanceof GeneratedJavaFile generatedJavaFile) {
             return Goethe.formatAndEmit(generatedJavaFile.javaFile(), outputDirectoryPath);
         } else if (generatedFile instanceof GeneratedReachabilityMetadataFile generatedReachabilityMetadataFile) {
             try {
-                Path outputDirectory = outputDirectoryPath;
-                for (String packageComponent :
-                        Splitter.on(".").split(generatedReachabilityMetadataFile.packageName())) {
-                    outputDirectory = outputDirectory.resolve(packageComponent);
-                }
-                Files.createDirectories(outputDirectory);
-                Path output = outputDirectory.resolve("reachability-metadata.json");
-                OBJECT_MAPPER.writeValue(output.toFile(), generatedReachabilityMetadataFile.reachabilityMetadata());
-                return output;
+                return generateReachabilityMetadata(
+                        outputDirectoryPath.resolve("META-INF").resolve("native-image"),
+                        generatedReachabilityMetadataFile);
             } catch (IOException e) {
                 throw new SafeRuntimeException("Failed to emit reachability metadata file", e);
             }
@@ -85,5 +89,32 @@ public class GenerationCoordinator {
             throw new SafeRuntimeException(
                     "Unknown generated file type", SafeArg.of("class", generatedFile.getClass()));
         }
+    }
+
+    private static Path formatAndEmitForTests(GeneratedFile generatedFile, Path outputDirectoryPath) {
+        if (generatedFile instanceof GeneratedJavaFile generatedJavaFile) {
+            return Goethe.formatAndEmit(generatedJavaFile.javaFile(), outputDirectoryPath);
+        } else if (generatedFile instanceof GeneratedReachabilityMetadataFile generatedReachabilityMetadataFile) {
+            try {
+                return generateReachabilityMetadata(outputDirectoryPath, generatedReachabilityMetadataFile);
+            } catch (IOException e) {
+                throw new SafeRuntimeException("Failed to emit reachability metadata file", e);
+            }
+        } else {
+            throw new SafeRuntimeException(
+                    "Unknown generated file type", SafeArg.of("class", generatedFile.getClass()));
+        }
+    }
+
+    private static Path generateReachabilityMetadata(
+            Path outputDir, GeneratedReachabilityMetadataFile generatedReachabilityMetadataFile) throws IOException {
+        Path outputDirectory = outputDir;
+        for (String packageComponent : Splitter.on(".").split(generatedReachabilityMetadataFile.packageName())) {
+            outputDirectory = outputDirectory.resolve(packageComponent);
+        }
+        Files.createDirectories(outputDirectory);
+        Path output = outputDirectory.resolve("reachability-metadata.json");
+        OBJECT_MAPPER.writeValue(output.toFile(), generatedReachabilityMetadataFile.reachabilityMetadata());
+        return output;
     }
 }
