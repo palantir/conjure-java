@@ -17,10 +17,14 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.base.Joiner;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -42,6 +46,22 @@ public final class Expressions {
 
     public static CodeBlock objectArray(Collection<?> args) {
         return CodeBlock.of("new Object[]{" + indexParams(1, args.size() + 1) + "}", args.toArray());
+    }
+
+    public static CodeBlock wrapUnmodifiableCollections(Type type, String fieldName) {
+        return wrapUnmodifiableCollections(type, CodeBlock.of("$L", fieldName));
+    }
+
+    public static CodeBlock wrapUnmodifiableCollections(Type type, CodeBlock codeBlock) {
+        if (type.accept(TypeVisitor.IS_LIST)) {
+            return CodeBlock.of("$T.unmodifiableList($L)", ConjureCollections.class, codeBlock);
+        } else if (type.accept(TypeVisitor.IS_SET)) {
+            return CodeBlock.of("$T.unmodifiableSet($L)", Collections.class, codeBlock);
+        } else if (type.accept(TypeVisitor.IS_MAP)) {
+            return CodeBlock.of("$T.unmodifiableMap($L)", Collections.class, codeBlock);
+        } else {
+            return codeBlock;
+        }
     }
 
     private static Object[] append(Object one, Collection<?> rest) {

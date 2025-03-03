@@ -53,7 +53,6 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
-import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -89,7 +88,7 @@ public final class AliasGenerator {
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
-                .addMethod(createConstructor(aliasTypeName))
+                .addMethod(createConstructor(typeDef.getAlias(), aliasTypeName, options))
                 .addMethod(MethodSpec.methodBuilder("get")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(JsonValue.class)
@@ -570,12 +569,16 @@ public final class AliasGenerator {
         }
     }
 
-    private static MethodSpec createConstructor(TypeName aliasTypeName) {
+    private static MethodSpec createConstructor(Type type, TypeName aliasTypeName, Options options) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"));
         if (!Primitives.isPrimitive(aliasTypeName)) {
-            builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
+            if (options.defensiveCollections() && type.accept(MoreVisitors.IS_COLLECTION)) {
+                builder.addStatement("this.value = $L", Expressions.wrapUnmodifiableCollections(type, "value"));
+            } else {
+                builder.addStatement("this.value = $L", Expressions.requireNonNull("value", "value cannot be null"));
+            }
         } else {
             builder.addStatement("this.value = value");
         }
