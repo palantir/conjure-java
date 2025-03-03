@@ -114,7 +114,9 @@ public final class GenerationCoordinator {
         }
         Files.createDirectories(outputDirectory);
         Path output = outputDirectory.resolve("reachability-metadata.json");
-        OBJECT_MAPPER.writeValue(output.toFile(), generatedReachabilityMetadataFile.reachabilityMetadata());
+        OBJECT_MAPPER
+                .writerWithDefaultPrettyPrinter()
+                .writeValue(output.toFile(), generatedReachabilityMetadataFile.reachabilityMetadata());
         return output;
     }
 }
