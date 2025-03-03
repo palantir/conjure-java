@@ -2,8 +2,10 @@ package excludeemptycollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,7 +62,7 @@ public final class CollectionsTestAliasSet {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static CollectionsTestAliasSet of(@Nonnull Set<Integer> value) {
+    public static CollectionsTestAliasSet of(@Nonnull @JsonDeserialize(as = LinkedHashSet.class) Set<Integer> value) {
         return new CollectionsTestAliasSet(value);
     }
 

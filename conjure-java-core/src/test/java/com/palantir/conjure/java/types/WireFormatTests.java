@@ -71,6 +71,7 @@ import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -636,6 +637,34 @@ public final class WireFormatTests {
                         .optionalAlias(OptionalAlias.of(Optional.of("")))
                         .build()))
                 .isEqualTo("{\"optionalAlias\":\"\"}");
+    }
+
+    @Test
+    void testRoundTripSetOrderPreservation_alias() throws JsonProcessingException {
+        SetAlias original = SetAlias.of(new LinkedHashSet<>(List.of("one", "two", "3", "four", "5")));
+        String originalJson = mapper.writeValueAsString(original);
+        SetAlias recreated = mapper.readValue(originalJson, SetAlias.class);
+        String recreatedJson = mapper.writeValueAsString(recreated);
+        assertThat(recreatedJson).isEqualTo(originalJson);
+    }
+
+    @Test
+    void testRoundTripSetOrderPreservation_union() throws JsonProcessingException {
+        UnionTypeExample original = UnionTypeExample.set(new LinkedHashSet<>(List.of("one", "two", "3", "four", "5")));
+        String originalJson = mapper.writeValueAsString(original);
+        UnionTypeExample recreated = mapper.readValue(originalJson, UnionTypeExample.class);
+        String recreatedJson = mapper.writeValueAsString(recreated);
+        assertThat(recreatedJson).isEqualTo(originalJson);
+    }
+
+    @Test
+    void testRoundTripSetOrderPreservation_union_alias() throws JsonProcessingException {
+        UnionTypeExample original =
+                UnionTypeExample.setAlias(SetAlias.of(new LinkedHashSet<>(List.of("one", "two", "3", "four", "5"))));
+        String originalJson = mapper.writeValueAsString(original);
+        UnionTypeExample recreated = mapper.readValue(originalJson, UnionTypeExample.class);
+        String recreatedJson = mapper.writeValueAsString(recreated);
+        assertThat(recreatedJson).isEqualTo(originalJson);
     }
 
     @Test

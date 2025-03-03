@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -58,6 +59,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -254,6 +256,16 @@ public final class AliasGenerator {
     private static ParameterSpec getAliasFactoryParameter(
             Type aliasType, TypeName aliasTypeName, TypeMapper typeMapper, Options options) {
         ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
+
+        if (aliasType.accept(TypeVisitor.IS_SET)) {
+            AnnotationSpec deserializeAnnotation = AnnotationSpec.builder(JsonDeserialize.class)
+                    .addMember("as", "$T.class", LinkedHashSet.class)
+                    .build();
+            return parameterSpec.toBuilder()
+                    .addAnnotation(deserializeAnnotation)
+                    .build();
+        }
+
         if (options.defensiveCollections() && options.nonNullCollections() && aliasType.accept(TypeVisitor.IS_MAP)) {
             AnnotationSpec.Builder contentNullAnnotation = AnnotationSpec.builder(JsonSetter.class);
             if (TypeFunctions.isOptionalInnerType(aliasType, typeMapper)) {
