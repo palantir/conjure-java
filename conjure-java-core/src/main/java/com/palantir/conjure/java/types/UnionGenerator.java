@@ -32,6 +32,9 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.types.CollectionType.ConjureCollectionNullHandlingMode;
+import com.palantir.conjure.java.types.CollectionType.ConjureCollectionType;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -39,9 +42,16 @@ import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
+import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.OptionalType;
+import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.Type.Visitor;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
@@ -63,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -754,7 +765,7 @@ public final class UnionGenerator {
                                             Expressions.requireNonNull(
                                                     VALUE_FIELD_NAME,
                                                     String.format("%s cannot be null", memberName.get())))
-                                    .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
+                                    .addStatement(memberTypeDef.getType().accept(new UnionConstructorVisitor(options)))
                                     .build())
                             .addMethod(MethodSpec.methodBuilder("getType")
                                     .addModifiers(Modifier.PRIVATE)
@@ -964,6 +975,135 @@ public final class UnionGenerator {
         private NameTypeMetadata(String memberName, TypeName type) {
             this.memberName = memberName;
             this.type = type;
+        }
+    }
+
+    private static final class UnionConstructorVisitor implements Visitor<CodeBlock> {
+        private final Options options;
+
+        UnionConstructorVisitor(Options options) {
+            this.options = options;
+        }
+
+        private CodeBlock generateCollectionCodeBlock(CollectionType collectionType) {
+            if (collectionType.useNonNullFactory()) {
+                return CodeBlock.of(
+                        "this.$1L = $4L($2T.newNonNull$3L($1L))",
+                        VALUE_FIELD_NAME,
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName(),
+                        getUnmodifiableBlock(collectionType));
+            }
+            return CodeBlock.of(
+                    "this.$1L = $4L($2T.new$3L($1L))",
+                    VALUE_FIELD_NAME,
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionType().getCollectionName(),
+                    getUnmodifiableBlock(collectionType));
+        }
+
+        // Hacky, will clean up
+        private CodeBlock getUnmodifiableBlock(CollectionType collectionType) {
+            if (collectionType.getConjureCollectionType().equals(ConjureCollectionType.SET)) {
+                return CodeBlock.of("$T.unmodifiableSet", Collections.class);
+            }
+            return CodeBlock.of("$T.unmodifiableList", ConjureCollections.class);
+        }
+
+        private CodeBlock defaultFactoryStatement() {
+            return CodeBlock.of("this.$1L = $1L", VALUE_FIELD_NAME);
+        }
+
+        @Override
+        public CodeBlock visitPrimitive(PrimitiveType _value) {
+            return defaultFactoryStatement();
+        }
+
+        @Override
+        public CodeBlock visitOptional(OptionalType _value) {
+            return defaultFactoryStatement();
+        }
+
+        @Override
+        public CodeBlock visitList(ListType value) {
+            if (!options.defensiveCollections()) {
+                return defaultFactoryStatement();
+            }
+
+            if (options.nonNullCollections()) {
+                if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                    switch (value.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
+                        case DOUBLE:
+                            return generateCollectionCodeBlock(new CollectionType(
+                                    ConjureCollectionType.DOUBLE_LIST,
+                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+                        case INTEGER:
+                            return generateCollectionCodeBlock(new CollectionType(
+                                    ConjureCollectionType.INTEGER_LIST,
+                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+                        case SAFELONG:
+                            return generateCollectionCodeBlock(new CollectionType(
+                                    ConjureCollectionType.SAFE_LONG_LIST,
+                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+                        case ANY:
+                        case BEARERTOKEN:
+                        case BINARY:
+                        case BOOLEAN:
+                        case DATETIME:
+                        case RID:
+                        case STRING:
+                        case UUID:
+                        case UNKNOWN:
+                            // Fall through to generic non-null List
+                    }
+                }
+                return generateCollectionCodeBlock(new CollectionType(
+                        ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+            }
+            return generateCollectionCodeBlock(new CollectionType(
+                    ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
+        }
+
+        @Override
+        public CodeBlock visitSet(SetType value) {
+            if (!options.defensiveCollections()) {
+                return defaultFactoryStatement();
+            }
+
+            if (options.nonNullCollections()) {
+                return generateCollectionCodeBlock(new CollectionType(
+                        ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
+            }
+            return generateCollectionCodeBlock(new CollectionType(
+                    ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
+        }
+
+        @Override
+        public CodeBlock visitMap(MapType value) {
+            if (!options.defensiveCollections()) {
+                return defaultFactoryStatement();
+            }
+
+            return CodeBlock.of(
+                    "this.$1L = $2T.unmodifiableMap(new $3T<>($1L))",
+                    VALUE_FIELD_NAME,
+                    Collections.class,
+                    LinkedHashMap.class);
+        }
+
+        @Override
+        public CodeBlock visitReference(com.palantir.conjure.spec.TypeName _value) {
+            return defaultFactoryStatement();
+        }
+
+        @Override
+        public CodeBlock visitExternal(ExternalReference _value) {
+            return defaultFactoryStatement();
+        }
+
+        @Override
+        public CodeBlock visitUnknown(@Safe String _unknownType) {
+            return defaultFactoryStatement();
         }
     }
 }
