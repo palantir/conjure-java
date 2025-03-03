@@ -28,6 +28,6 @@ public sealed interface GeneratedFile permits GeneratedJavaFile, GeneratedReacha
         }
     }
 
-    record GeneratedReachabilityMetadataFile(
-            String packageName, String typeName, ReachabilityMetadata reachabilityMetadata) implements GeneratedFile {}
+    record GeneratedReachabilityMetadataFile(String packageName, ReachabilityMetadata reachabilityMetadata)
+            implements GeneratedFile {}
 }

@@ -64,12 +64,6 @@ public class GenerationCoordinator {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * TODO(pm): decide if we'll do one file per type? or one file per package?
-     *  no harm in creating loads of files + they're localized. these aren't really going to be read by humans so we
-     *  don't need to worry about "people can more easily see all the info in one file". it'd be easy to concat all the
-     *  reachability-metadata.json files as well.
-     */
     private static Path formatAndEmit(GeneratedFile generatedFile, Path outputDirectoryPath) {
         if (generatedFile instanceof GeneratedJavaFile generatedJavaFile) {
             return Goethe.formatAndEmit(generatedJavaFile.javaFile(), outputDirectoryPath);
@@ -80,7 +74,6 @@ public class GenerationCoordinator {
                         Splitter.on(".").split(generatedReachabilityMetadataFile.packageName())) {
                     outputDirectory = outputDirectory.resolve(packageComponent);
                 }
-                outputDirectory = outputDirectory.resolve(generatedReachabilityMetadataFile.typeName());
                 Files.createDirectories(outputDirectory);
                 Path output = outputDirectory.resolve("reachability-metadata.json");
                 OBJECT_MAPPER.writeValue(output.toFile(), generatedReachabilityMetadataFile.reachabilityMetadata());

@@ -28,6 +28,7 @@ import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ReachabilityMetadataGenerator implements Generator {
@@ -38,18 +39,31 @@ public final class ReachabilityMetadataGenerator implements Generator {
         this.packagePrefix = packagePrefix;
     }
 
+    // TODO(pm): generate it in the META-INF/native-image directory
     @Override
     public Stream<GeneratedFile> generate(ConjureDefinition definition) {
-        List<TypeDefinition> types = definition.getTypes();
-        return types.stream()
-                .map(type -> {
-                    TypeName typeName = type.accept(TypeDefinitionVisitor.TYPE_NAME);
-                    TypeName prefixedTypeName = Packages.getPrefixedName(typeName, packagePrefix);
-                    return new GeneratedReachabilityMetadataFile(
-                            prefixedTypeName.getPackage(),
-                            prefixedTypeName.getName(),
-                            new ReachabilityMetadata(new ReflectionMetadata(
-                                    List.of(ReflectionMetadataForType.allEnabled(prefixedTypeName.getName())))));
-                });
+        return getPackagesAndTypes(definition).stream()
+                .map(packageAndTypes -> new GeneratedReachabilityMetadataFile(
+                        Packages.getPrefixedPackage(packageAndTypes.packageName(), packagePrefix),
+                        new ReachabilityMetadata(new ReflectionMetadata(packageAndTypes.typeDefinitions().stream()
+                                .map(type -> {
+                                    TypeName typeName = type.accept(TypeDefinitionVisitor.TYPE_NAME);
+                                    TypeName prefixedTypeName = Packages.getPrefixedName(typeName, packagePrefix);
+                                    return ReflectionMetadataForType.allEnabled(
+                                            prefixedTypeName.getPackage() + "." + prefixedTypeName.getName());
+                                })
+                                .toList()))));
+    }
+
+    private record PackageAndTypes(String packageName, List<TypeDefinition> typeDefinitions) {}
+
+    private static List<PackageAndTypes> getPackagesAndTypes(ConjureDefinition conjureDefinition) {
+        return conjureDefinition.getTypes().stream()
+                .collect(Collectors.groupingBy(
+                        type -> type.accept(TypeDefinitionVisitor.TYPE_NAME).getPackage()))
+                .entrySet()
+                .stream()
+                .map(entry -> new PackageAndTypes(entry.getKey(), entry.getValue()))
+                .toList();
     }
 }
