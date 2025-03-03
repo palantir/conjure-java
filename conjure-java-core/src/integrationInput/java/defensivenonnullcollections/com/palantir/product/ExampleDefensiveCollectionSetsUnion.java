@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -173,7 +174,7 @@ public final class ExampleDefensiveCollectionSetsUnion {
                 @JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @JsonDeserialize(as = LinkedHashSet.class) @Nonnull
                         Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
-            this.value = value;
+            this.value = Collections.unmodifiableSet(ConjureCollections.newNonNullSet(value));
         }
 
         @JsonProperty(value = "type", index = 0)
