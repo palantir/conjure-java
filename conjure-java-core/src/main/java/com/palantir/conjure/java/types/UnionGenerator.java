@@ -42,16 +42,11 @@ import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
-import com.palantir.conjure.spec.ExternalReference;
+import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
-import com.palantir.conjure.spec.MapType;
-import com.palantir.conjure.spec.OptionalType;
-import com.palantir.conjure.spec.PrimitiveType;
-import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
-import com.palantir.conjure.spec.Type.Visitor;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
@@ -765,7 +760,7 @@ public final class UnionGenerator {
                                             Expressions.requireNonNull(
                                                     VALUE_FIELD_NAME,
                                                     String.format("%s cannot be null", memberName.get())))
-                                    .addStatement(memberTypeDef.getType().accept(new UnionConstructorVisitor(options)))
+                                    .addStatement(createConstructor(memberTypeDef.getType(), options))
                                     .build())
                             .addMethod(MethodSpec.methodBuilder("getType")
                                     .addModifiers(Modifier.PRIVATE)
@@ -822,7 +817,7 @@ public final class UnionGenerator {
                 .addMember("value", "$S", field.getFieldName().get());
         Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(field.getType(), typesMap);
         if (dealiased.accept(DefaultableTypeVisitor.INSTANCE)) {
-            builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
+            builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class); // TODO(kkak): Fail if non-null?
         }
         return builder.build();
     }
@@ -978,112 +973,21 @@ public final class UnionGenerator {
         }
     }
 
-    private static final class UnionConstructorVisitor implements Visitor<CodeBlock> {
-        private final Options options;
-
-        UnionConstructorVisitor(Options options) {
-            this.options = options;
-        }
-
-        private CodeBlock generateCollectionCodeBlock(CollectionType collectionType) {
-            if (collectionType.useNonNullFactory()) {
-                return CodeBlock.of(
-                        "this.$1L = $4L($2T.newNonNull$3L($1L))",
-                        VALUE_FIELD_NAME,
-                        ConjureCollections.class,
-                        collectionType.getConjureCollectionType().getCollectionName(),
-                        getUnmodifiableBlock(collectionType));
-            }
-            return CodeBlock.of(
-                    "this.$1L = $4L($2T.new$3L($1L))",
-                    VALUE_FIELD_NAME,
-                    ConjureCollections.class,
-                    collectionType.getConjureCollectionType().getCollectionName(),
-                    getUnmodifiableBlock(collectionType));
-        }
-
-        // Hacky, will clean up
-        private CodeBlock getUnmodifiableBlock(CollectionType collectionType) {
-            if (collectionType.getConjureCollectionType().equals(ConjureCollectionType.SET)) {
-                return CodeBlock.of("$T.unmodifiableSet", Collections.class);
-            }
-            return CodeBlock.of("$T.unmodifiableList", ConjureCollections.class);
-        }
-
-        private CodeBlock defaultFactoryStatement() {
+    private static CodeBlock createConstructor(Type type, Options options) {
+        if (!options.defensiveCollections() || !type.accept(MoreVisitors.IS_COLLECTION)) {
             return CodeBlock.of("this.$1L = $1L", VALUE_FIELD_NAME);
         }
 
-        @Override
-        public CodeBlock visitPrimitive(PrimitiveType _value) {
-            return defaultFactoryStatement();
+        if (type.accept(TypeVisitor.IS_SET)) {
+            return CodeBlock.of(
+                    "this.$1L = $2T.unmodifiableSet($3T.$4L($1L))",
+                    VALUE_FIELD_NAME,
+                    Collections.class,
+                    ConjureCollections.class,
+                    options.nonNullCollections() ? "newNonNullSet" : "newSet");
         }
 
-        @Override
-        public CodeBlock visitOptional(OptionalType _value) {
-            return defaultFactoryStatement();
-        }
-
-        @Override
-        public CodeBlock visitList(ListType value) {
-            if (!options.defensiveCollections()) {
-                return defaultFactoryStatement();
-            }
-
-            if (options.nonNullCollections()) {
-                if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-                    switch (value.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
-                        case DOUBLE:
-                            return generateCollectionCodeBlock(new CollectionType(
-                                    ConjureCollectionType.DOUBLE_LIST,
-                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-                        case INTEGER:
-                            return generateCollectionCodeBlock(new CollectionType(
-                                    ConjureCollectionType.INTEGER_LIST,
-                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-                        case SAFELONG:
-                            return generateCollectionCodeBlock(new CollectionType(
-                                    ConjureCollectionType.SAFE_LONG_LIST,
-                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-                        case ANY:
-                        case BEARERTOKEN:
-                        case BINARY:
-                        case BOOLEAN:
-                        case DATETIME:
-                        case RID:
-                        case STRING:
-                        case UUID:
-                        case UNKNOWN:
-                            // Fall through to generic non-null List
-                    }
-                }
-                return generateCollectionCodeBlock(new CollectionType(
-                        ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-            }
-            return generateCollectionCodeBlock(new CollectionType(
-                    ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
-        }
-
-        @Override
-        public CodeBlock visitSet(SetType value) {
-            if (!options.defensiveCollections()) {
-                return defaultFactoryStatement();
-            }
-
-            if (options.nonNullCollections()) {
-                return generateCollectionCodeBlock(new CollectionType(
-                        ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-            }
-            return generateCollectionCodeBlock(new CollectionType(
-                    ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
-        }
-
-        @Override
-        public CodeBlock visitMap(MapType value) {
-            if (!options.defensiveCollections()) {
-                return defaultFactoryStatement();
-            }
-
+        if (type.accept(TypeVisitor.IS_MAP)) {
             return CodeBlock.of(
                     "this.$1L = $2T.unmodifiableMap(new $3T<>($1L))",
                     VALUE_FIELD_NAME,
@@ -1091,19 +995,46 @@ public final class UnionGenerator {
                     LinkedHashMap.class);
         }
 
-        @Override
-        public CodeBlock visitReference(com.palantir.conjure.spec.TypeName _value) {
-            return defaultFactoryStatement();
-        }
+        CollectionType listType = getListType(type.accept(TypeVisitor.LIST), options);
+        return CodeBlock.of(
+                "this.$1L = $2T.unmodifiableList($2T.$3L($1L))",
+                VALUE_FIELD_NAME,
+                ConjureCollections.class,
+                listType.getConjureCollectionStaticFactoryMethod());
+    }
 
-        @Override
-        public CodeBlock visitExternal(ExternalReference _value) {
-            return defaultFactoryStatement();
+    private static CollectionType getListType(ListType value, Options options) {
+        if (options.nonNullCollections()) {
+            if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                switch (value.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
+                    case DOUBLE:
+                        return new CollectionType(
+                                ConjureCollectionType.DOUBLE_LIST,
+                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                    case INTEGER:
+                        return new CollectionType(
+                                ConjureCollectionType.INTEGER_LIST,
+                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                    case SAFELONG:
+                        return new CollectionType(
+                                ConjureCollectionType.SAFE_LONG_LIST,
+                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                    case ANY:
+                    case BEARERTOKEN:
+                    case BINARY:
+                    case BOOLEAN:
+                    case DATETIME:
+                    case RID:
+                    case STRING:
+                    case UUID:
+                    case UNKNOWN:
+                        // Fall through to generic non-null List
+                }
+            }
+            return new CollectionType(
+                    ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
         }
-
-        @Override
-        public CodeBlock visitUnknown(@Safe String _unknownType) {
-            return defaultFactoryStatement();
-        }
+        return new CollectionType(
+                ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
     }
 }

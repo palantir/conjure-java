@@ -34,6 +34,14 @@ final class CollectionType {
         return nullHandlingMode.shouldUseNonNullFactory();
     }
 
+    String getConjureCollectionStaticFactoryMethod() {
+        // Primitive optimized lists can only be used with the non-null flag enabled
+        if (nullHandlingMode.shouldUseNonNullFactory()) {
+            return "newNonNull" + conjureCollectionType.getCollectionName();
+        }
+        return "new" + conjureCollectionType.getCollectionName();
+    }
+
     enum ConjureCollectionType {
         LIST("List", false),
         DOUBLE_LIST("DoubleList", true),
