@@ -290,7 +290,10 @@ public final class AliasGenerator {
 
         if (options.defensiveCollections() && type.accept(TypeVisitor.IS_MAP)) {
             return CodeBlock.of(
-                    "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, Expressions.requireNonNull("value", "value cannot be null"));
+                    "return new $T(new $T<>($L))",
+                    thisClass,
+                    LinkedHashMap.class,
+                    Expressions.requireNonNull("value", "value cannot be null"));
         }
 
         return CodeBlock.of("return new $T(value)", thisClass);
