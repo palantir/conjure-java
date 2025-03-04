@@ -49,18 +49,14 @@ public final class Expressions {
     }
 
     public static CodeBlock wrapUnmodifiableCollections(Type type, String fieldName) {
-        return wrapUnmodifiableCollections(type, CodeBlock.of("$L", fieldName));
-    }
-
-    public static CodeBlock wrapUnmodifiableCollections(Type type, CodeBlock codeBlock) {
         if (type.accept(TypeVisitor.IS_LIST)) {
-            return CodeBlock.of("$T.unmodifiableList($L)", ConjureCollections.class, codeBlock);
+            return CodeBlock.of("$T.unmodifiableList($L)", ConjureCollections.class, fieldName);
         } else if (type.accept(TypeVisitor.IS_SET)) {
-            return CodeBlock.of("$T.unmodifiableSet($L)", Collections.class, codeBlock);
+            return CodeBlock.of("$T.unmodifiableSet($L)", Collections.class, fieldName);
         } else if (type.accept(TypeVisitor.IS_MAP)) {
-            return CodeBlock.of("$T.unmodifiableMap($L)", Collections.class, codeBlock);
+            return CodeBlock.of("$T.unmodifiableMap($L)", Collections.class, fieldName);
         } else {
-            return codeBlock;
+            return CodeBlock.of("$L", fieldName);
         }
     }
 

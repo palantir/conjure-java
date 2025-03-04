@@ -24,8 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
-import com.palantir.conjure.java.types.CollectionType.ConjureCollectionNullHandlingMode;
-import com.palantir.conjure.java.types.CollectionType.ConjureCollectionType;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -144,7 +142,7 @@ public final class AliasGenerator {
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName, typeMapper, options))
                 .returns(thisClass)
-                .addStatement(typeDef.getAlias().accept(new AliasFactoryVisitor(thisClass, options)))
+                .addStatement(createStaticFactory(typeDef.getAlias(), thisClass, options))
                 .build());
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
@@ -279,128 +277,23 @@ public final class AliasGenerator {
         return parameterSpec;
     }
 
-    private static final class AliasFactoryVisitor implements Visitor<CodeBlock> {
-        private final ClassName thisClass;
-        private final Options options;
-
-        AliasFactoryVisitor(ClassName thisClass, Options options) {
-            this.thisClass = thisClass;
-            this.options = options;
-        }
-
-        private static CodeBlock nonNullValueExpression() {
-            return Expressions.requireNonNull("value", "value cannot be null");
-        }
-
-        private CodeBlock generateCollectionCodeBlock(CollectionType collectionType) {
-            if (collectionType.useNonNullFactory()) {
-                return CodeBlock.of(
-                        "return new $T($T.newNonNull$L($L))",
-                        thisClass,
-                        ConjureCollections.class,
-                        collectionType.getConjureCollectionType().getCollectionName(),
-                        nonNullValueExpression());
-            }
+    private static CodeBlock createStaticFactory(Type type, ClassName thisClass, Options options) {
+        if (options.defensiveCollections() && (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET))) {
+            CollectionType collectionType = CollectionType.from(type, options);
             return CodeBlock.of(
-                    "return new $T($T.new$L($L))",
+                    "return new $T($T.$L($L))",
                     thisClass,
                     ConjureCollections.class,
-                    collectionType.getConjureCollectionType().getCollectionName(),
-                    nonNullValueExpression());
+                    collectionType.getConjureCollectionStaticFactoryMethod(),
+                    Expressions.requireNonNull("value", "value cannot be null"));
         }
 
-        private CodeBlock defaultFactoryStatement() {
-            return CodeBlock.of("return new $T(value)", thisClass);
-        }
-
-        @Override
-        public CodeBlock visitPrimitive(PrimitiveType _value) {
-            return defaultFactoryStatement();
-        }
-
-        @Override
-        public CodeBlock visitOptional(OptionalType _value) {
-            return defaultFactoryStatement();
-        }
-
-        @Override
-        public CodeBlock visitList(ListType value) {
-            if (!options.defensiveCollections()) {
-                return defaultFactoryStatement();
-            }
-
-            if (options.nonNullCollections()) {
-                if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-                    switch (value.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
-                        case DOUBLE:
-                            return generateCollectionCodeBlock(new CollectionType(
-                                    ConjureCollectionType.DOUBLE_LIST,
-                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-                        case INTEGER:
-                            return generateCollectionCodeBlock(new CollectionType(
-                                    ConjureCollectionType.INTEGER_LIST,
-                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-                        case SAFELONG:
-                            return generateCollectionCodeBlock(new CollectionType(
-                                    ConjureCollectionType.SAFE_LONG_LIST,
-                                    ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-                        case ANY:
-                        case BEARERTOKEN:
-                        case BINARY:
-                        case BOOLEAN:
-                        case DATETIME:
-                        case RID:
-                        case STRING:
-                        case UUID:
-                        case UNKNOWN:
-                            // Fall through to generic non-null List
-                    }
-                }
-                return generateCollectionCodeBlock(new CollectionType(
-                        ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-            }
-            return generateCollectionCodeBlock(new CollectionType(
-                    ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
-        }
-
-        @Override
-        public CodeBlock visitSet(SetType value) {
-            if (!options.defensiveCollections()) {
-                return defaultFactoryStatement();
-            }
-
-            if (options.nonNullCollections()) {
-                return generateCollectionCodeBlock(new CollectionType(
-                        ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY));
-            }
-            return generateCollectionCodeBlock(new CollectionType(
-                    ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY));
-        }
-
-        @Override
-        public CodeBlock visitMap(MapType value) {
-            if (!options.defensiveCollections()) {
-                return defaultFactoryStatement();
-            }
-
+        if (options.defensiveCollections() && type.accept(TypeVisitor.IS_MAP)) {
             return CodeBlock.of(
-                    "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, nonNullValueExpression());
+                    "return new $T(new $T<>($L))", thisClass, LinkedHashMap.class, Expressions.requireNonNull("value", "value cannot be null"));
         }
 
-        @Override
-        public CodeBlock visitReference(com.palantir.conjure.spec.TypeName _value) {
-            return defaultFactoryStatement();
-        }
-
-        @Override
-        public CodeBlock visitExternal(ExternalReference _value) {
-            return defaultFactoryStatement();
-        }
-
-        @Override
-        public CodeBlock visitUnknown(@Safe String _unknownType) {
-            return defaultFactoryStatement();
-        }
+        return CodeBlock.of("return new $T(value)", thisClass);
     }
 
     private static final class DefaultConstructorVisitor implements Visitor<Optional<MethodSpec>> {
