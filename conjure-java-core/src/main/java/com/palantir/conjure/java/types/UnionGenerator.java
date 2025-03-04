@@ -746,8 +746,8 @@ public final class UnionGenerator {
                                     .addModifiers(Modifier.PRIVATE)
                                     .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                            .addAnnotation(
-                                                    wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
+                                            .addAnnotation(wrapperConstructorParameterAnnotation(
+                                                    memberTypeDef, typesMap, options))
                                             .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
                                             .build())
@@ -808,12 +808,21 @@ public final class UnionGenerator {
     }
 
     private static AnnotationSpec wrapperConstructorParameterAnnotation(
-            FieldDefinition field, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+            FieldDefinition field, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap, Options options) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", field.getFieldName().get());
         Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(field.getType(), typesMap);
         if (dealiased.accept(DefaultableTypeVisitor.INSTANCE)) {
-            builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class); // TODO(kkak): Fail if non-null?
+            builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
+            // We only need to restrict nulls by annotations on Maps, the other collections have non-null constructors
+            if (options.defensiveCollections()
+                    && options.nonNullCollections()
+                    && field.getType().accept(TypeVisitor.IS_MAP)) {
+                // TODO(kkak): TypeMapper isn't needed since we've de-aliased
+                if (!TypeFunctions.isOptionalInnerType(dealiased, new TypeMapper(typesMap, options))) {
+                    builder.addMember("contentNulls", "$T.FAIL", Nulls.class);
+                }
+            }
         }
         return builder.build();
     }
