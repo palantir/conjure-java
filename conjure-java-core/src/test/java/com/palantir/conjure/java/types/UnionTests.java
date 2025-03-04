@@ -30,10 +30,15 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionListsUnion;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
@@ -142,6 +147,64 @@ class UnionTests {
                 .throwOnUnknown()
                 .build());
         assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.add("update"));
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsCopiesCollection_list() {
+        List<String> original = List.of("foo", "bar");
+        List<String> mutableList = new ArrayList<>(original);
+
+        ExampleDefensiveCollectionListsUnion union = ExampleDefensiveCollectionListsUnion.list(mutableList);
+        mutableList.add("update");
+        assertThat(union).isEqualTo(ExampleDefensiveCollectionListsUnion.list(original));
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsCopiesCollection_primitiveList() {
+        List<Double> original = List.of(1.0);
+        List<Double> mutableList = new ArrayList<>(original);
+
+        ExampleDefensiveCollectionListsUnion union = ExampleDefensiveCollectionListsUnion.primitiveList(mutableList);
+        mutableList.add(2.0);
+        assertThat(union).isEqualTo(ExampleDefensiveCollectionListsUnion.primitiveList(original));
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsIsImmutable_list() {
+        List<String> original = List.of("foo", "bar");
+        ExampleDefensiveCollectionListsUnion union = ExampleDefensiveCollectionListsUnion.list(original);
+
+        List<String> internal = union.accept(ExampleDefensiveCollectionListsUnion.Visitor.<List<String>>builder()
+                .list(list -> list)
+                .listOptional(_x -> List.of())
+                .primitiveList(_x -> List.of())
+                .throwOnUnknown()
+                .build());
+        assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.add("update"));
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsCopiesCollection_map() {
+        Map<String, String> original = Map.of("foo", "bar");
+        Map<String, String> mutableMap = new HashMap<>(original);
+
+        ExampleDefensiveCollectionMapsUnion union = ExampleDefensiveCollectionMapsUnion.map(mutableMap);
+        mutableMap.put("test", "update");
+        assertThat(union).isEqualTo(ExampleDefensiveCollectionMapsUnion.map(original));
+    }
+
+    @Test
+    void unionWithDefensiveCollectionsIsImmutable_map() {
+        Map<String, String> original = Map.of("foo", "bar");
+        ExampleDefensiveCollectionMapsUnion union = ExampleDefensiveCollectionMapsUnion.map(original);
+
+        Map<String, String> internal =
+                union.accept(ExampleDefensiveCollectionMapsUnion.Visitor.<Map<String, String>>builder()
+                        .map(map -> map)
+                        .mapOptional(_x -> Map.of())
+                        .throwOnUnknown()
+                        .build());
+        assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.put("test", "update"));
     }
 
     private Void failOnKnownType(String type, Object value) {
