@@ -17,6 +17,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -202,7 +203,7 @@ public final class ExampleDefensiveCollectionMapsUnion {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private MapWrapper(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull Map<String, String> value) {
             Preconditions.checkNotNull(value, "map cannot be null");
-            this.value = value;
+            this.value = Collections.unmodifiableMap(new LinkedHashMap<>(value));
         }
 
         @JsonProperty(value = "type", index = 0)
@@ -249,7 +250,7 @@ public final class ExampleDefensiveCollectionMapsUnion {
                 @JsonSetter(value = "mapOptional", nulls = Nulls.AS_EMPTY) @Nonnull
                         Map<String, Optional<String>> value) {
             Preconditions.checkNotNull(value, "mapOptional cannot be null");
-            this.value = value;
+            this.value = Collections.unmodifiableMap(new LinkedHashMap<>(value));
         }
 
         @JsonProperty(value = "type", index = 0)

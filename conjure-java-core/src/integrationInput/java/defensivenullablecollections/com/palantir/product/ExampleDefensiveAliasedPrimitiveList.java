@@ -19,7 +19,7 @@ public final class ExampleDefensiveAliasedPrimitiveList {
     private int memoizedHashCode;
 
     private ExampleDefensiveAliasedPrimitiveList(@Nonnull List<Double> value) {
-        this.value = Preconditions.checkNotNull(value, "value cannot be null");
+        this.value = ConjureCollections.unmodifiableList(value);
     }
 
     private ExampleDefensiveAliasedPrimitiveList() {

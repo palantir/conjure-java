@@ -21,7 +21,7 @@ public final class ExampleDefensiveAliasedMap {
     private int memoizedHashCode;
 
     private ExampleDefensiveAliasedMap(@Nonnull Map<String, Boolean> value) {
-        this.value = Preconditions.checkNotNull(value, "value cannot be null");
+        this.value = Collections.unmodifiableMap(value);
     }
 
     private ExampleDefensiveAliasedMap() {

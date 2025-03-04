@@ -21,7 +21,7 @@ public final class ExampleDefensiveAliasedListOptionalValue {
     private int memoizedHashCode;
 
     private ExampleDefensiveAliasedListOptionalValue(@Nonnull List<Optional<String>> value) {
-        this.value = Preconditions.checkNotNull(value, "value cannot be null");
+        this.value = ConjureCollections.unmodifiableList(value);
     }
 
     private ExampleDefensiveAliasedListOptionalValue() {

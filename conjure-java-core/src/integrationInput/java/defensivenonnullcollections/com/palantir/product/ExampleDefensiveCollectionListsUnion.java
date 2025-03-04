@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -236,7 +237,7 @@ public final class ExampleDefensiveCollectionListsUnion {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private ListWrapper(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull List<String> value) {
             Preconditions.checkNotNull(value, "list cannot be null");
-            this.value = value;
+            this.value = ConjureCollections.unmodifiableList(ConjureCollections.newNonNullList(value));
         }
 
         @JsonProperty(value = "type", index = 0)
@@ -282,7 +283,7 @@ public final class ExampleDefensiveCollectionListsUnion {
         private PrimitiveListWrapper(
                 @JsonSetter(value = "primitiveList", nulls = Nulls.AS_EMPTY) @Nonnull List<Double> value) {
             Preconditions.checkNotNull(value, "primitiveList cannot be null");
-            this.value = value;
+            this.value = ConjureCollections.unmodifiableList(ConjureCollections.newNonNullDoubleList(value));
         }
 
         @JsonProperty(value = "type", index = 0)
@@ -328,7 +329,7 @@ public final class ExampleDefensiveCollectionListsUnion {
         private ListOptionalWrapper(
                 @JsonSetter(value = "listOptional", nulls = Nulls.AS_EMPTY) @Nonnull List<Optional<String>> value) {
             Preconditions.checkNotNull(value, "listOptional cannot be null");
-            this.value = value;
+            this.value = ConjureCollections.unmodifiableList(ConjureCollections.newNonNullList(value));
         }
 
         @JsonProperty(value = "type", index = 0)

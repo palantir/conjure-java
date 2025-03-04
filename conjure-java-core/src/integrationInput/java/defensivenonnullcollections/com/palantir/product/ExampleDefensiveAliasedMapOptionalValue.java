@@ -22,7 +22,7 @@ public final class ExampleDefensiveAliasedMapOptionalValue {
     private int memoizedHashCode;
 
     private ExampleDefensiveAliasedMapOptionalValue(@Nonnull Map<String, Optional<String>> value) {
-        this.value = Preconditions.checkNotNull(value, "value cannot be null");
+        this.value = Collections.unmodifiableMap(value);
     }
 
     private ExampleDefensiveAliasedMapOptionalValue() {

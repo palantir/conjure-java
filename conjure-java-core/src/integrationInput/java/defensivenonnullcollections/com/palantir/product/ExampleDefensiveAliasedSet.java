@@ -21,7 +21,7 @@ public final class ExampleDefensiveAliasedSet {
     private int memoizedHashCode;
 
     private ExampleDefensiveAliasedSet(@Nonnull Set<Integer> value) {
-        this.value = Preconditions.checkNotNull(value, "value cannot be null");
+        this.value = Collections.unmodifiableSet(value);
     }
 
     private ExampleDefensiveAliasedSet() {
