@@ -30,24 +30,18 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
-import com.palantir.conjure.java.types.CollectionType.ConjureCollectionNullHandlingMode;
-import com.palantir.conjure.java.types.CollectionType.ConjureCollectionType;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
-import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
-import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
-import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
-import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -951,76 +945,7 @@ public final class BeanBuilderGenerator {
     }
 
     private CollectionType getCollectionType(Type type) {
-        return type.accept(new DefaultTypeVisitor<>() {
-            @Override
-            public CollectionType visitList(ListType value) {
-                if (!options.nonNullCollections()) {
-                    return new CollectionType(
-                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
-                }
-
-                return value.getItemType().accept(new DefaultTypeVisitor<>() {
-                    @Override
-                    public CollectionType visitDefault() {
-                        return new CollectionType(
-                                ConjureCollectionType.LIST,
-                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                    }
-
-                    @Override
-                    public CollectionType visitPrimitive(PrimitiveType primitiveType) {
-                        return primitiveType.accept(new DefaultPrimitiveTypeVisitor<>() {
-
-                            @Override
-                            public CollectionType visitDefault() {
-                                return new CollectionType(
-                                        ConjureCollectionType.LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitDouble() {
-                                return new CollectionType(
-                                        ConjureCollectionType.DOUBLE_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitInteger() {
-                                return new CollectionType(
-                                        ConjureCollectionType.INTEGER_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitBoolean() {
-                                return new CollectionType(
-                                        ConjureCollectionType.BOOLEAN_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitSafelong() {
-                                return new CollectionType(
-                                        ConjureCollectionType.SAFE_LONG_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-                        });
-                    }
-                });
-            }
-
-            @Override
-            public CollectionType visitSet(SetType _value) {
-                if (options.nonNullCollections()) {
-                    return new CollectionType(
-                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                } else {
-                    return new CollectionType(
-                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
-                }
-            }
-        });
+        return CollectionType.from(type, options);
     }
 
     private boolean isPrimitiveOptimized(Type type) {

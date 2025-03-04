@@ -16,6 +16,14 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
+
 final class CollectionType {
     private final ConjureCollectionType conjureCollectionType;
 
@@ -90,5 +98,82 @@ final class CollectionType {
         boolean shouldUseNonNullFactory() {
             return useNonNullFactory;
         }
+    }
+
+    /**
+     * Creates an instance of CollectionType.
+     * @param type must be either a LIST or SET, other types are unsupported within CollectionType.
+     */
+    static CollectionType from(Type type, Options options) {
+        return type.accept(new DefaultTypeVisitor<>() {
+            @Override
+            public CollectionType visitList(ListType value) {
+                if (!options.nonNullCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
+                }
+
+                return value.getItemType().accept(new DefaultTypeVisitor<>() {
+                    @Override
+                    public CollectionType visitDefault() {
+                        return new CollectionType(
+                                ConjureCollectionType.LIST,
+                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                    }
+
+                    @Override
+                    public CollectionType visitPrimitive(PrimitiveType primitiveType) {
+                        return primitiveType.accept(new DefaultPrimitiveTypeVisitor<>() {
+
+                            @Override
+                            public CollectionType visitDefault() {
+                                return new CollectionType(
+                                        ConjureCollectionType.LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitDouble() {
+                                return new CollectionType(
+                                        ConjureCollectionType.DOUBLE_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitInteger() {
+                                return new CollectionType(
+                                        ConjureCollectionType.INTEGER_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitBoolean() {
+                                return new CollectionType(
+                                        ConjureCollectionType.BOOLEAN_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitSafelong() {
+                                return new CollectionType(
+                                        ConjureCollectionType.SAFE_LONG_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+                        });
+                    }
+                });
+            }
+
+            @Override
+            public CollectionType visitSet(SetType _value) {
+                if (options.nonNullCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                } else {
+                    return new CollectionType(
+                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
+                }
+            }
+        });
     }
 }
