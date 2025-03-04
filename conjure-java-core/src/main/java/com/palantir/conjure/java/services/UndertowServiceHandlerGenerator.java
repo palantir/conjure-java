@@ -79,6 +79,7 @@ import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
@@ -1144,21 +1145,28 @@ final class UndertowServiceHandlerGenerator {
     private static String deserializeFunctionName(Type type) {
         if (type.accept(TypeVisitor.IS_PRIMITIVE)) {
             return "deserialize" + TypeFunctions.primitiveTypeName(type.accept(TypeFunctions.PRIMITIVE_VISITOR));
-        } else if (type.accept(TypeVisitor.IS_OPTIONAL)
-                && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+        } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            if (!type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                throw new SafeIllegalStateException(
+                        "Optional element type must be primitive", SafeArg.of("type", type));
+            }
             PrimitiveType innerPrimitiveType =
                     type.accept(TypeFunctions.OPTIONAL_VISITOR).getItemType().accept(TypeFunctions.PRIMITIVE_VISITOR);
             return "deserializeOptional" + TypeFunctions.primitiveTypeName(innerPrimitiveType);
-        } else if (type.accept(TypeVisitor.IS_LIST)
-                && type.accept(TypeVisitor.LIST).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+        } else if (type.accept(TypeVisitor.IS_LIST)) {
+            if (!type.accept(TypeVisitor.LIST).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                throw new SafeIllegalStateException("List element type must be primitive", SafeArg.of("type", type));
+            }
             Type subtype = type.accept(TypeVisitor.LIST).getItemType();
             return deserializeFunctionName(subtype) + "List";
-        } else if (type.accept(TypeVisitor.IS_SET)
-                && type.accept(TypeVisitor.SET).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+        } else if (type.accept(TypeVisitor.IS_SET)) {
+            if (!type.accept(TypeVisitor.SET).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                throw new SafeIllegalStateException("Set element type must be primitive", SafeArg.of("type", type));
+            }
             Type subtype = type.accept(TypeVisitor.SET).getItemType();
             return deserializeFunctionName(subtype) + "Set";
         } else {
-            throw new IllegalStateException("unknown type: " + type);
+            throw new SafeIllegalStateException("unknown type", SafeArg.of("type", type));
         }
     }
 
