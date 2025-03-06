@@ -44,6 +44,11 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
         delegate.addAtIndex(index, toAdd);
     }
 
+    // Primitive optimized overload
+    void add(double toAdd) {
+        this.delegate.add(toAdd);
+    }
+
     @Override
     public Double get(int index) {
         return delegate.get(index);
@@ -56,6 +61,7 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
         return delegate.addAllAtIndex(index, target);
     }
 
+    // Primitive optimized overload
     void addAll(double[] source) {
         this.delegate.addAll(source);
     }
