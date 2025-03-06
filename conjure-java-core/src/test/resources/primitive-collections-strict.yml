@@ -6,3 +6,15 @@ types:
         fields:
           ints: list<integer>
           doubles: list<double>
+          longs:
+            type: list<safelong>
+            docs: |
+              This primitive type is stored optimally, but does not have boxing optimizations.
+              
+              This type was added in case we choose to change that later we have a comparison.
+          bools:
+            type: list<boolean>
+            docs: |
+              This primitive type is intentionally not optimized
+              
+              This type was added in case we choose to change that later we have a comparison.

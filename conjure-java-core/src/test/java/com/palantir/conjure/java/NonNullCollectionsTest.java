@@ -24,6 +24,7 @@ import allexamples.com.palantir.product.ListExample;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.util.Collections;
 import java.util.List;
@@ -82,6 +83,8 @@ public class NonNullCollectionsTest {
         PrimitiveStrictExample expected = PrimitiveStrictExample.builder()
                 .ints(Collections.emptyList())
                 .doubles(Collections.emptyList())
+                .longs(Collections.emptyList())
+                .bools(Collections.emptyList())
                 .build();
         assertThat(clientMapper.writeValueAsString(expected))
                 .describedAs("Does not serialize any empty collections, even when optimizing for primitives")
@@ -106,6 +109,8 @@ public class NonNullCollectionsTest {
         PrimitiveStrictExample expected = PrimitiveStrictExample.builder()
                 .ints(List.of(1, 2, 3))
                 .doubles(List.of(1.1, 2.2, 3.3))
+                .longs(List.of(SafeLong.of(1L), SafeLong.of(2L), SafeLong.of(3L)))
+                .bools(List.of(true, false))
                 .build();
         String serialized = serverMapper.writeValueAsString(expected);
         assertThat(expected).isEqualTo(clientMapper.readValue(serialized, PrimitiveStrictExample.class));
