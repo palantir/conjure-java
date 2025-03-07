@@ -251,7 +251,7 @@ public final class ListExample {
         public Builder primitiveItems(int primitiveItems) {
             checkNotBuilt();
             Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null");
-            this.primitiveItems.add(primitiveItems);
+            ConjureCollections.addToIntegerList(this.primitiveItems, primitiveItems);
             return this;
         }
 
@@ -280,7 +280,7 @@ public final class ListExample {
         public Builder doubleItems(double doubleItems) {
             checkNotBuilt();
             Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null");
-            this.doubleItems.add(doubleItems);
+            ConjureCollections.addToDoubleList(this.doubleItems, doubleItems);
             return this;
         }
 

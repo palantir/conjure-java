@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: '[Improvement] Primitive Optimized Singular Addition Implementation'
+  links:
+  - https://github.com/palantir/conjure-java/pull/2486

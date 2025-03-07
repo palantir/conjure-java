@@ -603,16 +603,25 @@ public final class BeanBuilderGenerator {
         Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size() * 5);
         for (EnrichedField field : fields) {
             Type type = field.conjureDef().getType();
+            Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(field.conjureDef());
+            boolean isPrimitiveOptimized = isPrimitiveOptimized(type);
 
             // Add all the base required setters
             setters.add(createSetter(field, typesMap, override));
-            // Add any primitive setters, which are required when optimized as they handle deserialization
-            if (isPrimitiveOptimized(type)) {
+            // Add the primitive setter, this is required when optimized as they handle deserialization
+            if (isPrimitiveOptimized) {
                 setters.add(createPrimitiveCollectionSetter(field, typesMap, override, strict));
             }
+
+            // Strict builders do not allow for additive setting by design
             // Non-strict builders have various additional QOL overloads
-            if (!strict || type.accept(TypeVisitor.IS_OPTIONAL)) {
-                setters.addAll(createAuxiliarySetters(field, override));
+            if (!strict) {
+                setters.addAll(createCollectionAdditiveSetters(field, override, safety, isPrimitiveOptimized));
+            }
+
+            // Optionals always have the optional setter, it is not additive
+            if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+                setters.add(createOptionalSetter(field, override));
             }
         }
         return setters;
@@ -822,16 +831,22 @@ public final class BeanBuilderGenerator {
         return type.accept(TypeVisitor.IS_BINARY) && !options.useImmutableBytes();
     }
 
-    private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
+    private List<MethodSpec> createCollectionAdditiveSetters(
+            EnrichedField enriched, boolean override, Optional<LogSafety> safety, boolean isPrimitiveOptimized) {
         Type type = enriched.conjureDef().getType();
-        Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
         ImmutableList.Builder<MethodSpec> builder = ImmutableList.builder();
 
         if (type.accept(TypeVisitor.IS_LIST)) {
-            builder.add(
-                    createCollectionSetter("addAll", enriched, override),
-                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
+            builder.add(createCollectionSetter("addAll", enriched, override));
+
+            if (isPrimitiveOptimized) {
+                builder.add(createPrimitiveItemSetter(enriched, override, safety));
+            } else {
+                builder.add(
+                        createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
+            }
+
             return builder.build();
         }
 
@@ -844,10 +859,6 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_MAP)) {
             return ImmutableList.of(
                     createCollectionSetter("putAll", enriched, override), createMapSetter(enriched, override));
-        }
-
-        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
-            return ImmutableList.of(createOptionalSetter(enriched, override));
         }
 
         return ImmutableList.of();
@@ -907,6 +918,27 @@ public final class BeanBuilderGenerator {
         }
 
         return builder.addStatement("this.$1N.add($1N)", field.name())
+                .addStatement("return this")
+                .build();
+    }
+
+    private MethodSpec createPrimitiveItemSetter(EnrichedField enriched, boolean override, Optional<LogSafety> safety) {
+        FieldSpec field = enriched.poetSpec();
+        Type type = enriched.conjureDef().getType();
+        Type itemType = type.accept(TypeVisitor.LIST).getItemType();
+
+        CollectionType collectionType = getCollectionType(type);
+        return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
+                        enriched, itemType, typeMapper, builderClass, safety)
+                .addAnnotations(ConjureAnnotations.override(override))
+                .addCode(verifyNotBuilt())
+                .addStatement(Expressions.requireNonNull(
+                        field.name(), enriched.fieldName().get() + " cannot be null"))
+                .addCode(CodeBlocks.statement(
+                        "$1T.addTo$2L(this.$3N, $3N)",
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName(),
+                        field.name()))
                 .addStatement("return this")
                 .build();
     }

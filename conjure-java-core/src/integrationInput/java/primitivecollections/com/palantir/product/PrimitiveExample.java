@@ -370,7 +370,7 @@ public final class PrimitiveExample {
         public Builder ints(int ints) {
             checkNotBuilt();
             Preconditions.checkNotNull(ints, "ints cannot be null");
-            this.ints.add(ints);
+            ConjureCollections.addToIntegerList(this.ints, ints);
             return this;
         }
 
@@ -403,7 +403,7 @@ public final class PrimitiveExample {
         public Builder doubles(double doubles) {
             checkNotBuilt();
             Preconditions.checkNotNull(doubles, "doubles cannot be null");
-            this.doubles.add(doubles);
+            ConjureCollections.addToDoubleList(this.doubles, doubles);
             return this;
         }
 
