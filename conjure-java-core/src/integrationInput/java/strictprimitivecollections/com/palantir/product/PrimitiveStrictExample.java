@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -24,12 +25,19 @@ public final class PrimitiveStrictExample {
 
     private final List<Double> doubles;
 
+    private final List<SafeLong> longs;
+
+    private final List<Boolean> bools;
+
     private int memoizedHashCode;
 
-    private PrimitiveStrictExample(List<Integer> ints, List<Double> doubles) {
-        validateFields(ints, doubles);
+    private PrimitiveStrictExample(
+            List<Integer> ints, List<Double> doubles, List<SafeLong> longs, List<Boolean> bools) {
+        validateFields(ints, doubles, longs, bools);
         this.ints = ConjureCollections.unmodifiableList(ints);
         this.doubles = ConjureCollections.unmodifiableList(doubles);
+        this.longs = ConjureCollections.unmodifiableList(longs);
+        this.bools = ConjureCollections.unmodifiableList(bools);
     }
 
     @JsonProperty("ints")
@@ -44,6 +52,28 @@ public final class PrimitiveStrictExample {
         return this.doubles;
     }
 
+    /**
+     * This primitive type is stored optimally, but does not have boxing optimizations.
+     *
+     * <p>This type was added in case we choose to change that later we have a comparison.
+     */
+    @JsonProperty("longs")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public List<SafeLong> getLongs() {
+        return this.longs;
+    }
+
+    /**
+     * This primitive type is intentionally not optimized
+     *
+     * <p>This type was added in case we choose to change that later we have a comparison.
+     */
+    @JsonProperty("bools")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public List<Boolean> getBools() {
+        return this.bools;
+    }
+
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof PrimitiveStrictExample && equalTo((PrimitiveStrictExample) other));
@@ -55,7 +85,10 @@ public final class PrimitiveStrictExample {
                 && this.memoizedHashCode != other.memoizedHashCode) {
             return false;
         }
-        return this.ints.equals(other.ints) && this.doubles.equals(other.doubles);
+        return this.ints.equals(other.ints)
+                && this.doubles.equals(other.doubles)
+                && this.longs.equals(other.longs)
+                && this.bools.equals(other.bools);
     }
 
     @Override
@@ -65,6 +98,8 @@ public final class PrimitiveStrictExample {
             int hash = 1;
             hash = 31 * hash + this.ints.hashCode();
             hash = 31 * hash + this.doubles.hashCode();
+            hash = 31 * hash + this.longs.hashCode();
+            hash = 31 * hash + this.bools.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -73,17 +108,17 @@ public final class PrimitiveStrictExample {
 
     @Override
     public String toString() {
-        return "PrimitiveStrictExample{ints: " + ints + ", doubles: " + doubles + '}';
+        return "PrimitiveStrictExample{ints: " + ints + ", doubles: " + doubles + ", longs: " + longs + ", bools: "
+                + bools + '}';
     }
 
-    public static PrimitiveStrictExample of(List<Integer> ints, List<Double> doubles) {
-        return builder().ints(ints).doubles(doubles).build();
-    }
-
-    private static void validateFields(List<Integer> ints, List<Double> doubles) {
+    private static void validateFields(
+            List<Integer> ints, List<Double> doubles, List<SafeLong> longs, List<Boolean> bools) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, ints, "ints");
         missingFields = addFieldIfMissing(missingFields, doubles, "doubles");
+        missingFields = addFieldIfMissing(missingFields, longs, "longs");
+        missingFields = addFieldIfMissing(missingFields, bools, "bools");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -94,7 +129,7 @@ public final class PrimitiveStrictExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(2);
+                missingFields = new ArrayList<>(4);
             }
             missingFields.add(fieldName);
         }
@@ -112,7 +147,15 @@ public final class PrimitiveStrictExample {
     }
 
     public interface DoublesStageBuilder {
-        Completed_StageBuilder doubles(@Nonnull Iterable<Double> doubles);
+        LongsStageBuilder doubles(@Nonnull Iterable<Double> doubles);
+    }
+
+    public interface LongsStageBuilder {
+        BoolsStageBuilder longs(@Nonnull Iterable<SafeLong> longs);
+    }
+
+    public interface BoolsStageBuilder {
+        Completed_StageBuilder bools(@Nonnull Iterable<Boolean> bools);
     }
 
     public interface Completed_StageBuilder {
@@ -120,7 +163,12 @@ public final class PrimitiveStrictExample {
         PrimitiveStrictExample build();
     }
 
-    public interface Builder extends IntsStageBuilder, DoublesStageBuilder, Completed_StageBuilder {
+    public interface Builder
+            extends IntsStageBuilder,
+                    DoublesStageBuilder,
+                    LongsStageBuilder,
+                    BoolsStageBuilder,
+                    Completed_StageBuilder {
         @Override
         Builder ints(@Nonnull Iterable<Integer> ints);
 
@@ -129,6 +177,12 @@ public final class PrimitiveStrictExample {
 
         @Override
         Builder doubles(@Nonnull Iterable<Double> doubles);
+
+        @Override
+        Builder longs(@Nonnull Iterable<SafeLong> longs);
+
+        @Override
+        Builder bools(@Nonnull Iterable<Boolean> bools);
 
         @CheckReturnValue
         @Override
@@ -144,6 +198,10 @@ public final class PrimitiveStrictExample {
 
         private List<Double> doubles = ConjureCollections.newNonNullDoubleList();
 
+        private List<SafeLong> longs = ConjureCollections.newNonNullSafeLongList();
+
+        private List<Boolean> bools = ConjureCollections.newNonNullList();
+
         private DefaultBuilder() {}
 
         @Override
@@ -151,6 +209,8 @@ public final class PrimitiveStrictExample {
             checkNotBuilt();
             ints(other.getInts());
             doubles(other.getDoubles());
+            longs(other.getLongs());
+            bools(other.getBools());
             return this;
         }
 
@@ -172,12 +232,39 @@ public final class PrimitiveStrictExample {
             return this;
         }
 
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        @JsonSetter(value = "longs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder longs(@Nonnull Iterable<SafeLong> longs) {
+            checkNotBuilt();
+            this.longs = ConjureCollections.newNonNullSafeLongList(
+                    Preconditions.checkNotNull(longs, "longs cannot be null"));
+            return this;
+        }
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        @JsonSetter(value = "bools", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder bools(@Nonnull Iterable<Boolean> bools) {
+            checkNotBuilt();
+            this.bools = ConjureCollections.newNonNullList(Preconditions.checkNotNull(bools, "bools cannot be null"));
+            return this;
+        }
+
         @Override
         @CheckReturnValue
         public PrimitiveStrictExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new PrimitiveStrictExample(ints, doubles);
+            return new PrimitiveStrictExample(ints, doubles, longs, bools);
         }
 
         private void checkNotBuilt() {
