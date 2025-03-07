@@ -9,7 +9,6 @@ types:
           field: integer
           ints: list<integer>
           doubles: list<double>
-          # this is stored optimally but does not have boxing optimizations
           longs:
             type: list<safelong>
             docs: |
