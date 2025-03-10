@@ -33,9 +33,10 @@ public record ReachabilityMetadata(@JsonProperty("reflection") ReflectionMetadat
             @JsonProperty("type") String typeName,
             @JsonProperty("allDeclaredMethods") boolean allDeclaredMethods,
             @JsonProperty("allPublicMethods") boolean allPublicMethods,
-            @JsonProperty("allDeclaredConstructors") boolean allDeclaredConstructors) {
+            @JsonProperty("allDeclaredConstructors") boolean allDeclaredConstructors,
+            @JsonProperty("allPublicConstructors") boolean allPublicConstructors) {
         public static ReflectionMetadataForType allEnabled(String typeName) {
-            return new ReflectionMetadataForType(typeName, true, true, true);
+            return new ReflectionMetadataForType(typeName, true, true, true, true);
         }
     }
 }

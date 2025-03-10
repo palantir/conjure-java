@@ -32,7 +32,6 @@ import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
-import com.palantir.conjure.java.types.ReachabilityMetadataGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
@@ -267,15 +266,7 @@ public final class ConjureJavaCli implements Runnable {
                 ImmutableSet.Builder<Generator> generatorBuilder = ImmutableSet.builder();
                 if (config.generateObjects()) {
                     generatorBuilder.add(new ObjectGenerator(config.options()), new ErrorGenerator(config.options()));
-                    if (config.options().generateReachabilityMetadata()) {
-                        generatorBuilder.add(new ReachabilityMetadataGenerator(
-                                config.options().packagePrefix()));
-                    }
-                } else if (config.options().generateReachabilityMetadata()) {
-                    System.err.println(
-                            "[WARNING] Skipping reachability-metadata generation as objects are not being generated");
                 }
-
                 if (config.generateJersey()) {
                     generatorBuilder.add(new JerseyServiceGenerator(config.options()));
                 }
@@ -286,6 +277,12 @@ public final class ConjureJavaCli implements Runnable {
                 }
                 if (config.generateDialogue()) {
                     generatorBuilder.add(new DialogueServiceGenerator(config.options()));
+                }
+                if (config.options().generateReachabilityMetadata()
+                        && !config.generateObjects()
+                        && !config.generateDialogue()) {
+                    System.err.println(
+                            "Reachability metadata generation is only supported for objects and dialogue services.");
                 }
                 new GenerationCoordinator(executor, generatorBuilder.build(), config.options())
                         .emit(conjureDefinition, config.outputDirectory());

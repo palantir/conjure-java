@@ -323,9 +323,11 @@ public final class TestCases {
                     .name("reachability-metadata")
                     .docs("Graal native-image reachability-metadata generation")
                     .files(Path.of("example-types.yml"))
+                    .files(Path.of("example-service.yml"))
                     .options(
                             Options.builder().generateReachabilityMetadata(true).build())
-                    .generatorTypes(GeneratorType.REACHABILITY_METADATA)
+                    .generatorTypes(GeneratorType.REACHABILITY_METADATA_OBJECTS)
+                    .generatorTypes(GeneratorType.REACHABILITY_METADATA_DIALOGUE_INTERFACES)
                     .build())
             .build();
 

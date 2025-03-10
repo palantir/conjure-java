@@ -1,0 +1,15 @@
+{
+  "reflection" : [ {
+    "type" : "reachabilitymetadata.com.palantir.product.datasets.BackingFileSystem",
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true
+  }, {
+    "type" : "reachabilitymetadata.com.palantir.product.datasets.Dataset",
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true
+  } ]
+}

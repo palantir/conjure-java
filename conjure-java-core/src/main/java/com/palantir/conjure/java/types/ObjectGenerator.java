@@ -20,6 +20,7 @@ import com.palantir.conjure.java.GeneratedFile;
 import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.ReachabilityMetadataGenerator.GenerationMode;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
@@ -28,6 +29,7 @@ import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.javapoet.JavaFile;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public final class ObjectGenerator implements Generator {
@@ -43,9 +45,16 @@ public final class ObjectGenerator implements Generator {
         Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
         TypeMapper typeMapper = new TypeMapper(typesMap, options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(typesMap);
-        return types.stream()
+        Stream<GeneratedFile> generatedObjectFiles = types.stream()
                 .map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef))
                 .map(GeneratedJavaFile::of);
+        if (options.generateReachabilityMetadata()) {
+            return Stream.concat(
+                    generatedObjectFiles,
+                    new ReachabilityMetadataGenerator(options.packagePrefix(), Set.of(GenerationMode.OBJECTS))
+                            .generate(definition));
+        }
+        return generatedObjectFiles;
     }
 
     private JavaFile generateInner(

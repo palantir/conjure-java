@@ -21,6 +21,8 @@ import com.palantir.conjure.java.GeneratedFile.GeneratedJavaFile;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.ReachabilityMetadataGenerator;
+import com.palantir.conjure.java.types.ReachabilityMetadataGenerator.GenerationMode;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
@@ -39,6 +41,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 // TODO(rfink): Add unit tests for misc edge cases, e.g.: docs/no-docs, auth/no-auth, binary return type.
@@ -89,7 +92,7 @@ public final class DialogueServiceGenerator implements Generator {
                 new ReturnTypeMapper(returnTypes),
                 StaticFactoryMethodType.BLOCKING);
 
-        return conjureDefinition.getServices().stream()
+        Stream<GeneratedFile> generatedDialogueServices = conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateFilesForService(
                         options.excludeDialogueAsyncInterfaces(),
                         options.generateDialogueEndpointErrorResultTypes(),
@@ -99,6 +102,14 @@ public final class DialogueServiceGenerator implements Generator {
                         blockingGenerator,
                         asyncGenerator))
                 .map(GeneratedJavaFile::of);
+        if (options.generateReachabilityMetadata()) {
+            return Stream.concat(
+                    generatedDialogueServices,
+                    new ReachabilityMetadataGenerator(
+                                    options.packagePrefix(), Set.of(GenerationMode.DIALOGUE_INTERFACES))
+                            .generate(conjureDefinition));
+        }
+        return generatedDialogueServices;
     }
 
     private static Stream<JavaFile> generateFilesForService(

@@ -27,6 +27,7 @@ import com.palantir.conjure.java.types.CheckedErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.types.ReachabilityMetadataGenerator;
+import com.palantir.conjure.java.types.ReachabilityMetadataGenerator.GenerationMode;
 import com.palantir.logsafe.Preconditions;
 import java.nio.file.Path;
 import java.util.List;
@@ -66,8 +67,10 @@ public record ParameterizedTestCase(
                     case JERSEY -> new JerseyServiceGenerator(options());
                     case ERROR -> new ErrorGenerator(options());
                     case CHECKED_ERROR -> new CheckedErrorGenerator(options());
-                    case REACHABILITY_METADATA -> new ReachabilityMetadataGenerator(
-                            options().packagePrefix());
+                    case REACHABILITY_METADATA_OBJECTS -> new ReachabilityMetadataGenerator(
+                            options().packagePrefix(), Set.of(ReachabilityMetadataGenerator.GenerationMode.OBJECTS));
+                    case REACHABILITY_METADATA_DIALOGUE_INTERFACES -> new ReachabilityMetadataGenerator(
+                            options().packagePrefix(), Set.of(GenerationMode.DIALOGUE_INTERFACES));
                 })
                 .collect(Collectors.toSet());
     }

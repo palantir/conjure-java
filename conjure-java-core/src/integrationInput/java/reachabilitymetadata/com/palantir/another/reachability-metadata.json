@@ -1,0 +1,15 @@
+{
+  "reflection" : [ {
+    "type" : "reachabilitymetadata.com.palantir.another.TestEmptyService",
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true
+  }, {
+    "type" : "reachabilitymetadata.com.palantir.another.TestService",
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true
+  } ]
+}
