@@ -821,7 +821,9 @@ public final class UnionGenerator {
             if (options.defensiveCollections()
                     && options.nonNullCollections()
                     && field.getType().accept(TypeVisitor.IS_MAP)) {
-                if (!TypeFunctions.isOptionalInnerType(dealiased, typeMapper)) {
+                if (TypeFunctions.isOptionalInnerType(dealiased, typeMapper)) {
+                    builder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
+                } else {
                     builder.addMember("contentNulls", "$T.FAIL", Nulls.class);
                 }
             }
