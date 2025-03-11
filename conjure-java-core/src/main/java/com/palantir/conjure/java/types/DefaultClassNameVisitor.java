@@ -91,7 +91,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 case INTEGER:
                     return ClassName.get(OptionalInt.class);
                 case BOOLEAN:
-                    // no OptionalBoolean type
+                // no OptionalBoolean type
                 case SAFELONG:
                 case STRING:
                 case RID:
