@@ -249,7 +249,7 @@ public final class ExampleDefensiveCollectionMapsUnion {
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private MapOptionalWrapper(
-                @JsonSetter(value = "mapOptional", nulls = Nulls.AS_EMPTY) @Nonnull
+                @JsonSetter(value = "mapOptional", nulls = Nulls.AS_EMPTY, contentNulls = Nulls.AS_EMPTY) @Nonnull
                         Map<String, Optional<String>> value) {
             Preconditions.checkNotNull(value, "mapOptional cannot be null");
             this.value = Collections.unmodifiableMap(new LinkedHashMap<>(value));

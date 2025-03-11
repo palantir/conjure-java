@@ -46,7 +46,6 @@ public final class TestCases {
                     .options(Options.builder().preferObjectBuilders(true).build())
                     .generatorTypes(GeneratorType.OBJECT)
                     .build())
-            // TODO(kkak): This feels slightly redundant to the template case, maybe we could pull out only union types
             .add(ParameterizedTestCase.builder()
                     .name("all-examples")
                     .docs("Test generation of all example objects")
