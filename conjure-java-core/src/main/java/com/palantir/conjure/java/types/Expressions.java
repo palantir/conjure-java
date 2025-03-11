@@ -23,6 +23,8 @@ import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -55,9 +57,8 @@ public final class Expressions {
             return CodeBlock.of("$T.unmodifiableSet($L)", Collections.class, fieldName);
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             return CodeBlock.of("$T.unmodifiableMap($L)", Collections.class, fieldName);
-        } else {
-            return CodeBlock.of("$L", fieldName);
         }
+        throw new SafeIllegalArgumentException("Cannot wrap non-collection types", SafeArg.of("type", type));
     }
 
     private static Object[] append(Object one, Collection<?> rest) {

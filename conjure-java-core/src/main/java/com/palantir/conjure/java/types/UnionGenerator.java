@@ -747,7 +747,7 @@ public final class UnionGenerator {
                                     .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(wrapperConstructorParameterAnnotation(
-                                                    memberTypeDef, typesMap, options))
+                                                    memberTypeDef, typeMapper, typesMap, options))
                                             .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
                                             .build())
@@ -808,7 +808,10 @@ public final class UnionGenerator {
     }
 
     private static AnnotationSpec wrapperConstructorParameterAnnotation(
-            FieldDefinition field, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap, Options options) {
+            FieldDefinition field,
+            TypeMapper typeMapper,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", field.getFieldName().get());
         Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(field.getType(), typesMap);
@@ -818,8 +821,7 @@ public final class UnionGenerator {
             if (options.defensiveCollections()
                     && options.nonNullCollections()
                     && field.getType().accept(TypeVisitor.IS_MAP)) {
-                // TODO(kkak): TypeMapper isn't needed since we've de-aliased
-                if (!TypeFunctions.isOptionalInnerType(dealiased, new TypeMapper(typesMap, options))) {
+                if (!TypeFunctions.isOptionalInnerType(dealiased, typeMapper)) {
                     builder.addMember("contentNulls", "$T.FAIL", Nulls.class);
                 }
             }
