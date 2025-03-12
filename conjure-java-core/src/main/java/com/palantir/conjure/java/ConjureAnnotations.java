@@ -96,7 +96,7 @@ public final class ConjureAnnotations {
                         case DO_NOT_LOG:
                             return DoNotLog.class;
                         case UNKNOWN:
-                            // fall through
+                        // fall through
                         default:
                             throw new IllegalStateException("Unknown safety: " + safety);
                     }

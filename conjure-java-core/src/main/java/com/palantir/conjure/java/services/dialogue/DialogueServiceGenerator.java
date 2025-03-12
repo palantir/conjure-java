@@ -22,6 +22,7 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.ErrorGenerationUtils.ErrorNameToParameterExistenceMapping;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -64,8 +65,10 @@ public final class DialogueServiceGenerator implements Generator {
                         new DefaultClassNameVisitor(types.keySet(), options), types, ClassName.get(InputStream.class)));
         ParameterTypeMapper parameterMapper = new ParameterTypeMapper(parameterTypes, safetyEvaluator);
 
-        DialogueInterfaceGenerator interfaceGenerator =
-                new DialogueInterfaceGenerator(options, parameterMapper, new ReturnTypeMapper(returnTypes));
+        ErrorNameToParameterExistenceMapping errorNameToParameterExistenceMapping =
+                ErrorNameToParameterExistenceMapping.from(conjureDefinition);
+        DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
+                options, parameterMapper, new ReturnTypeMapper(returnTypes), errorNameToParameterExistenceMapping);
 
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 types.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
@@ -87,6 +90,7 @@ public final class DialogueServiceGenerator implements Generator {
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateFilesForService(
                         options.excludeDialogueAsyncInterfaces(),
+                        options.generateDialogueEndpointErrorResultTypes(),
                         serviceDef,
                         endpoints,
                         interfaceGenerator,
@@ -96,6 +100,7 @@ public final class DialogueServiceGenerator implements Generator {
 
     private static Stream<JavaFile> generateFilesForService(
             boolean excludeDialogueAsyncInterfaces,
+            boolean generateDialogueEndpointErrorResultTypes,
             ServiceDefinition serviceDef,
             DialogueEndpointsGenerator endpointsGenerator,
             DialogueInterfaceGenerator interfaceGenerator,
@@ -105,9 +110,11 @@ public final class DialogueServiceGenerator implements Generator {
         if (!serviceDef.getEndpoints().isEmpty()) {
             files.add(endpointsGenerator.endpointsClass(serviceDef));
         }
-        files.add(interfaceGenerator.generateBlocking(serviceDef, blockingGenerator));
+        files.add(interfaceGenerator.generateBlocking(
+                serviceDef, blockingGenerator, generateDialogueEndpointErrorResultTypes));
         if (!excludeDialogueAsyncInterfaces) {
-            files.add(interfaceGenerator.generateAsync(serviceDef, asyncGenerator));
+            files.add(interfaceGenerator.generateAsync(
+                    serviceDef, asyncGenerator, generateDialogueEndpointErrorResultTypes));
         }
         return files.stream();
     }

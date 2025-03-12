@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -26,13 +27,20 @@ public final class PrimitiveExample {
 
     private final List<Double> doubles;
 
+    private final List<SafeLong> longs;
+
+    private final List<Boolean> bools;
+
     private int memoizedHashCode;
 
-    private PrimitiveExample(int field, List<Integer> ints, List<Double> doubles) {
-        validateFields(ints, doubles);
+    private PrimitiveExample(
+            int field, List<Integer> ints, List<Double> doubles, List<SafeLong> longs, List<Boolean> bools) {
+        validateFields(ints, doubles, longs, bools);
         this.field = field;
         this.ints = ConjureCollections.unmodifiableList(ints);
         this.doubles = ConjureCollections.unmodifiableList(doubles);
+        this.longs = ConjureCollections.unmodifiableList(longs);
+        this.bools = ConjureCollections.unmodifiableList(bools);
     }
 
     @JsonProperty("field")
@@ -52,6 +60,28 @@ public final class PrimitiveExample {
         return this.doubles;
     }
 
+    /**
+     * This primitive type is stored optimally, but does not have boxing optimizations.
+     *
+     * <p>This type was added in case we choose to change that later we have a comparison.
+     */
+    @JsonProperty("longs")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public List<SafeLong> getLongs() {
+        return this.longs;
+    }
+
+    /**
+     * This primitive type is intentionally not optimized
+     *
+     * <p>This type was added in case we choose to change that later we have a comparison.
+     */
+    @JsonProperty("bools")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public List<Boolean> getBools() {
+        return this.bools;
+    }
+
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof PrimitiveExample && equalTo((PrimitiveExample) other));
@@ -63,7 +93,11 @@ public final class PrimitiveExample {
                 && this.memoizedHashCode != other.memoizedHashCode) {
             return false;
         }
-        return this.field == other.field && this.ints.equals(other.ints) && this.doubles.equals(other.doubles);
+        return this.field == other.field
+                && this.ints.equals(other.ints)
+                && this.doubles.equals(other.doubles)
+                && this.longs.equals(other.longs)
+                && this.bools.equals(other.bools);
     }
 
     @Override
@@ -74,6 +108,8 @@ public final class PrimitiveExample {
             hash = 31 * hash + this.field;
             hash = 31 * hash + this.ints.hashCode();
             hash = 31 * hash + this.doubles.hashCode();
+            hash = 31 * hash + this.longs.hashCode();
+            hash = 31 * hash + this.bools.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -82,17 +118,17 @@ public final class PrimitiveExample {
 
     @Override
     public String toString() {
-        return "PrimitiveExample{field: " + field + ", ints: " + ints + ", doubles: " + doubles + '}';
+        return "PrimitiveExample{field: " + field + ", ints: " + ints + ", doubles: " + doubles + ", longs: " + longs
+                + ", bools: " + bools + '}';
     }
 
-    public static PrimitiveExample of(int field, List<Integer> ints, List<Double> doubles) {
-        return builder().field(field).ints(ints).doubles(doubles).build();
-    }
-
-    private static void validateFields(List<Integer> ints, List<Double> doubles) {
+    private static void validateFields(
+            List<Integer> ints, List<Double> doubles, List<SafeLong> longs, List<Boolean> bools) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, ints, "ints");
         missingFields = addFieldIfMissing(missingFields, doubles, "doubles");
+        missingFields = addFieldIfMissing(missingFields, longs, "longs");
+        missingFields = addFieldIfMissing(missingFields, bools, "bools");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -103,7 +139,7 @@ public final class PrimitiveExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(2);
+                missingFields = new ArrayList<>(4);
             }
             missingFields.add(fieldName);
         }
@@ -139,6 +175,48 @@ public final class PrimitiveExample {
         Completed_StageBuilder addAllDoubles(@Nonnull double... doubles);
 
         Completed_StageBuilder doubles(double doubles);
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        Completed_StageBuilder longs(@Nonnull Iterable<SafeLong> longs);
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        Completed_StageBuilder addAllLongs(@Nonnull Iterable<SafeLong> longs);
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        Completed_StageBuilder longs(SafeLong longs);
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        Completed_StageBuilder bools(@Nonnull Iterable<Boolean> bools);
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        Completed_StageBuilder addAllBools(@Nonnull Iterable<Boolean> bools);
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        Completed_StageBuilder bools(boolean bools);
     }
 
     public interface Builder extends FieldStageBuilder, Completed_StageBuilder {
@@ -175,6 +253,54 @@ public final class PrimitiveExample {
 
         @Override
         Builder doubles(double doubles);
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        Builder longs(@Nonnull Iterable<SafeLong> longs);
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        Builder addAllLongs(@Nonnull Iterable<SafeLong> longs);
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        Builder longs(SafeLong longs);
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        Builder bools(@Nonnull Iterable<Boolean> bools);
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        Builder addAllBools(@Nonnull Iterable<Boolean> bools);
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        Builder bools(boolean bools);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
@@ -188,6 +314,10 @@ public final class PrimitiveExample {
 
         private List<Double> doubles = ConjureCollections.newNonNullDoubleList();
 
+        private List<SafeLong> longs = ConjureCollections.newNonNullSafeLongList();
+
+        private List<Boolean> bools = ConjureCollections.newNonNullList();
+
         private boolean _fieldInitialized = false;
 
         private DefaultBuilder() {}
@@ -198,6 +328,8 @@ public final class PrimitiveExample {
             field(other.getField());
             ints(other.getInts());
             doubles(other.getDoubles());
+            longs(other.getLongs());
+            bools(other.getBools());
             return this;
         }
 
@@ -275,6 +407,85 @@ public final class PrimitiveExample {
             return this;
         }
 
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        @JsonSetter(value = "longs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder longs(@Nonnull Iterable<SafeLong> longs) {
+            checkNotBuilt();
+            this.longs = ConjureCollections.newNonNullSafeLongList(
+                    Preconditions.checkNotNull(longs, "longs cannot be null"));
+            return this;
+        }
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        public Builder addAllLongs(@Nonnull Iterable<SafeLong> longs) {
+            checkNotBuilt();
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.longs, Preconditions.checkNotNull(longs, "longs cannot be null"));
+            return this;
+        }
+
+        /**
+         * This primitive type is stored optimally, but does not have boxing optimizations.
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        public Builder longs(SafeLong longs) {
+            checkNotBuilt();
+            Preconditions.checkNotNull(longs, "longs cannot be null");
+            this.longs.add(longs);
+            return this;
+        }
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        @JsonSetter(value = "bools", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder bools(@Nonnull Iterable<Boolean> bools) {
+            checkNotBuilt();
+            this.bools = ConjureCollections.newNonNullList(Preconditions.checkNotNull(bools, "bools cannot be null"));
+            return this;
+        }
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        public Builder addAllBools(@Nonnull Iterable<Boolean> bools) {
+            checkNotBuilt();
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.bools, Preconditions.checkNotNull(bools, "bools cannot be null"));
+            return this;
+        }
+
+        /**
+         * This primitive type is intentionally not optimized
+         *
+         * <p>This type was added in case we choose to change that later we have a comparison.
+         */
+        @Override
+        public Builder bools(boolean bools) {
+            checkNotBuilt();
+            Preconditions.checkNotNull(bools, "bools cannot be null");
+            this.bools.add(bools);
+            return this;
+        }
+
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _fieldInitialized, "field");
@@ -301,7 +512,7 @@ public final class PrimitiveExample {
             checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
-            return new PrimitiveExample(field, ints, doubles);
+            return new PrimitiveExample(field, ints, doubles, longs, bools);
         }
 
         private void checkNotBuilt() {

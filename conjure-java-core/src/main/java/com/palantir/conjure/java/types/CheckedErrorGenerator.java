@@ -89,7 +89,7 @@ public final class CheckedErrorGenerator implements Generator {
                 })
                 .toList();
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
-                        ClassName.get(conjurePackage, ErrorGenerationUtils.errorExceptionsClassName(namespace)))
+                        ClassName.get(conjurePackage, ErrorGenerationUtils.serverErrorsClassName(namespace)))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(ErrorGenerationUtils.privateConstructor())
                 .addMethods(constructors)
@@ -112,7 +112,7 @@ public final class CheckedErrorGenerator implements Generator {
 
         ClassName exceptionClass = ClassName.get(
                 conjurePackage,
-                ErrorGenerationUtils.errorExceptionsClassName(errorDefinition.getNamespace()),
+                ErrorGenerationUtils.serverErrorsClassName(errorDefinition.getNamespace()),
                 errorDefinition.getErrorName().getName());
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
@@ -156,7 +156,7 @@ public final class CheckedErrorGenerator implements Generator {
                 .map(errorDefinition -> {
                     ClassName exceptionClassName = ClassName.get(
                             conjurePackage,
-                            ErrorGenerationUtils.errorExceptionsClassName(errorDefinition.getNamespace()),
+                            ErrorGenerationUtils.serverErrorsClassName(errorDefinition.getNamespace()),
                             errorDefinition.getErrorName().getName());
                     return ErrorGenerationUtils.conditionalStaticFactoryMethodBuilder(
                                     typeMapper,
