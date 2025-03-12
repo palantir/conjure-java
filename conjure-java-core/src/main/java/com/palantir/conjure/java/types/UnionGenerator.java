@@ -32,6 +32,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -744,8 +746,8 @@ public final class UnionGenerator {
                                     .addModifiers(Modifier.PRIVATE)
                                     .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                            .addAnnotation(
-                                                    wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
+                                            .addAnnotation(wrapperConstructorParameterAnnotation(
+                                                    memberTypeDef, typeMapper, typesMap, options))
                                             .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
                                             .build())
@@ -754,7 +756,7 @@ public final class UnionGenerator {
                                             Expressions.requireNonNull(
                                                     VALUE_FIELD_NAME,
                                                     String.format("%s cannot be null", memberName.get())))
-                                    .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
+                                    .addStatement(createConstructor(memberTypeDef.getType(), options))
                                     .build())
                             .addMethod(MethodSpec.methodBuilder("getType")
                                     .addModifiers(Modifier.PRIVATE)
@@ -806,12 +808,25 @@ public final class UnionGenerator {
     }
 
     private static AnnotationSpec wrapperConstructorParameterAnnotation(
-            FieldDefinition field, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+            FieldDefinition field,
+            TypeMapper typeMapper,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", field.getFieldName().get());
         Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(field.getType(), typesMap);
         if (dealiased.accept(DefaultableTypeVisitor.INSTANCE)) {
             builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
+            // We only need to restrict nulls by annotations on Maps, the other collections have non-null constructors
+            if (options.defensiveCollections()
+                    && options.nonNullCollections()
+                    && field.getType().accept(TypeVisitor.IS_MAP)) {
+                if (TypeFunctions.isOptionalInnerType(dealiased, typeMapper)) {
+                    builder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
+                } else {
+                    builder.addMember("contentNulls", "$T.FAIL", Nulls.class);
+                }
+            }
         }
         return builder.build();
     }
@@ -965,5 +980,36 @@ public final class UnionGenerator {
             this.memberName = memberName;
             this.type = type;
         }
+    }
+
+    private static CodeBlock createConstructor(Type type, Options options) {
+        if (options.defensiveCollections() && type.accept(TypeVisitor.IS_LIST)) {
+            CollectionType collectionType = CollectionType.from(type, options);
+            return CodeBlock.of(
+                    "this.$1L = $2T.unmodifiableList($2T.$3L($1L))",
+                    VALUE_FIELD_NAME,
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionStaticFactoryMethod());
+        }
+
+        if (options.defensiveCollections() && type.accept(TypeVisitor.IS_SET)) {
+            CollectionType collectionType = CollectionType.from(type, options);
+            return CodeBlock.of(
+                    "this.$1L = $2T.unmodifiableSet($3T.$4L($1L))",
+                    VALUE_FIELD_NAME,
+                    Collections.class,
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionStaticFactoryMethod());
+        }
+
+        if (options.defensiveCollections() && type.accept(TypeVisitor.IS_MAP)) {
+            return CodeBlock.of(
+                    "this.$1L = $2T.unmodifiableMap(new $3T<>($1L))",
+                    VALUE_FIELD_NAME,
+                    Collections.class,
+                    LinkedHashMap.class);
+        }
+
+        return CodeBlock.of("this.$1L = $1L", VALUE_FIELD_NAME);
     }
 }

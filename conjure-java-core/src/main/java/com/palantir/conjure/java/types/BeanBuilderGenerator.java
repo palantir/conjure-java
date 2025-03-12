@@ -34,20 +34,14 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
-import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
-import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
-import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
-import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
-import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
-import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -64,7 +58,6 @@ import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -661,7 +654,7 @@ public final class BeanBuilderGenerator {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
         } else if (isCollectionType(type)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
-            if (isOptionalInnerType(type)) {
+            if (TypeFunctions.isOptionalInnerType(type, typeMapper)) {
                 annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
             } else if (options.nonNullCollections()) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
@@ -951,182 +944,8 @@ public final class BeanBuilderGenerator {
         return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP);
     }
 
-    private boolean isOptionalInnerType(Type type) {
-        return type.accept(new Type.Visitor<>() {
-            @Override
-            public Boolean visitPrimitive(PrimitiveType value) {
-                return false;
-            }
-
-            @Override
-            public Boolean visitOptional(OptionalType value) {
-                return true;
-            }
-
-            @Override
-            public Boolean visitList(ListType value) {
-                return isOptionalInnerType(value.getItemType());
-            }
-
-            @Override
-            public Boolean visitSet(SetType value) {
-                return isOptionalInnerType(value.getItemType());
-            }
-
-            @Override
-            public Boolean visitMap(MapType value) {
-                return isOptionalInnerType(value.getValueType());
-            }
-
-            @Override
-            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
-                return typeMapper
-                        .getType(value)
-                        .map(typeDef -> typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)
-                                && typeDef.accept(TypeDefinitionVisitor.ALIAS)
-                                        .getAlias()
-                                        .accept(TypeVisitor.IS_OPTIONAL))
-                        .orElse(false);
-            }
-
-            @Override
-            public Boolean visitExternal(ExternalReference value) {
-                return false;
-            }
-
-            @Override
-            public Boolean visitUnknown(String unknownType) {
-                throw new SafeIllegalStateException("Encountered unknown type", SafeArg.of("type", unknownType));
-            }
-        });
-    }
-
     private CollectionType getCollectionType(Type type) {
-        return type.accept(new DefaultTypeVisitor<>() {
-            @Override
-            public CollectionType visitList(ListType value) {
-                if (!options.nonNullCollections()) {
-                    return new CollectionType(
-                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
-                }
-
-                return value.getItemType().accept(new DefaultTypeVisitor<>() {
-                    @Override
-                    public CollectionType visitDefault() {
-                        return new CollectionType(
-                                ConjureCollectionType.LIST,
-                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                    }
-
-                    @Override
-                    public CollectionType visitPrimitive(PrimitiveType primitiveType) {
-                        return primitiveType.accept(new DefaultPrimitiveTypeVisitor<>() {
-
-                            @Override
-                            public CollectionType visitDefault() {
-                                return new CollectionType(
-                                        ConjureCollectionType.LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitDouble() {
-                                return new CollectionType(
-                                        ConjureCollectionType.DOUBLE_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitInteger() {
-                                return new CollectionType(
-                                        ConjureCollectionType.INTEGER_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitBoolean() {
-                                return new CollectionType(
-                                        ConjureCollectionType.BOOLEAN_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-
-                            @Override
-                            public CollectionType visitSafelong() {
-                                return new CollectionType(
-                                        ConjureCollectionType.SAFE_LONG_LIST,
-                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                            }
-                        });
-                    }
-                });
-            }
-
-            @Override
-            public CollectionType visitSet(SetType _value) {
-                if (options.nonNullCollections()) {
-                    return new CollectionType(
-                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
-                } else {
-                    return new CollectionType(
-                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
-                }
-            }
-        });
-    }
-
-    private static final class CollectionType {
-        private final ConjureCollectionType conjureCollectionType;
-
-        private final ConjureCollectionNullHandlingMode nullHandlingMode;
-
-        CollectionType(
-                ConjureCollectionType conjureCollectionType, ConjureCollectionNullHandlingMode nullHandlingMode) {
-            this.conjureCollectionType = conjureCollectionType;
-            this.nullHandlingMode = nullHandlingMode;
-        }
-
-        ConjureCollectionType getConjureCollectionType() {
-            return conjureCollectionType;
-        }
-
-        boolean useNonNullFactory() {
-            return nullHandlingMode.shouldUseNonNullFactory();
-        }
-    }
-
-    private enum ConjureCollectionType {
-        LIST("List", false),
-        DOUBLE_LIST("DoubleList", true),
-        INTEGER_LIST("IntegerList", true),
-        // Eclipse has a BooleanList type, but this use case implies
-        // bit mask and it doesn't serialize efficiently as a collection
-        // so let's just use the "naive" boxed collection
-        BOOLEAN_LIST("List", false),
-        // SafeLong is unique in this list. While it is technically backed with a long
-        // its logical limitations are captured in the boxed type SafeLong. Meaning,
-        // you must either expose this "implementation detail" on the public API or
-        // accept that you cannot optimize away the boxing. For now, given the focus
-        // on doubles, let's delay this optimization and have it as a separate discussion.
-        // Technically this type could be optimized at rest, but that would require a more
-        // complex enum to represent this trinary. So for now this is disabled.
-        SAFE_LONG_LIST("SafeLongList", false),
-        SET("Set", false);
-
-        private final String collectionName;
-        private final Boolean primitiveCollection;
-
-        ConjureCollectionType(String collectionName, boolean primitiveCollection) {
-            this.collectionName = collectionName;
-            this.primitiveCollection = primitiveCollection;
-        }
-
-        String getCollectionName() {
-            return collectionName;
-        }
-
-        Boolean isPrimitiveCollection() {
-            return primitiveCollection;
-        }
+        return CollectionType.from(type, options);
     }
 
     private boolean isPrimitiveOptimized(Type type) {
@@ -1139,20 +958,5 @@ public final class BeanBuilderGenerator {
         }
 
         return false;
-    }
-
-    private enum ConjureCollectionNullHandlingMode {
-        NON_NULL_COLLECTION_FACTORY(true),
-        NULLABLE_COLLECTION_FACTORY(false);
-
-        private final boolean useNonNullFactory;
-
-        ConjureCollectionNullHandlingMode(boolean useNonNullFactory) {
-            this.useNonNullFactory = useNonNullFactory;
-        }
-
-        boolean shouldUseNonNullFactory() {
-            return useNonNullFactory;
-        }
     }
 }

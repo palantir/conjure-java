@@ -48,19 +48,32 @@ import allexamples.com.palantir.product.StringAliasTwo;
 import allexamples.com.palantir.product.StringExample;
 import allexamples.com.palantir.product.UnionTypeExample;
 import allexamples.com.palantir.product.UuidExample;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.Bytes;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedList;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedListOptionalValue;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedMap;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedMapOptionalValue;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedPrimitiveList;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedSet;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionListsUnion;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -655,6 +668,195 @@ public final class WireFormatTests {
         UnionTypeExample recreated = mapper.readValue(originalJson, UnionTypeExample.class);
         String recreatedJson = mapper.writeValueAsString(recreated);
         assertThat(recreatedJson).isEqualTo(originalJson);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listAlias() {
+        assertThatThrownBy(() -> mapper.readValue("[null]", ExampleDefensiveAliasedList.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("iterable cannot contain null elements");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listAliasOptionals() throws JsonProcessingException {
+        assertThat(mapper.readValue("[null]", ExampleDefensiveAliasedListOptionalValue.class)
+                        .get())
+                .isEqualTo(List.of(Optional.empty()));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_setAlias() {
+        assertThatThrownBy(() -> mapper.readValue("[null]", ExampleDefensiveAliasedSet.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("iterable cannot contain null elements");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_primitiveListAlias() {
+        assertThatThrownBy(() -> mapper.readValue("[null]", ExampleDefensiveAliasedPrimitiveList.class))
+                .isInstanceOf(JsonMappingException.class);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapAlias() {
+        assertThatThrownBy(() -> mapper.readValue("{\"test\":null}", ExampleDefensiveAliasedMap.class))
+                .isInstanceOf(InvalidNullException.class);
+        assertThatThrownBy(() -> mapper.readValue("{null:true}", ExampleDefensiveAliasedMap.class))
+                .isInstanceOf(JsonParseException.class);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapAliasOptionals() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"test\":null}", ExampleDefensiveAliasedMapOptionalValue.class)
+                        .get())
+                .isEqualTo(Map.of("test", Optional.empty()));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listAliasNullsSupported() throws JsonProcessingException {
+        List<String> expected = ConjureCollections.newList();
+        expected.add(null);
+        assertThat(mapper.readValue(
+                                "[null]",
+                                defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedList.class)
+                        .get())
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_setAliasNullsSupported() throws JsonProcessingException {
+        Set<Integer> expected = ConjureCollections.newSet();
+        expected.add(null);
+        assertThat(mapper.readValue(
+                                "[null]",
+                                defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedSet.class)
+                        .get())
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_primitiveListAliasNullsSupported() throws JsonProcessingException {
+        List<Double> expected = ConjureCollections.newList();
+        expected.add(null);
+        assertThat(mapper.readValue(
+                                "[null]",
+                                defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedPrimitiveList
+                                        .class)
+                        .get())
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapAliasNullsSupported() throws JsonProcessingException {
+        Map<String, Boolean> expected = new LinkedHashMap<>();
+        expected.put("test", null);
+        // Null keys are not supported
+        assertThat(mapper.readValue(
+                                "{\"test\":null}",
+                                defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedMap.class)
+                        .get())
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void name() throws JsonProcessingException {
+        System.out.println(mapper.writeValueAsString(ExampleDefensiveCollectionListsUnion.list(List.of("hi"))));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listUnion() {
+        assertThatThrownBy(() -> mapper.readValue(
+                        "{\"type\":\"list\",\"list\":[null]}", ExampleDefensiveCollectionListsUnion.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("iterable cannot contain null elements");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listUnionOptionals() throws JsonProcessingException {
+        assertThat(mapper.readValue(
+                        "{\"type\":\"listOptional\",\"listOptional\":[null]}",
+                        ExampleDefensiveCollectionListsUnion.class))
+                .isEqualTo(ExampleDefensiveCollectionListsUnion.listOptional(List.of(Optional.empty())));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_setUnion() {
+        assertThatThrownBy(() -> mapper.readValue(
+                        "{\"type\":\"set\",\"set\":[null]}", ExampleDefensiveCollectionSetsUnion.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("iterable cannot contain null elements");
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_primitiveListUnion() {
+        assertThatThrownBy(() -> mapper.readValue(
+                        "{\"type\":\"primitiveList\",\"primitiveList\":[null]}",
+                        ExampleDefensiveCollectionListsUnion.class))
+                .isInstanceOf(JsonMappingException.class);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapUnion() {
+        assertThatThrownBy(() -> mapper.readValue(
+                        "{\"type\":\"map\",\"map\":{\"test\":null}}", ExampleDefensiveCollectionMapsUnion.class))
+                .isInstanceOf(InvalidNullException.class);
+        assertThatThrownBy(() -> mapper.readValue(
+                        "{\"type\":\"map\",\"map\":{null:\"test\"}}", ExampleDefensiveCollectionMapsUnion.class))
+                .isInstanceOf(JsonParseException.class);
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapUnionOptionals() throws JsonProcessingException {
+        assertThat(mapper.readValue(
+                        "{\"type\":\"mapOptional\",\"mapOptional\":{\"test\":null}}",
+                        ExampleDefensiveCollectionMapsUnion.class))
+                .isEqualTo(ExampleDefensiveCollectionMapsUnion.mapOptional(Map.of("test", Optional.empty())));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_listUnionNullsSupported() throws JsonProcessingException {
+        List<String> expected = ConjureCollections.newList();
+        expected.add(null);
+        assertThat(mapper.readValue(
+                        "{\"type\":\"list\",\"list\":[null]}",
+                        defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionListsUnion.class))
+                .isEqualTo(defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionListsUnion.list(
+                        expected));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_setUnionNullsSupported() throws JsonProcessingException {
+        Set<String> expected = ConjureCollections.newSet();
+        expected.add(null);
+        assertThat(mapper.readValue(
+                        "{\"type\":\"set\",\"set\":[null]}",
+                        defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion.class))
+                .isEqualTo(defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion.set(
+                        expected));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_primitiveListUnionNullsSupported() throws JsonProcessingException {
+        List<Double> expected = ConjureCollections.newList();
+        expected.add(null);
+        assertThat(mapper.readValue(
+                        "{\"type\":\"primitiveList\",\"primitiveList\":[null]}",
+                        defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionListsUnion.class))
+                .isEqualTo(
+                        defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionListsUnion
+                                .primitiveList(expected));
+    }
+
+    @Test
+    void testNullContentCollectionDeserialization_mapUnionNullsSupported() throws JsonProcessingException {
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("test", null);
+        // Null keys are not supported
+        assertThat(mapper.readValue(
+                        "{\"type\":\"map\",\"map\":{\"test\":null}}",
+                        defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion.class))
+                .isEqualTo(defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion.map(
+                        expected));
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {

@@ -1,0 +1,31 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      ExampleDefensiveAliasedString:
+        docs: This class should remain unchanged with the defensiveCollections flag.
+        alias: string
+      ExampleDefensiveAliasedList:
+        alias: list<string>
+      ExampleDefensiveAliasedPrimitiveList:
+        alias: list<double>
+      ExampleDefensiveAliasedSet:
+        alias: set<integer>
+      ExampleDefensiveAliasedMap:
+        alias: map<string, boolean>
+      ExampleDefensiveAliasedMapOptionalValue:
+        alias: map<string, optional<string>>
+      ExampleDefensiveAliasedListOptionalValue:
+        alias: list<optional<string>>
+      ExampleDefensiveCollectionListsUnion:
+        union:
+          list: list<string>
+          primitiveList: list<double>
+          listOptional: list<optional<string>>
+      ExampleDefensiveCollectionSetsUnion:
+        union:
+          set: set<string>
+      ExampleDefensiveCollectionMapsUnion:
+        union:
+          map: map<string, string>
+          mapOptional: map<string, optional<string>>

@@ -16,14 +16,18 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -47,11 +51,11 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
-import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +86,7 @@ public final class AliasGenerator {
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
-                .addMethod(createConstructor(aliasTypeName))
+                .addMethod(createConstructor(typeDef.getAlias(), aliasTypeName, options))
                 .addMethod(MethodSpec.methodBuilder("get")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(JsonValue.class)
@@ -136,9 +140,9 @@ public final class AliasGenerator {
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName))
+                .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName, typeMapper, options))
                 .returns(thisClass)
-                .addStatement("return new $T(value)", thisClass)
+                .addStatement(createStaticFactory(typeDef.getAlias(), thisClass, options))
                 .build());
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
@@ -230,19 +234,6 @@ public final class AliasGenerator {
                 .build();
     }
 
-    private static ParameterSpec getAliasFactoryParameter(Type aliasType, TypeName aliasTypeName) {
-        ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
-        if (aliasType.accept(TypeVisitor.IS_SET)) {
-            AnnotationSpec deserializeAnnotation = AnnotationSpec.builder(JsonDeserialize.class)
-                    .addMember("as", "$T.class", LinkedHashSet.class)
-                    .build();
-            return parameterSpec.toBuilder()
-                    .addAnnotation(deserializeAnnotation)
-                    .build();
-        }
-        return parameterSpec;
-    }
-
     private static void addEmptyMethod(TypeSpec.Builder spec, TypeName thisClass) {
         spec.addField(FieldSpec.builder(thisClass, "EMPTY", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer(CodeBlock.of("new $T()", thisClass))
@@ -257,6 +248,55 @@ public final class AliasGenerator {
     private static boolean isAliasOfDouble(AliasDefinition typeDef) {
         return typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
+    }
+
+    private static ParameterSpec getAliasFactoryParameter(
+            Type aliasType, TypeName aliasTypeName, TypeMapper typeMapper, Options options) {
+        ParameterSpec parameterSpec = Parameters.nonnullParameter(aliasTypeName, "value");
+
+        if (aliasType.accept(TypeVisitor.IS_SET)) {
+            AnnotationSpec deserializeAnnotation = AnnotationSpec.builder(JsonDeserialize.class)
+                    .addMember("as", "$T.class", LinkedHashSet.class)
+                    .build();
+            return parameterSpec.toBuilder()
+                    .addAnnotation(deserializeAnnotation)
+                    .build();
+        }
+
+        if (options.defensiveCollections() && options.nonNullCollections() && aliasType.accept(TypeVisitor.IS_MAP)) {
+            AnnotationSpec.Builder contentNullAnnotation = AnnotationSpec.builder(JsonSetter.class);
+            if (TypeFunctions.isOptionalInnerType(aliasType, typeMapper)) {
+                contentNullAnnotation.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
+            } else {
+                contentNullAnnotation.addMember("contentNulls", "$T.FAIL", Nulls.class);
+            }
+            return parameterSpec.toBuilder()
+                    .addAnnotation(contentNullAnnotation.build())
+                    .build();
+        }
+        return parameterSpec;
+    }
+
+    private static CodeBlock createStaticFactory(Type type, ClassName thisClass, Options options) {
+        if (options.defensiveCollections() && (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET))) {
+            CollectionType collectionType = CollectionType.from(type, options);
+            return CodeBlock.of(
+                    "return new $T($T.$L($L))",
+                    thisClass,
+                    ConjureCollections.class,
+                    collectionType.getConjureCollectionStaticFactoryMethod(),
+                    Expressions.requireNonNull("value", "value cannot be null"));
+        }
+
+        if (options.defensiveCollections() && type.accept(TypeVisitor.IS_MAP)) {
+            return CodeBlock.of(
+                    "return new $T(new $T<>($L))",
+                    thisClass,
+                    LinkedHashMap.class,
+                    Expressions.requireNonNull("value", "value cannot be null"));
+        }
+
+        return CodeBlock.of("return new $T(value)", thisClass);
     }
 
     private static final class DefaultConstructorVisitor implements Visitor<Optional<MethodSpec>> {
@@ -425,12 +465,16 @@ public final class AliasGenerator {
         }
     }
 
-    private static MethodSpec createConstructor(TypeName aliasTypeName) {
+    private static MethodSpec createConstructor(Type type, TypeName aliasTypeName, Options options) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"));
         if (!Primitives.isPrimitive(aliasTypeName)) {
-            builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
+            if (options.defensiveCollections() && type.accept(MoreVisitors.IS_COLLECTION)) {
+                builder.addStatement("this.value = $L", Expressions.wrapUnmodifiableCollections(type, "value"));
+            } else {
+                builder.addStatement("this.value = $L", Expressions.requireNonNull("value", "value cannot be null"));
+            }
         } else {
             builder.addStatement("this.value = value");
         }

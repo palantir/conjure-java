@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import allexamples.com.palantir.product.DoubleAliasExample;
@@ -29,6 +30,16 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedList;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedMap;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedPrimitiveList;
+import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class AliasTests {
@@ -77,5 +88,72 @@ public class AliasTests {
     public void testNaNEqualityOnSafeDoubleAlias() throws JsonProcessingException {
         assertThat(TEST_MAPPER.readValue("NaN", SafeDoubleAliasExample.class))
                 .isEqualTo(SafeDoubleAliasExample.of(Double.NaN));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsCopiesCollection_set() {
+        Set<Integer> original = Set.of(1, 2);
+        Set<Integer> mutableSet = new HashSet<>(original);
+
+        ExampleDefensiveAliasedSet alias = ExampleDefensiveAliasedSet.of(mutableSet);
+        mutableSet.add(3);
+        assertThat(alias).isEqualTo(ExampleDefensiveAliasedSet.of(original));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsIsImmutable_set() {
+        Set<Integer> original = Set.of(1, 2);
+
+        ExampleDefensiveAliasedSet alias = ExampleDefensiveAliasedSet.of(original);
+        Set<Integer> internal = alias.get();
+        assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.add(3));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsCopiesCollection_list() {
+        List<String> original = List.of("foo", "bar");
+        List<String> mutableList = new ArrayList<>(original);
+
+        ExampleDefensiveAliasedList alias = ExampleDefensiveAliasedList.of(mutableList);
+        mutableList.add("update");
+        assertThat(alias).isEqualTo(ExampleDefensiveAliasedList.of(original));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsCopiesCollection_primitiveList() {
+        List<Double> original = List.of(1.0);
+        List<Double> mutableList = new ArrayList<>(original);
+
+        ExampleDefensiveAliasedPrimitiveList alias = ExampleDefensiveAliasedPrimitiveList.of(mutableList);
+        mutableList.add(2.0);
+        assertThat(alias).isEqualTo(ExampleDefensiveAliasedPrimitiveList.of(original));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsIsImmutable_list() {
+        List<String> original = List.of("foo", "bar");
+        ExampleDefensiveAliasedList alias = ExampleDefensiveAliasedList.of(original);
+
+        List<String> internal = alias.get();
+        assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.add("update"));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsCopiesCollection_map() {
+        Map<String, Boolean> original = Map.of("foo", true);
+        Map<String, Boolean> mutableMap = new HashMap<>(original);
+
+        ExampleDefensiveAliasedMap alias = ExampleDefensiveAliasedMap.of(mutableMap);
+        mutableMap.put("bar", true);
+        assertThat(alias).isEqualTo(ExampleDefensiveAliasedMap.of(original));
+    }
+
+    @Test
+    void aliasWithDefensiveCollectionsIsImmutable_map() {
+        Map<String, Boolean> original = Map.of("foo", true);
+        ExampleDefensiveAliasedMap alias = ExampleDefensiveAliasedMap.of(original);
+
+        Map<String, Boolean> internal = alias.get();
+        assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.put("bar", true));
     }
 }

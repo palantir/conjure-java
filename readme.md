@@ -57,6 +57,9 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      endpoint's return value, and each endpoint error. Producing JARs with this feature enabled will 
                      result in a compile-time break when consumers bump their dependency on the JAR. This is because the
                      return types of every endpoint with associated errors will change.
+        --defensiveCollections
+                      Makes immutable copies of collections for union and alias types, respecting the 
+                      --nonNullCollections flag.
 
 ### Known Tag Values
 

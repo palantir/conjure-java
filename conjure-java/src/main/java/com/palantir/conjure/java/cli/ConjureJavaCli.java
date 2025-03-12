@@ -239,6 +239,13 @@ public final class ConjureJavaCli implements Runnable {
                         "Generate result types in Dialogue clients for endpoints with errors associated with them.")
         private boolean generateDialogueEndpointErrorResultTypes;
 
+        @CommandLine.Option(
+                names = "--defensiveCollections",
+                defaultValue = "false",
+                description = "Makes immutable copies of collections for union and alias types, respecting the "
+                        + "--nonNullCollections flag.")
+        private boolean defensiveCollections;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -311,6 +318,7 @@ public final class ConjureJavaCli implements Runnable {
                             .externalFallbackTypes(externalFallbackTypes)
                             .preferObjectBuilders(preferObjectBuilders)
                             .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
+                            .defensiveCollections(defensiveCollections)
                             .build())
                     .build();
         }

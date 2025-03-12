@@ -202,6 +202,14 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Makes immutable copies of collections for union and alias types, respecting the --nonNullCollections flag.
+     */
+    @Value.Default
+    default boolean defensiveCollections() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
