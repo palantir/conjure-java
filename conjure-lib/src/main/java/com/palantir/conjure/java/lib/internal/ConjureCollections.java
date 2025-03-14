@@ -181,6 +181,11 @@ public final class ConjureCollections {
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Double> newNonNullDoubleList(double[] doubles) {
+        return new ConjureDoubleList(new DoubleArrayList(doubles));
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList(Iterable<Double> iterable) {
         List<Double> doubleList;
         if (iterable instanceof Collection) {
@@ -191,6 +196,15 @@ public final class ConjureCollections {
         addAll(doubleList, iterable);
 
         return doubleList;
+    }
+
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addToDoubleList(Collection<Double> addTo, double toAdd) {
+        if (addTo instanceof ConjureDoubleList) {
+            ((ConjureDoubleList) addTo).add(toAdd);
+        } else {
+            addTo.add(toAdd);
+        }
     }
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -210,6 +224,11 @@ public final class ConjureCollections {
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Integer> newNonNullIntegerList(int[] ints) {
+        return new ConjureIntegerList(new IntArrayList(ints));
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList(Iterable<Integer> iterable) {
         List<Integer> integerList;
         if (iterable instanceof Collection) {
@@ -220,6 +239,15 @@ public final class ConjureCollections {
         addAll(integerList, iterable);
 
         return integerList;
+    }
+
+    // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static void addToIntegerList(Collection<Integer> addTo, int toAdd) {
+        if (addTo instanceof ConjureIntegerList) {
+            ((ConjureIntegerList) addTo).add(toAdd);
+        } else {
+            addTo.add(toAdd);
+        }
     }
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set

@@ -44,6 +44,11 @@ final class ConjureIntegerList extends AbstractList<Integer> implements RandomAc
         delegate.addAtIndex(index, toAdd);
     }
 
+    // Primitive optimized overload
+    void add(int toAdd) {
+        this.delegate.add(toAdd);
+    }
+
     @Override
     public Integer get(int index) {
         return delegate.get(index);
@@ -56,6 +61,7 @@ final class ConjureIntegerList extends AbstractList<Integer> implements RandomAc
         return delegate.addAllAtIndex(index, target);
     }
 
+    // Primitive optimized overload
     void addAll(int[] source) {
         this.delegate.addAll(source);
     }
