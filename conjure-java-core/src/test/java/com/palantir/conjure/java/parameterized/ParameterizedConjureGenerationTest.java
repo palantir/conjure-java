@@ -28,14 +28,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public final class ParameterizedConjureGenerationTest {
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
+    private static final String RESERVED_NON_GENERATED_PREFIX = "nongenerated";
 
     @TempDir
     public File tempDir;
@@ -46,6 +55,7 @@ public final class ParameterizedConjureGenerationTest {
 
     @ParameterizedTest
     @MethodSource("getTestCases")
+    @Order(1)
     void testGeneratedCode(ParameterizedTestCase testCase) throws IOException {
         ConjureDefinition def =
                 Conjure.parse(testCase.files().stream().map(Path::toFile).toList());
@@ -54,6 +64,26 @@ public final class ParameterizedConjureGenerationTest {
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, testCase);
+    }
+
+    @Test
+    @Order(2)
+    void validateOnlyRegisteredPackagesPresent() {
+        File referenceFilesFolder = new File(REFERENCE_FILES_FOLDER);
+        File[] files = referenceFilesFolder.listFiles();
+
+        assertThat(files).isNotNull();
+        Set<String> actualPackages = Arrays.stream(files)
+                .filter(File::isDirectory)
+                .map(File::getName)
+                .collect(Collectors.toSet());
+        Set<String> expectedPackages = getTestCases().stream()
+                .map(ParameterizedTestCase::packagePrefix)
+                .collect(Collectors.toSet());
+        expectedPackages.add(RESERVED_NON_GENERATED_PREFIX);
+        assertThat(actualPackages)
+                .as("Only registered test cases should check-in generated code")
+                .containsExactlyInAnyOrderElementsOf(expectedPackages);
     }
 
     private void assertThatFilesAreTheSame(List<Path> files, ParameterizedTestCase testCase) throws IOException {
