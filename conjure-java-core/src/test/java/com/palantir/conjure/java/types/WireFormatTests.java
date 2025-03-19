@@ -681,7 +681,7 @@ public final class WireFormatTests {
     void testNullContentCollectionDeserialization_listAliasOptionals() throws JsonProcessingException {
         assertThat(mapper.readValue("[null]", ExampleDefensiveAliasedListOptionalValue.class)
                         .get())
-                .isEqualTo(List.of(Optional.empty()));
+                .containsExactly(Optional.empty());
     }
 
     @Test
@@ -709,7 +709,7 @@ public final class WireFormatTests {
     void testNullContentCollectionDeserialization_mapAliasOptionals() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"test\":null}", ExampleDefensiveAliasedMapOptionalValue.class)
                         .get())
-                .isEqualTo(Map.of("test", Optional.empty()));
+                .containsExactlyInAnyOrderEntriesOf(Map.of("test", Optional.empty()));
     }
 
     @Test
@@ -720,7 +720,7 @@ public final class WireFormatTests {
                                 "[null]",
                                 defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedList.class)
                         .get())
-                .isEqualTo(expected);
+                .containsExactlyElementsOf(expected);
     }
 
     @Test
@@ -731,7 +731,7 @@ public final class WireFormatTests {
                                 "[null]",
                                 defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedSet.class)
                         .get())
-                .isEqualTo(expected);
+                .containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
@@ -743,7 +743,7 @@ public final class WireFormatTests {
                                 defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedPrimitiveList
                                         .class)
                         .get())
-                .isEqualTo(expected);
+                .containsExactlyElementsOf(expected);
     }
 
     @Test
@@ -755,7 +755,7 @@ public final class WireFormatTests {
                                 "{\"test\":null}",
                                 defensivenullablecollections.com.palantir.product.ExampleDefensiveAliasedMap.class)
                         .get())
-                .isEqualTo(expected);
+                .containsExactlyInAnyOrderEntriesOf(expected);
     }
 
     @Test
