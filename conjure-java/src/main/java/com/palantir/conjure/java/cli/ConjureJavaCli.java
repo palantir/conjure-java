@@ -246,6 +246,12 @@ public final class ConjureJavaCli implements Runnable {
                         + "--nonNullCollections flag.")
         private boolean defensiveCollections;
 
+        @CommandLine.Option(
+                names = "--strictUnions",
+                defaultValue = "false",
+                description = "Generate Union POJOs that by default will fail to deserialize unknown fields")
+        private boolean strictUnions;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -319,6 +325,7 @@ public final class ConjureJavaCli implements Runnable {
                             .preferObjectBuilders(preferObjectBuilders)
                             .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
                             .defensiveCollections(defensiveCollections)
+                            .strictUnions(strictUnions)
                             .build())
                     .build();
         }

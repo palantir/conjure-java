@@ -19,6 +19,7 @@ package com.palantir.conjure.java;
 import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
+import com.palantir.conjure.java.types.UnionGenerator;
 import java.util.Optional;
 import org.immutables.value.Value;
 
@@ -207,6 +208,15 @@ public interface Options {
      */
     @Value.Default
     default boolean defensiveCollections() {
+        return false;
+    }
+
+    /**
+     * Instructs the {@link UnionGenerator} to not generate union objects that fail to deserialize if unknown fields are
+     * encountered.
+     */
+    @Value.Default
+    default boolean strictUnions() {
         return false;
     }
 

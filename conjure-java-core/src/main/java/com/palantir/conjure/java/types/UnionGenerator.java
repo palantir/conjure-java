@@ -136,7 +136,7 @@ public final class UnionGenerator {
                 .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options)));
 
         typeBuilder
-                .addType(generateBase(baseClass, visitorClass, memberTypes))
+                .addType(generateBase(baseClass, visitorClass, memberTypes, options))
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
@@ -676,7 +676,7 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateBase(
-            ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes) {
+            ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes, Options options) {
         ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
@@ -702,9 +702,11 @@ public final class UnionGenerator {
             subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
             baseBuilder.addAnnotation(annotationBuilder.build());
         }
-        baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
-                .addMember("ignoreUnknown", "$L", true)
-                .build());
+        if (!options.strictUnions()) {
+            baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                    .addMember("ignoreUnknown", "$L", true)
+                    .build());
+        }
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
         ParameterSpec visitor =
                 ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
