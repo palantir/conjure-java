@@ -77,11 +77,14 @@ public final class ErrorGenerator implements Generator {
             ErrorNamespace namespace, List<ErrorDefinition> errorTypeDefinitions) {
         return errorTypeDefinitions.stream()
                 .map(errorDef -> {
-                    CodeBlock initializer = CodeBlock.of(
-                            "ErrorType.create(ErrorType.Code.$L, \"$L:$L\")",
-                            errorDef.getCode().get(),
-                            namespace.get(),
-                            errorDef.getErrorName().getName());
+                    CodeBlock.Builder initializerBuilder = CodeBlock.builder()
+                            .add("ErrorType.create(ErrorType.Code.$L, \"$L:$L\")",
+                                    errorDef.getCode().get(),
+                                    namespace.get(),
+                                    errorDef.getErrorName().getName());
+                    errorDef.getDocs().ifPresent(docs ->
+                            initializerBuilder.add("\n// $L", docs.get()));
+                    CodeBlock initializer = initializerBuilder.build();
                     FieldSpec.Builder fieldSpecBuilder = FieldSpec.builder(
                                     ClassName.get(ErrorType.class),
                                     CaseFormat.UPPER_CAMEL.to(
