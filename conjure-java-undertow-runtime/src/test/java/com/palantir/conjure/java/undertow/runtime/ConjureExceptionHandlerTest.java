@@ -39,6 +39,7 @@ import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
+import io.undertow.UndertowMessages;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
@@ -355,6 +356,17 @@ public final class ConjureExceptionHandlerTest {
         HttpHandler handler = new ConjureExceptionHandler(
                 _exchange -> {
                     throw new Error();
+                },
+                ConjureExceptions.INSTANCE);
+        assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void handlesPeerRemoteExceptionsWithoutRethrowing() {
+        HttpHandler handler = new ConjureExceptionHandler(
+                _exchange -> {
+                    throw UndertowMessages.MESSAGES.couldNotReadContentLengthData();
                 },
                 ConjureExceptions.INSTANCE);
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))

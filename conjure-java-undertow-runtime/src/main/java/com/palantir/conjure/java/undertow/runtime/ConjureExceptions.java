@@ -32,6 +32,7 @@ import com.palantir.deadlines.DeadlineExpiredReasons;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
+import io.undertow.UndertowMessages;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
@@ -79,7 +80,9 @@ public enum ConjureExceptions implements ExceptionHandler {
             deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
-        } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
+        } else if (throwable instanceof IOException
+                && (!exchange.getConnection().isOpen()
+                        || throwable.equals(UndertowMessages.MESSAGES.couldNotReadContentLengthData()))) {
             log.info(
                     "I/O exception from a closed connection. The request may have been aborted by the client",
                     throwable);
