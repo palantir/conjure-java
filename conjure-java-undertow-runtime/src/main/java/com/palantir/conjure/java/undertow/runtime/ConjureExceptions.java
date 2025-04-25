@@ -208,7 +208,8 @@ public enum ConjureExceptions implements ExceptionHandler {
 
         if (ioException.equals(UndertowMessages.MESSAGES.couldNotReadContentLengthData())) {
             log.info(
-                    "Remote peer closed connection before all data could be read. The request may have been aborted by the client",
+                    "Remote peer closed connection before all data could be read. The request may have been aborted by"
+                            + " the client",
                     ioException);
             return;
         }
