@@ -363,14 +363,10 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
-    public void handlesPeerRemoteExceptionsWithoutRethrowing() {
-        HttpHandler handler = new ConjureExceptionHandler(
-                _exchange -> {
-                    throw UndertowMessages.MESSAGES.couldNotReadContentLengthData();
-                },
-                ConjureExceptions.INSTANCE);
-        assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
-                .doesNotThrowAnyException();
+    public void handlesPeerRemoteExceptionsWithoutRethrowing() throws IOException {
+        exception = UndertowMessages.MESSAGES.couldNotReadContentLengthData();
+        HttpURLConnection connection = execute();
+        assertThat(connection.getResponseCode()).isEqualTo(200);
     }
 
     private static String getErrorBody(HttpURLConnection connection) {
