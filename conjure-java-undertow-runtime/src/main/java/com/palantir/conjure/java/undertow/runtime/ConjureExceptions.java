@@ -80,12 +80,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
-        } else if (throwable instanceof IOException
-                && (!exchange.getConnection().isOpen()
-                        || throwable.equals(UndertowMessages.MESSAGES.couldNotReadContentLengthData()))) {
-            log.info(
-                    "I/O exception from a closed connection. The request may have been aborted by the client",
-                    throwable);
+        } else if (throwable instanceof IOException) {
+            ioException(exchange, (IOException) throwable);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception, throwable);
@@ -200,6 +196,29 @@ public enum ConjureExceptions implements ExceptionHandler {
         // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
         DeadlineExpiredReasons.encodeToResponse(
                 exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
+    }
+
+    private static void ioException(HttpServerExchange exchange, IOException ioException) {
+        if (!exchange.getConnection().isOpen()) {
+            log.info(
+                    "I/O exception from a closed connection. The request may have been aborted by the client",
+                    ioException);
+            return;
+        }
+
+        if (ioException.equals(UndertowMessages.MESSAGES.couldNotReadContentLengthData())) {
+            log.info(
+                    "Remote peer closed connection before all data could be read. The request may have been aborted by the client",
+                    ioException);
+            return;
+        }
+
+        ServiceException exception = new ServiceException(ErrorType.INTERNAL, ioException);
+        log(exception, ioException);
+        writeResponse(
+                exchange,
+                Optional.of(ConjureError.fromServiceException(exception)),
+                exception.getErrorType().httpErrorCode());
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
