@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
@@ -46,6 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -366,7 +368,9 @@ public final class ConjureExceptionHandlerTest {
     public void handlesPeerRemoteExceptionsWithoutRethrowing() throws IOException {
         exception = UndertowMessages.MESSAGES.couldNotReadContentLengthData();
         HttpURLConnection connection = execute();
-        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThatThrownBy(() -> connection.getResponseCode())
+                .isInstanceOf(SocketException.class)
+                .hasMessageContaining("Unexpected end of file from server");
     }
 
     private static String getErrorBody(HttpURLConnection connection) {
