@@ -58,7 +58,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
 
-    private static final String COULD_NOT_READ_CONTENT_LENGTH_MESSAGE =
+    private static final String COULD_NOT_READ_CONTENT_LENGTH_DATA_MESSAGE =
             UndertowMessages.MESSAGES.couldNotReadContentLengthData().getMessage();
 
     // Log at most once every second
@@ -210,7 +210,7 @@ public enum ConjureExceptions implements ExceptionHandler {
             return;
         }
 
-        if (Objects.equals(ioException.getMessage(), COULD_NOT_READ_CONTENT_LENGTH_MESSAGE)) {
+        if (Objects.equals(ioException.getMessage(), COULD_NOT_READ_CONTENT_LENGTH_DATA_MESSAGE)) {
             log.info(
                     "Remote peer closed connection before all data could be read. "
                             + "The request may have been aborted by the client.",
