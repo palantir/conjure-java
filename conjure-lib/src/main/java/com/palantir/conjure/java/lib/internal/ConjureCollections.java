@@ -75,9 +75,7 @@ public final class ConjureCollections {
             // ArrayList#addAll method which does a single System.arraycopy.
             addTo.addAll((Collection<T>) elementsToAdd);
         } else {
-            for (T element : elementsToAdd) {
-                addTo.add(element);
-            }
+            elementsToAdd.forEach(addTo::add);
         }
     }
 
@@ -92,10 +90,9 @@ public final class ConjureCollections {
                 ((ArrayList<T>) addTo).ensureCapacity(collectionElementsToAdd.size() + addTo.size());
             }
         }
-        for (T element : elementsToAdd) {
-            Preconditions.checkNotNull(element, "elementsToAdd cannot contain null elements");
-            addTo.add(element);
-        }
+        elementsToAdd.forEach(element -> {
+            addTo.add(Preconditions.checkNotNull(element, "elementsToAdd cannot contain null elements"));
+        });
     }
 
     // Prefer to use newList(iterable)
@@ -107,9 +104,7 @@ public final class ConjureCollections {
             return new ArrayList<>((Collection<T>) iterable);
         }
         ArrayList<T> list = new ArrayList<>();
-        for (T item : iterable) {
-            list.add(item);
-        }
+        iterable.forEach(list::add);
         return list;
     }
 
@@ -121,9 +116,7 @@ public final class ConjureCollections {
             return new LinkedHashSet<>((Collection<T>) iterable);
         }
         LinkedHashSet<T> set = new LinkedHashSet<>();
-        for (T item : iterable) {
-            set.add(item);
-        }
+        iterable.forEach(set::add);
         return set;
     }
 
@@ -141,10 +134,7 @@ public final class ConjureCollections {
 
     public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
         List<T> arrayList = newList(iterable);
-        for (T item : arrayList) {
-            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
-        }
-
+        arrayList.forEach(item -> Preconditions.checkNotNull(item, "iterable cannot contain null elements"));
         return arrayList;
     }
 
@@ -162,10 +152,7 @@ public final class ConjureCollections {
 
     public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
         Set<T> set = newSet(iterable);
-        for (T item : set) {
-            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
-        }
-
+        set.forEach(item -> Preconditions.checkNotNull(item, "iterable cannot contain null elements"));
         return set;
     }
 
