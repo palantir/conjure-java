@@ -211,8 +211,9 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new TracedRequestHandler(
                                     endpoint.handler(),
                                     "Undertow: " + endpoint.method() + " " + endpoint.template(),
-                                    CompletedRequestTagTranslator.INSTANCE.andThen(
-                                            new EndpointTagTranslator(endpoint)))),
+                                    CompletedRequestTagTranslator.INSTANCE
+                                            .andThen(new EndpointTagTranslator(endpoint))
+                                            .andThen(DeadlineTagTranslator.INSTANCE))),
                             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
                             // parameters. Servers which do not configure DECODE_URL will still work properly except
                             // for encoded slash values. When DECODE_URL has not been disabled, the following handler
