@@ -24,23 +24,24 @@ import io.undertow.util.HttpString;
 enum DeadlineTagTranslator implements TagTranslator<HttpServerExchange> {
     INSTANCE;
 
+    private static final HttpString EXPECT_WITHIN = HttpString.tryFromString("Expect-Within");
     private static final String EXPECT_WITHIN_TAG = "deadlines.expect_within";
+    private static final HttpString EXPECT_WITHIN_ENFORCED = HttpString.tryFromString("Expect-Within-Enforced");
     private static final String EXPECT_WITHIN_ENFORCED_TAG = "deadlines.expect_within_enforced";
+    private static final HttpString DEADLINE_EXPIRED_REASON = HttpString.tryFromString("Deadline-Expired-Reason");
     private static final String DEADLINE_EXPIRED_REASON_TAG = "deadlines.deadline_expired_reason";
 
     @Override
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange data) {
-        String expectWithin = data.getRequestHeaders().getFirst(HttpString.tryFromString("Expect-Within"));
+        String expectWithin = data.getRequestHeaders().getFirst(EXPECT_WITHIN);
         if (expectWithin != null) {
             adapter.tag(target, EXPECT_WITHIN_TAG, expectWithin);
         }
-        String expectWithinEnforced =
-                data.getRequestHeaders().getFirst(HttpString.tryFromString("Expect-Within-Enforced"));
+        String expectWithinEnforced = data.getRequestHeaders().getFirst(EXPECT_WITHIN_ENFORCED);
         if (expectWithinEnforced != null) {
             adapter.tag(target, EXPECT_WITHIN_ENFORCED_TAG, expectWithinEnforced);
         }
-        String deadlineExpiredReason =
-                data.getRequestHeaders().getFirst(HttpString.tryFromString("Deadline-Expired-Reason"));
+        String deadlineExpiredReason = data.getRequestHeaders().getFirst(DEADLINE_EXPIRED_REASON);
         if (deadlineExpiredReason != null) {
             adapter.tag(target, DEADLINE_EXPIRED_REASON_TAG, deadlineExpiredReason);
         }
