@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.palantir.deadlines.DeadlinesHttpHeaders;
 import com.palantir.tracing.TagTranslator;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -24,11 +25,13 @@ import io.undertow.util.HttpString;
 enum DeadlineTagTranslator implements TagTranslator<HttpServerExchange> {
     INSTANCE;
 
-    private static final HttpString EXPECT_WITHIN = HttpString.tryFromString("Expect-Within");
+    private static final HttpString EXPECT_WITHIN = HttpString.tryFromString(DeadlinesHttpHeaders.EXPECT_WITHIN);
     private static final String EXPECT_WITHIN_TAG = "deadlines.expect_within";
-    private static final HttpString EXPECT_WITHIN_ENFORCED = HttpString.tryFromString("Expect-Within-Enforced");
+    private static final HttpString EXPECT_WITHIN_ENFORCED =
+            HttpString.tryFromString(DeadlinesHttpHeaders.EXPECT_WITHIN_ENFORCED);
     private static final String EXPECT_WITHIN_ENFORCED_TAG = "deadlines.expect_within_enforced";
-    private static final HttpString DEADLINE_EXPIRED_REASON = HttpString.tryFromString("Deadline-Expired-Reason");
+    private static final HttpString DEADLINE_EXPIRED_REASON =
+            HttpString.tryFromString(DeadlinesHttpHeaders.DEADLINE_EXPIRED_REASON);
     private static final String DEADLINE_EXPIRED_REASON_TAG = "deadlines.deadline_expired_reason";
 
     @Override
