@@ -16,9 +16,11 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.base.Strings;
 import com.palantir.deadlines.DeadlinesHttpHeaders;
 import com.palantir.tracing.TagTranslator;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 
 /** A {@link TagTranslator} which populates metadata from deadlines headers. */
@@ -36,16 +38,17 @@ enum DeadlineTagTranslator implements TagTranslator<HttpServerExchange> {
 
     @Override
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange data) {
-        String expectWithin = data.getRequestHeaders().getFirst(EXPECT_WITHIN);
-        if (expectWithin != null) {
+        HeaderMap headers = data.getRequestHeaders();
+        String expectWithin = headers.getFirst(EXPECT_WITHIN);
+        if (!Strings.isNullOrEmpty(expectWithin)) {
             adapter.tag(target, EXPECT_WITHIN_TAG, expectWithin);
         }
-        String expectWithinEnforced = data.getRequestHeaders().getFirst(EXPECT_WITHIN_ENFORCED);
-        if (expectWithinEnforced != null) {
+        String expectWithinEnforced = headers.getFirst(EXPECT_WITHIN_ENFORCED);
+        if (!Strings.isNullOrEmpty(expectWithinEnforced)) {
             adapter.tag(target, EXPECT_WITHIN_ENFORCED_TAG, expectWithinEnforced);
         }
-        String deadlineExpiredReason = data.getRequestHeaders().getFirst(DEADLINE_EXPIRED_REASON);
-        if (deadlineExpiredReason != null) {
+        String deadlineExpiredReason = headers.getFirst(DEADLINE_EXPIRED_REASON);
+        if (!Strings.isNullOrEmpty(deadlineExpiredReason)) {
             adapter.tag(target, DEADLINE_EXPIRED_REASON_TAG, deadlineExpiredReason);
         }
     }
