@@ -39,17 +39,23 @@ enum DeadlineTagTranslator implements TagTranslator<HttpServerExchange> {
     @Override
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange data) {
         HeaderMap headers = data.getRequestHeaders();
-        String expectWithin = headers.getFirst(EXPECT_WITHIN);
-        if (!Strings.isNullOrEmpty(expectWithin)) {
-            adapter.tag(target, EXPECT_WITHIN_TAG, expectWithin);
+        if (EXPECT_WITHIN != null) {
+            String expectWithin = headers.getFirst(EXPECT_WITHIN);
+            if (!Strings.isNullOrEmpty(expectWithin)) {
+                adapter.tag(target, EXPECT_WITHIN_TAG, expectWithin);
+            }
         }
-        String expectWithinEnforced = headers.getFirst(EXPECT_WITHIN_ENFORCED);
-        if (!Strings.isNullOrEmpty(expectWithinEnforced)) {
-            adapter.tag(target, EXPECT_WITHIN_ENFORCED_TAG, expectWithinEnforced);
+        if (EXPECT_WITHIN_ENFORCED != null) {
+            String expectWithinEnforced = headers.getFirst(EXPECT_WITHIN_ENFORCED);
+            if (!Strings.isNullOrEmpty(expectWithinEnforced)) {
+                adapter.tag(target, EXPECT_WITHIN_ENFORCED_TAG, expectWithinEnforced);
+            }
         }
-        String deadlineExpiredReason = headers.getFirst(DEADLINE_EXPIRED_REASON);
-        if (!Strings.isNullOrEmpty(deadlineExpiredReason)) {
-            adapter.tag(target, DEADLINE_EXPIRED_REASON_TAG, deadlineExpiredReason);
+        if (DEADLINE_EXPIRED_REASON != null) {
+            String deadlineExpiredReason = headers.getFirst(DEADLINE_EXPIRED_REASON);
+            if (!Strings.isNullOrEmpty(deadlineExpiredReason)) {
+                adapter.tag(target, DEADLINE_EXPIRED_REASON_TAG, deadlineExpiredReason);
+            }
         }
     }
 }
