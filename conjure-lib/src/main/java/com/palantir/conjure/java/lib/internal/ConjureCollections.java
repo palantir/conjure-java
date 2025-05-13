@@ -18,9 +18,11 @@ package com.palantir.conjure.java.lib.internal;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,8 +43,8 @@ public final class ConjureCollections {
     /*
      * This is bizarre. Allow me to explain...
      *
-     * We do _not_ want to expose the Conjure*List types externally
-     * but we also want the optimizations they provide to make it thru
+     * We do _not_ want to expose the Conjure*List types externally,
+     * but we also want the optimizations they provide to make it through
      * to jackson for serialization. So the runtime type needs to be
      * preserved while also not exposing the type :phew:.
      *
@@ -51,48 +53,64 @@ public final class ConjureCollections {
      * return specific Conjure types when detected. This requires that we
      * erase the type info, but we know this is safe because we are directly
      * returning the same type which is by definition the identity function.
-     * Therefore the input List<T> is the same types as the output List<T>.
+     * Therefore, the input List<T> is the same types as the output List<T>.
      */
     public static <T> List<T> unmodifiableList(List<T> list) {
         // Return the unmodifiable version of the Eclipse types
-        if (list instanceof ConjureIntegerList) {
-            return (List<T>) ((ConjureIntegerList) list).asUnmodifiable();
-        } else if (list instanceof ConjureDoubleList) {
-            return (List<T>) ((ConjureDoubleList) list).asUnmodifiable();
-        } else if (list instanceof ConjureSafeLongList) {
-            return (List<T>) ((ConjureSafeLongList) list).asUnmodifiable();
+        if (list instanceof ConjureIntegerList conjureIntegerList) {
+            return (List<T>) conjureIntegerList.asUnmodifiable();
+        } else if (list instanceof ConjureDoubleList conjureDoubleList) {
+            return (List<T>) conjureDoubleList.asUnmodifiable();
+        } else if (list instanceof ConjureSafeLongList conjureSafeLongList) {
+            return (List<T>) conjureSafeLongList.asUnmodifiable();
         } else {
             // Otherwise use the JDK types
             return Collections.unmodifiableList(list);
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> void addAll(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
         Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
-        if (elementsToAdd instanceof Collection) {
+        if (elementsToAdd instanceof Collection<? extends T> collection) {
             // This special-casing allows us to take advantage of the more performant
             // ArrayList#addAll method which does a single System.arraycopy.
-            addTo.addAll((Collection<T>) elementsToAdd);
+            addTo.addAll(collection);
         } else {
             elementsToAdd.forEach(addTo::add);
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> void addAllAndCheckNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
         Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
-        // If we know the number of elements we are adding and the addTo Collection is an ArrayList, we can eagerly
-        // resize it to only do one grow() of the array.
-        if (elementsToAdd instanceof Collection) {
-            Collection<T> collectionElementsToAdd = (Collection<T>) elementsToAdd;
-            if (addTo instanceof ArrayList) {
-                ((ArrayList<T>) addTo).ensureCapacity(collectionElementsToAdd.size() + addTo.size());
-            }
+        if (elementsToAdd instanceof Collection<? extends T> collection) {
+            // Some collections such as ArrayList support bulk addAll optimizations to avoid repeated resizing.
+            addTo.addAll(new AbstractCollection<>() {
+                @Override
+                public Iterator<T> iterator() {
+                    return new NonNullIterator<>(collection.iterator());
+                }
+
+                @Override
+                public Object[] toArray() {
+                    Object[] array = collection.toArray();
+                    for (Object element : array) {
+                        checkNotNullElement(element);
+                    }
+                    return array;
+                }
+
+                @Override
+                public int size() {
+                    return collection.size();
+                }
+            });
+        } else {
+            elementsToAdd.forEach(element -> addTo.add(checkNotNullElement(element)));
         }
-        elementsToAdd.forEach(element -> {
-            addTo.add(Preconditions.checkNotNull(element, "elementsToAdd cannot contain null elements"));
-        });
+    }
+
+    private static <T> T checkNotNullElement(T element) {
+        return Preconditions.checkNotNull(element, "element cannot be null");
     }
 
     // Prefer to use newList(iterable)
@@ -112,8 +130,8 @@ public final class ConjureCollections {
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new LinkedHashSet<>((Collection<T>) iterable);
+        if (iterable instanceof Collection<? extends T> collection) {
+            return new LinkedHashSet<>(collection);
         }
         LinkedHashSet<T> set = new LinkedHashSet<>();
         iterable.forEach(set::add);
@@ -134,7 +152,7 @@ public final class ConjureCollections {
 
     public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
         List<T> arrayList = newList(iterable);
-        arrayList.forEach(item -> Preconditions.checkNotNull(item, "iterable cannot contain null elements"));
+        arrayList.forEach(ConjureCollections::checkNotNullElement);
         return arrayList;
     }
 
@@ -152,7 +170,7 @@ public final class ConjureCollections {
 
     public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
         Set<T> set = newSet(iterable);
-        set.forEach(item -> Preconditions.checkNotNull(item, "iterable cannot contain null elements"));
+        set.forEach(ConjureCollections::checkNotNullElement);
         return set;
     }
 
@@ -285,6 +303,22 @@ public final class ConjureCollections {
     public static void addAllToSafeLongList(Collection<SafeLong> addTo, long[] elementsToAdd) {
         for (long el : elementsToAdd) {
             addTo.add(SafeLong.of(el));
+        }
+    }
+
+    private record NonNullIterator<T>(Iterator<? extends T> iterator) implements Iterator<T> {
+        private NonNullIterator(Iterator<? extends T> iterator) {
+            this.iterator = Preconditions.checkNotNull(iterator, "iterator cannot be null");
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator().hasNext();
+        }
+
+        @Override
+        public T next() {
+            return checkNotNullElement(iterator().next());
         }
     }
 }

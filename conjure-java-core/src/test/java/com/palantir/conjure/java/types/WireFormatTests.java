@@ -674,7 +674,7 @@ public final class WireFormatTests {
     void testNullContentCollectionDeserialization_listAlias() {
         assertThatThrownBy(() -> mapper.readValue("[null]", ExampleDefensiveAliasedList.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("iterable cannot contain null elements");
+                .hasMessageContaining("element cannot be null");
     }
 
     @Test
@@ -688,7 +688,7 @@ public final class WireFormatTests {
     void testNullContentCollectionDeserialization_setAlias() {
         assertThatThrownBy(() -> mapper.readValue("[null]", ExampleDefensiveAliasedSet.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("iterable cannot contain null elements");
+                .hasMessageContaining("element cannot be null");
     }
 
     @Test
@@ -768,7 +768,7 @@ public final class WireFormatTests {
         assertThatThrownBy(() -> mapper.readValue(
                         "{\"type\":\"list\",\"list\":[null]}", ExampleDefensiveCollectionListsUnion.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("iterable cannot contain null elements");
+                .hasMessageContaining("element cannot be null");
     }
 
     @Test
@@ -784,7 +784,7 @@ public final class WireFormatTests {
         assertThatThrownBy(() -> mapper.readValue(
                         "{\"type\":\"set\",\"set\":[null]}", ExampleDefensiveCollectionSetsUnion.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("iterable cannot contain null elements");
+                .hasMessageContaining("element cannot be null");
     }
 
     @Test
