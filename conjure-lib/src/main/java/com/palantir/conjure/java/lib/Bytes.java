@@ -24,11 +24,14 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.logsafe.Preconditions;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Objects;
 
 /** An immutable {@code byte[]} wrapper. */
 @JsonSerialize(using = Bytes.Serializer.class)
@@ -114,6 +117,14 @@ public final class Bytes {
         return new Bytes(safe);
     }
 
+    public static Builder builder(int capacity) {
+        return new Builder(capacity);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     static final class Serializer extends JsonSerializer<Bytes> {
         @Override
         public void serialize(Bytes value, JsonGenerator gen, SerializerProvider _serializer) throws IOException {
@@ -126,6 +137,58 @@ public final class Bytes {
         public Bytes deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
             // Avoid making a copy of the value from jackson
             return new Bytes(parser.getBinaryValue());
+        }
+    }
+
+    public static final class Builder extends OutputStream {
+        private byte[] contents;
+        private boolean isBuilt;
+        private int count;
+
+        public Builder() {
+            this(32);
+        }
+
+        public Builder(int capacity) {
+            Preconditions.checkArgument(capacity > 0);
+            this.contents = new byte[capacity];
+            this.count = 0;
+        }
+
+        @Override
+        public synchronized void write(int inputByte) {
+            Preconditions.checkState(!isBuilt, "No writes are allowed because Immutable Bytes have already been built");
+            ensureCapacity(count + 1);
+            contents[count] = (byte) inputByte;
+            count += 1;
+        }
+
+        @Override
+        public synchronized void write(byte[] bytes, int off, int len) {
+            Preconditions.checkState(!isBuilt, "No writes are allowed because Immutable Bytes have already been built");
+            Objects.checkFromIndexSize(off, len, bytes.length);
+            ensureCapacity(count + len);
+            System.arraycopy(bytes, off, contents, count, len);
+            count += len;
+        }
+
+        public Bytes build() {
+            close();
+            return new Bytes(contents);
+        }
+
+        @Override
+        public synchronized void close() {
+            isBuilt = true;
+        }
+
+        private void ensureCapacity(int minCapacity) {
+            int oldCapacity = contents.length;
+            if (minCapacity - oldCapacity > 0) {
+                // This limit is taken from ArraysSupport::newLength
+                int newCapacity = Math.min(oldCapacity * 2, Integer.MAX_VALUE - 8);
+                contents = Arrays.copyOf(contents, newCapacity);
+            }
         }
     }
 }

@@ -181,4 +181,22 @@ public final class BytesTests {
         ObjectMapper mapper = new ObjectMapper();
         assertThatThrownBy(() -> mapper.readValue("[]", Bytes.class)).isInstanceOf(JsonParseException.class);
     }
+
+    @Test
+    public void testBuilderRejectsWritesAfterBuild() {
+        try (Bytes.Builder builder = Bytes.builder(8)) {
+            byte[] input = new byte[] {0, 1, 2};
+            builder.write(input, 0, input.length);
+
+            Bytes immutable = builder.build();
+            byte[] test = new byte[input.length];
+            immutable.copyTo(test, 0, test.length);
+            assertThat(test).isEqualTo(input);
+
+            assertThatThrownBy(() -> builder.write(input, 0, input.length))
+                    .hasMessageContaining("No writes are allowed because Immutable Bytes have already been built");
+
+            assertThat(test).isEqualTo(input);
+        }
+    }
 }
