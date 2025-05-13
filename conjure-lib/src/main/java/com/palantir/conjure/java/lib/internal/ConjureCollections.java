@@ -70,18 +70,17 @@ public final class ConjureCollections {
     }
 
     public static <T> void addAll(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
-        Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
         if (elementsToAdd instanceof Collection<? extends T> collection) {
             // This special-casing allows us to take advantage of the more performant
             // ArrayList#addAll method which does a single System.arraycopy.
             addTo.addAll(collection);
         } else {
-            elementsToAdd.forEach(addTo::add);
+            Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null")
+                    .forEach(addTo::add);
         }
     }
 
     public static <T> void addAllAndCheckNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
-        Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
         if (elementsToAdd instanceof Collection<? extends T> collection) {
             // Some collections such as ArrayList support bulk addAll optimizations to avoid repeated resizing.
             addTo.addAll(new AbstractCollection<>() {
@@ -105,36 +104,31 @@ public final class ConjureCollections {
                 }
             });
         } else {
-            elementsToAdd.forEach(element -> addTo.add(checkNotNullElement(element)));
+            Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null")
+                    .forEach(element -> addTo.add(checkNotNullElement(element)));
         }
-    }
-
-    private static <T> T checkNotNullElement(T element) {
-        return Preconditions.checkNotNull(element, "element cannot be null");
     }
 
     // Prefer to use newList(iterable)
     // explicitly need to return mutable list for generated builders
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new ArrayList<>((Collection<T>) iterable);
+        if (iterable instanceof Collection<? extends T> collection) {
+            return new ArrayList<>(collection);
         }
         ArrayList<T> list = new ArrayList<>();
-        iterable.forEach(list::add);
+        Preconditions.checkNotNull(iterable, "iterable cannot be null").forEach(list::add);
         return list;
     }
 
     // Prefer to use newSet(iterable)
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection<? extends T> collection) {
             return new LinkedHashSet<>(collection);
         }
         LinkedHashSet<T> set = new LinkedHashSet<>();
-        iterable.forEach(set::add);
+        Preconditions.checkNotNull(iterable, "iterable cannot be null").forEach(set::add);
         return set;
     }
 
@@ -289,8 +283,8 @@ public final class ConjureCollections {
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList(Iterable<SafeLong> iterable) {
         List<SafeLong> safeLongList;
-        if (iterable instanceof Collection) {
-            safeLongList = new ConjureSafeLongList(new LongArrayList(((Collection<SafeLong>) iterable).size()));
+        if (iterable instanceof Collection<SafeLong> collection) {
+            safeLongList = new ConjureSafeLongList(new LongArrayList(collection.size()));
         } else {
             safeLongList = new ConjureSafeLongList(new LongArrayList());
         }
@@ -304,6 +298,10 @@ public final class ConjureCollections {
         for (long el : elementsToAdd) {
             addTo.add(SafeLong.of(el));
         }
+    }
+
+    private static <T> T checkNotNullElement(T element) {
+        return Preconditions.checkNotNull(element, "element cannot be null");
     }
 
     private record NonNullIterator<T>(Iterator<? extends T> iterator) implements Iterator<T> {
