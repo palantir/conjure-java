@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.xnio.IoUtils;
@@ -57,6 +58,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
 
+    private static final String COULD_NOT_READ_CONTENT_LENGTH_DATA_MESSAGE =
+            UndertowMessages.MESSAGES.couldNotReadContentLengthData().getMessage();
+
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
@@ -66,22 +70,22 @@ public enum ConjureExceptions implements ExceptionHandler {
         setFailure(exchange, throwable);
         if (throwable instanceof CheckedServiceException checkedServiceException) {
             checkedServiceException(exchange, checkedServiceException);
-        } else if (throwable instanceof ServiceException) {
-            serviceException(exchange, (ServiceException) throwable);
-        } else if (throwable instanceof QosException) {
-            qosException(exchange, (QosException) throwable);
-        } else if (throwable instanceof RemoteException) {
-            remoteException(exchange, (RemoteException) throwable);
+        } else if (throwable instanceof ServiceException serviceException) {
+            serviceException(exchange, serviceException);
+        } else if (throwable instanceof QosException qosException) {
+            qosException(exchange, qosException);
+        } else if (throwable instanceof RemoteException remoteException) {
+            remoteException(exchange, remoteException);
         } else if (throwable instanceof IllegalArgumentException) {
             illegalArgumentException(exchange, throwable);
-        } else if (throwable instanceof FrameworkException) {
-            frameworkException(exchange, (FrameworkException) throwable);
-        } else if (throwable instanceof DeadlineExpiredException) {
-            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
-        } else if (throwable instanceof Error) {
-            error(exchange, (Error) throwable);
-        } else if (throwable instanceof IOException) {
-            ioException(exchange, (IOException) throwable);
+        } else if (throwable instanceof FrameworkException frameworkException) {
+            frameworkException(exchange, frameworkException);
+        } else if (throwable instanceof DeadlineExpiredException deadlineExpiredException) {
+            deadlineExpiredException(exchange, deadlineExpiredException);
+        } else if (throwable instanceof Error error) {
+            error(exchange, error);
+        } else if (throwable instanceof IOException ioException) {
+            ioException(exchange, ioException);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception, throwable);
@@ -206,15 +210,12 @@ public enum ConjureExceptions implements ExceptionHandler {
             return;
         }
 
-        if (ioException
-                .getMessage()
-                .equals(UndertowMessages.MESSAGES
-                        .couldNotReadContentLengthData()
-                        .getMessage())) {
+        if (Objects.equals(ioException.getMessage(), COULD_NOT_READ_CONTENT_LENGTH_DATA_MESSAGE)) {
             log.info(
-                    "Remote peer closed connection before all data could be read. The request may have been aborted by"
-                            + " the client",
+                    "Remote peer closed connection before all data could be read. "
+                            + "The request may have been aborted by the client.",
                     ioException);
+            IoUtils.safeClose(exchange.getConnection());
             return;
         }
 
