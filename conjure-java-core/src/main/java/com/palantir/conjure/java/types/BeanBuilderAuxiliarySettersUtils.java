@@ -46,12 +46,18 @@ final class BeanBuilderAuxiliarySettersUtils {
     private BeanBuilderAuxiliarySettersUtils() {}
 
     static MethodSpec.Builder createPrimitiveCollectionSetterBuilder(
-            EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass, SafetyEvaluator safetyEvaluator) {
+            EnrichedField enriched,
+            TypeMapper typeMapper,
+            ClassName returnClass,
+            SafetyEvaluator safetyEvaluator,
+            boolean strict) {
         FieldSpec field = enriched.poetSpec();
         FieldDefinition definition = enriched.conjureDef();
         TypeName innerTypeName = extractInnerTypeFromList(definition, typeMapper, safetyEvaluator);
+        // Strict builders are not "adders" so they should be named to overload the field setter
+        String methodName = strict ? field.name() : "addAll" + StringUtils.capitalize(field.name());
 
-        return MethodSpec.methodBuilder("addAll" + StringUtils.capitalize(field.name()))
+        return MethodSpec.methodBuilder(methodName)
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
                         .map(rendered -> CodeBlock.of("$L", rendered))
                         .orElseGet(() -> CodeBlock.builder().build()))
