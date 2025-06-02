@@ -1,6 +1,6 @@
 package undertow.com.palantir.product;
 
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
@@ -37,7 +37,7 @@ public final class EndpointSpecificServerErrors {
         }
     }
 
-    public static final class EndpointError extends CheckedServiceException {
+    public static final class EndpointError extends EndpointServiceException {
         private EndpointError(@Safe String typeName, @Unsafe Object typeDef, @Nullable Throwable cause) {
             super(
                     EndpointSpecificErrors.ENDPOINT_ERROR,

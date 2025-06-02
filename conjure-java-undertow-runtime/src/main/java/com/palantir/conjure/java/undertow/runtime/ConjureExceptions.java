@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.QosReasons;
@@ -63,7 +64,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (throwable instanceof CheckedServiceException checkedServiceException) {
+        if (throwable instanceof EndpointServiceException endpointServiceException) {
+            endpointServiceException(exchange, endpointServiceException);
+        } else if (throwable instanceof CheckedServiceException checkedServiceException) {
             checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
@@ -98,6 +101,14 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(
                 exchange,
                 Optional.of(ConjureError.fromCheckedServiceException(exception)),
+                exception.getErrorType().httpErrorCode());
+    }
+
+    private static void endpointServiceException(HttpServerExchange exchange, EndpointServiceException exception) {
+        log(exception);
+        writeResponse(
+                exchange,
+                Optional.of(ConjureError.fromEndpointServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
@@ -273,6 +284,24 @@ public enum ConjureExceptions implements ExceptionHandler {
                     SafeArg.of(
                             "errorName", checkedServiceException.getErrorType().name()),
                     checkedServiceException);
+        }
+    }
+
+    private static void log(EndpointServiceException endpointServiceException) {
+        if (endpointServiceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+            log.info(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", endpointServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", endpointServiceException.getErrorType().name()),
+                    endpointServiceException);
+        } else {
+            log.error(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", endpointServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", endpointServiceException.getErrorType().name()),
+                    endpointServiceException);
         }
     }
 

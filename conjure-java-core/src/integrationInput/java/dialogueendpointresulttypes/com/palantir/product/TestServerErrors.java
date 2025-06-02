@@ -1,6 +1,6 @@
 package dialogueendpointresulttypes.com.palantir.product;
 
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
@@ -79,20 +79,20 @@ public final class TestServerErrors {
         }
     }
 
-    public static final class ComplicatedParameters extends CheckedServiceException {
+    public static final class ComplicatedParameters extends EndpointServiceException {
         private ComplicatedParameters(
                 @Safe Map<Integer, ComplicatedObject> complicatedObjectMap, @Nullable Throwable cause) {
             super(TestErrors.COMPLICATED_PARAMETERS, cause, SafeArg.of("complicatedObjectMap", complicatedObjectMap));
         }
     }
 
-    public static final class InvalidArgument extends CheckedServiceException {
+    public static final class InvalidArgument extends EndpointServiceException {
         private InvalidArgument(@Safe String field, @Unsafe String value, @Nullable Throwable cause) {
             super(TestErrors.INVALID_ARGUMENT, cause, SafeArg.of("field", field), UnsafeArg.of("value", value));
         }
     }
 
-    public static final class NotFound extends CheckedServiceException {
+    public static final class NotFound extends EndpointServiceException {
         private NotFound(@Safe String resource, @Nullable Throwable cause) {
             super(TestErrors.NOT_FOUND, cause, SafeArg.of("resource", resource));
         }

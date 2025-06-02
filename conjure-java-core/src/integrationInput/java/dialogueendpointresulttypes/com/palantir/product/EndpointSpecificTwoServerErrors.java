@@ -1,6 +1,6 @@
 package dialogueendpointresulttypes.com.palantir.product;
 
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
@@ -27,7 +27,7 @@ public final class EndpointSpecificTwoServerErrors {
         }
     }
 
-    public static final class DifferentNamespace extends CheckedServiceException {
+    public static final class DifferentNamespace extends EndpointServiceException {
         private DifferentNamespace(@Nullable Throwable cause) {
             super(EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE, cause);
         }

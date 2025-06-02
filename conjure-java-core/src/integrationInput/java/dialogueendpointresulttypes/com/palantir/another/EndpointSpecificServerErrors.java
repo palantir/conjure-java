@@ -1,6 +1,6 @@
 package dialogueendpointresulttypes.com.palantir.another;
 
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
@@ -27,7 +27,7 @@ public final class EndpointSpecificServerErrors {
         }
     }
 
-    public static final class DifferentPackage extends CheckedServiceException {
+    public static final class DifferentPackage extends EndpointServiceException {
         private DifferentPackage(@Nullable Throwable cause) {
             super(EndpointSpecificErrors.DIFFERENT_PACKAGE, cause);
         }
