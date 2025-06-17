@@ -23,7 +23,7 @@ import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
-import com.palantir.conjure.java.types.CheckedErrorGenerator;
+import com.palantir.conjure.java.types.EndpointErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.logsafe.Preconditions;
@@ -64,7 +64,7 @@ public record ParameterizedTestCase(
                     case UNDERTOW -> new UndertowServiceGenerator(options());
                     case JERSEY -> new JerseyServiceGenerator(options());
                     case ERROR -> new ErrorGenerator(options());
-                    case CHECKED_ERROR -> new CheckedErrorGenerator(options());
+                    case CHECKED_ERROR -> new EndpointErrorGenerator(options());
                 })
                 .collect(Collectors.toSet());
     }

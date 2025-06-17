@@ -67,6 +67,8 @@ public enum ConjureExceptions implements ExceptionHandler {
         if (throwable instanceof EndpointServiceException endpointServiceException) {
             endpointServiceException(exchange, endpointServiceException);
         } else if (throwable instanceof CheckedServiceException checkedServiceException) {
+            // This is kept around for backward compatibility. Support for this can be removed in a future version of
+            // Conjure.
             checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
