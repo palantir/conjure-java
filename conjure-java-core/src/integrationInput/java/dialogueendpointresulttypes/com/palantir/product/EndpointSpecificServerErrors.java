@@ -8,7 +8,7 @@ import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class EndpointSpecificServerErrors {
     private EndpointSpecificServerErrors() {}
 
@@ -28,8 +28,7 @@ public final class EndpointSpecificServerErrors {
      * @param typeName
      * @param typeDef
      */
-    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef)
-            throws EndpointError {
+    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef) {
         if (shouldThrow) {
             throw endpointError(typeName, typeDef);
         }

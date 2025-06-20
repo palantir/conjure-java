@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
-@Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class EndpointSpecificServerErrors {
     private EndpointSpecificServerErrors() {}
 
@@ -30,8 +30,7 @@ public final class EndpointSpecificServerErrors {
      * @param typeDef
      */
     @Contract("true, _, _ -> fail")
-    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef)
-            throws EndpointError {
+    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef) {
         if (shouldThrow) {
             throw endpointError(typeName, typeDef);
         }

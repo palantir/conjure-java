@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
-@Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class TestServerErrors {
     private TestServerErrors() {}
 
@@ -48,8 +48,7 @@ public final class TestServerErrors {
      */
     @Contract("true, _ -> fail")
     public static void throwIfComplicatedParameters(
-            boolean shouldThrow, @Safe Map<Integer, ComplicatedObject> complicatedObjectMap)
-            throws ComplicatedParameters {
+            boolean shouldThrow, @Safe Map<Integer, ComplicatedObject> complicatedObjectMap) {
         if (shouldThrow) {
             throw complicatedParameters(complicatedObjectMap);
         }
@@ -63,8 +62,7 @@ public final class TestServerErrors {
      * @param value
      */
     @Contract("true, _, _ -> fail")
-    public static void throwIfInvalidArgument(boolean shouldThrow, @Safe String field, @Unsafe String value)
-            throws InvalidArgument {
+    public static void throwIfInvalidArgument(boolean shouldThrow, @Safe String field, @Unsafe String value) {
         if (shouldThrow) {
             throw invalidArgument(field, value);
         }
@@ -77,7 +75,7 @@ public final class TestServerErrors {
      * @param resource
      */
     @Contract("true, _ -> fail")
-    public static void throwIfNotFound(boolean shouldThrow, @Safe String resource) throws NotFound {
+    public static void throwIfNotFound(boolean shouldThrow, @Safe String resource) {
         if (shouldThrow) {
             throw notFound(resource);
         }

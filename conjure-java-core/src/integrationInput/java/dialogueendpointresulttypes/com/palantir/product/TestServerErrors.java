@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class TestServerErrors {
     private TestServerErrors() {}
 
@@ -46,8 +46,7 @@ public final class TestServerErrors {
      * @param complicatedObjectMap
      */
     public static void throwIfComplicatedParameters(
-            boolean shouldThrow, @Safe Map<Integer, ComplicatedObject> complicatedObjectMap)
-            throws ComplicatedParameters {
+            boolean shouldThrow, @Safe Map<Integer, ComplicatedObject> complicatedObjectMap) {
         if (shouldThrow) {
             throw complicatedParameters(complicatedObjectMap);
         }
@@ -60,8 +59,7 @@ public final class TestServerErrors {
      * @param field
      * @param value
      */
-    public static void throwIfInvalidArgument(boolean shouldThrow, @Safe String field, @Unsafe String value)
-            throws InvalidArgument {
+    public static void throwIfInvalidArgument(boolean shouldThrow, @Safe String field, @Unsafe String value) {
         if (shouldThrow) {
             throw invalidArgument(field, value);
         }
@@ -73,7 +71,7 @@ public final class TestServerErrors {
      * @param shouldThrow Cause the method to throw when true
      * @param resource
      */
-    public static void throwIfNotFound(boolean shouldThrow, @Safe String resource) throws NotFound {
+    public static void throwIfNotFound(boolean shouldThrow, @Safe String resource) {
         if (shouldThrow) {
             throw notFound(resource);
         }
