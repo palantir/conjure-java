@@ -275,7 +275,7 @@ public final class TestCases {
                             GeneratorType.UNDERTOW,
                             GeneratorType.OBJECT,
                             GeneratorType.ERROR,
-                            GeneratorType.CHECKED_ERROR))
+                            GeneratorType.ENDPOINT_ERROR))
                     .build())
             .add(ParameterizedTestCase.builder()
                     .name("async-request")
@@ -334,7 +334,7 @@ public final class TestCases {
                     .generatorTypes(List.of(
                             GeneratorType.OBJECT,
                             GeneratorType.ERROR,
-                            GeneratorType.CHECKED_ERROR,
+                            GeneratorType.ENDPOINT_ERROR,
                             GeneratorType.DIALOGUE,
                             GeneratorType.UNDERTOW))
                     .build())

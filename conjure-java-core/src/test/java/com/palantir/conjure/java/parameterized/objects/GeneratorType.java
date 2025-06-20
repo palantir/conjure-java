@@ -21,5 +21,5 @@ public enum GeneratorType {
     UNDERTOW,
     JERSEY,
     ERROR,
-    CHECKED_ERROR;
+    ENDPOINT_ERROR;
 }

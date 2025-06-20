@@ -64,7 +64,7 @@ public record ParameterizedTestCase(
                     case UNDERTOW -> new UndertowServiceGenerator(options());
                     case JERSEY -> new JerseyServiceGenerator(options());
                     case ERROR -> new ErrorGenerator(options());
-                    case CHECKED_ERROR -> new EndpointErrorGenerator(options());
+                    case ENDPOINT_ERROR -> new EndpointErrorGenerator(options());
                 })
                 .collect(Collectors.toSet());
     }
