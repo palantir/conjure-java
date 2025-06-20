@@ -182,8 +182,8 @@ public final class ConjureExceptionHandlerTest {
     }
 
     private record ArgumentWithOptionals(Optional<List<String>> optOfList, List<Optional<String>> listOfOpt) {}
-    private static final class OptionalCheckedException extends CheckedServiceException {
 
+    private static final class OptionalCheckedException extends CheckedServiceException {
 
         private OptionalCheckedException() {
             super(
