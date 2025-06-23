@@ -76,7 +76,6 @@ import undertow.com.palantir.product.EmptyPathServiceEndpoints;
 import undertow.com.palantir.product.EteBinaryServiceEndpoints;
 import undertow.com.palantir.product.EteServiceEndpoints;
 
-// MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();

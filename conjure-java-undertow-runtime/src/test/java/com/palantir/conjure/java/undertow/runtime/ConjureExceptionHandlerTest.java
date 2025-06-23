@@ -24,6 +24,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.QosException;
@@ -53,10 +54,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public final class ConjureExceptionHandlerTest {
 
@@ -110,16 +116,11 @@ public final class ConjureExceptionHandlerTest {
         assertThat(error.parameters()).containsEntry("arg", arg.toString());
     }
 
-    @Test
-    public void handlesCheckedServiceException() throws IOException {
+    @ParameterizedTest
+    @MethodSource("differentPackageExceptions")
+    public void handlesCheckedServiceException(Supplier<Exception> exceptionSupplier) throws IOException {
         // When:
-        final class DifferentPackage extends CheckedServiceException {
-            private DifferentPackage(@Nullable Throwable cause) {
-                super(ErrorType.CONFLICT, cause);
-            }
-        }
-
-        exception = new DifferentPackage(null);
+        exception = exceptionSupplier.get();
         HttpURLConnection connection = execute();
 
         // Then:
@@ -130,31 +131,29 @@ public final class ConjureExceptionHandlerTest {
         assertThat(error.parameters()).isEmpty();
     }
 
-    @Test
-    public void handlesCheckedServiceExceptionWithOptionals() throws IOException {
-        // When:
-        record Argument(Optional<List<String>> optOfList, List<Optional<String>> listOfOpt) {}
-        final class OptionalException extends CheckedServiceException {
-            private OptionalException() {
-                super(
-                        ErrorType.CONFLICT,
-                        (Throwable) null,
-                        SafeArg.of(
-                                "arg",
-                                new Argument(
-                                        Optional.of(List.of("a", "b")),
-                                        List.of(Optional.of("c"), Optional.empty(), Optional.of("d")))),
-                        SafeArg.of("nullValue", null),
-                        SafeArg.of("optionalInt", OptionalInt.of(2)),
-                        SafeArg.of("emptyOptionalInt", OptionalInt.empty()),
-                        SafeArg.of("optionalDouble", OptionalDouble.of(3.0)),
-                        SafeArg.of("emptyOptionalDouble", OptionalDouble.empty()),
-                        SafeArg.of("optional", Optional.of("value")),
-                        SafeArg.of("emptyOptional", Optional.empty()));
-            }
-        }
+    static Stream<Arguments> differentPackageExceptions() {
+        return Stream.of(
+                Arguments.of((Supplier<Exception>) () -> new DifferentPackageCheckedException(null)),
+                Arguments.of((Supplier<Exception>) () -> new DifferentPackageEndpointException(null)));
+    }
 
-        exception = new OptionalException();
+    private static final class DifferentPackageCheckedException extends CheckedServiceException {
+        private DifferentPackageCheckedException(@Nullable Throwable cause) {
+            super(ErrorType.CONFLICT, cause);
+        }
+    }
+
+    private static final class DifferentPackageEndpointException extends CheckedServiceException {
+        private DifferentPackageEndpointException(@Nullable Throwable cause) {
+            super(ErrorType.CONFLICT, cause);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("exceptionsWithOptionals")
+    public void handlesCheckedServiceExceptionWithOptionals(Supplier<Exception> exceptionSupplier) throws IOException {
+        // When:
+        exception = exceptionSupplier.get();
         HttpURLConnection connection = execute();
 
         // Then:
@@ -174,6 +173,75 @@ public final class ConjureExceptionHandlerTest {
                 assertThat(value).asInstanceOf(LIST).containsExactly("c", null, "d");
             });
         });
+    }
+
+    static Stream<Arguments> exceptionsWithOptionals() {
+        return Stream.of(
+                Arguments.of((Supplier<Exception>) OptionalCheckedException::new),
+                Arguments.of((Supplier<Exception>) OptionalEndpointException::new));
+    }
+
+    private record ArgumentWithOptionals(Optional<List<String>> optOfList, List<Optional<String>> listOfOpt) {}
+
+    private static final class OptionalCheckedException extends CheckedServiceException {
+
+        private OptionalCheckedException() {
+            super(
+                    ErrorType.CONFLICT,
+                    (Throwable) null,
+                    SafeArg.of(
+                            "arg",
+                            new ArgumentWithOptionals(
+                                    Optional.of(List.of("a", "b")),
+                                    List.of(Optional.of("c"), Optional.empty(), Optional.of("d")))),
+                    SafeArg.of("nullValue", null),
+                    SafeArg.of("optionalInt", OptionalInt.of(2)),
+                    SafeArg.of("emptyOptionalInt", OptionalInt.empty()),
+                    SafeArg.of("optionalDouble", OptionalDouble.of(3.0)),
+                    SafeArg.of("emptyOptionalDouble", OptionalDouble.empty()),
+                    SafeArg.of("optional", Optional.of("value")),
+                    SafeArg.of("emptyOptional", Optional.empty()));
+        }
+    }
+
+    private static final class OptionalEndpointException extends EndpointServiceException {
+        private OptionalEndpointException() {
+            super(
+                    ErrorType.CONFLICT,
+                    (Throwable) null,
+                    SafeArg.of(
+                            "arg",
+                            new ArgumentWithOptionals(
+                                    Optional.of(List.of("a", "b")),
+                                    List.of(Optional.of("c"), Optional.empty(), Optional.of("d")))),
+                    SafeArg.of("nullValue", null),
+                    SafeArg.of("optionalInt", OptionalInt.of(2)),
+                    SafeArg.of("emptyOptionalInt", OptionalInt.empty()),
+                    SafeArg.of("optionalDouble", OptionalDouble.of(3.0)),
+                    SafeArg.of("emptyOptionalDouble", OptionalDouble.empty()),
+                    SafeArg.of("optional", Optional.of("value")),
+                    SafeArg.of("emptyOptional", Optional.empty()));
+        }
+    }
+
+    @Test
+    public void handlesEndpointServiceException() throws IOException {
+        // When:
+        final class DifferentPackage extends EndpointServiceException {
+            private DifferentPackage(@Nullable Throwable cause) {
+                super(ErrorType.CONFLICT, cause);
+            }
+        }
+
+        exception = new DifferentPackage(null);
+        HttpURLConnection connection = execute();
+
+        // Then:
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        ConjureError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), ConjureError.class);
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
+        assertThat(error.errorName()).isEqualTo("Default:Conflict");
+        assertThat(error.parameters()).isEmpty();
     }
 
     @Test

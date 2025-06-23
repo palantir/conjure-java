@@ -20,7 +20,7 @@ import com.google.common.base.CaseFormat;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
 import com.palantir.conjure.java.util.Packages;
@@ -44,11 +44,11 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
-public final class CheckedErrorGenerator implements Generator {
+public final class EndpointErrorGenerator implements Generator {
 
     private final Options options;
 
-    public CheckedErrorGenerator(Options options) {
+    public EndpointErrorGenerator(Options options) {
         this.options = options;
     }
 
@@ -98,7 +98,7 @@ public final class CheckedErrorGenerator implements Generator {
                 .addTypes(errorDefinitions.stream()
                         .map(def -> generateErrorException(typeMapper, conjurePackage, namespace, def))
                         .toList())
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(CheckedErrorGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EndpointErrorGenerator.class));
         return JavaFile.builder(conjurePackage, typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
@@ -165,7 +165,6 @@ public final class CheckedErrorGenerator implements Generator {
                                     options,
                                     exceptionClassName,
                                     Optional.empty())
-                            .addException(exceptionClassName)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -174,7 +173,7 @@ public final class CheckedErrorGenerator implements Generator {
     private TypeSpec generateErrorException(
             TypeMapper typeMapper, String conjurePackage, ErrorNamespace namespace, ErrorDefinition errorDefinition) {
         return TypeSpec.classBuilder(errorDefinition.getErrorName().getName())
-                .superclass(CheckedServiceException.class)
+                .superclass(EndpointServiceException.class)
                 .addMethod(buildExceptionConstructor(typeMapper, conjurePackage, namespace, errorDefinition))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .build();

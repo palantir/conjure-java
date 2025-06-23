@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -65,6 +66,20 @@ record ConjureError(
     }
 
     static ConjureError fromCheckedServiceException(CheckedServiceException exception) {
+        Map<String, Object> parameters = new HashMap<>();
+        for (Arg<?> arg : exception.getArgs()) {
+            if (shouldIncludeArgInParameters(arg)) {
+                parameters.put(arg.getName(), arg.getValue());
+            }
+        }
+        return new ConjureError(
+                exception.getErrorType().code().name(),
+                exception.getErrorType().name(),
+                exception.getErrorInstanceId(),
+                parameters);
+    }
+
+    static ConjureError fromEndpointServiceException(EndpointServiceException exception) {
         Map<String, Object> parameters = new HashMap<>();
         for (Arg<?> arg : exception.getArgs()) {
             if (shouldIncludeArgInParameters(arg)) {
