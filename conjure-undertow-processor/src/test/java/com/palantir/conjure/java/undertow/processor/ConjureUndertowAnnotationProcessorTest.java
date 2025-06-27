@@ -37,6 +37,7 @@ import com.palantir.conjure.java.undertow.processor.sample.MismatchedPathParam;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
+import com.palantir.conjure.java.undertow.processor.sample.NestedInterface;
 import com.palantir.conjure.java.undertow.processor.sample.OptionalPrimitives;
 import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterConstructorThrows;
@@ -65,6 +66,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import org.junit.jupiter.api.Test;
@@ -78,6 +80,12 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testExampleFileCompiles() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, SimpleInterface.class);
+    }
+
+    @Test
+    public void testNestedExampleFileCompiles() {
+        assertTestFileCompileAndMatches(
+                TEST_CLASSES_BASE_DIR, NestedInterface.class, NestedInterface.SimpleInterface.class);
     }
 
     @Test
@@ -258,15 +266,20 @@ public class ConjureUndertowAnnotationProcessorTest {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, TaggedEndpoints.class);
     }
 
-    private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {
-        Compilation compilation = compileTestClass(basePath, clazz);
+    private void assertTestFileCompileAndMatches(Path basePath, Class<?> fileClass, Class<?>... serviceClasses) {
+        Compilation compilation = compileTestClass(basePath, fileClass);
         assertThat(compilation).succeededWithoutWarnings();
-        String generatedClassName = clazz.getSimpleName() + "Endpoints";
-        String generatedFqnClassName = clazz.getPackage().getName() + "." + generatedClassName;
-        String generatedClassFileRelativePath = generatedFqnClassName.replaceAll("\\.", "/") + ".java";
-        assertThat(compilation.generatedFile(StandardLocation.SOURCE_OUTPUT, generatedClassFileRelativePath))
-                .hasValueSatisfying(
-                        javaFileObject -> assertContentsMatch(javaFileObject, generatedClassFileRelativePath));
+
+        List<Class<?>> classes = serviceClasses.length > 0 ? List.of(serviceClasses) : List.of(fileClass);
+
+        classes.forEach(clazz -> {
+            String generatedClassFileRelativePath =
+                    clazz.getName().replace(".", "/").replace("$", "") + "Endpoints.java";
+            assertThat(compilation.generatedFile(StandardLocation.SOURCE_OUTPUT, generatedClassFileRelativePath))
+                    .hasValueSatisfying(javaFileObject -> {
+                        assertContentsMatch(javaFileObject, generatedClassFileRelativePath);
+                    });
+        });
     }
 
     private Compilation compileTestClass(Path basePath, Class<?> clazz) {

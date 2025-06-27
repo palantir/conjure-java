@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.processor.data;
 
 import com.palantir.javapoet.ClassName;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -28,7 +29,8 @@ public interface ServiceDefinition {
     @Value.Derived
     default ClassName undertowService() {
         return ClassName.get(
-                serviceInterface().packageName(), serviceInterface().simpleName() + "Endpoints");
+                serviceInterface().packageName(),
+                serviceInterface().simpleNames().stream().collect(Collectors.joining("", "", "Endpoints")));
     }
 
     @Value.Derived

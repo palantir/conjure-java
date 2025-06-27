@@ -33,7 +33,6 @@ buildscript {
         classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.6.0'
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.69.0'
         classpath 'com.palantir.suppressible-error-prone:gradle-suppressible-error-prone:2.9.0'
-        classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
         classpath 'org.revapi:gradle-revapi:1.8.0'
     }
 }
@@ -88,7 +87,6 @@ allprojects {
 
 subprojects {
     apply plugin: 'java-library'
-    apply plugin: 'org.inferred.processors'
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     tasks.withType(JavaCompile) {
