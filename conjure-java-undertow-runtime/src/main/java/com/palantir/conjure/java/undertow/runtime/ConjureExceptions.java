@@ -70,20 +70,20 @@ public enum ConjureExceptions implements ExceptionHandler {
             // This is kept around for backward compatibility. Support for this can be removed in a future version of
             // Conjure.
             checkedServiceException(exchange, checkedServiceException);
-        } else if (throwable instanceof ServiceException) {
-            serviceException(exchange, (ServiceException) throwable);
-        } else if (throwable instanceof QosException) {
-            qosException(exchange, (QosException) throwable);
-        } else if (throwable instanceof RemoteException) {
-            remoteException(exchange, (RemoteException) throwable);
+        } else if (throwable instanceof ServiceException serviceException) {
+            serviceException(exchange, serviceException);
+        } else if (throwable instanceof QosException qosException) {
+            qosException(exchange, qosException);
+        } else if (throwable instanceof RemoteException remoteException) {
+            remoteException(exchange, remoteException);
         } else if (throwable instanceof IllegalArgumentException) {
             illegalArgumentException(exchange, throwable);
-        } else if (throwable instanceof FrameworkException) {
-            frameworkException(exchange, (FrameworkException) throwable);
-        } else if (throwable instanceof DeadlineExpiredException) {
-            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
-        } else if (throwable instanceof Error) {
-            error(exchange, (Error) throwable);
+        } else if (throwable instanceof FrameworkException frameworkException) {
+            frameworkException(exchange, frameworkException);
+        } else if (throwable instanceof DeadlineExpiredException deadlineExpiredException) {
+            deadlineExpiredException(exchange, deadlineExpiredException);
+        } else if (throwable instanceof Error error) {
+            error(exchange, error);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
             log.info(
                     "I/O exception from a closed connection. The request may have been aborted by the client",
@@ -249,8 +249,8 @@ public enum ConjureExceptions implements ExceptionHandler {
         // The blocking exchange output stream may have un-committed data buffered.
         // In this case we can clear the buffer allowing us to send a serializable error.
         OutputStream outputStream = exchange.getOutputStream();
-        if (outputStream instanceof UndertowOutputStream) {
-            ((UndertowOutputStream) outputStream).resetBuffer();
+        if (outputStream instanceof UndertowOutputStream undertowOutputStream) {
+            undertowOutputStream.resetBuffer();
         }
         return false;
     }

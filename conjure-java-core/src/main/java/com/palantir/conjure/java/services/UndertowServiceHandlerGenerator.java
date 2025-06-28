@@ -407,8 +407,8 @@ final class UndertowServiceHandlerGenerator {
     private TypeName immutableCollection(TypeName input) {
         // Note that only the outermost collection is considered for replacement to avoid
         // generic type incompatibilities.
-        if (options.nonNullTopLevelCollectionValues() && input instanceof ParameterizedTypeName) {
-            ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
+        if (options.nonNullTopLevelCollectionValues() && input instanceof ParameterizedTypeName parameterized) {
+
             if (LIST_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
                         IMMUTABLE_LIST_NAME, parameterized.typeArguments().toArray(new TypeName[0]));

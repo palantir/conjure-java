@@ -751,6 +751,7 @@ public final class ConjureUndertowEndpointsGenerator {
         return endpoint.arguments().stream().anyMatch(arg -> arg.paramType().match(UsesRequestContextVisitor.INSTANCE));
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static Optional<CodeBlock> getSafeLogging(
             String name, String variableName, SafeLoggingAnnotation safeLoggable) {
         switch (safeLoggable) {
@@ -779,8 +780,7 @@ public final class ConjureUndertowEndpointsGenerator {
             .buildOrThrow();
 
     private static TypeName immutableCollection(TypeName input) {
-        if (input instanceof ParameterizedTypeName) {
-            ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
+        if (input instanceof ParameterizedTypeName parameterized) {
 
             Class<?> collectionClass = COLLECTION_CLASSES.get(parameterized.rawType());
             if (collectionClass != null) {

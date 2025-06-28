@@ -410,7 +410,7 @@ public final class AliasGenerator {
         return Optional.empty();
     }
 
-    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
+    @SuppressWarnings({"checkstyle:cyclomaticcomplexity", "for-rollout:StatementSwitchToExpressionSwitch"})
     private static CodeBlock valueOfFactoryMethodForPrimitive(PrimitiveType primitiveType, TypeName aliasTypeName) {
         TypeName boxedTypeName = Primitives.box(aliasTypeName).withoutAnnotations();
         switch (primitiveType.get()) {

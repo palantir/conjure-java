@@ -33,8 +33,8 @@ final class UnclosableOutputStreams {
      * way that preserves the {@link BufferWritableOutputStream} interface.
      */
     static OutputStream wrap(OutputStream delegate) {
-        if (delegate instanceof BufferWritableOutputStream) {
-            return new UnclosableBufferWritableOutputStream(delegate, (BufferWritableOutputStream) delegate);
+        if (delegate instanceof BufferWritableOutputStream bufferWritableOutputStream) {
+            return new UnclosableBufferWritableOutputStream(delegate, bufferWritableOutputStream);
         } else {
             return new UnclosableOutputStream(delegate);
         }
