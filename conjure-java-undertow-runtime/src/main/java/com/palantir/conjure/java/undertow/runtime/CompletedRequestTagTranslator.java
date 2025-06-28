@@ -54,6 +54,7 @@ enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> 
         }
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     static String statusString(int statusCode) {
         // handle common cases quickly
         switch (statusCode) {

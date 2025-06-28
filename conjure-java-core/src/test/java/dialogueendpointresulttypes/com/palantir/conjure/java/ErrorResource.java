@@ -55,6 +55,7 @@ interface ErrorResource {
             return SUCCESS;
         }
 
+        @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
         @Override
         public String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
                 throws InvalidArgument, NotFound, DifferentNamespace,

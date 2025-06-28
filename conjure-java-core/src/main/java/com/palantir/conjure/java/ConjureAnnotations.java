@@ -107,8 +107,8 @@ public final class ConjureAnnotations {
 
     public static TypeName withSafety(TypeName typeName, Optional<LogSafety> maybeSafety) {
         if (maybeSafety.isPresent()) {
-            if (typeName instanceof ParameterizedTypeName) {
-                ParameterizedTypeName param = (ParameterizedTypeName) typeName;
+            if (typeName instanceof ParameterizedTypeName param) {
+
                 // Handle List/Set/Optional wrappers, however Map has not been implemented yet.
                 if (param.typeArguments().size() == 1) {
                     TypeName typeArgument = Iterables.getOnlyElement(param.typeArguments());

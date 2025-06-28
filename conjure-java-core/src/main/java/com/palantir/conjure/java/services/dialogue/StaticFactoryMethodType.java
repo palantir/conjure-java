@@ -22,6 +22,7 @@ enum StaticFactoryMethodType {
     BLOCKING,
     ASYNC;
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public <R> R switchBy(R blocking, R async) {
         switch (this) {
             case ASYNC:

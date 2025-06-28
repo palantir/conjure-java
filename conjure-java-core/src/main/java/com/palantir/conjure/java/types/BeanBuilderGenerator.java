@@ -983,8 +983,8 @@ public final class BeanBuilderGenerator {
     }
 
     private static TypeName asRawType(TypeName type) {
-        if (type instanceof ParameterizedTypeName) {
-            return ((ParameterizedTypeName) type).rawType();
+        if (type instanceof ParameterizedTypeName parameterizedTypeName) {
+            return parameterizedTypeName.rawType();
         }
         return type;
     }

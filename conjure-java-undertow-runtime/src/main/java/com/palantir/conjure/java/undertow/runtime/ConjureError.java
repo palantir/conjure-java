@@ -118,8 +118,8 @@ record ConjureError(
         Object obj = arg.getValue();
         return obj != null
                 && (!(obj instanceof Optional) || ((Optional<?>) obj).isPresent())
-                && (!(obj instanceof OptionalInt) || ((OptionalInt) obj).isPresent())
-                && (!(obj instanceof OptionalLong) || ((OptionalLong) obj).isPresent())
-                && (!(obj instanceof OptionalDouble) || ((OptionalDouble) obj).isPresent());
+                && (!(obj instanceof OptionalInt optionalInt) || optionalInt.isPresent())
+                && (!(obj instanceof OptionalLong optionalLong) || optionalLong.isPresent())
+                && (!(obj instanceof OptionalDouble optionalDouble) || optionalDouble.isPresent());
     }
 }

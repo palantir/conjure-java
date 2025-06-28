@@ -422,6 +422,7 @@ public final class ParamTypesResolver {
                         factoryFunction));
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
         // No need to handle int/double/boolean because they're covered by default handlers
         switch (typeMirror.getKind()) {
@@ -513,6 +514,7 @@ public final class ParamTypesResolver {
         }
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static Optional<String> getClassNameForTypeMirror(TypeMirror typeMirror) {
         // Only need to support primitives that are also supported by {@link PlainSerDe}.
         switch (typeMirror.getKind()) {

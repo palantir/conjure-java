@@ -390,6 +390,7 @@ public final class JerseyServiceGenerator implements Generator {
         return Optional.of(annotationSpecBuilder.build());
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private ClassName httpMethodToClassName(String method) {
         switch (method) {
             case "DELETE":

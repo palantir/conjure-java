@@ -78,7 +78,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     }
 
     @Override
-    @SuppressWarnings("CyclomaticComplexity")
+    @SuppressWarnings({"CyclomaticComplexity", "for-rollout:StatementSwitchToExpressionSwitch"})
     public TypeName visitOptional(OptionalType type) {
         if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
             PrimitiveType primitiveType = type.getItemType().accept(TypeVisitor.PRIMITIVE);
@@ -113,7 +113,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
+    @SuppressWarnings({"checkstyle:cyclomaticcomplexity", "for-rollout:StatementSwitchToExpressionSwitch"})
     public TypeName visitPrimitive(PrimitiveType type) {
         switch (type.get()) {
             case STRING:

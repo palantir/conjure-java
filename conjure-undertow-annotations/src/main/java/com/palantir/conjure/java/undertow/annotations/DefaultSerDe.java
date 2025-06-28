@@ -92,12 +92,12 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
         if (type instanceof Class) {
             return (Class<?>) type;
         }
-        if (type instanceof ParameterizedType) {
-            ParameterizedType param = (ParameterizedType) type;
+        if (type instanceof ParameterizedType param) {
+
             return asClass(param.getRawType());
         }
-        if (type instanceof WildcardType) {
-            WildcardType wild = (WildcardType) type;
+        if (type instanceof WildcardType wild) {
+
             // Only check upper bounded e.g. '? extends Type' as opposed to lower bounded '? super Type'
             Type[] upperBounds = wild.getUpperBounds();
             if (upperBounds != null && upperBounds.length == 1) {
@@ -112,8 +112,8 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
     }
 
     private static Type unwrapOptional(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType parameterizedType) {
+
             if (parameterizedType.getRawType().equals(Optional.class)) {
                 Type[] typeArguments = parameterizedType.getActualTypeArguments();
                 if (typeArguments.length != 1) {
