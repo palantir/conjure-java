@@ -40,6 +40,14 @@ interface ErrorResource {
         public static final String SUCCESS = "success!";
 
         @Override
+        public String testNonEndpointAssociatedError(AuthHeader authHeader, boolean shouldThrowError) {
+            if (shouldThrowError) {
+                throw TestServerErrors.invalidArgument("field", "value");
+            }
+            return SUCCESS;
+        }
+
+        @Override
         public String testBasicError(AuthHeader _authHeader, boolean shouldThrowError) throws InvalidArgument {
             if (shouldThrowError) {
                 throw TestServerErrors.invalidArgument("field", "value");

@@ -34,12 +34,63 @@ public final class ErrorServiceEndpoints implements UndertowService {
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return ImmutableList.of(
+                new TestNonEndpointAssociatedErrorEndpoint(runtime, delegate),
                 new TestBasicErrorEndpoint(runtime, delegate),
                 new TestImportedErrorEndpoint(runtime, delegate),
                 new TestMultipleErrorsAndPackagesEndpoint(runtime, delegate),
                 new TestEmptyBodyEndpoint(runtime, delegate),
                 new TestBinaryEndpoint(runtime, delegate),
                 new TestOptionalBinaryEndpoint(runtime, delegate));
+    }
+
+    private static final class TestNonEndpointAssociatedErrorEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowErrorService delegate;
+
+        private final Deserializer<Boolean> deserializer;
+
+        private final Serializer<String> serializer;
+
+        TestNonEndpointAssociatedErrorEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Boolean shouldThrowError = deserializer.deserialize(exchange);
+            String result = delegate.testNonEndpointAssociatedError(authHeader, shouldThrowError);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/errors/nonEndpointError";
+        }
+
+        @Override
+        public String serviceName() {
+            return "ErrorService";
+        }
+
+        @Override
+        public String name() {
+            return "testNonEndpointAssociatedError";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
     }
 
     private static final class TestBasicErrorEndpoint implements HttpHandler, Endpoint {

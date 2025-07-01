@@ -99,6 +99,16 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void test_foo() {
+        try {
+            String result = errorServiceClient.testNonEndpointAssociatedError(AUTH_HEADER, true);
+            assertThat(result).isEqualTo("success!");
+        } catch (Throwable t) {
+            assertThat(t).isInstanceOf(TestBasicErrorResponse.InvalidArgument.class);
+        }
+    }
+
+    @Test
     public void error_client_returns_basic_error() {
         TestBasicErrorResponse result = errorServiceClient.testBasicError(AUTH_HEADER, true);
         assertThat(result)
