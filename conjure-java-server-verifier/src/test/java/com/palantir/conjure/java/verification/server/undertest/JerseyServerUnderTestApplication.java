@@ -21,28 +21,27 @@ import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeService;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
-import com.palantir.websecurity.WebSecurityBundle;
-import io.dropwizard.Application;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
 import io.dropwizard.jackson.FuzzyEnumModule;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
 
-public final class JerseyServerUnderTestApplication extends Application<JerseyServerUnderTestConfiguration> {
+public final class JerseyServerUnderTestApplication extends Application<Configuration> {
 
     @Override
-    public void initialize(Bootstrap<JerseyServerUnderTestConfiguration> bootstrap) {
+    public void initialize(Bootstrap<Configuration> bootstrap) {
         ObjectMapper remotingObjectMapper = ObjectMappers.newServerObjectMapper()
                 // needs discoverable subtype resolver for DW polymorphic configuration mechanism
                 .setSubtypeResolver(new DiscoverableSubtypeResolver())
                 .registerModule(new FuzzyEnumModule());
         bootstrap.setObjectMapper(remotingObjectMapper);
-        bootstrap.addBundle(new WebSecurityBundle());
     }
 
     @Override
     @SuppressWarnings("ProxyNonConstantType")
-    public void run(JerseyServerUnderTestConfiguration _configuration, Environment environment) {
+    public void run(Configuration _configuration, Environment environment) {
         environment
                 .jersey()
                 .register(Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));

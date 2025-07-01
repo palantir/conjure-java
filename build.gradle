@@ -76,11 +76,11 @@ allprojects {
                 details.useTarget group: details.requested.group, name: details.requested.name, version: '2.15.3'
                 details.because 'https://github.com/FasterXML/jackson-databind/pull/4230'
             }
-            if (details.requested.group.startsWith('org.slf4j')) {
-                details.useTarget group: details.requested.group, name: details.requested.name, version: '1.7.36'
-                details.because 'Dropwizard 2.x is used in tests. This version of Dropwizard only supports SLF4J < ' +
-                        '2.x. Until we upgrade Dropwizard, we should continue using a version of SLF4J < 2.x'
-            }
+//            if (details.requested.group.startsWith('org.slf4j')) {
+//                details.useTarget group: details.requested.group, name: details.requested.name, version: '1.7.36'
+//                details.because 'Dropwizard 2.x is used in tests. This version of Dropwizard only supports SLF4J < ' +
+//                        '2.x. Until we upgrade Dropwizard, we should continue using a version of SLF4J < 2.x'
+//            }
         }
     }
 }
