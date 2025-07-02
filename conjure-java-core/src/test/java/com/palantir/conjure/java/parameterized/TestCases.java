@@ -233,6 +233,7 @@ public final class TestCases {
                     .files(Path.of("ete-binary.yml"))
                     .options(Options.builder()
                             .requireNotNullAuthAndBodyParams(true)
+                            .jakartaPackages(true)
                             .build())
                     .generatorTypes(List.of(GeneratorType.JERSEY, GeneratorType.OBJECT))
                     .build())

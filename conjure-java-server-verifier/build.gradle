@@ -32,7 +32,7 @@ dependencies {
     testImplementation project('verification-client-api')
     testImplementation project(':conjure-java-undertow-runtime')
     testImplementation project(':conjure-undertow-lib')
-    testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
+//    testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
     testImplementation 'com.fasterxml.jackson.core:jackson-core'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
@@ -54,7 +54,7 @@ dependencies {
     testImplementation 'io.dropwizard:dropwizard-jersey'
     testImplementation 'io.dropwizard:dropwizard-testing'
     testImplementation 'io.undertow:undertow-core'
-    testImplementation 'javax.validation:validation-api'
+//    testImplementation 'javax.validation:validation-api'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

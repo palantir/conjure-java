@@ -2,6 +2,7 @@ package jersey.com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.AuthHeader;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
@@ -14,7 +15,6 @@ import jakarta.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.annotation.processing.Generated;
-import javax.validation.constraints.NotNull;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

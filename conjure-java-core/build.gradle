@@ -70,6 +70,7 @@ dependencies {
 
     testImplementation sourceSets.integrationInput.output
     testImplementation project(':conjure-java-undertow-runtime')
+    testImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     testImplementation 'com.fasterxml.jackson.core:jackson-core'
     testImplementation 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider'
     testImplementation 'com.palantir.conjure.java.api:service-config'
@@ -114,6 +115,7 @@ dependencies {
     integrationInputImplementation 'io.undertow:undertow-core'
     integrationInputImplementation 'javax.annotation:javax.annotation-api'
     integrationInputImplementation 'javax.validation:validation-api'
+    integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
     integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
     integrationInputImplementation 'org.jetbrains:annotations'
     integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
