@@ -71,13 +71,13 @@ dependencies {
     testImplementation sourceSets.integrationInput.output
     testImplementation project(':conjure-java-undertow-runtime')
     testImplementation 'com.fasterxml.jackson.core:jackson-core'
-    testImplementation 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
+    testImplementation 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider'
     testImplementation 'com.palantir.conjure.java.api:service-config'
     testImplementation 'com.palantir.conjure.java.api:ssl-config'
     testImplementation 'com.palantir.conjure.java.runtime:client-config'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
-    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-jakarta-server'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-legacy-clients'
     testImplementation 'com.palantir.conjure.java.runtime:keystores'
     testImplementation 'com.palantir.conjure:conjure-core'

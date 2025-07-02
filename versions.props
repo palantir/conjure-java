@@ -44,11 +44,11 @@ jakarta.ws.rs:jakarta.ws.rs-api = 4.0.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
-com.fasterxml.jackson.*:jackson-* = 2.12.3
+com.fasterxml.jackson.*:jackson-* = 2.18.3
 # Generator should be compatible with java 8
 com.palantir.javaformat:palantir-java-format = 1.1.0
 # Do not force up the minimum error_prone_annotations dependency version
 com.google.errorprone:error_prone_annotations = 2.7.1
 # Dropwizard is used for testing, do not take major version upgrades
-io.dropwizard:dropwizard-* = 4.0.8
+io.dropwizard:dropwizard-* = 4.0.14
 # dependency-upgrader:ON
