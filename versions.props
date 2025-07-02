@@ -51,5 +51,5 @@ com.palantir.javaformat:palantir-java-format = 1.1.0
 # Do not force up the minimum error_prone_annotations dependency version
 com.google.errorprone:error_prone_annotations = 2.7.1
 # Dropwizard is used for testing, do not take major version upgrades
-io.dropwizard:dropwizard-* = 4.0.14
+io.dropwizard:dropwizard-* = 4.0.13
 # dependency-upgrader:ON
