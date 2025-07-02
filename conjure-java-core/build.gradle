@@ -114,7 +114,6 @@ dependencies {
     integrationInputImplementation 'com.palantir.tokens:auth-tokens'
     integrationInputImplementation 'io.undertow:undertow-core'
     integrationInputImplementation 'javax.annotation:javax.annotation-api'
-    integrationInputImplementation 'javax.validation:validation-api'
     integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
     integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
     integrationInputImplementation 'org.jetbrains:annotations'
