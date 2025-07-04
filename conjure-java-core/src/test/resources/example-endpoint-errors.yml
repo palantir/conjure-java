@@ -33,6 +33,11 @@ types:
         code: INTERNAL
         safe-args:
           complicatedObjectMap: map<integer, ComplicatedObject>
+      UnassociatedComplicatedParameters:
+        namespace: Test
+        code: INTERNAL
+        safe-args:
+          complicatedObjectMap: map<integer, ComplicatedObject>
 services:
   ErrorService:
     name: Error Service
