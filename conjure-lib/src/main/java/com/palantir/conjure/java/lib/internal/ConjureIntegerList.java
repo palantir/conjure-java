@@ -20,10 +20,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.eclipse.collections.api.list.primitive.MutableIntList;
 import org.eclipse.collections.impl.list.mutable.primitive.BoxedMutableIntList;
 
-/**
- * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 12,
- * a BoxedMutableIntList will be released. Once available, ConjureIntegerList should be replaced with that.
- */
 final class ConjureIntegerList extends BoxedMutableIntList {
     private final MutableIntList delegate;
 

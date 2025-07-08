@@ -169,12 +169,6 @@ public final class ConjureCollections {
         return set;
     }
 
-    /**
-     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
-     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
-     * Conjure[type]List should be replaced with that.
-     */
-
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
         return new ConjureDoubleList(new DoubleArrayList());

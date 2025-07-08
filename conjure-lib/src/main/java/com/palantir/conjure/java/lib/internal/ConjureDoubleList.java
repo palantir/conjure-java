@@ -20,10 +20,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import org.eclipse.collections.api.list.primitive.MutableDoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.BoxedMutableDoubleList;
 
-/**
- * ConjureDoubleList is a boxed list wrapper for the eclipse-collections DoubleArrayList. In eclipse-collections 12,
- * a BoxedMutableDoubleList will be released. Once available, ConjureDoubleList should be replaced with that.
- */
 final class ConjureDoubleList extends BoxedMutableDoubleList {
     private final MutableDoubleList delegate;
 
