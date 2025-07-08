@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade Eclipse Collections to v13, With Boxed Collection Support
+  links:
+  - https://github.com/palantir/conjure-java/pull/2548
