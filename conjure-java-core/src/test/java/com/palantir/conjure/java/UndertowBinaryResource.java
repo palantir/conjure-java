@@ -23,12 +23,12 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.tokens.auth.AuthHeader;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import javax.validation.constraints.NotNull;
 import undertow.com.palantir.product.UndertowEteBinaryService;
 
 final class UndertowBinaryResource implements UndertowEteBinaryService {

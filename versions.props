@@ -1,5 +1,6 @@
 ch.qos.logback:* = 1.2.11
 com.atlassian.commonmark:* = 0.12.1
+com.fasterxml.jackson.*:jackson-* = 2.18.3
 com.fasterxml.jackson.core:jackson-databind = 2.18.3
 com.google.auto:auto-common = 1.2.2
 com.google.code.findbugs:jsr305 = 3.0.2
@@ -42,14 +43,13 @@ org.mockito:* = 5.11.0
 org.slf4j:* = 2.0.17
 org.wildfly.common:wildfly-common = 1.7.0.Final
 jakarta.ws.rs:jakarta.ws.rs-api = 4.0.0
+jakarta.validation:jakarta.validation-api = 3.0.0
 
 # dependency-upgrader:OFF
-# Avoid forcing consumers to upgrade jackson
-com.fasterxml.jackson.*:jackson-* = 2.12.3
 # Generator should be compatible with java 8
 com.palantir.javaformat:palantir-java-format = 1.1.0
 # Do not force up the minimum error_prone_annotations dependency version
 com.google.errorprone:error_prone_annotations = 2.7.1
 # Dropwizard is used for testing, do not take major version upgrades
-io.dropwizard:dropwizard-* = 2.0.34
+io.dropwizard:dropwizard-* = 4.0.13
 # dependency-upgrader:ON
