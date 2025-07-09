@@ -49,7 +49,6 @@ dependencies {
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-legacy-clients'
     testImplementation 'com.palantir.conjure.java.runtime:keystores'
     testImplementation 'com.palantir.safe-logging:preconditions'
-    testImplementation 'com.palantir.websecurity:dropwizard-web-security'
     testImplementation 'io.dropwizard:dropwizard-core'
     testImplementation 'io.dropwizard:dropwizard-jackson'
     testImplementation 'io.dropwizard:dropwizard-jersey'
