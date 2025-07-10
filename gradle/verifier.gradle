@@ -33,7 +33,6 @@ conjure {
 subprojects {
     dependencies {
         api project(':conjure-lib')
-        api 'javax.ws.rs:javax.ws.rs-api'
     }
 }
 
