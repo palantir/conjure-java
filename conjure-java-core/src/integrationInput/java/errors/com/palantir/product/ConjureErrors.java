@@ -14,6 +14,14 @@ import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
+    /** Cause argument conflicts with reserved Throwable cause parameter. */
+    public static final ErrorType CONFLICTING_CAUSE_SAFE_ARG =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseSafeArg");
+
+    /** Cause argument conflicts with reserved Throwable cause parameter. */
+    public static final ErrorType CONFLICTING_CAUSE_UNAFE_ARG =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseUnafeArg");
+
     /** Invalid Conjure service definition. */
     public static final ErrorType INVALID_SERVICE_DEFINITION =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidServiceDefinition");
@@ -23,6 +31,22 @@ public final class ConjureErrors {
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidTypeDefinition");
 
     private ConjureErrors() {}
+
+    public static ServiceException conflictingCauseSafeArg(@Safe String cause) {
+        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, SafeArg.of("cause", cause));
+    }
+
+    public static ServiceException conflictingCauseSafeArg(@Nullable Throwable cause, @Safe String cause) {
+        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause));
+    }
+
+    public static ServiceException conflictingCauseUnafeArg(@Unsafe String cause) {
+        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, UnsafeArg.of("cause", cause));
+    }
+
+    public static ServiceException conflictingCauseUnafeArg(@Nullable Throwable cause, @Unsafe String cause) {
+        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, cause, UnsafeArg.of("cause", cause));
+    }
 
     /**
      * @param serviceName Name of the invalid service definition.
@@ -60,6 +84,32 @@ public final class ConjureErrors {
     }
 
     /**
+     * Throws a {@link ServiceException} of type ConflictingCauseSafeArg when {@code shouldThrow} is true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     * @param cause
+     */
+    @Contract("true, _ -> fail")
+    public static void throwIfConflictingCauseSafeArg(boolean shouldThrow, @Safe String cause) {
+        if (shouldThrow) {
+            throw conflictingCauseSafeArg(cause);
+        }
+    }
+
+    /**
+     * Throws a {@link ServiceException} of type ConflictingCauseUnafeArg when {@code shouldThrow} is true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     * @param cause
+     */
+    @Contract("true, _ -> fail")
+    public static void throwIfConflictingCauseUnafeArg(boolean shouldThrow, @Unsafe String cause) {
+        if (shouldThrow) {
+            throw conflictingCauseUnafeArg(cause);
+        }
+    }
+
+    /**
      * Throws a {@link ServiceException} of type InvalidServiceDefinition when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
@@ -87,6 +137,22 @@ public final class ConjureErrors {
         if (shouldThrow) {
             throw invalidTypeDefinition(typeName, typeDef);
         }
+    }
+
+    /** Returns true if the {@link RemoteException} is named Conjure:ConflictingCauseSafeArg */
+    public static boolean isConflictingCauseSafeArg(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return CONFLICTING_CAUSE_SAFE_ARG
+                .name()
+                .equals(remoteException.getError().errorName());
+    }
+
+    /** Returns true if the {@link RemoteException} is named Conjure:ConflictingCauseUnafeArg */
+    public static boolean isConflictingCauseUnafeArg(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return CONFLICTING_CAUSE_UNAFE_ARG
+                .name()
+                .equals(remoteException.getError().errorName());
     }
 
     /** Returns true if the {@link RemoteException} is named Conjure:InvalidServiceDefinition */
