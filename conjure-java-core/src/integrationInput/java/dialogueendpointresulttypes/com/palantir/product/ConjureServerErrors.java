@@ -10,12 +10,12 @@ import javax.annotation.processing.Generated;
 public final class ConjureServerErrors {
     private ConjureServerErrors() {}
 
-    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause) {
-        return new ConflictingCauseSafeArg(cause, null);
+    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause_) {
+        return new ConflictingCauseSafeArg(cause_, null);
     }
 
-    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause, @Nullable Throwable cause) {
-        return new ConflictingCauseSafeArg(cause, cause);
+    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause_, @Nullable Throwable cause) {
+        return new ConflictingCauseSafeArg(cause_, cause);
     }
 
     /**
@@ -31,8 +31,8 @@ public final class ConjureServerErrors {
     }
 
     public static final class ConflictingCauseSafeArg extends EndpointServiceException {
-        private ConflictingCauseSafeArg(@Safe String cause, @Nullable Throwable cause) {
-            super(ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause));
+        private ConflictingCauseSafeArg(@Safe String cause_, @Nullable Throwable cause) {
+            super(ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause_));
         }
     }
 }

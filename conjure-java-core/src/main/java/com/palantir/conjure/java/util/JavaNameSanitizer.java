@@ -34,6 +34,8 @@ public final class JavaNameSanitizer {
 
     private static final ImmutableSet<String> RESERVED_FIELD_NAMES = ImmutableSet.of("memoizedHashCode");
 
+    private static final ImmutableSet<String> RESERVED_ERROR_PARAMETER_NAMES = ImmutableSet.of("cause");
+
     private static final ImmutableSet<String> RESERVED_METHOD_NAMES = ImmutableSet.of("getClass");
 
     /** Sanitizes the given {@link FieldName} for use as a java specifier. */
@@ -86,6 +88,11 @@ public final class JavaNameSanitizer {
             return sanitizeParameterName(escape(value), endpoint);
         }
         return value;
+    }
+
+    /** Sanitizes parameter names for errors. */
+    public static String sanitizeErrorParameterName(String input) {
+        return SourceVersion.isName(input) && !RESERVED_ERROR_PARAMETER_NAMES.contains(input) ? input : escape(input);
     }
 
     private static String sanitizeFieldName(String name) {

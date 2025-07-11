@@ -32,20 +32,20 @@ public final class ConjureErrors {
 
     private ConjureErrors() {}
 
-    public static ServiceException conflictingCauseSafeArg(@Safe String cause) {
-        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, SafeArg.of("cause", cause));
+    public static ServiceException conflictingCauseSafeArg(@Safe String cause_) {
+        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, SafeArg.of("cause", cause_));
     }
 
-    public static ServiceException conflictingCauseSafeArg(@Nullable Throwable cause, @Safe String cause) {
-        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause));
+    public static ServiceException conflictingCauseSafeArg(@Nullable Throwable cause, @Safe String cause_) {
+        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause_));
     }
 
-    public static ServiceException conflictingCauseUnafeArg(@Unsafe String cause) {
-        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, UnsafeArg.of("cause", cause));
+    public static ServiceException conflictingCauseUnafeArg(@Unsafe String cause_) {
+        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, UnsafeArg.of("cause", cause_));
     }
 
-    public static ServiceException conflictingCauseUnafeArg(@Nullable Throwable cause, @Unsafe String cause) {
-        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, cause, UnsafeArg.of("cause", cause));
+    public static ServiceException conflictingCauseUnafeArg(@Nullable Throwable cause, @Unsafe String cause_) {
+        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, cause, UnsafeArg.of("cause", cause_));
     }
 
     /**

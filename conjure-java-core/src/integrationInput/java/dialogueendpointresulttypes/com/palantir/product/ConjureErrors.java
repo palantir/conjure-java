@@ -23,5 +23,5 @@ public final class ConjureErrors {
                 .equals(remoteException.getError().errorName());
     }
 
-    public static record ConflictingCauseSafeArgParameters(@JsonProperty("cause") @Safe String cause) {}
+    public static record ConflictingCauseSafeArgParameters(@JsonProperty("cause") @Safe String cause_) {}
 }
