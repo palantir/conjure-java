@@ -26,6 +26,7 @@ import dialogueendpointresulttypes.com.palantir.product.EndpointSpecificTwoServe
 import dialogueendpointresulttypes.com.palantir.product.ErrorService;
 import dialogueendpointresulttypes.com.palantir.product.OptionalBinaryResponseMode;
 import dialogueendpointresulttypes.com.palantir.product.StringAlias;
+import dialogueendpointresulttypes.com.palantir.product.TestErrors;
 import dialogueendpointresulttypes.com.palantir.product.TestServerErrors;
 import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.ComplicatedParameters;
 import dialogueendpointresulttypes.com.palantir.product.TestServerErrors.InvalidArgument;
@@ -38,6 +39,15 @@ import java.util.Optional;
 interface ErrorResource {
     final class Impl implements ErrorService {
         public static final String SUCCESS = "success!";
+
+        @Override
+        public String testNonEndpointAssociatedError(AuthHeader authHeader, boolean shouldThrowError) {
+            if (shouldThrowError) {
+                throw TestErrors.unassociatedComplicatedParameters(
+                        Map.of(1, ComplicatedObject.of(List.of("string"), StringAlias.of("alias"))));
+            }
+            return SUCCESS;
+        }
 
         @Override
         public String testBasicError(AuthHeader _authHeader, boolean shouldThrowError) throws InvalidArgument {

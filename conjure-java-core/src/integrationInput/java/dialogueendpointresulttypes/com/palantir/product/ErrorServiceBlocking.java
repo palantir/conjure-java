@@ -35,6 +35,10 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ErrorServiceBlocking.Factory.class)
 public interface ErrorServiceBlocking {
+    /** @apiNote {@code POST /errors/nonEndpointError} */
+    @ClientEndpoint(method = "POST", path = "/errors/nonEndpointError")
+    String testNonEndpointAssociatedError(AuthHeader authHeader, boolean shouldThrowError);
+
     /** @apiNote {@code POST /errors/basic} */
     @ClientEndpoint(method = "POST", path = "/errors/basic")
     @CheckReturnValue
@@ -70,6 +74,15 @@ public interface ErrorServiceBlocking {
     static ErrorServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ErrorServiceBlocking() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Serializer<Boolean> testNonEndpointAssociatedErrorSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
+
+            private final EndpointChannel testNonEndpointAssociatedErrorChannel =
+                    _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testNonEndpointAssociatedError);
+
+            private final Deserializer<String> testNonEndpointAssociatedErrorDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final Serializer<Boolean> testBasicErrorSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
@@ -177,6 +190,18 @@ public interface ErrorServiceBlocking {
                                     TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestOptionalBinaryResponse.InvalidArgument>() {})
                             .build());
+
+            @Override
+            public String testNonEndpointAssociatedError(AuthHeader authHeader, boolean shouldThrowError) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testNonEndpointAssociatedErrorSerializer.serialize(shouldThrowError));
+                return _runtime.clients()
+                        .callBlocking(
+                                testNonEndpointAssociatedErrorChannel,
+                                _request.build(),
+                                testNonEndpointAssociatedErrorDeserializer);
+            }
 
             @Override
             public TestBasicErrorResponse testBasicError(AuthHeader authHeader, boolean shouldThrowError) {

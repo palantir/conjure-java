@@ -33,6 +33,11 @@ types:
         code: INTERNAL
         safe-args:
           complicatedObjectMap: map<integer, ComplicatedObject>
+      UnassociatedComplicatedParameters:
+        namespace: Test
+        code: INTERNAL
+        safe-args:
+          complicatedObjectMap: map<integer, ComplicatedObject>
 services:
   ErrorService:
     name: Error Service
@@ -40,6 +45,11 @@ services:
     default-auth: header
     base-path: /errors
     endpoints:
+      testNonEndpointAssociatedError:
+        http: POST /nonEndpointError
+        args:
+          shouldThrowError: boolean
+        returns: string
       testBasicError:
         http: POST /basic
         args:

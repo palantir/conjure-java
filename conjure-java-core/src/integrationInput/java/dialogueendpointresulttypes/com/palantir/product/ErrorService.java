@@ -7,6 +7,9 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface ErrorService {
+    /** @apiNote {@code POST /errors/nonEndpointError} */
+    String testNonEndpointAssociatedError(AuthHeader authHeader, boolean shouldThrowError);
+
     /**
      * @apiNote {@code POST /errors/basic}
      * @throws TestServerErrors.InvalidArgument

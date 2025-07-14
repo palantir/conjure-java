@@ -12,6 +12,36 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueErrorEndpoints implements Endpoint {
+    testNonEndpointAssociatedError {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("errors").fixed("nonEndpointError").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "ErrorService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testNonEndpointAssociatedError";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
     testBasicError {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("errors").fixed("basic").build();
