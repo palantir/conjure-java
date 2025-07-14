@@ -155,7 +155,7 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
                         () -> {
                             // TIMED_OUT must be set prior to future.cancel, otherwise the FutureCallback
                             // may be invoked before TIMED_OUT is set/visible.
-                            exchange.putAttachment(TIMED_OUT, Boolean.TRUE);
+                            exchange.putAttachment(TIMED_OUT, true);
                             future.cancel(INTERRUPT_ON_CANCEL);
                         },
                         requestAsyncTimeout.toMillis(),

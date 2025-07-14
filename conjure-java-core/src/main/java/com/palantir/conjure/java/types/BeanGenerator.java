@@ -504,17 +504,17 @@ public final class BeanGenerator {
 
         @Override
         public Boolean visitList(ListType _value) {
-            return Boolean.TRUE;
+            return true;
         }
 
         @Override
         public Boolean visitSet(SetType _value) {
-            return Boolean.TRUE;
+            return true;
         }
 
         @Override
         public Boolean visitMap(MapType _value) {
-            return Boolean.TRUE;
+            return true;
         }
 
         @Override
@@ -525,7 +525,7 @@ public final class BeanGenerator {
 
         @Override
         public Boolean visitDefault() {
-            return Boolean.FALSE;
+            return false;
         }
     }
 }
