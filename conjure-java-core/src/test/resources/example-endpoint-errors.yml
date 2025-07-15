@@ -39,6 +39,7 @@ types:
         code: INTERNAL
         safe-args:
           cause: string
+          shouldThrow: boolean
 services:
   ErrorService:
     name: Error Service

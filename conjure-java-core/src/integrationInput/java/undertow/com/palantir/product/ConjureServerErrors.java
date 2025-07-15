@@ -11,30 +11,37 @@ import org.jetbrains.annotations.Contract;
 public final class ConjureServerErrors {
     private ConjureServerErrors() {}
 
-    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause_) {
-        return new ConflictingCauseSafeArg(cause_, null);
+    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause_, @Safe boolean shouldThrow_) {
+        return new ConflictingCauseSafeArg(cause_, shouldThrow_, null);
     }
 
-    public static ConflictingCauseSafeArg conflictingCauseSafeArg(@Safe String cause_, @Nullable Throwable cause) {
-        return new ConflictingCauseSafeArg(cause_, cause);
+    public static ConflictingCauseSafeArg conflictingCauseSafeArg(
+            @Safe String cause_, @Safe boolean shouldThrow_, @Nullable Throwable cause) {
+        return new ConflictingCauseSafeArg(cause_, shouldThrow_, cause);
     }
 
     /**
      * Throws a {@link ConflictingCauseSafeArg} when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
-     * @param cause
+     * @param cause_
+     * @param shouldThrow_
      */
-    @Contract("true, _ -> fail")
-    public static void throwIfConflictingCauseSafeArg(boolean shouldThrow, @Safe String cause) {
+    @Contract("true, _, _ -> fail")
+    public static void throwIfConflictingCauseSafeArg(
+            boolean shouldThrow, @Safe String cause_, @Safe boolean shouldThrow_) {
         if (shouldThrow) {
-            throw conflictingCauseSafeArg(cause);
+            throw conflictingCauseSafeArg(cause_, shouldThrow_);
         }
     }
 
     public static final class ConflictingCauseSafeArg extends EndpointServiceException {
-        private ConflictingCauseSafeArg(@Safe String cause_, @Nullable Throwable cause) {
-            super(ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause_));
+        private ConflictingCauseSafeArg(@Safe String cause_, @Safe boolean shouldThrow_, @Nullable Throwable cause) {
+            super(
+                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG,
+                    cause,
+                    SafeArg.of("cause", cause_),
+                    SafeArg.of("shouldThrow", shouldThrow_));
         }
     }
 }

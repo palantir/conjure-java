@@ -256,7 +256,8 @@ public final class ErrorGenerationUtils {
                                 Stream.concat(
                                                 errorDefinition.getSafeArgs().stream(),
                                                 errorDefinition.getUnsafeArgs().stream())
-                                        .map(arg -> arg.getFieldName().get())
+                                        .map(arg -> JavaNameSanitizer.sanitizeErrorParameterName(
+                                                arg.getFieldName().get()))
                                         .collect(Collectors.toList())));
         if (errorType.isPresent()) {
             methodBuilder.addJavadoc(
@@ -295,8 +296,9 @@ public final class ErrorGenerationUtils {
                                 errorDefinition.getErrorName().getName(),
                                 arg.getFieldName()));
                     }
-                    return ParameterSpec.builder(
-                                    argumentTypeName, arg.getFieldName().get())
+                    String name = JavaNameSanitizer.sanitizeErrorParameterName(
+                            arg.getFieldName().get());
+                    return ParameterSpec.builder(argumentTypeName, name)
                             .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
                             .addJavadoc(
                                     "$L",

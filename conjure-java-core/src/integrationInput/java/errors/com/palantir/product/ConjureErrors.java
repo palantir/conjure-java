@@ -19,8 +19,8 @@ public final class ConjureErrors {
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseSafeArg");
 
     /** Cause argument conflicts with reserved Throwable cause parameter. */
-    public static final ErrorType CONFLICTING_CAUSE_UNAFE_ARG =
-            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseUnafeArg");
+    public static final ErrorType CONFLICTING_CAUSE_UNSAFE_ARG =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseUnsafeArg");
 
     /** Invalid Conjure service definition. */
     public static final ErrorType INVALID_SERVICE_DEFINITION =
@@ -32,20 +32,32 @@ public final class ConjureErrors {
 
     private ConjureErrors() {}
 
-    public static ServiceException conflictingCauseSafeArg(@Safe String cause_) {
-        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, SafeArg.of("cause", cause_));
+    public static ServiceException conflictingCauseSafeArg(@Safe String cause_, @Safe boolean shouldThrow_) {
+        return new ServiceException(
+                CONFLICTING_CAUSE_SAFE_ARG, SafeArg.of("cause", cause_), SafeArg.of("shouldThrow", shouldThrow_));
     }
 
-    public static ServiceException conflictingCauseSafeArg(@Nullable Throwable cause, @Safe String cause_) {
-        return new ServiceException(CONFLICTING_CAUSE_SAFE_ARG, cause, SafeArg.of("cause", cause_));
+    public static ServiceException conflictingCauseSafeArg(
+            @Nullable Throwable cause, @Safe String cause_, @Safe boolean shouldThrow_) {
+        return new ServiceException(
+                CONFLICTING_CAUSE_SAFE_ARG,
+                cause,
+                SafeArg.of("cause", cause_),
+                SafeArg.of("shouldThrow", shouldThrow_));
     }
 
-    public static ServiceException conflictingCauseUnafeArg(@Unsafe String cause_) {
-        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, UnsafeArg.of("cause", cause_));
+    public static ServiceException conflictingCauseUnsafeArg(@Unsafe String cause_, @Unsafe boolean shouldThrow_) {
+        return new ServiceException(
+                CONFLICTING_CAUSE_UNSAFE_ARG, UnsafeArg.of("cause", cause_), UnsafeArg.of("shouldThrow", shouldThrow_));
     }
 
-    public static ServiceException conflictingCauseUnafeArg(@Nullable Throwable cause, @Unsafe String cause_) {
-        return new ServiceException(CONFLICTING_CAUSE_UNAFE_ARG, cause, UnsafeArg.of("cause", cause_));
+    public static ServiceException conflictingCauseUnsafeArg(
+            @Nullable Throwable cause, @Unsafe String cause_, @Unsafe boolean shouldThrow_) {
+        return new ServiceException(
+                CONFLICTING_CAUSE_UNSAFE_ARG,
+                cause,
+                UnsafeArg.of("cause", cause_),
+                UnsafeArg.of("shouldThrow", shouldThrow_));
     }
 
     /**
@@ -87,25 +99,29 @@ public final class ConjureErrors {
      * Throws a {@link ServiceException} of type ConflictingCauseSafeArg when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
-     * @param cause
+     * @param cause_
+     * @param shouldThrow_
      */
-    @Contract("true, _ -> fail")
-    public static void throwIfConflictingCauseSafeArg(boolean shouldThrow, @Safe String cause) {
+    @Contract("true, _, _ -> fail")
+    public static void throwIfConflictingCauseSafeArg(
+            boolean shouldThrow, @Safe String cause_, @Safe boolean shouldThrow_) {
         if (shouldThrow) {
-            throw conflictingCauseSafeArg(cause);
+            throw conflictingCauseSafeArg(cause_, shouldThrow_);
         }
     }
 
     /**
-     * Throws a {@link ServiceException} of type ConflictingCauseUnafeArg when {@code shouldThrow} is true.
+     * Throws a {@link ServiceException} of type ConflictingCauseUnsafeArg when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
-     * @param cause
+     * @param cause_
+     * @param shouldThrow_
      */
-    @Contract("true, _ -> fail")
-    public static void throwIfConflictingCauseUnafeArg(boolean shouldThrow, @Unsafe String cause) {
+    @Contract("true, _, _ -> fail")
+    public static void throwIfConflictingCauseUnsafeArg(
+            boolean shouldThrow, @Unsafe String cause_, @Unsafe boolean shouldThrow_) {
         if (shouldThrow) {
-            throw conflictingCauseUnafeArg(cause);
+            throw conflictingCauseUnsafeArg(cause_, shouldThrow_);
         }
     }
 
@@ -147,10 +163,10 @@ public final class ConjureErrors {
                 .equals(remoteException.getError().errorName());
     }
 
-    /** Returns true if the {@link RemoteException} is named Conjure:ConflictingCauseUnafeArg */
-    public static boolean isConflictingCauseUnafeArg(RemoteException remoteException) {
+    /** Returns true if the {@link RemoteException} is named Conjure:ConflictingCauseUnsafeArg */
+    public static boolean isConflictingCauseUnsafeArg(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
-        return CONFLICTING_CAUSE_UNAFE_ARG
+        return CONFLICTING_CAUSE_UNSAFE_ARG
                 .name()
                 .equals(remoteException.getError().errorName());
     }

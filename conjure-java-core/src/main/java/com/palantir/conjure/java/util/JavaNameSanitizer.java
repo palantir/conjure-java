@@ -34,7 +34,7 @@ public final class JavaNameSanitizer {
 
     private static final ImmutableSet<String> RESERVED_FIELD_NAMES = ImmutableSet.of("memoizedHashCode");
 
-    private static final ImmutableSet<String> RESERVED_ERROR_PARAMETER_NAMES = ImmutableSet.of("cause");
+    private static final ImmutableSet<String> RESERVED_ERROR_PARAMETER_NAMES = ImmutableSet.of("cause", "shouldThrow");
 
     private static final ImmutableSet<String> RESERVED_METHOD_NAMES = ImmutableSet.of("getClass");
 
