@@ -1,6 +1,6 @@
 ch.qos.logback:* = 1.2.11
 com.atlassian.commonmark:* = 0.12.1
-com.fasterxml.jackson.core:jackson-databind = 2.19.1
+com.fasterxml.jackson.*:* = 2.19.1
 com.google.auto:auto-common = 1.2.2
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 33.1.0-jre
@@ -45,7 +45,6 @@ jakarta.ws.rs:jakarta.ws.rs-api = 4.0.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
-com.fasterxml.jackson.*:jackson-* = 2.12.3
 # Generator should be compatible with java 8
 com.palantir.javaformat:palantir-java-format = 1.1.0
 # Do not force up the minimum error_prone_annotations dependency version
