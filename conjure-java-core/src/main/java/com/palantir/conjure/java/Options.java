@@ -209,7 +209,7 @@ public interface Options {
      * For rollout, this value is initially set to true. In the future, this value will be set to false.
      */
     @Value.Default
-    default boolean dangerousEnableEndpointAssociatedErrors() {
+    default boolean dangerousDoNotUseEnableEndpointAssociatedErrors() {
         return true;
     }
 

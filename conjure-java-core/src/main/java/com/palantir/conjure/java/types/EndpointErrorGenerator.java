@@ -62,7 +62,7 @@ public final class EndpointErrorGenerator implements Generator {
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
-        if (!options.dangerousEnableEndpointAssociatedErrors()
+        if (!options.dangerousDoNotUseEnableEndpointAssociatedErrors()
                 && !endpointErrors.errors().isEmpty()) {
             List<String> errorNames =
                     endpointErrors.errors().stream().map(ErrorTypeName::getName).toList();

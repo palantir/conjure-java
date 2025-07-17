@@ -79,10 +79,11 @@ public final class EndpointErrorGeneratorTests {
     @Test
     public void testThrowsExceptionWhenOptionIsFalseAndEndpointErrorsExist() {
         // Create an EndpointErrorGenerator with the option set to false
-        EndpointErrorGenerator generator = new EndpointErrorGenerator(
-                Options.builder().dangerousEnableEndpointAssociatedErrors(false).build());
+        EndpointErrorGenerator generator = new EndpointErrorGenerator(Options.builder()
+                .dangerousDoNotUseEnableEndpointAssociatedErrors(false)
+                .build());
 
-        // Verify that an exception is thrown, and that it contians the name of the error associated with the endpoint
+        // Verify that an exception is thrown, and that it contains the name of the error associated with the endpoint
         assertThatThrownBy(() -> generator.generate(definition))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasMessageContaining("Errors are associated with endpoints. This feature is currently not supported.")
@@ -92,8 +93,9 @@ public final class EndpointErrorGeneratorTests {
     @Test
     public void testNoExceptionThrownWhenOptionIsTrueAndEndpointErrorsExist() {
         // Create an EndpointErrorGenerator with the option set to true
-        EndpointErrorGenerator generator = new EndpointErrorGenerator(
-                Options.builder().dangerousEnableEndpointAssociatedErrors(true).build());
+        EndpointErrorGenerator generator = new EndpointErrorGenerator(Options.builder()
+                .dangerousDoNotUseEnableEndpointAssociatedErrors(true)
+                .build());
 
         // Verify that no exception is thrown
         assertThatCode(() -> generator.generate(definition)).doesNotThrowAnyException();
