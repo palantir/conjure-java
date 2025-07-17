@@ -24,6 +24,7 @@ import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Random;
@@ -44,7 +45,7 @@ final class EteBinaryResource implements EteBinaryService {
             try {
                 ByteStreams.exhaust(ByteStreams.limit(body, bytesToRead));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
         throw new ServiceException(

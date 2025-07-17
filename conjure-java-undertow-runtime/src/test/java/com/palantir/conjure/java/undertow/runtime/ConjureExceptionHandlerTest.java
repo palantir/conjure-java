@@ -45,6 +45,7 @@ import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -433,7 +434,7 @@ public final class ConjureExceptionHandlerTest {
         try (InputStream response = connection.getErrorStream()) {
             return new String(response.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -444,7 +445,7 @@ public final class ConjureExceptionHandlerTest {
             connection.setRequestMethod("GET");
             return connection;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }
