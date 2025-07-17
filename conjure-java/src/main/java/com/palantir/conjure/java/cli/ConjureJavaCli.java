@@ -33,7 +33,7 @@ import com.palantir.conjure.java.types.EndpointErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -281,7 +281,7 @@ public final class ConjureJavaCli implements Runnable {
                 new GenerationCoordinator(executor, generatorBuilder.build(), config.options())
                         .emit(conjureDefinition, config.outputDirectory());
             } catch (IOException e) {
-                throw new SafeRuntimeException("Error parsing definition", e);
+                throw new SafeUncheckedIoException("Error parsing definition", e);
             } finally {
                 executor.shutdown();
             }

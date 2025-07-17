@@ -44,6 +44,7 @@ import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -203,11 +204,11 @@ public final class UndertowServiceEteTest extends TestBase {
                             .isEqualTo(ErrorResource.Impl.SUCCESS.getBytes(StandardCharsets.UTF_8));
 
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -234,11 +235,11 @@ public final class UndertowServiceEteTest extends TestBase {
                     assertThat(is.readAllBytes())
                             .isEqualTo(ErrorResource.Impl.SUCCESS.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 

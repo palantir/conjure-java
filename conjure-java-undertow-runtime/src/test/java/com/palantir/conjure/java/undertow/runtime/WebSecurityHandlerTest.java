@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.net.HttpHeaders;
 import io.undertow.Undertow;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import org.junit.jupiter.api.AfterAll;
@@ -90,7 +91,7 @@ public class WebSecurityHandlerTest {
             connection.setRequestMethod("GET");
             return connection;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }
