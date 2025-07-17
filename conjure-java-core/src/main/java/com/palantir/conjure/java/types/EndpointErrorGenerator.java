@@ -58,9 +58,6 @@ public final class EndpointErrorGenerator implements Generator {
 
     @Override
     public Stream<JavaFile> generate(ConjureDefinition definition) {
-        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
-        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
-        TypeMapper typeMapper = new TypeMapper(types, options);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
         if (!options.dangerousDoNotUseEnableEndpointAssociatedErrors()
                 && !endpointErrors.errors().isEmpty()) {
@@ -70,6 +67,9 @@ public final class EndpointErrorGenerator implements Generator {
                     "Errors are associated with endpoints. This feature is currently not supported.",
                     SafeArg.of("errors", errorNames));
         }
+        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
+        TypeMapper typeMapper = new TypeMapper(types, options);
         return ErrorGenerationUtils.getNamespacedErrorsFromDefinitions(definition.getErrors()).stream()
                 .flatMap(namespacedErrors -> {
                     List<ErrorDefinition> filteredErrorDefinitions = namespacedErrors.errors().stream()
