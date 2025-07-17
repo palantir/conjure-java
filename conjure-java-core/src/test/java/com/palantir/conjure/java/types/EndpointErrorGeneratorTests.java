@@ -34,47 +34,33 @@ import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class EndpointErrorGeneratorTests {
-
-    private ConjureDefinition definition;
     private static final String ERROR_NAME = "TestError";
-
-    @BeforeEach
-    public void beforeEach() {
-        // Create a ConjureDefinition with an error and associate the error with an endpoint
-        ErrorDefinition errorDefinition = ErrorDefinition.builder()
-                .errorName(TypeName.of(ERROR_NAME, "com.palantir.test"))
-                .code(ErrorCode.CUSTOM_SERVER)
-                .namespace(ErrorNamespace.of("TestService"))
-                .build();
-
-        EndpointDefinition endpoint = EndpointDefinition.builder()
-                .endpointName(EndpointName.of("testEndpoint"))
-                .httpMethod(HttpMethod.GET)
-                .httpPath(HttpPath.of("/test"))
-                .errors(EndpointError.builder()
-                        .error(ErrorTypeName.builder()
-                                .name(ERROR_NAME)
-                                .package_("com.palantir.test")
-                                .namespace(ErrorNamespace.of("TestService"))
-                                .build())
-                        .build())
-                .build();
-
-        ServiceDefinition service = ServiceDefinition.builder()
-                .serviceName(TypeName.of("TestService", "com.palantir.test"))
-                .endpoints(List.of(endpoint))
-                .build();
-
-        definition = ConjureDefinition.builder()
-                .version(1)
-                .errors(List.of(errorDefinition))
-                .services(List.of(service))
-                .build();
-    }
+    private static final ConjureDefinition DEFINITION = ConjureDefinition.builder()
+            .version(1)
+            .errors(List.of(ErrorDefinition.builder()
+                    .errorName(TypeName.of(ERROR_NAME, "com.palantir.test"))
+                    .code(ErrorCode.CUSTOM_SERVER)
+                    .namespace(ErrorNamespace.of("TestService"))
+                    .build()))
+            .services(List.of(ServiceDefinition.builder()
+                    .serviceName(TypeName.of("TestService", "com.palantir.test"))
+                    .endpoints(List.of(EndpointDefinition.builder()
+                            .endpointName(EndpointName.of("testEndpoint"))
+                            .httpMethod(HttpMethod.GET)
+                            .httpPath(HttpPath.of("/test"))
+                            .errors(EndpointError.builder()
+                                    .error(ErrorTypeName.builder()
+                                            .name(ERROR_NAME)
+                                            .package_("com.palantir.test")
+                                            .namespace(ErrorNamespace.of("TestService"))
+                                            .build())
+                                    .build())
+                            .build()))
+                    .build()))
+            .build();
 
     @Test
     public void testThrowsExceptionWhenOptionIsFalseAndEndpointErrorsExist() {
@@ -84,7 +70,7 @@ public final class EndpointErrorGeneratorTests {
                 .build());
 
         // Verify that an exception is thrown, and that it contains the name of the error associated with the endpoint
-        assertThatThrownBy(() -> generator.generate(definition))
+        assertThatThrownBy(() -> generator.generate(DEFINITION))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasMessageContaining("Errors are associated with endpoints. This feature is currently not supported.")
                 .hasMessageContaining(ERROR_NAME);
@@ -98,6 +84,6 @@ public final class EndpointErrorGeneratorTests {
                 .build());
 
         // Verify that no exception is thrown
-        assertThatCode(() -> generator.generate(definition)).doesNotThrowAnyException();
+        assertThatCode(() -> generator.generate(DEFINITION)).doesNotThrowAnyException();
     }
 }
