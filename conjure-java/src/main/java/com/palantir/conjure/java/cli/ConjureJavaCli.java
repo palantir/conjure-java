@@ -246,6 +246,13 @@ public final class ConjureJavaCli implements Runnable {
                         + "--nonNullCollections flag.")
         private boolean defensiveCollections;
 
+        @CommandLine.Option(
+                names = "--dangerousEnableEndpointAssociatedErrors",
+                defaultValue = "true",
+                description = "Generate endpoint associated errors as EndpointServiceExceptions. "
+                        + "This feature is currently not supported.")
+        private boolean dangerousEnableEndpointAssociatedErrors;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -319,6 +326,7 @@ public final class ConjureJavaCli implements Runnable {
                             .preferObjectBuilders(preferObjectBuilders)
                             .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
                             .defensiveCollections(defensiveCollections)
+                            .dangerousEnableEndpointAssociatedErrors(dangerousEnableEndpointAssociatedErrors)
                             .build())
                     .build();
         }

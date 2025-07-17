@@ -29,6 +29,7 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -36,6 +37,8 @@ import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +62,14 @@ public final class EndpointErrorGenerator implements Generator {
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
         DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
+        if (!options.dangerousEnableEndpointAssociatedErrors()
+                && !endpointErrors.errors().isEmpty()) {
+            List<String> errorNames =
+                    endpointErrors.errors().stream().map(ErrorTypeName::getName).toList();
+            throw new SafeIllegalStateException(
+                    "Errors are associated with endpoints. This feature is currently not supported.",
+                    SafeArg.of("errors", errorNames));
+        }
         return ErrorGenerationUtils.getNamespacedErrorsFromDefinitions(definition.getErrors()).stream()
                 .flatMap(namespacedErrors -> {
                     List<ErrorDefinition> filteredErrorDefinitions = namespacedErrors.errors().stream()

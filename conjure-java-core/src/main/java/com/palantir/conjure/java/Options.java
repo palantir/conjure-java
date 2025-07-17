@@ -203,6 +203,17 @@ public interface Options {
     }
 
     /**
+     * Enabling this option will cause parameters of errors that are associated with an endpoint to be serialized as
+     * JSON. This is a wire break and can cause errors for clients that parse error parameters. Do not enable this.
+     * <p>
+     * For rollout, this value is initially set to true. In the future, this value will be set to false.
+     */
+    @Value.Default
+    default boolean dangerousEnableEndpointAssociatedErrors() {
+        return true;
+    }
+
+    /**
      * Makes immutable copies of collections for union and alias types, respecting the --nonNullCollections flag.
      */
     @Value.Default
