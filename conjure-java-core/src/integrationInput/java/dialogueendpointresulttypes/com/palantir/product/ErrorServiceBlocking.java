@@ -84,6 +84,9 @@ public interface ErrorServiceBlocking {
                             .error(
                                     TestErrors.INVALID_ARGUMENT.name(),
                                     new TypeMarker<TestBasicErrorResponse.InvalidArgument>() {})
+                            .error(
+                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
+                                    new TypeMarker<TestBasicErrorResponse.ConflictingCauseSafeArg>() {})
                             .build());
 
             private final Serializer<Boolean> testImportedErrorSerializer =
@@ -267,7 +270,9 @@ public interface ErrorServiceBlocking {
     }
 
     sealed interface TestBasicErrorResponse
-            permits TestBasicErrorResponse.Success, TestBasicErrorResponse.InvalidArgument {
+            permits TestBasicErrorResponse.Success,
+                    TestBasicErrorResponse.InvalidArgument,
+                    TestBasicErrorResponse.ConflictingCauseSafeArg {
         record Success(@JsonValue String value) implements TestBasicErrorResponse {
             public Success {
                 Preconditions.checkArgumentNotNull(value, "value cannot be null");
@@ -282,6 +287,17 @@ public interface ErrorServiceBlocking {
                     @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                     @JsonProperty("parameters") TestErrors.InvalidArgumentParameters parameters) {
                 super(errorCode, TestErrors.INVALID_ARGUMENT.name(), errorInstanceId, parameters);
+            }
+        }
+
+        final class ConflictingCauseSafeArg extends EndpointError<ConjureErrors.ConflictingCauseSafeArgParameters>
+                implements TestBasicErrorResponse {
+            @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+            ConflictingCauseSafeArg(
+                    @JsonProperty("errorCode") @Safe String errorCode,
+                    @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                    @JsonProperty("parameters") ConjureErrors.ConflictingCauseSafeArgParameters parameters) {
+                super(errorCode, ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(), errorInstanceId, parameters);
             }
         }
     }

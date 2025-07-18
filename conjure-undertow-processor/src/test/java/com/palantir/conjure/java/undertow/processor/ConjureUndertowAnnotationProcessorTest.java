@@ -58,7 +58,7 @@ import com.palantir.conjure.java.undertow.processor.sample.StaticMethodAnnotated
 import com.palantir.conjure.java.undertow.processor.sample.TaggedEndpoints;
 import com.palantir.conjure.java.undertow.processor.sample.UnmatchedPathParam;
 import com.palantir.conjure.java.undertow.processor.sample.UnmatchedPathTemplateParam;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -293,7 +293,7 @@ public class ConjureUndertowAnnotationProcessorTest {
                     .withProcessors(new ConjureUndertowAnnotationProcessor())
                     .compile(JavaFileObjects.forResource(clazzPath.toUri().toURL()));
         } catch (MalformedURLException e) {
-            throw new SafeRuntimeException(e);
+            throw new SafeUncheckedIoException(e);
         }
     }
 
@@ -308,7 +308,7 @@ public class ConjureUndertowAnnotationProcessorTest {
             }
             assertThat(generatedContents).isEqualTo(Files.readString(output));
         } catch (IOException e) {
-            throw new SafeRuntimeException(e);
+            throw new SafeUncheckedIoException(e);
         }
     }
 

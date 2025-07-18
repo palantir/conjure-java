@@ -23,6 +23,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
+import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -123,7 +124,10 @@ public final class EndpointErrorGenerator implements Generator {
 
         List<CodeBlock> args = new ArrayList<>(
                 Stream.concat(errorDefinition.getSafeArgs().stream(), errorDefinition.getUnsafeArgs().stream())
-                        .map(arg -> CodeBlock.of("$N", arg.getFieldName().get()))
+                        .map(arg -> CodeBlock.of(
+                                "$N",
+                                JavaNameSanitizer.sanitizeErrorParameterName(
+                                        arg.getFieldName().get())))
                         .toList());
         if (withCause) {
             args.add(CodeBlock.of("$N", "cause"));

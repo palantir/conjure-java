@@ -31,3 +31,17 @@ types:
         namespace: Conjure
         docs: Different package.
         code: INTERNAL
+      ConflictingCauseSafeArg:
+        namespace: Conjure
+        docs: Cause argument conflicts with reserved Throwable cause parameter.
+        code: INTERNAL
+        safe-args:
+          cause: string
+          shouldThrow: boolean
+      ConflictingCauseUnsafeArg:
+        namespace: Conjure
+        docs: Cause argument conflicts with reserved Throwable cause parameter.
+        code: INTERNAL
+        unsafe-args:
+          cause: string
+          shouldThrow: boolean
