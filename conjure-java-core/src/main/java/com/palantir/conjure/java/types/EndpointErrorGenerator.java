@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
@@ -52,6 +53,13 @@ public final class EndpointErrorGenerator implements Generator {
 
     private final Options options;
 
+    @VisibleForTesting
+    static final String NOT_SUPPORTED_ERROR_MESSAGE =
+            "Errors are associated with endpoints. This feature has been temporarily disabled while we iterate through"
+                + " issues with its rollout. If this is blocking you or you need this immediately, please reach out to"
+                + " the Conjure maintainers at https://github.com/palantir/conjure-java/issues so we can help support"
+                + " your needs.";
+
     public EndpointErrorGenerator(Options options) {
         this.options = options;
     }
@@ -63,9 +71,7 @@ public final class EndpointErrorGenerator implements Generator {
                 && !endpointErrors.errors().isEmpty()) {
             List<String> errorNames =
                     endpointErrors.errors().stream().map(ErrorTypeName::getName).toList();
-            throw new SafeIllegalStateException(
-                    "Errors are associated with endpoints. This feature is currently not supported.",
-                    SafeArg.of("errors", errorNames));
+            throw new SafeIllegalStateException(NOT_SUPPORTED_ERROR_MESSAGE, SafeArg.of("errors", errorNames));
         }
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);

@@ -203,10 +203,17 @@ public interface Options {
     }
 
     /**
-     * Enabling this option will cause parameters of errors that are associated with an endpoint to be serialized as
-     * JSON. This is a wire break and can cause errors for clients that parse error parameters. Do not enable this.
+     * Enabling this option will enable associating errors with endpoints, which currently causes parameters of these
+     * errors to be serialized as JSON. This is a wire break and can cause errors for clients that parse error
+     * parameters. Do not enable this.
      * <p>
-     * For rollout, this value is initially set to true. In the future, this value will be set to false.
+     * This flag has been temporarily added to help us iterate on a safer rollout strategy for endpoint-associated
+     * errors.
+     * <p>
+     * It is initially set to true, but will quickly be set to false.
+     * <p>
+     * It will also eventually be removed, and you should not use it without letting the Conjure maintainers know.
+     * Otherwise, a future upgrade will break your builds.
      */
     @Value.Default
     default boolean dangerousDoNotUseEnableEndpointAssociatedErrors() {

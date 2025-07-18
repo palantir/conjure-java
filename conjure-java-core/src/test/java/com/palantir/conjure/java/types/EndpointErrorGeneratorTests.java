@@ -38,28 +38,49 @@ import org.junit.jupiter.api.Test;
 
 public final class EndpointErrorGeneratorTests {
     private static final String ERROR_NAME = "TestError";
+    private static final EndpointDefinition ENDPOINT_DEF = EndpointDefinition.builder()
+            .endpointName(EndpointName.of("testEndpoint"))
+            .httpMethod(HttpMethod.GET)
+            .httpPath(HttpPath.of("/test"))
+            .build();
+
+    private static final EndpointDefinition ENDPOINT_DEF_WITH_ERROR = EndpointDefinition.builder()
+            .from(ENDPOINT_DEF)
+            .errors(EndpointError.builder()
+                    .error(ErrorTypeName.builder()
+                            .name(ERROR_NAME)
+                            .package_("com.palantir.test")
+                            .namespace(ErrorNamespace.of("TestService"))
+                            .build())
+                    .build())
+            .build();
+
+    private static final ServiceDefinition SERVICE_DEF = ServiceDefinition.builder()
+            .serviceName(TypeName.of("TestService", "com.palantir.test"))
+            .endpoints(List.of(ENDPOINT_DEF))
+            .build();
+
+    private static final ServiceDefinition SERVICE_DEF_WITH_ENDPOINT_ERROR = ServiceDefinition.builder()
+            .from(SERVICE_DEF)
+            .endpoints(List.of(ENDPOINT_DEF_WITH_ERROR))
+            .build();
+
     private static final ConjureDefinition DEFINITION = ConjureDefinition.builder()
             .version(1)
+            .services(List.of(ServiceDefinition.builder()
+                    .serviceName(TypeName.of("TestService", "com.palantir.test"))
+                    .endpoints(List.of(ENDPOINT_DEF))
+                    .build()))
+            .build();
+
+    private static final ConjureDefinition DEFINITION_WITH_ENDPOINT_ERROR = ConjureDefinition.builder()
+            .from(DEFINITION)
             .errors(List.of(ErrorDefinition.builder()
                     .errorName(TypeName.of(ERROR_NAME, "com.palantir.test"))
                     .code(ErrorCode.CUSTOM_SERVER)
                     .namespace(ErrorNamespace.of("TestService"))
                     .build()))
-            .services(List.of(ServiceDefinition.builder()
-                    .serviceName(TypeName.of("TestService", "com.palantir.test"))
-                    .endpoints(List.of(EndpointDefinition.builder()
-                            .endpointName(EndpointName.of("testEndpoint"))
-                            .httpMethod(HttpMethod.GET)
-                            .httpPath(HttpPath.of("/test"))
-                            .errors(EndpointError.builder()
-                                    .error(ErrorTypeName.builder()
-                                            .name(ERROR_NAME)
-                                            .package_("com.palantir.test")
-                                            .namespace(ErrorNamespace.of("TestService"))
-                                            .build())
-                                    .build())
-                            .build()))
-                    .build()))
+            .services(List.of(SERVICE_DEF_WITH_ENDPOINT_ERROR))
             .build();
 
     @Test
@@ -70,9 +91,9 @@ public final class EndpointErrorGeneratorTests {
                 .build());
 
         // Verify that an exception is thrown, and that it contains the name of the error associated with the endpoint
-        assertThatThrownBy(() -> generator.generate(DEFINITION))
+        assertThatThrownBy(() -> generator.generate(DEFINITION_WITH_ENDPOINT_ERROR))
                 .isInstanceOf(SafeIllegalStateException.class)
-                .hasMessageContaining("Errors are associated with endpoints. This feature is currently not supported.")
+                .hasMessageContaining(EndpointErrorGenerator.NOT_SUPPORTED_ERROR_MESSAGE)
                 .hasMessageContaining(ERROR_NAME);
     }
 
@@ -81,6 +102,17 @@ public final class EndpointErrorGeneratorTests {
         // Create an EndpointErrorGenerator with the option set to true
         EndpointErrorGenerator generator = new EndpointErrorGenerator(Options.builder()
                 .dangerousDoNotUseEnableEndpointAssociatedErrors(true)
+                .build());
+
+        // Verify that no exception is thrown
+        assertThatCode(() -> generator.generate(DEFINITION_WITH_ENDPOINT_ERROR)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void testNoExceptionThrownWhenOptionIsFalseeAndNoEndpointErrorsExist() {
+        // Create an EndpointErrorGenerator with the option set to true
+        EndpointErrorGenerator generator = new EndpointErrorGenerator(Options.builder()
+                .dangerousDoNotUseEnableEndpointAssociatedErrors(false)
                 .build());
 
         // Verify that no exception is thrown
