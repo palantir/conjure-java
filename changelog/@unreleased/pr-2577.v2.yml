@@ -1,5 +1,6 @@
 type: improvement
 improvement:
   description: Add `dangerousEnableEndpointAssociatedErrors` option to gate endpoint
+    error generation
   links:
   - https://github.com/palantir/conjure-java/pull/2577
