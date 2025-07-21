@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
@@ -29,6 +30,7 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
+import com.palantir.conjure.spec.ErrorTypeName;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -36,6 +38,8 @@ import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,16 +53,29 @@ public final class EndpointErrorGenerator implements Generator {
 
     private final Options options;
 
+    @VisibleForTesting
+    static final String NOT_SUPPORTED_ERROR_MESSAGE =
+            "Errors are associated with endpoints. This feature has been temporarily disabled while we iterate through"
+                + " issues with its rollout. If this is blocking you or you need this immediately, please reach out to"
+                + " the Conjure maintainers at https://github.com/palantir/conjure-java/issues so we can help support"
+                + " your needs.";
+
     public EndpointErrorGenerator(Options options) {
         this.options = options;
     }
 
     @Override
     public Stream<JavaFile> generate(ConjureDefinition definition) {
+        DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
+        if (!options.dangerousDoNotUseEnableEndpointAssociatedErrors()
+                && !endpointErrors.errors().isEmpty()) {
+            List<String> errorNames =
+                    endpointErrors.errors().stream().map(ErrorTypeName::getName).toList();
+            throw new SafeIllegalStateException(NOT_SUPPORTED_ERROR_MESSAGE, SafeArg.of("errors", errorNames));
+        }
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(types, options);
-        DeclaredEndpointErrors endpointErrors = DeclaredEndpointErrors.from(definition);
         return ErrorGenerationUtils.getNamespacedErrorsFromDefinitions(definition.getErrors()).stream()
                 .flatMap(namespacedErrors -> {
                     List<ErrorDefinition> filteredErrorDefinitions = namespacedErrors.errors().stream()
