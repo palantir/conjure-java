@@ -78,29 +78,23 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     }
 
     @Override
-    @SuppressWarnings({"CyclomaticComplexity", "for-rollout:StatementSwitchToExpressionSwitch"})
+    @SuppressWarnings("CyclomaticComplexity")
     public TypeName visitOptional(OptionalType type) {
         if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
             PrimitiveType primitiveType = type.getItemType().accept(TypeVisitor.PRIMITIVE);
             // special handling for primitive optionals with Java 8
             switch (primitiveType.get()) {
-                case UNKNOWN:
-                    throw new IllegalStateException("Unknown type " + primitiveType);
-                case DOUBLE:
+                case UNKNOWN -> throw new IllegalStateException("Unknown type " + primitiveType);
+                case DOUBLE -> {
                     return ClassName.get(OptionalDouble.class);
-                case INTEGER:
+                }
+                case INTEGER -> {
                     return ClassName.get(OptionalInt.class);
-                case BOOLEAN:
-                // no OptionalBoolean type
-                case SAFELONG:
-                case STRING:
-                case RID:
-                case BEARERTOKEN:
-                case UUID:
-                case DATETIME:
-                case BINARY:
-                case ANY:
+                }
+                case BOOLEAN, SAFELONG, STRING, RID, BEARERTOKEN, UUID, DATETIME, BINARY, ANY -> {
+                    // no OptionalBoolean type
                     // treat normally
+                }
             }
         }
 
@@ -113,33 +107,43 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     }
 
     @Override
-    @SuppressWarnings({"checkstyle:cyclomaticcomplexity", "for-rollout:StatementSwitchToExpressionSwitch"})
+    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     public TypeName visitPrimitive(PrimitiveType type) {
         switch (type.get()) {
-            case STRING:
+            case STRING -> {
                 return ClassName.get(String.class);
-            case DATETIME:
+            }
+            case DATETIME -> {
                 return ClassName.get(OffsetDateTime.class);
-            case INTEGER:
+            }
+            case INTEGER -> {
                 return TypeName.INT;
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 return TypeName.DOUBLE;
-            case SAFELONG:
+            }
+            case SAFELONG -> {
                 return ClassName.get(SafeLong.class);
-            case BINARY:
+            }
+            case BINARY -> {
                 return options.useImmutableBytes() ? ClassName.get(Bytes.class) : ClassName.get(ByteBuffer.class);
-            case ANY:
+            }
+            case ANY -> {
                 return ClassName.get(Object.class);
-            case BOOLEAN:
+            }
+            case BOOLEAN -> {
                 return TypeName.BOOLEAN;
-            case UUID:
+            }
+            case UUID -> {
                 return ClassName.get(UUID.class);
-            case RID:
+            }
+            case RID -> {
                 return ClassName.get(ResourceIdentifier.class);
-            case BEARERTOKEN:
+            }
+            case BEARERTOKEN -> {
                 return ClassName.get(BearerToken.class);
-            case UNKNOWN:
-                // fall through
+            }
+            case UNKNOWN -> {}
         }
         throw new IllegalStateException("Unknown primitive type: " + type);
     }

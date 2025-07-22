@@ -55,7 +55,6 @@ interface ErrorResource {
             return SUCCESS;
         }
 
-        @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
         @Override
         public String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow)
                 throws InvalidArgument, NotFound, DifferentNamespace,
@@ -64,20 +63,16 @@ interface ErrorResource {
             if (errorToThrow.isPresent()) {
                 String error = errorToThrow.get();
                 switch (error) {
-                    case "invalidArgument":
-                        throw TestServerErrors.invalidArgument("field", "value");
-                    case "notFound":
-                        throw TestServerErrors.notFound("resource");
-                    case "differentNamespace":
-                        throw EndpointSpecificTwoServerErrors.differentNamespace();
-                    case "differentPackage":
+                    case "invalidArgument" -> throw TestServerErrors.invalidArgument("field", "value");
+                    case "notFound" -> throw TestServerErrors.notFound("resource");
+                    case "differentNamespace" -> throw EndpointSpecificTwoServerErrors.differentNamespace();
+                    case "differentPackage" ->
                         throw dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors
                                 .differentPackage();
-                    case "complicatedParameters":
+                    case "complicatedParameters" ->
                         throw TestServerErrors.complicatedParameters(
                                 Map.of(1, ComplicatedObject.of(List.of("string"), StringAlias.of("alias"))));
-                    default:
-                        throw new IllegalArgumentException("Unknown error: " + error);
+                    default -> throw new IllegalArgumentException("Unknown error: " + error);
                 }
             }
             return SUCCESS;

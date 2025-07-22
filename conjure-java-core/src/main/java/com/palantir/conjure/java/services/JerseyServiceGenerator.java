@@ -390,17 +390,20 @@ public final class JerseyServiceGenerator implements Generator {
         return Optional.of(annotationSpecBuilder.build());
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private ClassName httpMethodToClassName(String method) {
         switch (method) {
-            case "DELETE":
+            case "DELETE" -> {
                 return ClassName.get(jaxrsPackage(), "DELETE");
-            case "GET":
+            }
+            case "GET" -> {
                 return ClassName.get(jaxrsPackage(), "GET");
-            case "PUT":
+            }
+            case "PUT" -> {
                 return ClassName.get(jaxrsPackage(), "PUT");
-            case "POST":
+            }
+            case "POST" -> {
                 return ClassName.get(jaxrsPackage(), "POST");
+            }
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }

@@ -22,15 +22,11 @@ enum StaticFactoryMethodType {
     BLOCKING,
     ASYNC;
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public <R> R switchBy(R blocking, R async) {
-        switch (this) {
-            case ASYNC:
-                return async;
-            case BLOCKING:
-                return blocking;
-            default:
-                throw new SafeIllegalStateException("Unknown");
-        }
+        return switch (this) {
+            case ASYNC -> async;
+            case BLOCKING -> blocking;
+            default -> throw new SafeIllegalStateException("Unknown");
+        };
     }
 }

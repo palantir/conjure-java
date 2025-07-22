@@ -751,21 +751,18 @@ public final class ConjureUndertowEndpointsGenerator {
         return endpoint.arguments().stream().anyMatch(arg -> arg.paramType().match(UsesRequestContextVisitor.INSTANCE));
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static Optional<CodeBlock> getSafeLogging(
             String name, String variableName, SafeLoggingAnnotation safeLoggable) {
-        switch (safeLoggable) {
-            case UNKNOWN:
-                return Optional.empty();
-            case SAFE:
-                return Optional.of(CodeBlock.of(
+        return switch (safeLoggable) {
+            case UNKNOWN -> Optional.empty();
+            case SAFE ->
+                Optional.of(CodeBlock.of(
                         "$N.requestArg($T.of($S, $N))", REQUEST_CONTEXT, SafeArg.class, name, variableName));
-            case UNSAFE:
-                return Optional.of(CodeBlock.of(
+            case UNSAFE ->
+                Optional.of(CodeBlock.of(
                         "$N.requestArg($T.of($S, $N))", REQUEST_CONTEXT, UnsafeArg.class, name, variableName));
-            default:
-                throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
-        }
+            default -> throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
+        };
     }
 
     private static final Map<ClassName, Class<?>> COLLECTION_CLASSES = ImmutableMap.<ClassName, Class<?>>builder()
