@@ -422,27 +422,32 @@ public final class ParamTypesResolver {
                         factoryFunction));
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
         // No need to handle int/double/boolean because they're covered by default handlers
         switch (typeMirror.getKind()) {
-            case FLOAT:
+            case FLOAT -> {
                 return Optional.of(CodeBlock.of("$T::parseFloat", Float.class));
-            case LONG:
+            }
+            case LONG -> {
                 return Optional.of(CodeBlock.of("$T::parseLong", Long.class));
-            case BYTE:
+            }
+            case BYTE -> {
                 return Optional.of(CodeBlock.of("$T::parseByte", Byte.class));
-            case SHORT:
+            }
+            case SHORT -> {
                 return Optional.of(CodeBlock.of("$T::parseShort", Short.class));
-            case DECLARED:
+            }
+            case DECLARED -> {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 return getFactoryDecoderFactoryFunction(declaredType, "valueOf")
                         .or(() -> getConstructorDecoderFactoryFunction(declaredType))
                         .or(() -> getFactoryDecoderFactoryFunction(declaredType, "of"))
                         .or(() -> getFactoryDecoderFactoryFunction(declaredType, "fromString"))
                         .or(() -> getFactoryDecoderFactoryFunction(declaredType, "create"));
-            default:
+            }
+            default -> {
                 return Optional.empty();
+            }
         }
     }
 
@@ -514,22 +519,26 @@ public final class ParamTypesResolver {
         }
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static Optional<String> getClassNameForTypeMirror(TypeMirror typeMirror) {
         // Only need to support primitives that are also supported by {@link PlainSerDe}.
         switch (typeMirror.getKind()) {
-            case INT:
+            case INT -> {
                 return Optional.of(Integer.class.getName());
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 return Optional.of(Double.class.getName());
-            case BOOLEAN:
+            }
+            case BOOLEAN -> {
                 return Optional.of(Boolean.class.getName());
-            case DECLARED:
+            }
+            case DECLARED -> {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 TypeElement typeElement = (TypeElement) declaredType.asElement();
                 return Optional.of(typeElement.getQualifiedName().toString());
-            default:
+            }
+            default -> {
                 return Optional.empty();
+            }
         }
     }
 
