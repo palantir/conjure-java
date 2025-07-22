@@ -3,7 +3,7 @@ package test.api;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.processing.Generated;
-import jakarta.validation.constraints.NotNull;;
+import jakarta.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
