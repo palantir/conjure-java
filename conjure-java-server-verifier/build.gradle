@@ -21,7 +21,6 @@ conjure {
         addFlag 'undertow'
         addFlag 'undertowServicePrefixes'
         addFlag 'useStagedBuilders'
-        addFlag 'jakartaPackages'
     }
 }
 

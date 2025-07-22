@@ -27,6 +27,7 @@ conjure {
         addFlag 'useImmutableBytes'
         addFlag 'jersey'
         addFlag 'objects'
+        addFlag 'jakartaPackages'
     }
 }
 
