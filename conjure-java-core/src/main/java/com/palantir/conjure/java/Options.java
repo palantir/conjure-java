@@ -35,7 +35,7 @@ public interface Options {
     }
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to add {@link javax.validation.constraints.NotNull} annotations to all auth parameters, as well
+     * Instructs the {@link JerseyServiceGenerator} to add {@link jakarta.validation.constraints.NotNull} annotations to all auth parameters, as well
      * as all non-optional body params on service endpoints.
      */
     @Value.Default

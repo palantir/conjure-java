@@ -22,14 +22,14 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.tokens.auth.AuthHeader;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Random;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.StreamingOutput;
 import jersey.com.palantir.product.EteBinaryService;
 
 final class EteBinaryResource implements EteBinaryService {

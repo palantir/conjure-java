@@ -1,10 +1,10 @@
 package jersey.com.palantir.another;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import javax.annotation.processing.Generated;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 /** This service has no endpoints. */
 @Consumes(MediaType.APPLICATION_JSON)

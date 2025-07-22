@@ -5,8 +5,3 @@ server:
       port: 0
   adminConnectors: []
   rootPath: /api/*
-webSecurity:
-  cors:
-    allowedHeaders: "*"
-    allowedMethods: "DELETE,GET,HEAD,POST,PUT"
-    allowedOrigins: "*"
