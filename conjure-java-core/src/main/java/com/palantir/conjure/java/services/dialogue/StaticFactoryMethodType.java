@@ -20,12 +20,16 @@ import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 
 enum StaticFactoryMethodType {
     BLOCKING,
-    ASYNC;
+    BLOCKING_WITH_ERRORS,
+    ASYNC,
+    ASYNC_WITH_ERRORS;
 
-    public <R> R switchBy(R blocking, R async) {
+    public <R> R switchBy(R blocking, R async, R blockingWithErrors, R asyncWithErrors) {
         return switch (this) {
             case ASYNC -> async;
+            case ASYNC_WITH_ERRORS -> asyncWithErrors;
             case BLOCKING -> blocking;
+            case BLOCKING_WITH_ERRORS -> blockingWithErrors;
             default -> throw new SafeIllegalStateException("Unknown");
         };
     }

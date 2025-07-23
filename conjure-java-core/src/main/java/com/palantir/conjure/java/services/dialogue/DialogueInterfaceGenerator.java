@@ -394,12 +394,18 @@ public final class DialogueInterfaceGenerator {
                     className.simpleName(),
                     ErrorGenerationUtils.endpointResponseResultTypeName(endpointDef.getEndpointName()));
             methodBuilder.returns(serviceCallType.switchBy(
-                    returnType, ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType)));
+                    returnType,
+                    ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType),
+                    returnType,
+                    ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), returnType)));
             // The result type should be used by clients
             methodBuilder.addAnnotation(CheckReturnValue.class);
         } else {
             TypeName returnType = serviceCallType.switchBy(
-                    returnTypes.baseType(endpointDef.getReturns()), returnTypes.async(endpointDef.getReturns()));
+                    returnTypes.baseType(endpointDef.getReturns()),
+                    returnTypes.async(endpointDef.getReturns()),
+                    returnTypes.baseType(endpointDef.getReturns()),
+                    returnTypes.async(endpointDef.getReturns()));
             methodBuilder.returns(returnType);
             if (TypeName.get(InputStream.class).equals(returnType)) {
                 methodBuilder.addAnnotation(MustBeClosed.class);

@@ -40,6 +40,16 @@ public final class Names {
         return maybeRelocate(def, options, simpleName);
     }
 
+    public static ClassName blockingClassNameWithErrors(ServiceDefinition def, Options options) {
+        String simpleName = def.getServiceName().getName() + "WithErrorsBlocking";
+        return maybeRelocate(def, options, simpleName);
+    }
+
+    public static ClassName asyncClassNameWithErrors(ServiceDefinition def, Options options) {
+        String simpleName = def.getServiceName().getName() + "WithErrorsAsync";
+        return maybeRelocate(def, options, simpleName);
+    }
+
     static String endpointChannel(EndpointDefinition endpoint) {
         return endpoint.getEndpointName().get() + "Channel";
     }

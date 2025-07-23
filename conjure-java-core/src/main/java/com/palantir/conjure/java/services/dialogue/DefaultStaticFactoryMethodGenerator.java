@@ -129,6 +129,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
         String javadoc = methodType.switchBy(
                 "Creates a synchronous/blocking client for a $L service.",
+                "Creates an " + "asynchronous/non-blocking client for a $L service.",
+                "Creates a synchronous/blocking client for a $L service.",
                 "Creates an " + "asynchronous/non-blocking client for a $L service.");
         MethodSpec method = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
@@ -142,7 +144,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     }
 
     private ClassName getClassName(ServiceDefinition def) {
-        return methodType.switchBy(Names.blockingClassName(def, options), Names.asyncClassName(def, options));
+        return methodType.switchBy(
+                Names.blockingClassName(def, options),
+                Names.asyncClassName(def, options),
+                Names.blockingClassNameWithErrors(def, options),
+                Names.asyncClassNameWithErrors(def, options));
     }
 
     private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointDefinition endpoint) {
@@ -270,7 +276,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .add(requestParams.build())
                 .build();
         String codeBlock = methodType.switchBy(
-                "$L.clients().callBlocking($L, $L.build(), $L);", "$L.clients().call($L, $L.build" + "(), $L);");
+                "$L.clients().callBlocking($L, $L.build(), $L);",
+                "$L.clients().call($L, $L.build" + "(), $L);",
+                "$L.clients().callBlocking($L, $L.build(), $L);",
+                "$L.clients().call($L, $L.build" + "(), $L);");
         boolean generateResultTypes = ErrorGenerationUtils.shouldGenerateResultTypesForEndpoint(
                 options.generateDialogueEndpointErrorResultTypes(), def);
         CodeBlock execute = CodeBlock.of(
@@ -288,8 +297,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         methodBuilder.addCode(request);
-        methodBuilder.addCode(
-                methodType.switchBy(def.getReturns().isPresent() || generateResultTypes ? "return " : "", "return "));
+        methodBuilder.addCode(methodType.switchBy(
+                def.getReturns().isPresent() || generateResultTypes ? "return " : "",
+                "return ",
+                def.getReturns().isPresent() || generateResultTypes ? "return " : "",
+                "return "));
         methodBuilder.addCode(execute);
 
         return methodBuilder.build();
@@ -304,9 +316,15 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     ErrorGenerationUtils.endpointResponseResultTypeName(def.getEndpointName()));
             return methodType.switchBy(
                     responseResultTypeName,
+                    ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), responseResultTypeName),
+                    responseResultTypeName,
                     ParameterizedTypeName.get(ClassName.get(ListenableFuture.class), responseResultTypeName));
         }
-        return methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
+        return methodType.switchBy(
+                returnTypes.baseType(def.getReturns()),
+                returnTypes.async(def.getReturns()),
+                returnTypes.baseType(def.getReturns()),
+                returnTypes.async(def.getReturns()));
     }
 
     private CodeBlock generateParam(String endpointName, ArgumentDefinition param) {

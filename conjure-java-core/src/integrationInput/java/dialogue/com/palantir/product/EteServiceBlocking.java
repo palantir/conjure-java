@@ -1,11 +1,15 @@
 package dialogue.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.api.errors.AbstractRemoteException;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DeserializerArgsForErrors;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -15,19 +19,16 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
+import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.io.InputStream;
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -400,6 +401,61 @@ public interface EteServiceBlocking {
 
             private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Deserializer<String> myStringDeserializer = _runtime.bodySerDe()
+                    .deserializer(DeserializerArgsForErrors.<String>builder()
+                            .returnType(new TypeMarker<String>() {})
+                            .error("myException", new TypeMarker<MyError>() {}, new TypeMarker<MyException>() {})
+                            .build());
+
+            record MyParams(@Safe String field) {}
+
+            final class MyError extends AbstractSerializableError<MyParams> {
+                MyError(
+                        @JsonProperty("errorCode") String errorCode,
+                        @JsonProperty("errorName") String errorName,
+                        @JsonProperty("errorInstanceId") String errorInstanceId,
+                        @JsonProperty("parameters") MyParams parameters) {
+                    super(errorCode, errorName, errorInstanceId, parameters);
+                }
+
+                @Override
+                public Map<String, String> legacyParameters() {
+                    return Map.of("field", Objects.toString(parameters().field()));
+                }
+            }
+
+            class MyException extends RuntimeException implements AbstractRemoteException<MyError> {
+                private MyError error;
+                private int status;
+
+                public MyException(MyError error, int status) {
+                    this.error = error;
+                    this.status = status;
+                }
+
+                @Override
+                public MyError getError() {
+                    return error;
+                }
+
+                @Override
+                public int getStatus() {
+                    return status;
+                }
+
+                @Override
+                public String getLogMessage() {
+                    return error.errorCode().equals(error.errorName())
+                            ? "MyException" + error.errorCode()
+                            : "MyException:" + error.errorCode() + " (" + error.errorName() + ")";
+                }
+
+                @Override
+                public List<Arg<?>> getArgs() {
+                    return List.of(SafeArg.of("field", error.parameters().field()));
+                }
+            }
 
             @Override
             public String string(AuthHeader authHeader) {
