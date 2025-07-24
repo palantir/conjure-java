@@ -138,6 +138,15 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void test_new_errors() {
+        try {
+            client.string(AuthHeader.valueOf("authHeader"));
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(RuntimeException.class);
+        }
+    }
+
+    @Test
     public void client_can_retrieve_a_double_from_a_server() {
         assertThat(client.double_(AuthHeader.valueOf("authHeader"))).isEqualTo(1 / 3d);
     }
