@@ -1,13 +1,18 @@
 package errors.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -183,5 +188,55 @@ public final class ConjureErrors {
     public static boolean isInvalidTypeDefinition(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());
+    }
+
+    public static record InvalidServiceDefinitionParams(
+            @JsonProperty("serviceName") @Safe String serviceName,
+            @JsonProperty("serviceDef") @Unsafe Object serviceDef) {}
+
+    public static final class InvalidServiceDefinitionSerializableError
+            extends AbstractSerializableError<InvalidServiceDefinitionParams> {
+        private static String errorName;
+        private static String errorCode;
+        private static String errorInstanceId;
+        private static InvalidServiceDefinitionParams parameters;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        InvalidServiceDefinitionSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") InvalidServiceDefinitionParams parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public InvalidServiceDefinitionParams parameters() {
+            return parameters;
+        }
+
+        public SerializableError toSerializableError() {
+            return SerializableError.builder()
+                    .errorCode(errorCode)
+                    .errorName(errorName)
+                    .errorInstanceId(errorInstanceId)
+                    .putParameters("serviceName", Objects.toString(parameters.serviceName()))
+                    .putParameters("serviceDef", Objects.toString(parameters.serviceDef()))
+                    .build();
+        }
+    }
+
+    public static final class InvalidServiceDefinitionException extends RemoteException {
+        private InvalidServiceDefinitionSerializableError error;
+        private int status;
+
+        public InvalidServiceDefinitionException(InvalidServiceDefinitionSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public InvalidServiceDefinitionSerializableError error() {
+            return error;
+        }
     }
 }

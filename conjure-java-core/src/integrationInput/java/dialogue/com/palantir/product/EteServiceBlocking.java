@@ -1,9 +1,6 @@
 package dialogue.com.palantir.product;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.errorprone.annotations.MustBeClosed;
-import com.palantir.conjure.java.api.errors.AbstractRemoteException;
-import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
@@ -19,18 +16,14 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
-import com.palantir.logsafe.Arg;
-import com.palantir.logsafe.Safe;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.Unsafe;
-import com.palantir.logsafe.UnsafeArg;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import errors.com.palantir.product.ConjureErrors.InvalidServiceDefinitionException;
+import errors.com.palantir.product.ConjureErrors.InvalidServiceDefinitionSerializableError;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -408,75 +401,19 @@ public interface EteServiceBlocking {
                     .deserializer(DeserializerArgs.<String>builder()
                             .baseType(new TypeMarker<String>() {})
                             .success(new TypeMarker<String>() {})
-                            .error(
+                            .exception(
                                     "Conjure:InvalidServiceDefinition",
-                                    new TypeMarker<InvalidServiceDefinitionError>() {},
-                                    new TypeMarker<MyException>() {})
+                                    new TypeMarker<InvalidServiceDefinitionSerializableError>() {},
+                                    new TypeMarker<InvalidServiceDefinitionException>() {})
                             .build());
-
-            record InvalidServiceDefinitionParams(
-                    @Safe @JsonProperty("serviceName") String serviceName,
-                    @Unsafe @JsonProperty("serviceDef") Object serviceDef) {}
-
-            final class InvalidServiceDefinitionError
-                    extends AbstractSerializableError<InvalidServiceDefinitionParams> {
-                InvalidServiceDefinitionError(
-                        @JsonProperty("errorCode") String errorCode,
-                        @JsonProperty("errorName") String errorName,
-                        @JsonProperty("errorInstanceId") String errorInstanceId,
-                        @JsonProperty("parameters") InvalidServiceDefinitionParams parameters) {
-                    super(errorCode, errorName, errorInstanceId, parameters);
-                }
-
-                @Override
-                public Map<String, String> legacyParameters() {
-                    return Map.of(
-                            "serviceName",
-                            Objects.toString(parameters().serviceName()),
-                            "serviceDef",
-                            Objects.toString(parameters().serviceDef()));
-                }
-            }
-
-            class MyException extends RuntimeException
-                    implements AbstractRemoteException<InvalidServiceDefinitionError> {
-                private InvalidServiceDefinitionError error;
-                private int status;
-
-                public MyException(InvalidServiceDefinitionError error, int status) {
-                    this.error = error;
-                    this.status = status;
-                }
-
-                @Override
-                public InvalidServiceDefinitionError getError() {
-                    return error;
-                }
-
-                @Override
-                public int getStatus() {
-                    return status;
-                }
-
-                @Override
-                public String getLogMessage() {
-                    return error.errorCode().equals(error.errorName())
-                            ? "MyException" + error.errorCode()
-                            : "MyException:" + error.errorCode() + " (" + error.errorName() + ")";
-                }
-
-                @Override
-                public List<Arg<?>> getArgs() {
-                    return List.of(
-                            SafeArg.of("serviceName", error.parameters().serviceName()),
-                            UnsafeArg.of("serviceDef", error.parameters().serviceDef()));
-                }
-            }
 
             @Override
             public String string(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                // if the "use new errors" flag is set, set the header, and use the new deserializer
+                _request.putHeaderParams("Accept-Conjure-Error-Param-Type", "JSON");
+                // else, use the old deserializer
                 return _runtime.clients().callBlocking(stringChannel, _request.build(), myStringDeserializer);
             }
 

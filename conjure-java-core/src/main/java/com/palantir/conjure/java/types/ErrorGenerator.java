@@ -16,11 +16,15 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.AbstractRemoteException;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -33,13 +37,22 @@ import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.javapoet.WildcardTypeName;
+import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -154,7 +167,8 @@ public final class ErrorGenerator implements Generator {
                 })
                 .collect(Collectors.toList());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorTypesClassName(conjurePackage, namespace))
+        ClassName errorTypesClassName = errorTypesClassName(conjurePackage, namespace);
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorTypesClassName)
                 .addMethod(ErrorGenerationUtils.privateConstructor())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(generateErrorTypeFields(namespace, errorTypeDefinitions))
@@ -163,9 +177,12 @@ public final class ErrorGenerator implements Generator {
                 .addMethods(isRemoteExceptionDefinitions)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
 
-        if (options.generateDialogueEndpointErrorResultTypes()) {
-            typeBuilder.addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper));
-        }
+        // if (options.generateDialogueEndpointErrorResultTypes()) {
+        // Always generate the error parameter records.
+        typeBuilder.addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper));
+        generateSerializableErrors(errorTypeDefinitions, errorTypesClassName);
+        generateErrorExceptions(errorTypeDefinitions, errorTypesClassName);
+        // }
 
         return JavaFile.builder(conjurePackage, typeBuilder.build())
                 .skipJavaLangImports(true)
@@ -178,6 +195,169 @@ public final class ErrorGenerator implements Generator {
         return errorTypeDefinitions.stream()
                 .map(errorDefinition -> generateErrorParameterRecord(errorDefinition, typeMapper))
                 .toList();
+    }
+
+    private static List<TypeSpec> generateSerializableErrors(
+            List<ErrorDefinition> errorDefinitions, ClassName errorTypesClassName) {
+        return errorDefinitions.stream()
+                .map(errorDef -> generateSerializableError(errorDef, errorTypesClassName))
+                .toList();
+    }
+
+    private static List<TypeSpec> generateErrorExceptions(
+            List<ErrorDefinition> errorDefinitions, ClassName errorTypesClassName) {
+        return errorDefinitions.stream()
+                .map(errorDef -> generateErrorException(errorDef, errorTypesClassName))
+                .toList();
+    }
+
+    private static TypeSpec generateErrorException(ErrorDefinition errorDefinition, ClassName errorTypesClassName) {
+        String errorName = errorDefinition.getErrorName().getName();
+        String exceptionClassName = errorName + "Exception";
+        String serializableErrorClassName = ErrorGenerator.serializableErrorClassName(errorName);
+        ClassName errorType = errorTypesClassName.nestedClass(serializableErrorClassName);
+
+        // Constructor
+        MethodSpec constructor = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(errorType, "error")
+                .addParameter(TypeName.INT, "status")
+                .addStatement("this.$1N = $1N", "error")
+                .addStatement("this.$1N = $1N", "status")
+                .build();
+
+        // getError
+        MethodSpec getError = MethodSpec.methodBuilder("getError")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(errorType)
+                .addStatement("return $N", "error")
+                .build();
+
+        // getStatus
+        MethodSpec getStatus = MethodSpec.methodBuilder("getStatus")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.INT)
+                .addStatement("return $N", "status")
+                .build();
+
+        // getLogMessage
+        MethodSpec getLogMessage = MethodSpec.methodBuilder("getLogMessage")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addStatement(
+                        """
+                        return error.errorCode().equals(error.errorName())
+                               ? $S + error.errorCode()
+                               : $S + error.errorCode() + " (" + error.errorName() + ")"
+                        """,
+                        exceptionClassName + ":",
+                        exceptionClassName + ":")
+                .build();
+
+        // getArgs
+        CodeBlock.Builder argsBlock = CodeBlock.builder().add("return $T.of(", List.class);
+        for (FieldDefinition param : errorDefinition.getSafeArgs()) {
+            argsBlock.add(
+                    "$T.of($S, error.parameters().$L())",
+                    SafeArg.class,
+                    param.getFieldName().get(),
+                    param.getFieldName().get());
+        }
+        for (FieldDefinition param : errorDefinition.getUnsafeArgs()) {
+            argsBlock.add(
+                    "$T.of($S, error.parameters().$L())",
+                    UnsafeArg.class,
+                    param.getFieldName().get(),
+                    param.getFieldName().get());
+        }
+        argsBlock.add(");");
+
+        MethodSpec getArgs = MethodSpec.methodBuilder("getArgs")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(
+                        List.class,
+                        ParameterizedTypeName.get(ClassName.get(Arg.class), WildcardTypeName.subtypeOf(Object.class))
+                                .getClass()))
+                .addCode(argsBlock.build())
+                .build();
+
+        return TypeSpec.classBuilder(exceptionClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(AbstractRemoteException.class), errorType))
+                .superclass(RuntimeException.class)
+                .addField(
+                        FieldSpec.builder(errorType, "error", Modifier.PRIVATE).build())
+                .addField(FieldSpec.builder(TypeName.INT, "status", Modifier.PRIVATE)
+                        .build())
+                .addMethod(constructor)
+                .addMethod(getError)
+                .addMethod(getStatus)
+                .addMethod(getLogMessage)
+                .addMethod(getArgs)
+                .build();
+    }
+
+    private static TypeSpec generateSerializableError(ErrorDefinition errorDefinition, ClassName errorTypesClassName) {
+        ClassName parametersClassName = errorTypesClassName.nestedClass(ErrorGenerationUtils.errorParametersClassName(
+                errorDefinition.getErrorName().getName()));
+        MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
+                .addAnnotation(AnnotationSpec.builder(JsonCreator.class)
+                        .addMember("mode", "$T.$L", JsonCreator.Mode.class, JsonCreator.Mode.PROPERTIES)
+                        .build())
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorCode")
+                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                .addMember("value", "$S", "errorCode")
+                                .build())
+                        .addAnnotation(Safe.class)
+                        .build())
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "errorInstanceId")
+                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                .addMember("value", "$S", "errorInstanceId")
+                                .build())
+                        .addAnnotation(Safe.class)
+                        .build());
+
+        // This could be cleaner with streams. This is more efficient.
+        List<FieldDefinition> allParams =
+                new ArrayList<>(errorDefinition.getUnsafeArgs().size()
+                        + errorDefinition.getSafeArgs().size());
+        allParams.addAll(errorDefinition.getSafeArgs());
+        allParams.addAll(errorDefinition.getUnsafeArgs());
+
+        if (!allParams.isEmpty()) {
+            ctorBuilder.addParameter(ParameterSpec.builder(parametersClassName, "parameters")
+                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                            .addMember("value", "$S", "parameters")
+                            .build())
+                    .build());
+        }
+
+        MethodSpec.Builder legacyParams = MethodSpec.methodBuilder("legacyParameters")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(Map.class, String.class, String.class))
+                .addStatement(
+                        "return $T.of($L)",
+                        Map.class,
+                        allParams.stream()
+                                .map(param -> String.format(
+                                        "\"%s\", Objects.toString(parameters().%s())",
+                                        param.getFieldName().get(),
+                                        param.getFieldName().get()))
+                                .collect(Collectors.joining(", ")));
+
+        return TypeSpec.classBuilder(serializableErrorClassName(
+                        errorDefinition.getErrorName().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .superclass(
+                        ParameterizedTypeName.get(ClassName.get(AbstractSerializableError.class), parametersClassName))
+                .addMethod(ctorBuilder.build())
+                .addMethod(legacyParams.build())
+                .build();
     }
 
     private static TypeSpec generateErrorParameterRecord(ErrorDefinition errorDefinition, TypeMapper typeMapper) {
@@ -223,5 +403,9 @@ public final class ErrorGenerator implements Generator {
 
     static ClassName errorTypesClassName(String conjurePackage, ErrorNamespace namespace) {
         return ClassName.get(conjurePackage, ErrorGenerationUtils.errorTypesClassName(namespace));
+    }
+
+    static String serializableErrorClassName(String errorName) {
+        return errorName + "Error";
     }
 }

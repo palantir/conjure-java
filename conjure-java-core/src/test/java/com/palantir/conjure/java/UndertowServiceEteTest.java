@@ -43,6 +43,7 @@ import dialogue.com.palantir.product.EteServiceBlocking;
 import dialogue.com.palantir.product.NestedStringAliasExample;
 import dialogue.com.palantir.product.SimpleEnum;
 import dialogue.com.palantir.product.StringAliasExample;
+import errors.com.palantir.product.ConjureErrors.InvalidServiceDefinitionException;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -62,6 +63,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import jersey.com.palantir.product.EmptyPathService;
@@ -141,8 +143,23 @@ public final class UndertowServiceEteTest extends TestBase {
     public void test_new_errors() {
         try {
             client.string(AuthHeader.valueOf("authHeader"));
-        } catch (Exception e) {
-            assertThat(e).isInstanceOf(RuntimeException.class);
+        } catch (RemoteException e) {
+            assertThat(e.getError().parameters())
+                    .containsExactlyEntriesOf(Map.of("serviceName", "my-service", "serviceDef", "service-def"));
+            assertThat(e)
+                    .isInstanceOfSatisfying(
+                            InvalidServiceDefinitionException.class, invalidServiceDefinitionException -> {
+                                assertThat(invalidServiceDefinitionException
+                                                .error()
+                                                .parameters()
+                                                .serviceName())
+                                        .isEqualTo("my-service");
+                                assertThat(invalidServiceDefinitionException
+                                                .error()
+                                                .parameters()
+                                                .serviceDef())
+                                        .isEqualTo("service-def");
+                            });
         }
     }
 
