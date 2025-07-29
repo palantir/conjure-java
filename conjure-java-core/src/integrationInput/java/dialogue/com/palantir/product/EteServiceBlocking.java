@@ -194,9 +194,6 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
-            //            private final Deserializer<String> stringDeserializer =
-            //                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
-
             private final EndpointChannel integerChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.integer);
 
@@ -397,6 +394,9 @@ public interface EteServiceBlocking {
             private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
+            private final Deserializer<String> stringDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+
             private final Deserializer<String> myStringDeserializer = _runtime.bodySerDe()
                     .deserializer(DeserializerArgs.<String>builder()
                             .baseType(new TypeMarker<String>() {})
@@ -411,9 +411,9 @@ public interface EteServiceBlocking {
             public String string(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                // if the "use new errors" flag is set, set the header, and use the new deserializer
-                _request.putHeaderParams("Accept-Conjure-Error-Param-Type", "JSON");
-                // else, use the old deserializer
+                if (_runtime.bodySerDe().supportJsonErrorDeserialization()) {
+                   _request.putHeaderParams("Accept-Conjure-Error-Param-Type", "JSON");
+                }
                 return _runtime.clients().callBlocking(stringChannel, _request.build(), myStringDeserializer);
             }
 

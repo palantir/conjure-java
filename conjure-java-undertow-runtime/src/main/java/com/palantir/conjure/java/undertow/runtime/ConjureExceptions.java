@@ -71,6 +71,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             // Conjure.
             checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException serviceException) {
+            // Read header value of the accept-error format header
+            // if it's JSON
             serviceException(exchange, serviceException);
         } else if (throwable instanceof QosException qosException) {
             qosException(exchange, qosException);
