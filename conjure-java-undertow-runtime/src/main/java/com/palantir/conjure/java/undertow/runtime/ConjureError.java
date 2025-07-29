@@ -66,12 +66,7 @@ record ConjureError(
     }
 
     static ConjureError fromCheckedServiceException(CheckedServiceException exception) {
-        Map<String, Object> parameters = new HashMap<>();
-        for (Arg<?> arg : exception.getArgs()) {
-            if (shouldIncludeArgInParameters(arg)) {
-                parameters.put(arg.getName(), arg.getValue());
-            }
-        }
+        Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
         return new ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
@@ -80,12 +75,7 @@ record ConjureError(
     }
 
     static ConjureError fromEndpointServiceException(EndpointServiceException exception) {
-        Map<String, Object> parameters = new HashMap<>();
-        for (Arg<?> arg : exception.getArgs()) {
-            if (shouldIncludeArgInParameters(arg)) {
-                parameters.put(arg.getName(), arg.getValue());
-            }
-        }
+        Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
         return new ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
@@ -98,6 +88,12 @@ record ConjureError(
         for (Arg<?> arg : exception.getArgs()) {
             parameters.put(arg.getName(), Objects.toString(arg.getValue()));
         }
+        ErrorType errorType = exception.getErrorType();
+        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
+    }
+
+    static ConjureError fromServiceExceptionWithJsonParameters(ServiceException exception) {
+        Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
         ErrorType errorType = exception.getErrorType();
         return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
     }
@@ -121,5 +117,15 @@ record ConjureError(
                 && (!(obj instanceof OptionalInt optionalInt) || optionalInt.isPresent())
                 && (!(obj instanceof OptionalLong optionalLong) || optionalLong.isPresent())
                 && (!(obj instanceof OptionalDouble optionalDouble) || optionalDouble.isPresent());
+    }
+
+    private static Map<String, Object> getParametersFromArgs(Iterable<Arg<?>> args) {
+        Map<String, Object> parameters = new HashMap<>();
+        for (Arg<?> arg : args) {
+            if (shouldIncludeArgInParameters(arg)) {
+                parameters.put(arg.getName(), arg.getValue());
+            }
+        }
+        return parameters;
     }
 }
