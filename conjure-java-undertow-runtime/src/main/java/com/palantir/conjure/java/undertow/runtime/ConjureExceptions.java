@@ -122,15 +122,24 @@ public enum ConjureExceptions implements ExceptionHandler {
         Optional<ConjureErrorParameterFormat> maybeErrorParamFormatHeader =
                 ConjureErrorParameterFormats.parseFromRequest(
                         exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
-        ConjureError conjureError;
-        if (maybeErrorParamFormatHeader.isPresent()
-                && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT)) {
-            logWithSerializationFormat(exception, true);
-            conjureError = ConjureError.fromServiceExceptionWithJsonParameters(exception);
-        } else {
-            logWithSerializationFormat(exception, false);
-            conjureError = ConjureError.fromServiceException(exception);
+
+        boolean isHeaderPresent = maybeErrorParamFormatHeader.isPresent();
+        boolean isJsonErrorParameterValueFormat =
+                isHeaderPresent && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT);
+
+        // Log unrecognized format if present but not JSON
+        if (isHeaderPresent && !isJsonErrorParameterValueFormat) {
+            log.info(
+                    "Unrecognized Conjure error parameter format header",
+                    SafeArg.of("headerValue", maybeErrorParamFormatHeader.get()));
         }
+
+        // Use the appropriate serialization based on format
+        logWithSerializationFormat(exception, isJsonErrorParameterValueFormat);
+        ConjureError conjureError = isJsonErrorParameterValueFormat
+                ? ConjureError.fromServiceExceptionWithJsonSerializedParameterValues(exception)
+                : ConjureError.fromServiceException(exception);
+
         writeResponse(
                 exchange, Optional.of(conjureError), exception.getErrorType().httpErrorCode());
     }
@@ -139,8 +148,8 @@ public enum ConjureExceptions implements ExceptionHandler {
         INSTANCE;
 
         @Override
-        public String getFirstHeader(HeaderMap response, String headerName) {
-            return response.getFirst(headerName);
+        public String getFirstHeader(HeaderMap requestHeaderMap, String headerName) {
+            return requestHeaderMap.getFirst(headerName);
         }
     }
 
@@ -346,10 +355,6 @@ public enum ConjureExceptions implements ExceptionHandler {
                             "errorName", endpointServiceException.getErrorType().name()),
                     endpointServiceException);
         }
-    }
-
-    private static void log(ServiceException exception) {
-        log(exception, exception);
     }
 
     private static void setFailure(HttpServerExchange exchange, Throwable failure) {
