@@ -64,6 +64,15 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
+    private enum ConjureErrorParamsDecoder implements ConjureErrorParameterFormatRequestDecodingAdapter<HeaderMap> {
+        INSTANCE;
+
+        @Override
+        public String getFirstHeader(HeaderMap response, String headerName) {
+            return response.getFirst(headerName);
+        }
+    }
+
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
@@ -75,7 +84,13 @@ public enum ConjureExceptions implements ExceptionHandler {
             // Conjure.
             checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException serviceException) {
-            serviceException(exchange, serviceException);
+            Optional<ConjureErrorParameterFormat> maybeErrorParamFormatHeader = ConjureErrorParameterFormats.parseFromRequest(exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
+            if ( maybeErrorParamFormatHeader.isPresent()
+                    && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT)) {
+                serviceExceptionWithJsonParameterValues(exchange, serviceException);
+            } else {
+                serviceException(exchange, serviceException);
+            }
         } else if (throwable instanceof QosException qosException) {
             qosException(exchange, qosException);
         } else if (throwable instanceof RemoteException remoteException) {
@@ -154,6 +169,14 @@ public enum ConjureExceptions implements ExceptionHandler {
         public String getFirstHeader(HeaderMap requestHeaderMap, String headerName) {
             return requestHeaderMap.getFirst(headerName);
         }
+    }
+
+    private static void serviceExceptionWithJsonParameterValues(HttpServerExchange exchange, ServiceException exception) {
+        log(exception);
+        writeResponse(
+                exchange,
+                Optional.of(ConjureError.fromServiceExceptionWithJsonParameters(exception)),
+                exception.getErrorType().httpErrorCode());
     }
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
