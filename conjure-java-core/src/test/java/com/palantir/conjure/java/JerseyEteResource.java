@@ -174,6 +174,11 @@ public class JerseyEteResource implements EteService {
     }
 
     @Override
+    public String jsonErrorsHeader(AuthHeader authHeader, String _headerParameter) {
+        return "hello!";
+    }
+
+    @Override
     public Optional<LongAlias> aliasLongEndpoint(AuthHeader _authHeader, Optional<LongAlias> input) {
         return input;
     }
