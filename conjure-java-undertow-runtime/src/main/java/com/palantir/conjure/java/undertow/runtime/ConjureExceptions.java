@@ -18,6 +18,9 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats.ConjureErrorParameterFormatRequestDecodingAdapter;
 import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
@@ -35,6 +38,7 @@ import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 import java.io.IOException;
@@ -60,6 +64,15 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
+    private enum ConjureErrorParamsDecoder implements ConjureErrorParameterFormatRequestDecodingAdapter<HeaderMap> {
+        INSTANCE;
+
+        @Override
+        public String getFirstHeader(HeaderMap response, String headerName) {
+            return response.getFirst(headerName);
+        }
+    }
+
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
@@ -71,7 +84,13 @@ public enum ConjureExceptions implements ExceptionHandler {
             // Conjure.
             checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException serviceException) {
-            serviceException(exchange, serviceException);
+            Optional<ConjureErrorParameterFormat> maybeErrorParamFormatHeader = ConjureErrorParameterFormats.parseFromRequest(exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
+            if ( maybeErrorParamFormatHeader.isPresent()
+                    && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT)) {
+                serviceExceptionWithJsonParameterValues(exchange, serviceException);
+            } else {
+                serviceException(exchange, serviceException);
+            }
         } else if (throwable instanceof QosException qosException) {
             qosException(exchange, qosException);
         } else if (throwable instanceof RemoteException remoteException) {
@@ -119,6 +138,14 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(
                 exchange,
                 Optional.of(ConjureError.fromServiceException(exception)),
+                exception.getErrorType().httpErrorCode());
+    }
+
+    private static void serviceExceptionWithJsonParameterValues(HttpServerExchange exchange, ServiceException exception) {
+        log(exception);
+        writeResponse(
+                exchange,
+                Optional.of(ConjureError.fromServiceExceptionWithJsonParameters(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
