@@ -200,6 +200,17 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Custom-Header") SimpleEnum headerParameter);
 
+    /**
+     * This endpoint is used to test that the <code>Accept-Conjure-Error-Parameter-Format</code> header is respected.
+     * Specifically, that error parameters are serialized as JSON when the header is set to <code>JSON</code>.
+     */
+    @GET
+    @Path("base/errors/header")
+    @ClientEndpoint(method = "GET", path = "/base/errors/header")
+    String jsonErrorsHeader(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
+
     @GET
     @Path("base/alias-long")
     @ClientEndpoint(method = "GET", path = "/base/alias-long")

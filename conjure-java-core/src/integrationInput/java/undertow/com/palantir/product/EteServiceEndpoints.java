@@ -72,6 +72,7 @@ public final class EteServiceEndpoints implements UndertowService {
                 new EnumListQueryEndpoint(runtime, delegate),
                 new OptionalEnumQueryEndpoint(runtime, delegate),
                 new EnumHeaderEndpoint(runtime, delegate),
+                new JsonErrorsHeaderEndpoint(runtime, delegate),
                 new AliasLongEndpointEndpoint(runtime, delegate),
                 new ComplexQueryParametersEndpoint(runtime, delegate),
                 new ReceiveListOfOptionalsEndpoint(runtime, delegate),
@@ -1366,6 +1367,55 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "enumHeader";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class JsonErrorsHeaderEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Serializer<String> serializer;
+
+        JsonErrorsHeaderEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            HeaderMap headerParams = exchange.getRequestHeaders();
+            String headerParameter =
+                    runtime.plainSerDe().deserializeString(headerParams.get("Accept-Conjure-Error-Parameter-Format"));
+            String result = delegate.jsonErrorsHeader(authHeader, headerParameter);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/errors/header";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "jsonErrorsHeader";
         }
 
         @Override
