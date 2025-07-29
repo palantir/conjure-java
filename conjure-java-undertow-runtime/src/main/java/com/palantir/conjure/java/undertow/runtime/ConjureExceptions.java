@@ -124,8 +124,11 @@ public enum ConjureExceptions implements ExceptionHandler {
                         exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
 
         boolean isHeaderPresent = maybeErrorParamFormatHeader.isPresent();
-        boolean isJsonErrorParameterValueFormat =
-                isHeaderPresent && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT);
+        boolean isJsonErrorParameterValueFormat = isHeaderPresent
+                && maybeErrorParamFormatHeader
+                        .get()
+                        .toString()
+                        .equalsIgnoreCase(ConjureErrorParameterFormat.JSON_FORMAT.toString());
 
         // Log unrecognized format if present but not JSON
         if (isHeaderPresent && !isJsonErrorParameterValueFormat) {
