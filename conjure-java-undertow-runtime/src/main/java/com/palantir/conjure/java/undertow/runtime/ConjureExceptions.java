@@ -64,15 +64,6 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
-    private enum ConjureErrorParamsDecoder implements ConjureErrorParameterFormatRequestDecodingAdapter<HeaderMap> {
-        INSTANCE;
-
-        @Override
-        public String getFirstHeader(HeaderMap response, String headerName) {
-            return response.getFirst(headerName);
-        }
-    }
-
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
@@ -84,13 +75,7 @@ public enum ConjureExceptions implements ExceptionHandler {
             // Conjure.
             checkedServiceException(exchange, checkedServiceException);
         } else if (throwable instanceof ServiceException serviceException) {
-            Optional<ConjureErrorParameterFormat> maybeErrorParamFormatHeader = ConjureErrorParameterFormats.parseFromRequest(exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
-            if ( maybeErrorParamFormatHeader.isPresent()
-                    && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT)) {
-                serviceExceptionWithJsonParameterValues(exchange, serviceException);
-            } else {
-                serviceException(exchange, serviceException);
-            }
+            serviceException(exchange, serviceException);
         } else if (throwable instanceof QosException qosException) {
             qosException(exchange, qosException);
         } else if (throwable instanceof RemoteException remoteException) {
@@ -134,19 +119,29 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
-        log(exception);
+        Optional<ConjureErrorParameterFormat> maybeErrorParamFormatHeader =
+                ConjureErrorParameterFormats.parseFromRequest(
+                        exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
+        ConjureError conjureError;
+        if (maybeErrorParamFormatHeader.isPresent()
+                && maybeErrorParamFormatHeader.get().equals(ConjureErrorParameterFormat.JSON_FORMAT)) {
+            logWithSerializationFormat(exception, true);
+            conjureError = ConjureError.fromServiceExceptionWithJsonParameters(exception);
+        } else {
+            logWithSerializationFormat(exception, false);
+            conjureError = ConjureError.fromServiceException(exception);
+        }
         writeResponse(
-                exchange,
-                Optional.of(ConjureError.fromServiceException(exception)),
-                exception.getErrorType().httpErrorCode());
+                exchange, Optional.of(conjureError), exception.getErrorType().httpErrorCode());
     }
 
-    private static void serviceExceptionWithJsonParameterValues(HttpServerExchange exchange, ServiceException exception) {
-        log(exception);
-        writeResponse(
-                exchange,
-                Optional.of(ConjureError.fromServiceExceptionWithJsonParameters(exception)),
-                exception.getErrorType().httpErrorCode());
+    private enum ConjureErrorParamsDecoder implements ConjureErrorParameterFormatRequestDecodingAdapter<HeaderMap> {
+        INSTANCE;
+
+        @Override
+        public String getFirstHeader(HeaderMap response, String headerName) {
+            return response.getFirst(headerName);
+        }
     }
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
@@ -280,6 +275,25 @@ public enum ConjureExceptions implements ExceptionHandler {
             undertowOutputStream.resetBuffer();
         }
         return false;
+    }
+
+    private static void logWithSerializationFormat(
+            ServiceException serviceException, boolean isUsingJsonSerializationForParameters) {
+        if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+            log.info(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                    SafeArg.of("errorName", serviceException.getErrorType().name()),
+                    SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
+                    serviceException);
+        } else {
+            log.error(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                    SafeArg.of("errorName", serviceException.getErrorType().name()),
+                    SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
+                    serviceException);
+        }
     }
 
     private static void log(ServiceException serviceException, Throwable exceptionForLogging) {

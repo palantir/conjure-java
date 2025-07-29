@@ -551,15 +551,17 @@ public final class UndertowServiceEteTest extends TestBase {
         try {
             client.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
         } catch (RemoteException e) {
-            assertThat(e.getError().parameters()).containsExactlyInAnyOrderEntriesOf(Map.of("serviceName", "my-service-string",
-                    "serviceDef", SimpleEnum.VALUE.toString()));
+            assertThat(e.getError().parameters())
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
         }
 
         try {
             client.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING");
         } catch (RemoteException e) {
-            assertThat(e.getError().parameters()).containsExactlyInAnyOrderEntriesOf(Map.of("serviceName", "my-service-string",
-                    "serviceDef", "Optional[VALUE]"));
+            assertThat(e.getError().parameters())
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]"));
         }
     }
 
