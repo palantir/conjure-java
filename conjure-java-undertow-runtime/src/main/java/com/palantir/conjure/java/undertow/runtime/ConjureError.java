@@ -92,12 +92,6 @@ record ConjureError(
         return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
     }
 
-    static ConjureError fromServiceExceptionWithJsonParameters(ServiceException exception) {
-        Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
-        ErrorType errorType = exception.getErrorType();
-        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
-    }
-
     /**
      * Creates a {@link ConjureError} from a {@link ServiceException} where the parameter values are serialized as JSON.
      * Currently, this should only be used when clients send a request with a custom header specifying the parameter
