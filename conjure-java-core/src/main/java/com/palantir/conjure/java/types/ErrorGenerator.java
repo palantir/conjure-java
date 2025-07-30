@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.api.errors.AbstractRemoteException;
 import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -287,8 +286,7 @@ public final class ErrorGenerator implements Generator {
 
         return TypeSpec.classBuilder(exceptionClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(AbstractRemoteException.class), errorType))
-                .superclass(RuntimeException.class)
+                .superclass(RemoteException.class)
                 .addField(
                         FieldSpec.builder(errorType, "error", Modifier.PRIVATE).build())
                 .addField(FieldSpec.builder(TypeName.INT, "status", Modifier.PRIVATE)

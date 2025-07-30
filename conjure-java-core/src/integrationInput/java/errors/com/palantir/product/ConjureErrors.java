@@ -196,11 +196,6 @@ public final class ConjureErrors {
 
     public static final class InvalidServiceDefinitionSerializableError
             extends AbstractSerializableError<InvalidServiceDefinitionParams> {
-        private static String errorName;
-        private static String errorCode;
-        private static String errorInstanceId;
-        private static InvalidServiceDefinitionParams parameters;
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         InvalidServiceDefinitionSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -210,17 +205,15 @@ public final class ConjureErrors {
             super(errorCode, errorName, errorInstanceId, parameters);
         }
 
-        public InvalidServiceDefinitionParams parameters() {
-            return parameters;
-        }
-
         public SerializableError toSerializableError() {
             return SerializableError.builder()
-                    .errorCode(errorCode)
-                    .errorName(errorName)
-                    .errorInstanceId(errorInstanceId)
-                    .putParameters("serviceName", Objects.toString(parameters.serviceName()))
-                    .putParameters("serviceDef", Objects.toString(parameters.serviceDef()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .putParameters(
+                            "serviceName", Objects.toString(errorParameters().serviceName()))
+                    .putParameters(
+                            "serviceDef", Objects.toString(errorParameters().serviceDef()))
                     .build();
         }
     }

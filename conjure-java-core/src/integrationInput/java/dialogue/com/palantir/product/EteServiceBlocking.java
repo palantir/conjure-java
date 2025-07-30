@@ -1,6 +1,9 @@
 package dialogue.com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats.ConjureErrorParameterFormatRequestEncodingAdapter;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
@@ -394,10 +397,7 @@ public interface EteServiceBlocking {
             private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
-            private final Deserializer<String> stringDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
-
-            private final Deserializer<String> myStringDeserializer = _runtime.bodySerDe()
+            private final Deserializer<String> stringDeserializer = _runtime.bodySerDe()
                     .deserializer(DeserializerArgs.<String>builder()
                             .baseType(new TypeMarker<String>() {})
                             .success(new TypeMarker<String>() {})
@@ -407,14 +407,25 @@ public interface EteServiceBlocking {
                                     new TypeMarker<InvalidServiceDefinitionException>() {})
                             .build());
 
+            private static enum ConjureErrorParameterEncoder
+                    implements ConjureErrorParameterFormatRequestEncodingAdapter<Request.Builder> {
+                INSTANCE;
+
+                @Override
+                public void setHeader(Request.Builder request, String headerName, String headerValue) {
+                    request.putHeaderParams(headerName, headerValue);
+                }
+            }
+
             @Override
             public String string(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 if (_runtime.bodySerDe().supportJsonErrorDeserialization()) {
-                   _request.putHeaderParams("Accept-Conjure-Error-Param-Type", "JSON");
+                    ConjureErrorParameterFormats.encodeToRequest(
+                            ConjureErrorParameterFormat.JSON_FORMAT, _request, ConjureErrorParameterEncoder.INSTANCE);
                 }
-                return _runtime.clients().callBlocking(stringChannel, _request.build(), myStringDeserializer);
+                return _runtime.clients().callBlocking(stringChannel, _request.build(), stringDeserializer);
             }
 
             @Override

@@ -140,23 +140,24 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void test_new_errors() {
+    public void test_json_parameter_errors() {
         try {
             client.string(AuthHeader.valueOf("authHeader"));
         } catch (RemoteException e) {
             assertThat(e.getError().parameters())
-                    .containsExactlyEntriesOf(Map.of("serviceName", "my-service", "serviceDef", "service-def"));
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service", "serviceDef", "service-def"));
             assertThat(e)
                     .isInstanceOfSatisfying(
                             InvalidServiceDefinitionException.class, invalidServiceDefinitionException -> {
                                 assertThat(invalidServiceDefinitionException
                                                 .error()
-                                                .parameters()
+                                                .errorParameters()
                                                 .serviceName())
                                         .isEqualTo("my-service");
                                 assertThat(invalidServiceDefinitionException
                                                 .error()
-                                                .parameters()
+                                                .errorParameters()
                                                 .serviceDef())
                                         .isEqualTo("service-def");
                             });
