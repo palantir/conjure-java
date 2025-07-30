@@ -1,6 +1,29 @@
 types:
+  imports:
+    Long:
+      base-type: string
+      external:
+        java: java.lang.Long
   definitions:
     default-package: com.palantir.product
+    objects:
+      StringExample:
+        fields:
+          string: string
+      CollectionExample:
+        fields:
+          strings: list<string>
+          map: map<string, StringExample>
+          set: set<string>
+      OptionalExample:
+        alias: optional<string>
+        safety: safe
+      OptionalCollectionExample:
+        alias: optional<map<string, any>>
+      EnumExample:
+        values:
+          - A
+          - B
     errors:
       InvalidTypeDefinition:
         namespace: Conjure
@@ -45,3 +68,14 @@ types:
         unsafe-args:
           cause: string
           shouldThrow: boolean
+      ErrorWithComplexArgs:
+        namespace: Conjure
+        docs: Error with complex arguments.
+        code: INTERNAL
+        safe-args:
+          stringExample: StringExample
+          primitive: Long
+          collectionExample: CollectionExample
+          optionalExample: OptionalExample
+          optionalCollectionExample: OptionalCollectionExample
+          enumExample: EnumExample

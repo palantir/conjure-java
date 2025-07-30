@@ -41,4 +41,6 @@ public final class ConjureErrors {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return DIFFERENT_PACKAGE.name().equals(remoteException.getError().errorName());
     }
+
+    public static record DifferentPackageParameters() {}
 }

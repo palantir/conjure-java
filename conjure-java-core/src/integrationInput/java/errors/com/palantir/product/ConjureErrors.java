@@ -27,6 +27,10 @@ public final class ConjureErrors {
     public static final ErrorType CONFLICTING_CAUSE_UNSAFE_ARG =
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseUnsafeArg");
 
+    /** Error with complex arguments. */
+    public static final ErrorType ERROR_WITH_COMPLEX_ARGS =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ErrorWithComplexArgs");
+
     /** Invalid Conjure service definition. */
     public static final ErrorType INVALID_SERVICE_DEFINITION =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidServiceDefinition");
@@ -63,6 +67,42 @@ public final class ConjureErrors {
                 cause,
                 UnsafeArg.of("cause", cause_),
                 UnsafeArg.of("shouldThrow", shouldThrow_));
+    }
+
+    public static ServiceException errorWithComplexArgs(
+            @Safe StringExample stringExample,
+            @Safe long primitive,
+            @Safe CollectionExample collectionExample,
+            @Safe OptionalExample optionalExample,
+            @Safe OptionalCollectionExample optionalCollectionExample,
+            @Safe EnumExample enumExample) {
+        return new ServiceException(
+                ERROR_WITH_COMPLEX_ARGS,
+                SafeArg.of("stringExample", stringExample),
+                SafeArg.of("primitive", primitive),
+                SafeArg.of("collectionExample", collectionExample),
+                SafeArg.of("optionalExample", optionalExample),
+                SafeArg.of("optionalCollectionExample", optionalCollectionExample),
+                SafeArg.of("enumExample", enumExample));
+    }
+
+    public static ServiceException errorWithComplexArgs(
+            @Nullable Throwable cause,
+            @Safe StringExample stringExample,
+            @Safe long primitive,
+            @Safe CollectionExample collectionExample,
+            @Safe OptionalExample optionalExample,
+            @Safe OptionalCollectionExample optionalCollectionExample,
+            @Safe EnumExample enumExample) {
+        return new ServiceException(
+                ERROR_WITH_COMPLEX_ARGS,
+                cause,
+                SafeArg.of("stringExample", stringExample),
+                SafeArg.of("primitive", primitive),
+                SafeArg.of("collectionExample", collectionExample),
+                SafeArg.of("optionalExample", optionalExample),
+                SafeArg.of("optionalCollectionExample", optionalCollectionExample),
+                SafeArg.of("enumExample", enumExample));
     }
 
     /**
@@ -131,6 +171,37 @@ public final class ConjureErrors {
     }
 
     /**
+     * Throws a {@link ServiceException} of type ErrorWithComplexArgs when {@code shouldThrow} is true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     * @param stringExample
+     * @param primitive
+     * @param collectionExample
+     * @param optionalExample
+     * @param optionalCollectionExample
+     * @param enumExample
+     */
+    @Contract("true, _, _, _, _, _, _ -> fail")
+    public static void throwIfErrorWithComplexArgs(
+            boolean shouldThrow,
+            @Safe StringExample stringExample,
+            @Safe long primitive,
+            @Safe CollectionExample collectionExample,
+            @Safe OptionalExample optionalExample,
+            @Safe OptionalCollectionExample optionalCollectionExample,
+            @Safe EnumExample enumExample) {
+        if (shouldThrow) {
+            throw errorWithComplexArgs(
+                    stringExample,
+                    primitive,
+                    collectionExample,
+                    optionalExample,
+                    optionalCollectionExample,
+                    enumExample);
+        }
+    }
+
+    /**
      * Throws a {@link ServiceException} of type InvalidServiceDefinition when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
@@ -176,6 +247,12 @@ public final class ConjureErrors {
                 .equals(remoteException.getError().errorName());
     }
 
+    /** Returns true if the {@link RemoteException} is named Conjure:ErrorWithComplexArgs */
+    public static boolean isErrorWithComplexArgs(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return ERROR_WITH_COMPLEX_ARGS.name().equals(remoteException.getError().errorName());
+    }
+
     /** Returns true if the {@link RemoteException} is named Conjure:InvalidServiceDefinition */
     public static boolean isInvalidServiceDefinition(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
@@ -190,18 +267,39 @@ public final class ConjureErrors {
         return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());
     }
 
-    public static record InvalidServiceDefinitionParams(
+    public static record ConflictingCauseSafeArgParameters(
+            @JsonProperty("cause") @Safe String cause_, @JsonProperty("shouldThrow") @Safe boolean shouldThrow_) {}
+
+    public static record ConflictingCauseUnsafeArgParameters(
+            @JsonProperty("cause") @Unsafe String cause_, @JsonProperty("shouldThrow") @Unsafe boolean shouldThrow_) {}
+
+    public static record ErrorWithComplexArgsParameters(
+            @JsonProperty("stringExample") @Safe StringExample stringExample,
+            @JsonProperty("primitive") @Safe long primitive,
+            @JsonProperty("collectionExample") @Safe CollectionExample collectionExample,
+            @JsonProperty("optionalExample") @Safe OptionalExample optionalExample,
+            @JsonProperty("optionalCollectionExample") @Safe OptionalCollectionExample optionalCollectionExample,
+            @JsonProperty("enumExample") @Safe EnumExample enumExample) {}
+
+    /**
+     * @param serviceName Name of the invalid service definition.
+     * @param serviceDef Details of the invalid service definition.
+     */
+    public static record InvalidServiceDefinitionParameters(
             @JsonProperty("serviceName") @Safe String serviceName,
             @JsonProperty("serviceDef") @Unsafe Object serviceDef) {}
 
-    public static final class InvalidServiceDefinitionSerializableError
-            extends AbstractSerializableError<InvalidServiceDefinitionParams> {
+    public static record InvalidTypeDefinitionParameters(
+            @JsonProperty("typeName") @Safe String typeName, @JsonProperty("typeDef") @Unsafe Object typeDef) {}
+
+    public static final class ErrorWithComplexArgsSerializableError
+            extends AbstractSerializableError<ErrorWithComplexArgsParameters> {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        InvalidServiceDefinitionSerializableError(
+        ErrorWithComplexArgsSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") InvalidServiceDefinitionParams parameters) {
+                @JsonProperty("parameters") ErrorWithComplexArgsParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
         }
 
@@ -211,24 +309,34 @@ public final class ConjureErrors {
                     .errorName(errorName())
                     .errorInstanceId(errorInstanceId())
                     .putParameters(
-                            "serviceName", Objects.toString(errorParameters().serviceName()))
+                            "stringExample", Objects.toString(errorParameters().stringExample()))
+                    .putParameters("primitive", Objects.toString(errorParameters().primitive))
                     .putParameters(
-                            "serviceDef", Objects.toString(errorParameters().serviceDef()))
+                            "collectionExample",
+                            Objects.toString(errorParameters().collectionExample()))
+                    .putParameters(
+                            "optionalExample",
+                            Objects.toString(errorParameters().optionalExample()))
+                    .putParameters(
+                            "optionalCollectionExample",
+                            Objects.toString(errorParameters().optionalCollectionExample()))
+                    .putParameters(
+                            "enumExample", Objects.toString(errorParameters().enumExample()))
                     .build();
         }
     }
 
-    public static final class InvalidServiceDefinitionException extends RemoteException {
-        private InvalidServiceDefinitionSerializableError error;
+    public static final class ErrorWithComplexArgsException extends RemoteException {
+        private ErrorWithComplexArgsSerializableError error;
         private int status;
 
-        public InvalidServiceDefinitionException(InvalidServiceDefinitionSerializableError error, int status) {
+        public ErrorWithComplexArgsException(ErrorWithComplexArgsSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
             this.status = status;
         }
 
-        public InvalidServiceDefinitionSerializableError error() {
+        public ErrorWithComplexArgsSerializableError error() {
             return error;
         }
     }

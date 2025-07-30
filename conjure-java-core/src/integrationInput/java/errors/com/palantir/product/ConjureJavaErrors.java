@@ -41,4 +41,6 @@ public final class ConjureJavaErrors {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return JAVA_COMPILATION_FAILED.name().equals(remoteException.getError().errorName());
     }
+
+    public static record JavaCompilationFailedParameters() {}
 }

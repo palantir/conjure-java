@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
+import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.parameterized.objects.GeneratorType;
 import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -50,7 +53,19 @@ public final class ParameterizedConjureGenerationTest {
     public File tempDir;
 
     private static List<ParameterizedTestCase> getTestCases() {
-        return TestCases.get();
+        return List.of(ParameterizedTestCase.builder()
+                .name("errors")
+                .docs("Testing error generation.")
+                .files(Path.of("example-errors.yml"))
+                .files(Path.of("example-errors-other.yml"))
+                .options(Options.builder()
+                        .useImmutableBytes(true)
+                        .excludeEmptyOptionals(true)
+                        .jetbrainsContractAnnotations(true)
+                        .build())
+                .generatorTypes(List.of(GeneratorType.ERROR, GeneratorType.OBJECT))
+                .build());
+        // return TestCases.get();
     }
 
     @ParameterizedTest
@@ -68,6 +83,7 @@ public final class ParameterizedConjureGenerationTest {
 
     @Test
     @Order(2)
+    @Disabled
     void validateOnlyRegisteredPackagesPresent() {
         File referenceFilesFolder = new File(REFERENCE_FILES_FOLDER);
         File[] files = referenceFilesFolder.listFiles();

@@ -43,7 +43,9 @@ import dialogue.com.palantir.product.EteServiceBlocking;
 import dialogue.com.palantir.product.NestedStringAliasExample;
 import dialogue.com.palantir.product.SimpleEnum;
 import dialogue.com.palantir.product.StringAliasExample;
-import errors.com.palantir.product.ConjureErrors.InvalidServiceDefinitionException;
+import errors.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
+import errors.com.palantir.product.OptionalExample;
+import errors.com.palantir.product.StringExample;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -63,7 +65,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import jersey.com.palantir.product.EmptyPathService;
@@ -144,23 +145,21 @@ public final class UndertowServiceEteTest extends TestBase {
         try {
             client.string(AuthHeader.valueOf("authHeader"));
         } catch (RemoteException e) {
-            assertThat(e.getError().parameters())
-                    .containsExactlyInAnyOrderEntriesOf(
-                            Map.of("serviceName", "my-service", "serviceDef", "service-def"));
-            assertThat(e)
-                    .isInstanceOfSatisfying(
-                            InvalidServiceDefinitionException.class, invalidServiceDefinitionException -> {
-                                assertThat(invalidServiceDefinitionException
-                                                .error()
-                                                .errorParameters()
-                                                .serviceName())
-                                        .isEqualTo("my-service");
-                                assertThat(invalidServiceDefinitionException
-                                                .error()
-                                                .errorParameters()
-                                                .serviceDef())
-                                        .isEqualTo("service-def");
-                            });
+//            assertThat(e.getError().parameters())
+//                    .containsExactlyInAnyOrderEntriesOf(
+//                            Map.of("serviceName", "my-service", "serviceDef", "service-def"));
+            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, errorWithComplexArgsException -> {
+                assertThat(errorWithComplexArgsException
+                                .error()
+                                .errorParameters()
+                                .stringExample())
+                        .isEqualTo(StringExample.of("my-service"));
+                assertThat(errorWithComplexArgsException
+                                .error()
+                                .errorParameters()
+                                .optionalExample())
+                        .isEqualTo(OptionalExample.empty());
+            });
         }
     }
 

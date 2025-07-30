@@ -22,8 +22,6 @@ import com.palantir.dialogue.TypeMarker;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import errors.com.palantir.product.ConjureErrors.InvalidServiceDefinitionException;
-import errors.com.palantir.product.ConjureErrors.InvalidServiceDefinitionSerializableError;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -401,10 +399,10 @@ public interface EteServiceBlocking {
                     .deserializer(DeserializerArgs.<String>builder()
                             .baseType(new TypeMarker<String>() {})
                             .success(new TypeMarker<String>() {})
-                            .exception(
-                                    "Conjure:InvalidServiceDefinition",
-                                    new TypeMarker<InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<InvalidServiceDefinitionException>() {})
+//                            .exception(
+//                                    "Conjure:ErrorWithComplexArgs",
+//                                    new TypeMarker<ErrorWithComplexArgsSerializableError>() {},
+//                                    new TypeMarker<ErrorWithComplexArgsException>() {})
                             .build());
 
             private static enum ConjureErrorParameterEncoder

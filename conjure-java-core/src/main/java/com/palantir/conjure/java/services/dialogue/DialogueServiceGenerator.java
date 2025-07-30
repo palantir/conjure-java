@@ -87,20 +87,6 @@ public final class DialogueServiceGenerator implements Generator {
                 new ReturnTypeMapper(returnTypes),
                 StaticFactoryMethodType.BLOCKING);
 
-        StaticFactoryMethodGenerator asyncWithErrorsGenerator = new DefaultStaticFactoryMethodGenerator(
-                options,
-                typeNameResolver,
-                parameterMapper,
-                new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.ASYNC_WITH_ERRORS);
-
-        StaticFactoryMethodGenerator blockingWithErrorsGenerator = new DefaultStaticFactoryMethodGenerator(
-                options,
-                typeNameResolver,
-                parameterMapper,
-                new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.BLOCKING_WITH_ERRORS);
-
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateFilesForService(
                         options.excludeDialogueAsyncInterfaces(),
@@ -109,8 +95,6 @@ public final class DialogueServiceGenerator implements Generator {
                         endpoints,
                         interfaceGenerator,
                         blockingGenerator,
-                        blockingWithErrorsGenerator,
-                        asyncWithErrorsGenerator,
                         asyncGenerator));
     }
 
@@ -121,22 +105,16 @@ public final class DialogueServiceGenerator implements Generator {
             DialogueEndpointsGenerator endpointsGenerator,
             DialogueInterfaceGenerator interfaceGenerator,
             StaticFactoryMethodGenerator blockingGenerator,
-            StaticFactoryMethodGenerator blockingWithErrorsGenerator,
-            StaticFactoryMethodGenerator asyncGenerator,
-            StaticFactoryMethodGenerator asyncWithErrorsGenerator) {
+            StaticFactoryMethodGenerator asyncGenerator) {
         List<JavaFile> files = new ArrayList<>(/* initialCapacity= */ 5);
         if (!serviceDef.getEndpoints().isEmpty()) {
             files.add(endpointsGenerator.endpointsClass(serviceDef));
         }
         files.add(interfaceGenerator.generateBlocking(
                 serviceDef, blockingGenerator, generateDialogueEndpointErrorResultTypes));
-        files.add(interfaceGenerator.generateBlocking(
-                serviceDef, blockingWithErrorsGenerator, generateDialogueEndpointErrorResultTypes));
         if (!excludeDialogueAsyncInterfaces) {
             files.add(interfaceGenerator.generateAsync(
                     serviceDef, asyncGenerator, generateDialogueEndpointErrorResultTypes));
-            files.add(interfaceGenerator.generateAsync(
-                    serviceDef, asyncWithErrorsGenerator, generateDialogueEndpointErrorResultTypes));
         }
         return files.stream();
     }
