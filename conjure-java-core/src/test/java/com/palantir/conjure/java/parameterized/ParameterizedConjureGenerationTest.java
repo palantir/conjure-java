@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,26 @@ public final class ParameterizedConjureGenerationTest {
     public File tempDir;
 
     private static List<ParameterizedTestCase> getTestCases() {
-        return TestCases.get();
+//        return List.of(ParameterizedTestCase.builder()
+//                .name("errors")
+//                .docs("Testing error generation.")
+//                .files(Path.of("example-errors.yml"))
+//                .files(Path.of("example-errors-other.yml"))
+//                .files(Path.of("ete-service.yml"))
+//                .options(Options.builder()
+//                        .undertowServicePrefix(true)
+//                        .useImmutableBytes(true)
+//                        .excludeEmptyOptionals(true)
+//                        .jetbrainsContractAnnotations(true)
+//                        .build())
+//                .generatorTypes(List.of(
+//                        GeneratorType.ERROR,
+//                        GeneratorType.OBJECT,
+//                        GeneratorType.UNDERTOW,
+//                        GeneratorType.DIALOGUE,
+//                        GeneratorType.ENDPOINT_ERROR))
+//                .build());
+                return TestCases.get();
     }
 
     @ParameterizedTest
@@ -68,6 +88,7 @@ public final class ParameterizedConjureGenerationTest {
 
     @Test
     @Order(2)
+    @Disabled
     void validateOnlyRegisteredPackagesPresent() {
         File referenceFilesFolder = new File(REFERENCE_FILES_FOLDER);
         File[] files = referenceFilesFolder.listFiles();

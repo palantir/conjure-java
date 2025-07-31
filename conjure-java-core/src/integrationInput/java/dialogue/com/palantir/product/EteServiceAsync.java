@@ -176,6 +176,16 @@ public interface EteServiceAsync {
     @ClientEndpoint(method = "GET", path = "/base/errors/header")
     ListenableFuture<String> jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
 
+    /**
+     * This endpoint is used to test that that error parameters serialized as JSON or using <code>Objects.toString
+     * </code> are both handled correctly by the clients that return &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     *
+     * @apiNote {@code GET /base/errors/serialization}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
+    ListenableFuture<String> errorParameterSerialization(AuthHeader authHeader, String headerParameter);
+
     /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
@@ -376,6 +386,12 @@ public interface EteServiceAsync {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
 
             private final Deserializer<String> jsonErrorsHeaderDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+
+            private final EndpointChannel errorParameterSerializationChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
+
+            private final Deserializer<String> errorParameterSerializationDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel aliasLongEndpointChannel =
@@ -668,6 +684,19 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
                 return _runtime.clients().call(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<String> errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putHeaderParams(
+                        "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
+                return _runtime.clients()
+                        .call(
+                                errorParameterSerializationChannel,
+                                _request.build(),
+                                errorParameterSerializationDeserializer);
             }
 
             @Override

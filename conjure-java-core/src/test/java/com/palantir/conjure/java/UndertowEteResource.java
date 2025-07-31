@@ -21,7 +21,12 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import errors.com.palantir.product.CollectionExample;
 import errors.com.palantir.product.ConjureErrors;
+import errors.com.palantir.product.EnumExample;
+import errors.com.palantir.product.OptionalCollectionExample;
+import errors.com.palantir.product.OptionalExample;
+import errors.com.palantir.product.StringExample;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import undertow.com.palantir.product.LongAlias;
@@ -176,6 +182,21 @@ public final class UndertowEteResource implements UndertowEteService {
     @Override
     public String jsonErrorsHeader(AuthHeader authHeader, String headerParameter) {
         throw ConjureErrors.invalidServiceDefinition("my-service-string", Optional.of(SimpleEnum.VALUE));
+    }
+
+    @Override
+    public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
+        if (headerParameter.equals("JSON") || headerParameter.equals("TOSTRING")) {
+            throw ConjureErrors.errorWithComplexArgs(
+                    StringExample.of("string-example"),
+                    123L,
+                    CollectionExample.of(
+                            List.of("foo", "bar"), Map.of("foo", StringExample.of("bar")), Set.of("foo", "bar")),
+                    OptionalExample.empty(),
+                    OptionalCollectionExample.of(Optional.of(Map.of("foo", StringExample.of("bar")))),
+                    EnumExample.A);
+        }
+        return "hello!";
     }
 
     @Override
