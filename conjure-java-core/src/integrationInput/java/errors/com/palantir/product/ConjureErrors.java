@@ -1,13 +1,19 @@
 package errors.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
+import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -21,7 +27,7 @@ public final class ConjureErrors {
     /** Cause argument conflicts with reserved Throwable cause parameter. */
     public static final ErrorType CONFLICTING_CAUSE_UNSAFE_ARG =
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseUnsafeArg");
-
+    /** Error with complex arguments. */
     public static final ErrorType ERROR_WITH_COMPLEX_ARGS =
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ErrorWithComplexArgs");
 
@@ -329,5 +335,66 @@ public final class ConjureErrors {
     public static boolean isInvalidTypeDefinition(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());
+    }
+
+    // HAND-WRITTEN CODE BELOW
+    public static record ErrorWithComplexArgsParameters(
+            @JsonProperty("stringExample") @Safe StringExample stringExample,
+            @JsonProperty("primitive") @Safe long primitive,
+            @JsonProperty("collectionExample") @Safe CollectionExample collectionExample,
+            @JsonProperty("optionalExample") @Safe OptionalExample optionalExample,
+            @JsonProperty("optionalCollectionExample") @Safe OptionalCollectionExample optionalCollectionExample,
+            @JsonProperty("enumExample") @Safe EnumExample enumExample) {}
+
+    public static final class ErrorWithComplexArgsSerializableError
+            extends AbstractSerializableError<ErrorWithComplexArgsParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        ErrorWithComplexArgsSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") ErrorWithComplexArgsParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            return SerializableError.builder()
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .putParameters(
+                            "stringExample", Objects.toString(errorParameters().stringExample()))
+                    .putParameters("primitive", Objects.toString(errorParameters().primitive))
+                    .putParameters(
+                            "collectionExample",
+                            Objects.toString(errorParameters().collectionExample()))
+                    .putParameters(
+                            "optionalExample",
+                            Objects.toString(
+                                    errorParameters().optionalExample().get().isPresent()
+                                            ? errorParameters().optionalExample()
+                                            : Optional.empty()))
+                    .putParameters(
+                            "optionalCollectionExample",
+                            Objects.toString(errorParameters().optionalCollectionExample()))
+                    .putParameters(
+                            "enumExample", Objects.toString(errorParameters().enumExample()))
+                    .build();
+        }
+    }
+
+    public static final class ErrorWithComplexArgsException extends RemoteException {
+        private ErrorWithComplexArgsSerializableError error;
+        private int status;
+
+        public ErrorWithComplexArgsException(ErrorWithComplexArgsSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public ErrorWithComplexArgsSerializableError error() {
+            return error;
+        }
     }
 }

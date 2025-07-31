@@ -565,6 +565,53 @@ public final class UndertowServiceEteTest extends TestBase {
         }
     }
 
+    @Test
+    public void test_json_parameter_errors() {
+        // Get the parameters when we use TOSTRING serialization
+        Map<String, String> toStringParams;
+        Map<String, String> jsonParams;
+        try {
+            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "TOSTRING");
+        } catch (RemoteException e) {
+            toStringParams = e.getError().parameters();
+            assertThat(toStringParams)
+                    .containsExactlyInAnyOrderEntriesOf(Map.of(
+                            "stringExample",
+                            "StringExample{string: string-example}",
+                            "primitive",
+                            "123",
+                            "collectionExample",
+                            "CollectionExample{strings: [foo, bar], map: {foo=StringExample{string: bar}}, set: [foo, bar]}",
+                            "optionalExample",
+                            "Optional.empty",
+                            "optionalCollectionExample",
+                            "Optional[{foo=StringExample{string: bar}}]",
+                            "enumExample",
+                            "A"));
+        }
+
+        // Get the parameters when we use JSON serialization
+        try {
+            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON");
+        } catch (RemoteException e) {
+            jsonParams = e.getError().parameters();
+            assertThat(jsonParams)
+                    .containsExactlyInAnyOrderEntriesOf(Map.of(
+                            "stringExample",
+                            "StringExample{string: string-example}",
+                            "primitive",
+                            "123",
+                            "collectionExample",
+                            "CollectionExample{strings: [foo, bar], map: {foo=StringExample{string: bar}}, set: [foo, bar]}",
+                            "optionalExample",
+                            "null",
+                            "optionalCollectionExample",
+                            "Optional[{foo={string=bar}}]",
+                            "enumExample",
+                            "A"));
+        }
+    }
+
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
         URL url = new URL("http://localhost:" + port + "/test-example/api" + path);
         return (HttpURLConnection) url.openConnection();

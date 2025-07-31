@@ -6,6 +6,7 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DeserializerArgs;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -18,14 +19,10 @@ import com.palantir.dialogue.TypeMarker;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import errors.com.palantir.product.ConjureErrors;
+import errors.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
+import errors.com.palantir.product.ConjureErrors.ErrorWithComplexArgsSerializableError;
 import java.io.InputStream;
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -174,6 +171,16 @@ public interface EteServiceBlocking {
      */
     @ClientEndpoint(method = "GET", path = "/base/errors/header")
     String jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
+
+    /**
+     * This endpoint is used to test that that error parameters serialized as JSON or using <code>Objects.toString
+     * </code> are both handled correctly by the clients that return &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     *
+     * @apiNote {@code GET /base/errors/serialization}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
+    String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
 
     /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
@@ -376,6 +383,19 @@ public interface EteServiceBlocking {
 
             private final Deserializer<String> jsonErrorsHeaderDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+
+            private final EndpointChannel errorParameterSerializationChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
+
+            private final Deserializer<String> errorParameterSerializationDeserializer = _runtime.bodySerDe()
+                    .deserializer(DeserializerArgs.<String>builder()
+                            .baseType(new TypeMarker<String>() {})
+                            .success(new TypeMarker<String>() {})
+                            .exception(
+                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
+                                    new TypeMarker<ErrorWithComplexArgsSerializableError>() {},
+                                    new TypeMarker<ErrorWithComplexArgsException>() {})
+                            .build());
 
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
@@ -664,6 +684,19 @@ public interface EteServiceBlocking {
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
                 return _runtime.clients()
                         .callBlocking(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
+            }
+
+            @Override
+            public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putHeaderParams(
+                        "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
+                return _runtime.clients()
+                        .callBlocking(
+                                errorParameterSerializationChannel,
+                                _request.build(),
+                                errorParameterSerializationDeserializer);
             }
 
             @Override
