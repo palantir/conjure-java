@@ -139,12 +139,14 @@ public final class ConjureExceptionHandlerTest {
     }
 
     private static final class DifferentPackageCheckedException extends CheckedServiceException {
+        @SuppressWarnings("removal")
         private DifferentPackageCheckedException(@Nullable Throwable cause) {
             super(ErrorType.CONFLICT, cause);
         }
     }
 
     private static final class DifferentPackageEndpointException extends CheckedServiceException {
+        @SuppressWarnings("removal")
         private DifferentPackageEndpointException(@Nullable Throwable cause) {
             super(ErrorType.CONFLICT, cause);
         }
@@ -186,6 +188,7 @@ public final class ConjureExceptionHandlerTest {
 
     private static final class OptionalCheckedException extends CheckedServiceException {
 
+        @SuppressWarnings("removal")
         private OptionalCheckedException() {
             super(
                     ErrorType.CONFLICT,
