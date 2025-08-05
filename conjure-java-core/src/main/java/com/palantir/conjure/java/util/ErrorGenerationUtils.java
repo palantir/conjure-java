@@ -77,6 +77,24 @@ public final class ErrorGenerationUtils {
         return parameterBuilder.build();
     }
 
+    /**
+     * A mapping from a package name to the list of errors defined within that package. This is used when attempting to
+     * deserialize error responses from endpoints.
+     *
+     * TODO(pm): does this work with imported errors?
+     */
+    public record PackageToErrorDefinitionsMapping(Map<String, List<ErrorDefinition>> packageToErrors) {
+        public static PackageToErrorDefinitionsMapping from(ConjureDefinition definition) {
+            Map<String, List<ErrorDefinition>> fromDefinition = definition.getErrors().stream()
+                    .collect(Collectors.groupingBy(error -> error.getErrorName().getPackage(), Collectors.toList()));
+            return new PackageToErrorDefinitionsMapping(fromDefinition);
+        }
+
+        public List<ErrorDefinition> get(String packageName) {
+            return packageToErrors.getOrDefault(packageName, ImmutableList.of());
+        }
+    }
+
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {
         public static DeclaredEndpointErrors from(ConjureDefinition definition) {
             return new DeclaredEndpointErrors(definition.getServices().stream()

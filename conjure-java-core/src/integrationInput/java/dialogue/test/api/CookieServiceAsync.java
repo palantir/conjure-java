@@ -5,6 +5,7 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DeserializerArgs;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -12,6 +13,7 @@ import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
+import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.Override;
 import java.lang.String;
@@ -33,8 +35,11 @@ public interface CookieServiceAsync {
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
-            private final Deserializer<Void> eatCookiesDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
+            private final Deserializer<Void> eatCookiesDeserializer = _runtime.bodySerDe()
+                    .deserializer(DeserializerArgs.<Void>builder()
+                            .baseType(new TypeMarker<>() {})
+                            .success(new TypeMarker<Void>() {})
+                            .build());
 
             @Override
             public ListenableFuture<Void> eatCookies(BearerToken token) {

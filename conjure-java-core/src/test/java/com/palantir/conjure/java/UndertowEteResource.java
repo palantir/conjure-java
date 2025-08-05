@@ -37,7 +37,7 @@ import errors.com.palantir.product.OptionalAlias;
 import errors.com.palantir.product.OptionalExample;
 import errors.com.palantir.product.PrimitiveExample;
 import errors.com.palantir.product.SafetyExample;
-import errors.com.palantir.product.StringAlias;
+import errors.com.palantir.product.StringAliasEx;
 import errors.com.palantir.product.UnionExample;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -248,10 +248,10 @@ public final class UndertowEteResource implements UndertowEteService {
                             .build(),
                     UnionExample.stringVariant("union-string-value"),
                     EnumExample.A,
-                    StringAlias.of("aliased-string"),
+                    StringAliasEx.of("aliased-string"),
                     OptionalAlias.of(Optional.of("optional-aliased-string")),
                     CollectionAlias.of(List.of("alias1", "alias2", "alias3")),
-                    NestedAlias.of(StringAlias.of("nested-alias-value")),
+                    NestedAlias.of(StringAliasEx.of("nested-alias-value")),
                     ExternalExample.builder()
                             .externalLong(456L)
                             .optionalExternal(Optional.of(789L))
@@ -272,7 +272,7 @@ public final class UndertowEteResource implements UndertowEteService {
                     EmptyObject.of(),
                     ComplexExample.builder()
                             .metadata(Map.of(
-                                    StringAlias.of("meta1"),
+                                    StringAliasEx.of("meta1"),
                                             Optional.of(List.of(
                                                     ObjectReference.builder()
                                                             .name("complex1")
@@ -282,7 +282,7 @@ public final class UndertowEteResource implements UndertowEteService {
                                                             .name("complex2")
                                                             .value(2)
                                                             .build())),
-                                    StringAlias.of("meta2"), Optional.empty()))
+                                    StringAliasEx.of("meta2"), Optional.empty()))
                             .status(EnumExample.B)
                             .variants(List.of(
                                     UnionExample.intVariant(42),

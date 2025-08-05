@@ -1,4 +1,4 @@
-package undertow.com.palantir.product;
+package dialogueendpointresulttypes.com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
@@ -21,13 +21,13 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class ErrorServiceEndpoints implements UndertowService {
-    private final UndertowErrorService delegate;
+    private final ErrorService delegate;
 
-    private ErrorServiceEndpoints(UndertowErrorService delegate) {
+    private ErrorServiceEndpoints(ErrorService delegate) {
         this.delegate = delegate;
     }
 
-    public static UndertowService of(UndertowErrorService delegate) {
+    public static UndertowService of(ErrorService delegate) {
         return new ErrorServiceEndpoints(delegate);
     }
 
@@ -45,13 +45,13 @@ public final class ErrorServiceEndpoints implements UndertowService {
     private static final class TestBasicErrorEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final UndertowErrorService delegate;
+        private final ErrorService delegate;
 
         private final Deserializer<Boolean> deserializer;
 
         private final Serializer<String> serializer;
 
-        TestBasicErrorEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+        TestBasicErrorEndpoint(UndertowRuntime runtime, ErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
@@ -96,13 +96,13 @@ public final class ErrorServiceEndpoints implements UndertowService {
     private static final class TestImportedErrorEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final UndertowErrorService delegate;
+        private final ErrorService delegate;
 
         private final Deserializer<Boolean> deserializer;
 
         private final Serializer<String> serializer;
 
-        TestImportedErrorEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+        TestImportedErrorEndpoint(UndertowRuntime runtime, ErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
@@ -147,13 +147,13 @@ public final class ErrorServiceEndpoints implements UndertowService {
     private static final class TestMultipleErrorsAndPackagesEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final UndertowErrorService delegate;
+        private final ErrorService delegate;
 
         private final Deserializer<Optional<String>> deserializer;
 
         private final Serializer<String> serializer;
 
-        TestMultipleErrorsAndPackagesEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+        TestMultipleErrorsAndPackagesEndpoint(UndertowRuntime runtime, ErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {}, this);
@@ -164,7 +164,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange)
                 throws IOException, TestServerErrors.InvalidArgument, TestServerErrors.NotFound,
                         EndpointSpecificTwoServerErrors.DifferentNamespace,
-                        undertow.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
+                        dialogueendpointresulttypes.com.palantir.another.EndpointSpecificServerErrors.DifferentPackage,
                         TestServerErrors.ComplicatedParameters {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Optional<String> errorToThrow = deserializer.deserialize(exchange);
@@ -201,11 +201,11 @@ public final class ErrorServiceEndpoints implements UndertowService {
     private static final class TestEmptyBodyEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final UndertowErrorService delegate;
+        private final ErrorService delegate;
 
         private final Deserializer<Boolean> deserializer;
 
-        TestEmptyBodyEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+        TestEmptyBodyEndpoint(UndertowRuntime runtime, ErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
@@ -248,11 +248,11 @@ public final class ErrorServiceEndpoints implements UndertowService {
     private static final class TestBinaryEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final UndertowErrorService delegate;
+        private final ErrorService delegate;
 
         private final Deserializer<Boolean> deserializer;
 
-        TestBinaryEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+        TestBinaryEndpoint(UndertowRuntime runtime, ErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
@@ -295,11 +295,11 @@ public final class ErrorServiceEndpoints implements UndertowService {
     private static final class TestOptionalBinaryEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final UndertowErrorService delegate;
+        private final ErrorService delegate;
 
         private final Deserializer<OptionalBinaryResponseMode> deserializer;
 
-        TestOptionalBinaryEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
+        TestOptionalBinaryEndpoint(UndertowRuntime runtime, ErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<OptionalBinaryResponseMode>() {}, this);

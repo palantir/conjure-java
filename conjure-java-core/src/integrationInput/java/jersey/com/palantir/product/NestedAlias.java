@@ -1,4 +1,4 @@
-package errors.com.palantir.product;
+package jersey.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -10,30 +10,29 @@ import javax.annotation.processing.Generated;
 
 @Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class StringAlias implements Comparable<StringAlias> {
-    private final @Safe String value;
+public final class NestedAlias {
+    private final StringAliasEx value;
 
-    private StringAlias(@Nonnull @Safe String value) {
+    private NestedAlias(@Nonnull StringAliasEx value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    public @Safe String get() {
+    public StringAliasEx get() {
         return value;
     }
 
     @Override
-    @Safe
     public String toString() {
         return value.toString();
     }
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof StringAlias && equalTo((StringAlias) other));
+        return this == other || (other instanceof NestedAlias && equalTo((NestedAlias) other));
     }
 
-    private boolean equalTo(StringAlias other) {
+    private boolean equalTo(NestedAlias other) {
         return this.value.equals(other.value);
     }
 
@@ -42,17 +41,12 @@ public final class StringAlias implements Comparable<StringAlias> {
         return this.value.hashCode();
     }
 
-    @Override
-    public int compareTo(StringAlias other) {
-        return value.compareTo(other.get());
-    }
-
-    public static StringAlias valueOf(@Safe String value) {
-        return of(value);
+    public static NestedAlias valueOf(@Safe String value) {
+        return of(StringAliasEx.valueOf(value));
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static StringAlias of(@Nonnull @Safe String value) {
-        return new StringAlias(value);
+    public static NestedAlias of(@Nonnull StringAliasEx value) {
+        return new NestedAlias(value);
     }
 }

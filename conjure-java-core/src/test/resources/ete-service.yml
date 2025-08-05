@@ -1,4 +1,8 @@
 types:
+  # This is needed because Conjure needs to know the errors that could be thrown. Every error defined in the imported
+  # files that is part of the same package as a service will be respected.
+  conjure-imports:
+    errors: example-errors.yml
   imports:
     StringAliasExampleImport:
       base-type: string

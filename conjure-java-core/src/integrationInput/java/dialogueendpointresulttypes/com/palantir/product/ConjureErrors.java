@@ -14,30 +14,30 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
     /** Cause argument conflicts with reserved Throwable cause parameter. */
-    public static final ErrorType CONFLICTING_CAUSE_SAFE_ARG =
-            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseSafeArg");
+    public static final ErrorType CONFLICTING_CAUSE_SAFE_ARG_ERR =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseSafeArgErr");
 
     private ConjureErrors() {}
 
-    /** Returns true if the {@link RemoteException} is named Conjure:ConflictingCauseSafeArg */
-    public static boolean isConflictingCauseSafeArg(RemoteException remoteException) {
+    /** Returns true if the {@link RemoteException} is named Conjure:ConflictingCauseSafeArgErr */
+    public static boolean isConflictingCauseSafeArgErr(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
-        return CONFLICTING_CAUSE_SAFE_ARG
+        return CONFLICTING_CAUSE_SAFE_ARG_ERR
                 .name()
                 .equals(remoteException.getError().errorName());
     }
 
-    public static record ConflictingCauseSafeArgParameters(
+    public static record ConflictingCauseSafeArgErrParameters(
             @JsonProperty("cause") @Safe String cause_, @JsonProperty("shouldThrow") @Safe boolean shouldThrow_) {}
 
-    public static final class ConflictingCauseSafeArgSerializableError
-            extends AbstractSerializableError<ConflictingCauseSafeArgParameters> {
+    public static final class ConflictingCauseSafeArgErrSerializableError
+            extends AbstractSerializableError<ConflictingCauseSafeArgErrParameters> {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        ConflictingCauseSafeArgSerializableError(
+        ConflictingCauseSafeArgErrSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") ConflictingCauseSafeArgParameters parameters) {
+                @JsonProperty("parameters") ConflictingCauseSafeArgErrParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
         }
 
@@ -52,18 +52,18 @@ public final class ConjureErrors {
         }
     }
 
-    public static final class ConflictingCauseSafeArgException extends RemoteException {
-        private ConflictingCauseSafeArgSerializableError error;
+    public static final class ConflictingCauseSafeArgErrException extends RemoteException {
+        private ConflictingCauseSafeArgErrSerializableError error;
 
         private int status;
 
-        public ConflictingCauseSafeArgException(ConflictingCauseSafeArgSerializableError error, int status) {
+        public ConflictingCauseSafeArgErrException(ConflictingCauseSafeArgErrSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
             this.status = status;
         }
 
-        public ConflictingCauseSafeArgSerializableError error() {
+        public ConflictingCauseSafeArgErrSerializableError error() {
             return error;
         }
     }
