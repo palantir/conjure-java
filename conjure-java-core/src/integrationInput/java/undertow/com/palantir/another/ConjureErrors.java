@@ -1,4 +1,4 @@
-package errors.com.palantir.another;
+package undertow.com.palantir.another;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,35 +16,35 @@ import org.jetbrains.annotations.Contract;
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
     /** Different package. */
-    public static final ErrorType DIFFERENT_PACKAGE_ERROR =
-            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:DifferentPackageError");
+    public static final ErrorType DIFFERENT_PACKAGE_ERR =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:DifferentPackageErr");
 
     private ConjureErrors() {}
 
-    public static ServiceException differentPackageError() {
-        return new ServiceException(DIFFERENT_PACKAGE_ERROR);
+    public static ServiceException differentPackageErr() {
+        return new ServiceException(DIFFERENT_PACKAGE_ERR);
     }
 
-    public static ServiceException differentPackageError(@Nullable Throwable cause) {
-        return new ServiceException(DIFFERENT_PACKAGE_ERROR, cause);
+    public static ServiceException differentPackageErr(@Nullable Throwable cause) {
+        return new ServiceException(DIFFERENT_PACKAGE_ERR, cause);
     }
 
     /**
-     * Throws a {@link ServiceException} of type DifferentPackageError when {@code shouldThrow} is true.
+     * Throws a {@link ServiceException} of type DifferentPackageErr when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
      */
     @Contract("true -> fail")
-    public static void throwIfDifferentPackageError(boolean shouldThrow) {
+    public static void throwIfDifferentPackageErr(boolean shouldThrow) {
         if (shouldThrow) {
-            throw differentPackageError();
+            throw differentPackageErr();
         }
     }
 
-    /** Returns true if the {@link RemoteException} is named Conjure:DifferentPackageError */
-    public static boolean isDifferentPackageError(RemoteException remoteException) {
+    /** Returns true if the {@link RemoteException} is named Conjure:DifferentPackageErr */
+    public static boolean isDifferentPackageErr(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
-        return DIFFERENT_PACKAGE_ERROR.name().equals(remoteException.getError().errorName());
+        return DIFFERENT_PACKAGE_ERR.name().equals(remoteException.getError().errorName());
     }
 
     public static record DifferentPackageErrParameters() {}

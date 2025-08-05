@@ -350,7 +350,7 @@ public final class ConjureErrors {
             @JsonProperty("objectReference") @Safe ObjectReference objectReference,
             @JsonProperty("unionExample") @Safe UnionExample unionExample,
             @JsonProperty("enumExample") @Safe EnumExample enumExample,
-            @JsonProperty("stringAlias") @Safe StringAlias stringAlias,
+            @JsonProperty("stringAlias") @Safe StringAliasEx stringAlias,
             @JsonProperty("optionalAlias") @Safe OptionalAlias optionalAlias,
             @JsonProperty("collectionAlias") @Safe CollectionAlias collectionAlias,
             @JsonProperty("nestedAlias") @Safe NestedAlias nestedAlias,

@@ -203,6 +203,15 @@ public interface Options {
     }
 
     /**
+     * TODO.
+     */
+    @Value.Default
+    @Beta
+    default boolean deserializeErrorResponsesAsJson() {
+        return false;
+    }
+
+    /**
      * Makes immutable copies of collections for union and alias types, respecting the --nonNullCollections flag.
      */
     @Value.Default

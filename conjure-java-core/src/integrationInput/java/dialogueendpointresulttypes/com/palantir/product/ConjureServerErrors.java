@@ -1,11 +1,10 @@
-package undertow.com.palantir.product;
+package dialogueendpointresulttypes.com.palantir.product;
 
 import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
-import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class ConjureServerErrors {
@@ -28,7 +27,6 @@ public final class ConjureServerErrors {
      * @param cause_
      * @param shouldThrow_
      */
-    @Contract("true, _, _ -> fail")
     public static void throwIfConflictingCauseSafeArgErr(
             boolean shouldThrow, @Safe String cause_, @Safe boolean shouldThrow_) {
         if (shouldThrow) {

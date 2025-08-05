@@ -246,6 +246,9 @@ public final class ConjureJavaCli implements Runnable {
                         + "This feature is currently not supported.")
         private boolean dangerousDoNotUseEnableEndpointAssociatedErrors;
 
+        @CommandLine.Option(names = "--deserializeErrorResponsesAsJson", defaultValue = "false", description = "TODO.")
+        private boolean deserializeErrorResponsesAsJson;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -320,6 +323,7 @@ public final class ConjureJavaCli implements Runnable {
                             .defensiveCollections(defensiveCollections)
                             .dangerousDoNotUseEnableEndpointAssociatedErrors(
                                     dangerousDoNotUseEnableEndpointAssociatedErrors)
+                            .deserializeErrorResponsesAsJson(deserializeErrorResponsesAsJson)
                             .build())
                     .build();
         }
