@@ -1,8 +1,13 @@
 package undertow.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
@@ -17,5 +22,43 @@ public final class EndpointSpecificTwoErrors {
     public static boolean isDifferentNamespace(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return DIFFERENT_NAMESPACE.name().equals(remoteException.getError().errorName());
+    }
+
+    public static record DifferentNamespaceParameters() {}
+
+    public static final class DifferentNamespaceSerializableError
+            extends AbstractSerializableError<DifferentNamespaceParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        DifferentNamespaceSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") DifferentNamespaceParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder()
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class DifferentNamespaceException extends RemoteException {
+        private DifferentNamespaceSerializableError error;
+
+        private int status;
+
+        public DifferentNamespaceException(DifferentNamespaceSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public DifferentNamespaceSerializableError error() {
+            return error;
+        }
     }
 }

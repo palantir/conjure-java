@@ -13,7 +13,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
 import java.util.Objects;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -337,14 +336,84 @@ public final class ConjureErrors {
         return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());
     }
 
-    // HAND-WRITTEN CODE BELOW
+    public static record ConflictingCauseSafeArgParameters(
+            @JsonProperty("cause") @Safe String cause_, @JsonProperty("shouldThrow") @Safe boolean shouldThrow_) {}
+
+    public static record ConflictingCauseUnsafeArgParameters(
+            @JsonProperty("cause") @Unsafe String cause_, @JsonProperty("shouldThrow") @Unsafe boolean shouldThrow_) {}
+
     public static record ErrorWithComplexArgsParameters(
-            @JsonProperty("stringExample") @Safe StringExample stringExample,
-            @JsonProperty("primitive") @Safe long primitive,
+            @JsonProperty("primitiveExample") @Safe PrimitiveExample primitiveExample,
             @JsonProperty("collectionExample") @Safe CollectionExample collectionExample,
+            @JsonProperty("nestedCollectionExample") @Safe NestedCollectionExample nestedCollectionExample,
             @JsonProperty("optionalExample") @Safe OptionalExample optionalExample,
-            @JsonProperty("optionalCollectionExample") @Safe OptionalCollectionExample optionalCollectionExample,
-            @JsonProperty("enumExample") @Safe EnumExample enumExample) {}
+            @JsonProperty("objectReference") @Safe ObjectReference objectReference,
+            @JsonProperty("unionExample") @Safe UnionExample unionExample,
+            @JsonProperty("enumExample") @Safe EnumExample enumExample,
+            @JsonProperty("stringAlias") @Safe StringAlias stringAlias,
+            @JsonProperty("optionalAlias") @Safe OptionalAlias optionalAlias,
+            @JsonProperty("collectionAlias") @Safe CollectionAlias collectionAlias,
+            @JsonProperty("nestedAlias") @Safe NestedAlias nestedAlias,
+            @JsonProperty("externalExample") @Safe ExternalExample externalExample,
+            @JsonProperty("anyExample") @Safe AnyExample anyExample,
+            @JsonProperty("emptyObject") @Safe EmptyObject emptyObject,
+            @JsonProperty("complexExample") @Safe ComplexExample complexExample,
+            @JsonProperty("safetyExample") @Unsafe SafetyExample safetyExample) {}
+
+    /**
+     * @param serviceName Name of the invalid service definition.
+     * @param serviceDef Details of the invalid service definition.
+     */
+    public static record InvalidServiceDefinitionParameters(
+            @JsonProperty("serviceName") @Safe String serviceName,
+            @JsonProperty("serviceDef") @Unsafe Object serviceDef) {}
+
+    public static record InvalidTypeDefinitionParameters(
+            @JsonProperty("typeName") @Safe String typeName, @JsonProperty("typeDef") @Unsafe Object typeDef) {}
+
+    public static final class ConflictingCauseSafeArgSerializableError
+            extends AbstractSerializableError<ConflictingCauseSafeArgParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        ConflictingCauseSafeArgSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") ConflictingCauseSafeArgParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder()
+                    .putParameters("cause", Objects.toString(parameters().cause_()))
+                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow_()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class ConflictingCauseUnsafeArgSerializableError
+            extends AbstractSerializableError<ConflictingCauseUnsafeArgParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        ConflictingCauseUnsafeArgSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") ConflictingCauseUnsafeArgParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder()
+                    .putParameters("cause", Objects.toString(parameters().cause_()))
+                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow_()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
 
     public static final class ErrorWithComplexArgsSerializableError
             extends AbstractSerializableError<ErrorWithComplexArgsParameters> {
@@ -358,33 +427,120 @@ public final class ConjureErrors {
         }
 
         public SerializableError toSerializableError() {
-            return SerializableError.builder()
+            SerializableError.Builder builder = SerializableError.builder()
+                    .putParameters(
+                            "primitiveExample", Objects.toString(parameters().primitiveExample()))
+                    .putParameters(
+                            "collectionExample", Objects.toString(parameters().collectionExample()))
+                    .putParameters(
+                            "nestedCollectionExample",
+                            Objects.toString(parameters().nestedCollectionExample()))
+                    .putParameters(
+                            "optionalExample", Objects.toString(parameters().optionalExample()))
+                    .putParameters(
+                            "objectReference", Objects.toString(parameters().objectReference()))
+                    .putParameters("unionExample", Objects.toString(parameters().unionExample()))
+                    .putParameters("enumExample", Objects.toString(parameters().enumExample()))
+                    .putParameters("stringAlias", Objects.toString(parameters().stringAlias()))
+                    .putParameters(
+                            "optionalAlias", Objects.toString(parameters().optionalAlias()))
+                    .putParameters(
+                            "collectionAlias", Objects.toString(parameters().collectionAlias()))
+                    .putParameters("nestedAlias", Objects.toString(parameters().nestedAlias()))
+                    .putParameters(
+                            "externalExample", Objects.toString(parameters().externalExample()))
+                    .putParameters("anyExample", Objects.toString(parameters().anyExample()))
+                    .putParameters("emptyObject", Objects.toString(parameters().emptyObject()))
+                    .putParameters(
+                            "complexExample", Objects.toString(parameters().complexExample()))
+                    .putParameters(
+                            "safetyExample", Objects.toString(parameters().safetyExample()))
                     .errorCode(errorCode())
                     .errorName(errorName())
-                    .errorInstanceId(errorInstanceId())
-                    .putParameters(
-                            "stringExample", Objects.toString(errorParameters().stringExample()))
-                    .putParameters("primitive", Objects.toString(errorParameters().primitive))
-                    .putParameters(
-                            "collectionExample",
-                            Objects.toString(errorParameters().collectionExample()))
-                    .putParameters(
-                            "optionalExample",
-                            Objects.toString(
-                                    errorParameters().optionalExample().get().isPresent()
-                                            ? errorParameters().optionalExample()
-                                            : Optional.empty()))
-                    .putParameters(
-                            "optionalCollectionExample",
-                            Objects.toString(errorParameters().optionalCollectionExample()))
-                    .putParameters(
-                            "enumExample", Objects.toString(errorParameters().enumExample()))
-                    .build();
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class InvalidServiceDefinitionSerializableError
+            extends AbstractSerializableError<InvalidServiceDefinitionParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        InvalidServiceDefinitionSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") InvalidServiceDefinitionParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder()
+                    .putParameters("serviceName", Objects.toString(parameters().serviceName()))
+                    .putParameters("serviceDef", Objects.toString(parameters().serviceDef()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class InvalidTypeDefinitionSerializableError
+            extends AbstractSerializableError<InvalidTypeDefinitionParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        InvalidTypeDefinitionSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") InvalidTypeDefinitionParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder()
+                    .putParameters("typeName", Objects.toString(parameters().typeName()))
+                    .putParameters("typeDef", Objects.toString(parameters().typeDef()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class ConflictingCauseSafeArgException extends RemoteException {
+        private ConflictingCauseSafeArgSerializableError error;
+
+        private int status;
+
+        public ConflictingCauseSafeArgException(ConflictingCauseSafeArgSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public ConflictingCauseSafeArgSerializableError error() {
+            return error;
+        }
+    }
+
+    public static final class ConflictingCauseUnsafeArgException extends RemoteException {
+        private ConflictingCauseUnsafeArgSerializableError error;
+
+        private int status;
+
+        public ConflictingCauseUnsafeArgException(ConflictingCauseUnsafeArgSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public ConflictingCauseUnsafeArgSerializableError error() {
+            return error;
         }
     }
 
     public static final class ErrorWithComplexArgsException extends RemoteException {
         private ErrorWithComplexArgsSerializableError error;
+
         private int status;
 
         public ErrorWithComplexArgsException(ErrorWithComplexArgsSerializableError error, int status) {
@@ -394,6 +550,38 @@ public final class ConjureErrors {
         }
 
         public ErrorWithComplexArgsSerializableError error() {
+            return error;
+        }
+    }
+
+    public static final class InvalidServiceDefinitionException extends RemoteException {
+        private InvalidServiceDefinitionSerializableError error;
+
+        private int status;
+
+        public InvalidServiceDefinitionException(InvalidServiceDefinitionSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public InvalidServiceDefinitionSerializableError error() {
+            return error;
+        }
+    }
+
+    public static final class InvalidTypeDefinitionException extends RemoteException {
+        private InvalidTypeDefinitionSerializableError error;
+
+        private int status;
+
+        public InvalidTypeDefinitionException(InvalidTypeDefinitionSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public InvalidTypeDefinitionSerializableError error() {
             return error;
         }
     }

@@ -1,4 +1,4 @@
-package undertow.com.palantir.another;
+package dialogueendpointresulttypes.com.palantir.another;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

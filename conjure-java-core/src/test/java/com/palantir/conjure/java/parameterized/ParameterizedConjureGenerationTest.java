@@ -51,26 +51,26 @@ public final class ParameterizedConjureGenerationTest {
     public File tempDir;
 
     private static List<ParameterizedTestCase> getTestCases() {
-//        return List.of(ParameterizedTestCase.builder()
-//                .name("errors")
-//                .docs("Testing error generation.")
-//                .files(Path.of("example-errors.yml"))
-//                .files(Path.of("example-errors-other.yml"))
-//                .files(Path.of("ete-service.yml"))
-//                .options(Options.builder()
-//                        .undertowServicePrefix(true)
-//                        .useImmutableBytes(true)
-//                        .excludeEmptyOptionals(true)
-//                        .jetbrainsContractAnnotations(true)
-//                        .build())
-//                .generatorTypes(List.of(
-//                        GeneratorType.ERROR,
-//                        GeneratorType.OBJECT,
-//                        GeneratorType.UNDERTOW,
-//                        GeneratorType.DIALOGUE,
-//                        GeneratorType.ENDPOINT_ERROR))
-//                .build());
-                return TestCases.get();
+        //        return List.of(ParameterizedTestCase.builder()
+        //                .name("errors")
+        //                .docs("Testing error generation.")
+        //                .files(Path.of("example-errors.yml"))
+        //                .files(Path.of("example-errors-other.yml"))
+        //                .files(Path.of("ete-service.yml"))
+        //                .options(Options.builder()
+        //                        .undertowServicePrefix(true)
+        //                        .useImmutableBytes(true)
+        //                        .excludeEmptyOptionals(true)
+        //                        .jetbrainsContractAnnotations(true)
+        //                        .build())
+        //                .generatorTypes(List.of(
+        //                        GeneratorType.ERROR,
+        //                        GeneratorType.OBJECT,
+        //                        GeneratorType.UNDERTOW,
+        //                        GeneratorType.DIALOGUE,
+        //                        GeneratorType.ENDPOINT_ERROR))
+        //                .build());
+        return TestCases.get();
     }
 
     @ParameterizedTest
