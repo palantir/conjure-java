@@ -1,9 +1,14 @@
 package errors.com.palantir.another;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -40,5 +45,43 @@ public final class ConjureJavaOtherErrors {
     public static boolean isJavaCompilationFailed(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return JAVA_COMPILATION_FAILED.name().equals(remoteException.getError().errorName());
+    }
+
+    public static record JavaCompilationFailedParameters() {}
+
+    public static final class JavaCompilationFailedSerializableError
+            extends AbstractSerializableError<JavaCompilationFailedParameters> {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        JavaCompilationFailedSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") JavaCompilationFailedParameters parameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder()
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class JavaCompilationFailedException extends RemoteException {
+        private JavaCompilationFailedSerializableError error;
+
+        private int status;
+
+        public JavaCompilationFailedException(JavaCompilationFailedSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+            this.status = status;
+        }
+
+        public JavaCompilationFailedSerializableError error() {
+            return error;
+        }
     }
 }

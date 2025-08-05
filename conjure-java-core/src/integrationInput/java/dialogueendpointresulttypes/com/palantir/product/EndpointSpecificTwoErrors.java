@@ -1,4 +1,4 @@
-package undertow.com.palantir.another;
+package dialogueendpointresulttypes.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,29 +11,29 @@ import com.palantir.logsafe.Safe;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
-public final class EndpointSpecificErrors {
-    /** An error in a different package. */
-    public static final ErrorType DIFFERENT_PACKAGE =
-            ErrorType.create(ErrorType.Code.INTERNAL, "EndpointSpecific:DifferentPackage");
+public final class EndpointSpecificTwoErrors {
+    /** An error in a different namespace. */
+    public static final ErrorType DIFFERENT_NAMESPACE =
+            ErrorType.create(ErrorType.Code.INTERNAL, "EndpointSpecificTwo:DifferentNamespace");
 
-    private EndpointSpecificErrors() {}
+    private EndpointSpecificTwoErrors() {}
 
-    /** Returns true if the {@link RemoteException} is named EndpointSpecific:DifferentPackage */
-    public static boolean isDifferentPackage(RemoteException remoteException) {
+    /** Returns true if the {@link RemoteException} is named EndpointSpecificTwo:DifferentNamespace */
+    public static boolean isDifferentNamespace(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
-        return DIFFERENT_PACKAGE.name().equals(remoteException.getError().errorName());
+        return DIFFERENT_NAMESPACE.name().equals(remoteException.getError().errorName());
     }
 
-    public static record DifferentPackageParameters() {}
+    public static record DifferentNamespaceParameters() {}
 
-    public static final class DifferentPackageSerializableError
-            extends AbstractSerializableError<DifferentPackageParameters> {
+    public static final class DifferentNamespaceSerializableError
+            extends AbstractSerializableError<DifferentNamespaceParameters> {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        DifferentPackageSerializableError(
+        DifferentNamespaceSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") DifferentPackageParameters parameters) {
+                @JsonProperty("parameters") DifferentNamespaceParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
         }
 
@@ -46,18 +46,18 @@ public final class EndpointSpecificErrors {
         }
     }
 
-    public static final class DifferentPackageException extends RemoteException {
-        private DifferentPackageSerializableError error;
+    public static final class DifferentNamespaceException extends RemoteException {
+        private DifferentNamespaceSerializableError error;
 
         private int status;
 
-        public DifferentPackageException(DifferentPackageSerializableError error, int status) {
+        public DifferentNamespaceException(DifferentNamespaceSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
             this.status = status;
         }
 
-        public DifferentPackageSerializableError error() {
+        public DifferentNamespaceSerializableError error() {
             return error;
         }
     }

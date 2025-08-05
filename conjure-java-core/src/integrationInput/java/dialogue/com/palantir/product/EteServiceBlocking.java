@@ -387,14 +387,14 @@ public interface EteServiceBlocking {
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
 
-            private final Deserializer<String> errorParameterSerializationDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<String>builder()
+            private final Deserializer<String> errorParameterSerializationDeserializer =
+                    _runtime.bodySerDe().deserializer(DeserializerArgs.<String>builder()
                             .baseType(new TypeMarker<String>() {})
                             .success(new TypeMarker<String>() {})
                             .exception(
                                     ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
                                     new TypeMarker<ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ErrorWithComplexArgsException>() {})
+                                    new TypeMarker<ErrorWithComplexArgsException>(){})
                             .build());
 
             private final EndpointChannel aliasLongEndpointChannel =

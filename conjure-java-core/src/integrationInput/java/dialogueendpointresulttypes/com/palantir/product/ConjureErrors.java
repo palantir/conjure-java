@@ -1,4 +1,4 @@
-package undertow.com.palantir.product;
+package dialogueendpointresulttypes.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

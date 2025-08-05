@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.util;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -60,6 +61,20 @@ public final class ErrorGenerationUtils {
 
     public static String errorTypesClassName(ErrorNamespace namespace) {
         return namespace.get() + "Errors";
+    }
+
+    public static String errorParametersClassName(String errorName) {
+        return errorName + "Parameters";
+    }
+
+    public static ParameterSpec buildParameterWithSafetyAnnotationAndJsonProperty(
+            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
+        ParameterSpec.Builder parameterBuilder =
+                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe);
+        parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$S", argDefinition.getFieldName().get())
+                .build());
+        return parameterBuilder.build();
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {

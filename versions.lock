@@ -44,11 +44,19 @@ com.palantir.conjure:conjure-api-objects:4.50.0 (3 constraints: 9327531f)
 
 com.palantir.conjure:conjure-generator-common:4.50.0 (2 constraints: fd13a782)
 
+<<<<<<< HEAD
 com.palantir.conjure.java.api:errors:2.64.0 (8 constraints: a094bf79)
 
 com.palantir.conjure.java.api:service-config:2.64.0 (6 constraints: 3466fcd7)
 
 com.palantir.conjure.java.api:ssl-config:2.64.0 (5 constraints: b44fa72d)
+=======
+com.palantir.conjure.java.api:errors:2.62.0-10-g6a81a18 (8 constraints: 749a93bb)
+
+com.palantir.conjure.java.api:service-config:2.62.0-10-g6a81a18 (6 constraints: 1e697150)
+
+com.palantir.conjure.java.api:ssl-config:2.62.0-10-g6a81a18 (5 constraints: 8855770a)
+>>>>>>> 86e910bd (wip code-gen)
 
 com.palantir.conjure.java.runtime:client-config:8.24.0 (6 constraints: ab6bbb28)
 
@@ -64,15 +72,15 @@ com.palantir.dialogue:dialogue-apache-hc5-client:6.7.0 (2 constraints: 1a2974b6)
 
 com.palantir.dialogue:dialogue-blocking-channels:6.7.0 (2 constraints: 79232973)
 
-com.palantir.dialogue:dialogue-clients:6.7.0 (1 constraints: 30088985)
+com.palantir.dialogue:dialogue-clients:6.7.0 (1 constraints: b40a3dc0)
 
 com.palantir.dialogue:dialogue-core:6.7.0 (3 constraints: ea3c6541)
 
 com.palantir.dialogue:dialogue-futures:6.7.0 (3 constraints: 3e33a938)
 
-com.palantir.dialogue:dialogue-serde:6.7.0 (3 constraints: 493156e9)
+com.palantir.dialogue:dialogue-serde:6.7.0 (3 constraints: cd337445)
 
-com.palantir.dialogue:dialogue-target:6.7.0 (7 constraints: f27a7e9a)
+com.palantir.dialogue:dialogue-target:6.7.0 (7 constraints: 767da404)
 
 com.palantir.goethe:goethe:0.16.0 (1 constraints: 3905353b)
 
@@ -172,7 +180,11 @@ org.glassfish.jersey.core:jersey-common:3.1.3 (15 constraints: 7410a287)
 
 org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
+<<<<<<< HEAD
 org.immutables:value:2.11.3 (2 constraints: 0215eac1)
+=======
+org.immutables:value:2.11.3 (2 constraints: 0115e9c1)
+>>>>>>> 86e910bd (wip code-gen)
 
 org.jboss.logging:jboss-logging:3.5.0.Final (9 constraints: 89ae085f)
 
@@ -238,7 +250,11 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: c718909e)
 
 com.palantir.conjure:conjure-core:4.50.0 (1 constraints: 3b054b3b)
 
+<<<<<<< HEAD
 com.palantir.conjure.java.api:test-utils:2.64.0 (1 constraints: 3e054f3b)
+=======
+com.palantir.conjure.java.api:test-utils:2.62.0-10-g6a81a18 (1 constraints: 2808568c)
+>>>>>>> 86e910bd (wip code-gen)
 
 com.palantir.conjure.java.runtime:conjure-java-annotations:8.24.0 (1 constraints: c418889e)
 
