@@ -66,6 +66,14 @@ public interface EmptyPathServiceBlocking {
             @Override
             public boolean emptyPath() {
                 Request.Builder _request = Request.builder();
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(emptyPathChannel, _request.build(), emptyPathDeserializer);
             }
 

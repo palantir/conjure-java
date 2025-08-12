@@ -322,6 +322,14 @@ public interface TestServiceBlocking {
             public Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(getFileSystemsChannel, _request.build(), getFileSystemsDeserializer);
             }
@@ -332,6 +340,14 @@ public interface TestServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(createDatasetSerializer.serialize(request));
                 _request.putHeaderParams("Test-Header", _plainSerDe.serializeString(testHeaderArg));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(createDatasetChannel, _request.build(), createDatasetDeserializer);
             }
@@ -341,6 +357,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(getDatasetChannel, _request.build(), getDatasetDeserializer);
             }
 
@@ -349,6 +373,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(
                                 getRawDataChannel,
@@ -361,6 +393,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(
                                 getAliasedRawDataChannel,
@@ -373,6 +413,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(
                                 maybeGetRawDataChannel,
@@ -385,6 +433,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(getAliasedStringChannel, _request.build(), getAliasedStringDeserializer);
             }
@@ -394,6 +450,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(input));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 _runtime.clients().callBlocking(uploadRawDataChannel, _request.build(), uploadRawDataDeserializer);
             }
 
@@ -402,6 +466,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(input));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 _runtime.clients()
                         .callBlocking(uploadAliasedRawDataChannel, _request.build(), uploadAliasedRawDataDeserializer);
             }
@@ -411,6 +483,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(getBranchesChannel, _request.build(), getBranchesDeserializer);
             }
 
@@ -420,6 +500,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(
                                 getBranchesDeprecatedChannel, _request.build(), getBranchesDeprecatedDeserializer);
@@ -431,6 +519,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(
                                 getBranchesDeprecatedForRemovalChannel,
@@ -444,6 +540,14 @@ public interface TestServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 _request.putPathParams("branch", _plainSerDe.serializeString(branch));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(resolveBranchChannel, _request.build(), resolveBranchDeserializer);
             }
@@ -453,6 +557,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(testParamChannel, _request.build(), testParamDeserializer);
             }
 
@@ -478,6 +590,14 @@ public interface TestServiceBlocking {
                 }
                 if (optionalEnd.isPresent()) {
                     _request.putQueryParams("optionalEnd", _plainSerDe.serializeRid(optionalEnd.get()));
+                }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
                 }
                 return _runtime.clients()
                         .callBlocking(testQueryParamsChannel, _request.build(), testQueryParamsDeserializer);
@@ -506,6 +626,14 @@ public interface TestServiceBlocking {
                 if (optionalEnd.isPresent()) {
                     _request.putQueryParams("optionalEnd", _plainSerDe.serializeRid(optionalEnd.get()));
                 }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 _runtime.clients()
                         .callBlocking(
                                 testNoResponseQueryParamsChannel,
@@ -517,6 +645,14 @@ public interface TestServiceBlocking {
             public boolean testBoolean(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(testBooleanChannel, _request.build(), testBooleanDeserializer);
             }
 
@@ -524,6 +660,14 @@ public interface TestServiceBlocking {
             public double testDouble(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(testDoubleChannel, _request.build(), testDoubleDeserializer);
             }
 
@@ -531,6 +675,14 @@ public interface TestServiceBlocking {
             public int testInteger(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(testIntegerChannel, _request.build(), testIntegerDeserializer);
             }
 
@@ -539,6 +691,14 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testPostOptionalSerializer.serialize(maybeString));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(testPostOptionalChannel, _request.build(), testPostOptionalDeserializer);
             }
@@ -553,6 +713,14 @@ public interface TestServiceBlocking {
                 }
                 if (maybeDouble.isPresent()) {
                     _request.putQueryParams("maybeDouble", _plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
+                }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
                 }
                 _runtime.clients()
                         .callBlocking(
@@ -569,6 +737,14 @@ public interface TestServiceBlocking {
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 for (AliasedString stringsElement : strings) {
                     _request.putQueryParams("strings", _plainSerDe.serializeString(stringsElement.get()));
+                }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
                 }
                 _runtime.clients().callBlocking(getForStringsChannel, _request.build(), getForStringsDeserializer);
             }

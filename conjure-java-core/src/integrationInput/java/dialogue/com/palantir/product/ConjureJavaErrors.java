@@ -1,9 +1,15 @@
 package dialogue.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
+import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
@@ -38,5 +44,47 @@ public final class ConjureJavaErrors {
     public static boolean isJavaCompilationFailed(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return JAVA_COMPILATION_FAILED.name().equals(remoteException.getError().errorName());
+    }
+    public static record JavaCompilationFailedParameters() {}
+
+    public static final class JavaCompilationFailedSerializableError
+            extends AbstractSerializableError<JavaCompilationFailedParameters> {
+        @org.jspecify.annotations.Nullable
+        private final Map<String, String> legacyParameters;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        JavaCompilationFailedSerializableError(
+                @JsonProperty("errorCode") @Safe String errorCode,
+                @JsonProperty("errorName") @Safe String errorName,
+                @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
+                @JsonProperty("parameters") JavaCompilationFailedParameters parameters,
+                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
+                        Map<String, String> legacyParameters) {
+            super(errorCode, errorName, errorInstanceId, parameters);
+            this.legacyParameters = legacyParameters;
+        }
+
+        public SerializableError toSerializableError() {
+            SerializableError.Builder builder = SerializableError.builder();
+            if (legacyParameters != null) {
+                builder.putAllParameters(legacyParameters);
+            } else {
+            }
+            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
+            return builder.build();
+        }
+    }
+
+    public static final class JavaCompilationFailedException extends RemoteException {
+        private JavaCompilationFailedSerializableError error;
+
+        public JavaCompilationFailedException(JavaCompilationFailedSerializableError error, int status) {
+            super(error.toSerializableError(), status);
+            this.error = error;
+        }
+
+        public JavaCompilationFailedSerializableError error() {
+            return error;
+        }
     }
 }

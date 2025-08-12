@@ -199,7 +199,7 @@ public final class UndertowEteResource implements UndertowEteService {
 
     @Override
     public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
-        if (headerParameter.equals("JSON") || headerParameter.equals("TOSTRING")) {
+        if (headerParameter.startsWith("JSON") || headerParameter.equals("TOSTRING")) {
             throw ConjureErrors.errorWithComplexArgs(
                     PrimitiveExample.builder()
                             .stringVal("example-string")
