@@ -47,6 +47,14 @@ public interface ServiceUsingExternalTypesAsync {
                 Request.Builder _request = Request.builder();
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
                 _request.body(externalSerializer.serialize(body));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(externalChannel, _request.build(), externalDeserializer);
             }
 

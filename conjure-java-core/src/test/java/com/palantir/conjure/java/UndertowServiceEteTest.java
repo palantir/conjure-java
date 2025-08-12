@@ -37,6 +37,7 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogue.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
 import dialogue.com.palantir.product.EteBinaryServiceBlocking;
 import dialogue.com.palantir.product.EteServiceAsync;
 import dialogue.com.palantir.product.EteServiceBlocking;
@@ -566,11 +567,12 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void test_json_parameter_errors() {
-        // Get the parameters when we use TOSTRING serialization
+    public void testStringParametersDoNotChangeWhenUsingJsonAndJavaString() {
         Map<String, String> toStringParams = Map.of();
         Map<String, String> jsonParams = Map.of();
         try {
+            // The `TOSTRING` header does nothing: it's not used in `ConjureExceptions` to change any serialization
+            // behavior. It's just a way to tell the EteResource to throw an error.
             client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "TOSTRING");
         } catch (RemoteException e) {
             toStringParams = e.getError().parameters();
@@ -578,13 +580,23 @@ public final class UndertowServiceEteTest extends TestBase {
 
         // Get the parameters when we use JSON serialization
         try {
-            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON");
+            // The `JSON+JAVA-STRING` header is read by `ConjureExceptions` to change the serialization
+            // behavior. The `JSON` representation of the parameters is sent in the `parameters` field of the Conjure
+            // error, and a new field `legacyParameters` is added containing the string representation of the
+            // parameters.
+            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON+JAVA-STRING");
         } catch (RemoteException e) {
+            // .getError() returns the SerializableError which should contain the legacy parameters sent over the wire.
             jsonParams = e.getError().parameters();
+            // e should be an instance of ErrorWithComplexArgsException, which has rich parameters as well.
+            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
+                assertThat(exception.error().parameters().optionalExample().getOptionalString())
+                        .contains("optional-value");
+            });
         }
 
         // Assert that the two maps contain the same keys and values, logging any differences
-        assertThat(jsonParams).containsExactlyInAnyOrderEntriesOf(toStringParams);
+        assertThat(jsonParams).containsExactlyEntriesOf(toStringParams);
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {

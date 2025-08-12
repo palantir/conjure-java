@@ -186,6 +186,14 @@ public interface ErrorServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testBasicErrorSerializer.serialize(shouldThrowError));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(testBasicErrorChannel, _request.build(), testBasicErrorDeserializer);
             }
@@ -195,6 +203,14 @@ public interface ErrorServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testImportedErrorSerializer.serialize(shouldThrowError));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(testImportedErrorChannel, _request.build(), testImportedErrorDeserializer);
             }
@@ -205,6 +221,14 @@ public interface ErrorServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testMultipleErrorsAndPackagesSerializer.serialize(errorToThrow));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(
                                 testMultipleErrorsAndPackagesChannel,
@@ -217,6 +241,14 @@ public interface ErrorServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testEmptyBodySerializer.serialize(shouldThrowError));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
             }
@@ -226,6 +258,14 @@ public interface ErrorServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testBinarySerializer.serialize(shouldThrowError));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().callBlocking(testBinaryChannel, _request.build(), testBinaryDeserializer);
             }
 
@@ -235,6 +275,14 @@ public interface ErrorServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testOptionalBinarySerializer.serialize(mode));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .callBlocking(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
             }

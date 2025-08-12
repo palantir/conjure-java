@@ -9,6 +9,7 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -51,20 +52,28 @@ public final class ConjureErrors {
 
     public static final class DifferentPackageErrSerializableError
             extends AbstractSerializableError<DifferentPackageErrParameters> {
+        @org.jspecify.annotations.Nullable
+        private final Map<String, String> legacyParameters;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         DifferentPackageErrSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") DifferentPackageErrParameters parameters) {
+                @JsonProperty("parameters") DifferentPackageErrParameters parameters,
+                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
+                        Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
+            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder()
-                    .errorCode(errorCode())
-                    .errorName(errorName())
-                    .errorInstanceId(errorInstanceId());
+            SerializableError.Builder builder = SerializableError.builder();
+            if (legacyParameters != null) {
+                builder.putAllParameters(legacyParameters);
+            } else {
+            }
+            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
             return builder.build();
         }
     }
@@ -72,12 +81,9 @@ public final class ConjureErrors {
     public static final class DifferentPackageErrException extends RemoteException {
         private DifferentPackageErrSerializableError error;
 
-        private int status;
-
         public DifferentPackageErrException(DifferentPackageErrSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
-            this.status = status;
         }
 
         public DifferentPackageErrSerializableError error() {

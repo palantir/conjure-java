@@ -8,7 +8,9 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import java.util.Map;
 import javax.annotation.processing.Generated;
+import org.jspecify.annotations.Nullable;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificTwoErrors {
@@ -28,20 +30,27 @@ public final class EndpointSpecificTwoErrors {
 
     public static final class DifferentNamespaceSerializableError
             extends AbstractSerializableError<DifferentNamespaceParameters> {
+        @Nullable
+        private final Map<String, String> legacyParameters;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         DifferentNamespaceSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") DifferentNamespaceParameters parameters) {
+                @JsonProperty("parameters") DifferentNamespaceParameters parameters,
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
+            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder()
-                    .errorCode(errorCode())
-                    .errorName(errorName())
-                    .errorInstanceId(errorInstanceId());
+            SerializableError.Builder builder = SerializableError.builder();
+            if (legacyParameters != null) {
+                builder.putAllParameters(legacyParameters);
+            } else {
+            }
+            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
             return builder.build();
         }
     }
@@ -49,12 +58,9 @@ public final class EndpointSpecificTwoErrors {
     public static final class DifferentNamespaceException extends RemoteException {
         private DifferentNamespaceSerializableError error;
 
-        private int status;
-
         public DifferentNamespaceException(DifferentNamespaceSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
-            this.status = status;
         }
 
         public DifferentNamespaceSerializableError error() {

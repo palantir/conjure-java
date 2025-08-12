@@ -9,8 +9,10 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.processing.Generated;
+import org.jspecify.annotations.Nullable;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificErrors {
@@ -31,22 +33,29 @@ public final class EndpointSpecificErrors {
 
     public static final class EndpointErrorSerializableError
             extends AbstractSerializableError<EndpointErrorParameters> {
+        @Nullable
+        private final Map<String, String> legacyParameters;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         EndpointErrorSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") EndpointErrorParameters parameters) {
+                @JsonProperty("parameters") EndpointErrorParameters parameters,
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
+            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder()
-                    .putParameters("typeName", Objects.toString(parameters().typeName()))
-                    .putParameters("typeDef", Objects.toString(parameters().typeDef()))
-                    .errorCode(errorCode())
-                    .errorName(errorName())
-                    .errorInstanceId(errorInstanceId());
+            SerializableError.Builder builder = SerializableError.builder();
+            if (legacyParameters != null) {
+                builder.putAllParameters(legacyParameters);
+            } else {
+                builder.putParameters("typeName", Objects.toString(parameters().typeName()))
+                        .putParameters("typeDef", Objects.toString(parameters().typeDef()));
+            }
+            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
             return builder.build();
         }
     }
@@ -54,12 +63,9 @@ public final class EndpointSpecificErrors {
     public static final class EndpointErrorException extends RemoteException {
         private EndpointErrorSerializableError error;
 
-        private int status;
-
         public EndpointErrorException(EndpointErrorSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
-            this.status = status;
         }
 
         public EndpointErrorSerializableError error() {

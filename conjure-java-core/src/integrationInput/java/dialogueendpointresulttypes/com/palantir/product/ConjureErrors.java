@@ -8,8 +8,10 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.processing.Generated;
+import org.jspecify.annotations.Nullable;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
@@ -32,22 +34,30 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseSafeArgErrSerializableError
             extends AbstractSerializableError<ConflictingCauseSafeArgErrParameters> {
+        @Nullable
+        private final Map<String, String> legacyParameters;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ConflictingCauseSafeArgErrSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") ConflictingCauseSafeArgErrParameters parameters) {
+                @JsonProperty("parameters") ConflictingCauseSafeArgErrParameters parameters,
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
+            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder()
-                    .putParameters("cause", Objects.toString(parameters().cause_()))
-                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow_()))
-                    .errorCode(errorCode())
-                    .errorName(errorName())
-                    .errorInstanceId(errorInstanceId());
+            SerializableError.Builder builder = SerializableError.builder();
+            if (legacyParameters != null) {
+                builder.putAllParameters(legacyParameters);
+            } else {
+                builder.putParameters("cause", Objects.toString(parameters().cause_()))
+                        .putParameters(
+                                "shouldThrow", Objects.toString(parameters().shouldThrow_()));
+            }
+            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
             return builder.build();
         }
     }
@@ -55,12 +65,9 @@ public final class ConjureErrors {
     public static final class ConflictingCauseSafeArgErrException extends RemoteException {
         private ConflictingCauseSafeArgErrSerializableError error;
 
-        private int status;
-
         public ConflictingCauseSafeArgErrException(ConflictingCauseSafeArgErrSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
-            this.status = status;
         }
 
         public ConflictingCauseSafeArgErrSerializableError error() {

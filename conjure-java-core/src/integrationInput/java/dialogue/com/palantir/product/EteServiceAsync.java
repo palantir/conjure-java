@@ -1354,6 +1354,14 @@ public interface EteServiceAsync {
             public ListenableFuture<String> string(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(stringChannel, _request.build(), stringDeserializer);
             }
 
@@ -1361,6 +1369,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Integer> integer(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(integerChannel, _request.build(), integerDeserializer);
             }
 
@@ -1368,6 +1384,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Double> double_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(double_Channel, _request.build(), double_Deserializer);
             }
 
@@ -1375,6 +1399,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Boolean> boolean_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(boolean_Channel, _request.build(), boolean_Deserializer);
             }
 
@@ -1382,6 +1414,14 @@ public interface EteServiceAsync {
             public ListenableFuture<SafeLong> safelong(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(safelongChannel, _request.build(), safelongDeserializer);
             }
 
@@ -1389,6 +1429,14 @@ public interface EteServiceAsync {
             public ListenableFuture<ResourceIdentifier> rid(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(ridChannel, _request.build(), ridDeserializer);
             }
 
@@ -1396,6 +1444,14 @@ public interface EteServiceAsync {
             public ListenableFuture<BearerToken> bearertoken(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(bearertokenChannel, _request.build(), bearertokenDeserializer);
             }
 
@@ -1403,6 +1459,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Optional<String>> optionalString(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(optionalStringChannel, _request.build(), optionalStringDeserializer);
             }
 
@@ -1410,6 +1474,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Optional<String>> optionalEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(optionalEmptyChannel, _request.build(), optionalEmptyDeserializer);
             }
 
@@ -1417,6 +1489,14 @@ public interface EteServiceAsync {
             public ListenableFuture<OffsetDateTime> datetime(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(datetimeChannel, _request.build(), datetimeDeserializer);
             }
 
@@ -1424,6 +1504,14 @@ public interface EteServiceAsync {
             public ListenableFuture<InputStream> binary(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(
                                 binaryChannel,
@@ -1436,6 +1524,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("param", _plainSerDe.serializeString(param));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(pathChannel, _request.build(), pathDeserializer);
             }
 
@@ -1444,6 +1540,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("param", Objects.toString(param));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(externalLongPathChannel, _request.build(), externalLongPathDeserializer);
             }
 
@@ -1454,6 +1558,14 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 if (param.isPresent()) {
                     _request.putQueryParams("param", Objects.toString(param.get()));
+                }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
                 }
                 return _runtime.clients()
                         .call(
@@ -1468,6 +1580,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(notNullBodySerializer.serialize(notNullBody));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(notNullBodyChannel, _request.build(), notNullBodyDeserializer);
             }
 
@@ -1477,6 +1597,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("queryParamName", _plainSerDe.serializeString(queryParamName.get()));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(aliasOneChannel, _request.build(), aliasOneDeserializer);
             }
 
@@ -1490,6 +1618,14 @@ public interface EteServiceAsync {
                             "queryParamName",
                             _plainSerDe.serializeString(queryParamName.get().get()));
                 }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(optionalAliasOneChannel, _request.build(), optionalAliasOneDeserializer);
             }
 
@@ -1501,6 +1637,14 @@ public interface EteServiceAsync {
                 _request.putQueryParams(
                         "queryParamName",
                         _plainSerDe.serializeString(queryParamName.get().get()));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(aliasTwoChannel, _request.build(), aliasTwoDeserializer);
             }
 
@@ -1510,6 +1654,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(
                                 notNullBodyExternalImportChannel,
@@ -1524,6 +1676,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(optionalBodyExternalImportSerializer.serialize(body));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(
                                 optionalBodyExternalImportChannel,
@@ -1541,6 +1701,14 @@ public interface EteServiceAsync {
                 if (query.isPresent()) {
                     _request.putQueryParams("query", Objects.toString(query.get()));
                 }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(
                                 optionalQueryExternalImportChannel,
@@ -1552,6 +1720,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Void> noReturn(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(noReturnChannel, _request.build(), noReturnDeserializer);
             }
 
@@ -1560,6 +1736,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("queryParamName", Objects.toString(queryParamName));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(enumQueryChannel, _request.build(), enumQueryDeserializer);
             }
 
@@ -1570,6 +1754,14 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 for (SimpleEnum queryParamNameElement : queryParamName) {
                     _request.putQueryParams("queryParamName", Objects.toString(queryParamNameElement));
+                }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
                 }
                 return _runtime.clients().call(enumListQueryChannel, _request.build(), enumListQueryDeserializer);
             }
@@ -1582,6 +1774,14 @@ public interface EteServiceAsync {
                 if (queryParamName.isPresent()) {
                     _request.putQueryParams("queryParamName", Objects.toString(queryParamName.get()));
                 }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(optionalEnumQueryChannel, _request.build(), optionalEnumQueryDeserializer);
             }
@@ -1591,6 +1791,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(enumHeaderChannel, _request.build(), enumHeaderDeserializer);
             }
 
@@ -1600,6 +1808,14 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients().call(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
             }
 
@@ -1609,6 +1825,14 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(
                                 errorParameterSerializationChannel,
@@ -1624,6 +1848,14 @@ public interface EteServiceAsync {
                 if (input.isPresent()) {
                     _request.putQueryParams(
                             "input", Objects.toString(input.get().get()));
+                }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
                 }
                 return _runtime.clients()
                         .call(aliasLongEndpointChannel, _request.build(), aliasLongEndpointDeserializer);
@@ -1648,6 +1880,14 @@ public interface EteServiceAsync {
                 for (int intsElement : ints) {
                     _request.putQueryParams("ints", _plainSerDe.serializeInteger(intsElement));
                 }
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(complexQueryParametersChannel, _request.build(), complexQueryParametersDeserializer);
             }
@@ -1657,6 +1897,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(receiveListOfOptionalsSerializer.serialize(value));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(receiveListOfOptionalsChannel, _request.build(), receiveListOfOptionalsDeserializer);
             }
@@ -1666,6 +1914,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(receiveSetOfOptionalsSerializer.serialize(value));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
             }
@@ -1675,6 +1931,14 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(receiveListOfStringsSerializer.serialize(value));
+                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe()
+                                    .errorParameterDeserializationFormat()
+                                    .get()
+                                    .toString());
+                }
                 return _runtime.clients()
                         .call(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
             }

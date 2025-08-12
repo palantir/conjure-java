@@ -252,6 +252,17 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         methodBuilder.addCode(request);
+        // If the BodySerDe.errorParameterDeserializationFormat field is set, add the header
+        methodBuilder.addCode(CodeBlock.builder()
+                .beginControlFlow("if ($L.bodySerDe().errorParameterDeserializationFormat().isPresent())", RUNTIME)
+                .add(
+                        "$L.putHeaderParams($S,"
+                                + " $L.bodySerDe().errorParameterDeserializationFormat().get().toString());",
+                        REQUEST,
+                        "Accept-Conjure-Error-Parameter-Format", // TODO(pm): make this public.
+                        RUNTIME)
+                .endControlFlow()
+                .build());
         methodBuilder.addCode(methodType.switchBy(def.getReturns().isPresent() ? "return " : "", "return "));
         methodBuilder.addCode(execute);
 
