@@ -374,7 +374,7 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseSafeArgSerializableError
             extends AbstractSerializableError<ConflictingCauseSafeArgParameters> {
-        @org.jspecify.annotations.Nullable
+        @Nullable
         private final Map<String, String> legacyParameters;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -383,8 +383,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") ConflictingCauseSafeArgParameters parameters,
-                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
-                        Map<String, String> legacyParameters) {
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
             this.legacyParameters = legacyParameters;
         }
@@ -405,7 +404,7 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseUnsafeArgSerializableError
             extends AbstractSerializableError<ConflictingCauseUnsafeArgParameters> {
-        @org.jspecify.annotations.Nullable
+        @Nullable
         private final Map<String, String> legacyParameters;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -414,8 +413,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") ConflictingCauseUnsafeArgParameters parameters,
-                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
-                        Map<String, String> legacyParameters) {
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
             this.legacyParameters = legacyParameters;
         }
@@ -436,7 +434,7 @@ public final class ConjureErrors {
 
     public static final class ErrorWithComplexArgsSerializableError
             extends AbstractSerializableError<ErrorWithComplexArgsParameters> {
-        @org.jspecify.annotations.Nullable
+        @Nullable
         private final Map<String, String> legacyParameters;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -445,8 +443,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") ErrorWithComplexArgsParameters parameters,
-                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
-                        Map<String, String> legacyParameters) {
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
             this.legacyParameters = legacyParameters;
         }
@@ -499,7 +496,7 @@ public final class ConjureErrors {
 
     public static final class InvalidServiceDefinitionSerializableError
             extends AbstractSerializableError<InvalidServiceDefinitionParameters> {
-        @org.jspecify.annotations.Nullable
+        @Nullable
         private final Map<String, String> legacyParameters;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -508,8 +505,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") InvalidServiceDefinitionParameters parameters,
-                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
-                        Map<String, String> legacyParameters) {
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
             this.legacyParameters = legacyParameters;
         }
@@ -531,7 +527,7 @@ public final class ConjureErrors {
 
     public static final class InvalidTypeDefinitionSerializableError
             extends AbstractSerializableError<InvalidTypeDefinitionParameters> {
-        @org.jspecify.annotations.Nullable
+        @Nullable
         private final Map<String, String> legacyParameters;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -540,8 +536,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") InvalidTypeDefinitionParameters parameters,
-                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
-                        Map<String, String> legacyParameters) {
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
             this.legacyParameters = legacyParameters;
         }

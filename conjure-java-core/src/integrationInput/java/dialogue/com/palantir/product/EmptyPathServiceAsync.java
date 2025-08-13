@@ -34,34 +34,38 @@ public interface EmptyPathServiceAsync {
             private final EndpointChannel emptyPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEmptyPathEndpoints.emptyPath);
 
-            private final Deserializer<Boolean> emptyPathDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Boolean>builder()
-                            .returnType(new TypeMarker<Boolean>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Boolean> emptyPathDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Boolean>() {}));
+
+            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
+                return ExceptionDeserializerArgs.<T>builder()
+                        .returnType(returnType)
+                        .exception(
+                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
+                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
+                        .exception(
+                                ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
+                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
+                        .exception(
+                                ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
+                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
+                        .exception(
+                                ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
+                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
+                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
+                        .exception(
+                                ConjureErrors.INVALID_TYPE_DEFINITION.name(),
+                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
+                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
+                        .exception(
+                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
+                        .build();
+            }
 
             @Override
             public ListenableFuture<Boolean> emptyPath() {

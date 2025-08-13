@@ -18,7 +18,9 @@ package com.palantir.conjure.java.services.dialogue;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.PackageToErrorDefinitionsMapping;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -26,6 +28,7 @@ import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.HeaderParameterType;
@@ -60,6 +63,7 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.javapoet.TypeVariableName;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.List;
@@ -103,6 +107,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
                 .build());
 
+        if (options.deserializeErrorResponsesAsJson()) {
+            impl.addMethod(createHelperToConstructExceptionDeserializerArgs(
+                    def.getServiceName().getPackage()));
+        }
+
         def.getEndpoints().forEach(endpoint -> {
             endpoint.getArgs().stream()
                     .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
@@ -129,6 +138,45 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return method;
+    }
+
+    private MethodSpec createHelperToConstructExceptionDeserializerArgs(String serviceDefinitionPackageName) {
+        List<ErrorDefinition> errorDefinitions = packageToErrorDefinitionsMapping.get(serviceDefinitionPackageName);
+        TypeVariableName typeVariableT = TypeVariableName.get("T");
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createExceptionDeserializerArgs")
+                .addTypeVariable(typeVariableT)
+                .addModifiers(Modifier.PRIVATE)
+                .returns(ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.class), typeVariableT))
+                .addParameter(ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeVariableT), "returnType");
+
+        CodeBlock.Builder exceptions = CodeBlock.builder()
+                .add("return $T.<$T>builder()", ExceptionDeserializerArgs.class, typeVariableT)
+                .add(".returnType(returnType)");
+        // Add exceptions from error definitions
+        for (ErrorDefinition errorDef : errorDefinitions) {
+            String errorName = errorDef.getErrorName().getName();
+            ClassName errorClass = ClassName.get(
+                    Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
+                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
+            ClassName serializableErrorClass = ClassName.get(
+                    Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
+                    errorName + "SerializableError");
+            ClassName exceptionClass = ClassName.get(
+                    Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
+                    errorName + "Exception");
+            exceptions.add(
+                    ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
+                    errorClass,
+                    TypeMarker.class,
+                    serializableErrorClass,
+                    TypeMarker.class,
+                    exceptionClass);
+        }
+        exceptions.add(".build();");
+        return methodBuilder.addCode(exceptions.build()).build();
     }
 
     private ClassName getClassName(ServiceDefinition def) {
