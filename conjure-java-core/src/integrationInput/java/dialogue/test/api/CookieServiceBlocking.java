@@ -4,12 +4,12 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
-import com.palantir.dialogue.DeserializerArgs;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
@@ -35,9 +35,8 @@ public interface CookieServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
             private final Deserializer<Void> eatCookiesDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Void>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Void>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
+                            .returnType(new TypeMarker<Void>() {})
                             .build());
 
             @Override
