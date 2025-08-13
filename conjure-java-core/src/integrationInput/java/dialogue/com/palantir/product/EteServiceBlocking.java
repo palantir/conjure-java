@@ -6,12 +6,12 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
-import com.palantir.dialogue.DeserializerArgs;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -219,9 +219,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
             private final Deserializer<String> stringDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<String>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<String>() {})
+                    .deserializer(ExceptionDeserializerArgs.<String>builder()
+                            .returnType(new TypeMarker<String>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -252,9 +251,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.integer);
 
             private final Deserializer<Integer> integerDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Integer>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Integer>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Integer>builder()
+                            .returnType(new TypeMarker<Integer>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -285,9 +283,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.double_);
 
             private final Deserializer<Double> double_Deserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Double>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Double>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Double>builder()
+                            .returnType(new TypeMarker<Double>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -318,9 +315,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.boolean_);
 
             private final Deserializer<Boolean> boolean_Deserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Boolean>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Boolean>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Boolean>builder()
+                            .returnType(new TypeMarker<Boolean>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -351,9 +347,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.safelong);
 
             private final Deserializer<SafeLong> safelongDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<SafeLong>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<SafeLong>() {})
+                    .deserializer(ExceptionDeserializerArgs.<SafeLong>builder()
+                            .returnType(new TypeMarker<SafeLong>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -383,9 +378,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel ridChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.rid);
 
             private final Deserializer<ResourceIdentifier> ridDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<ResourceIdentifier>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<ResourceIdentifier>() {})
+                    .deserializer(ExceptionDeserializerArgs.<ResourceIdentifier>builder()
+                            .returnType(new TypeMarker<ResourceIdentifier>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -416,9 +410,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.bearertoken);
 
             private final Deserializer<BearerToken> bearertokenDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<BearerToken>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<BearerToken>() {})
+                    .deserializer(ExceptionDeserializerArgs.<BearerToken>builder()
+                            .returnType(new TypeMarker<BearerToken>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -449,9 +442,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalString);
 
             private final Deserializer<Optional<String>> optionalStringDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Optional<String>>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Optional<String>>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Optional<String>>builder()
+                            .returnType(new TypeMarker<Optional<String>>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -482,9 +474,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEmpty);
 
             private final Deserializer<Optional<String>> optionalEmptyDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Optional<String>>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Optional<String>>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Optional<String>>builder()
+                            .returnType(new TypeMarker<Optional<String>>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -515,9 +506,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.datetime);
 
             private final Deserializer<OffsetDateTime> datetimeDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<OffsetDateTime>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<OffsetDateTime>() {})
+                    .deserializer(ExceptionDeserializerArgs.<OffsetDateTime>builder()
+                            .returnType(new TypeMarker<OffsetDateTime>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -549,9 +539,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel pathChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.path);
 
             private final Deserializer<String> pathDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<String>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<String>() {})
+                    .deserializer(ExceptionDeserializerArgs.<String>builder()
+                            .returnType(new TypeMarker<String>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -582,9 +571,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.externalLongPath);
 
             private final Deserializer<Long> externalLongPathDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Long>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Long>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Long>builder()
+                            .returnType(new TypeMarker<Long>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -615,9 +603,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
 
             private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Optional<Long>>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Optional<Long>>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Optional<Long>>builder()
+                            .returnType(new TypeMarker<Optional<Long>>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -651,9 +638,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBody);
 
             private final Deserializer<StringAliasExample> notNullBodyDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<StringAliasExample>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<StringAliasExample>() {})
+                    .deserializer(ExceptionDeserializerArgs.<StringAliasExample>builder()
+                            .returnType(new TypeMarker<StringAliasExample>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -684,9 +670,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasOne);
 
             private final Deserializer<StringAliasExample> aliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<StringAliasExample>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<StringAliasExample>() {})
+                    .deserializer(ExceptionDeserializerArgs.<StringAliasExample>builder()
+                            .returnType(new TypeMarker<StringAliasExample>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -717,9 +702,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalAliasOne);
 
             private final Deserializer<StringAliasExample> optionalAliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<StringAliasExample>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<StringAliasExample>() {})
+                    .deserializer(ExceptionDeserializerArgs.<StringAliasExample>builder()
+                            .returnType(new TypeMarker<StringAliasExample>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -750,9 +734,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasTwo);
 
             private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<NestedStringAliasExample>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<NestedStringAliasExample>() {})
+                    .deserializer(ExceptionDeserializerArgs.<NestedStringAliasExample>builder()
+                            .returnType(new TypeMarker<NestedStringAliasExample>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -789,9 +772,9 @@ public interface EteServiceBlocking {
             private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
                     notNullBodyExternalImportDeserializer = _runtime.bodySerDe()
                             .deserializer(
-                                    DeserializerArgs.<allexamples.com.palantir.product.StringAliasExample>builder()
-                                            .baseType(new TypeMarker<>() {})
-                                            .success(
+                                    ExceptionDeserializerArgs
+                                            .<allexamples.com.palantir.product.StringAliasExample>builder()
+                                            .returnType(
                                                     new TypeMarker<
                                                             allexamples.com.palantir.product.StringAliasExample>() {})
                                             .exception(
@@ -844,10 +827,9 @@ public interface EteServiceBlocking {
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportDeserializer = _runtime.bodySerDe()
                             .deserializer(
-                                    DeserializerArgs
+                                    ExceptionDeserializerArgs
                                             .<Optional<allexamples.com.palantir.product.StringAliasExample>>builder()
-                                            .baseType(new TypeMarker<>() {})
-                                            .success(
+                                            .returnType(
                                                     new TypeMarker<
                                                             Optional<
                                                                     allexamples.com.palantir.product
@@ -897,10 +879,9 @@ public interface EteServiceBlocking {
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalQueryExternalImportDeserializer = _runtime.bodySerDe()
                             .deserializer(
-                                    DeserializerArgs
+                                    ExceptionDeserializerArgs
                                             .<Optional<allexamples.com.palantir.product.StringAliasExample>>builder()
-                                            .baseType(new TypeMarker<>() {})
-                                            .success(
+                                            .returnType(
                                                     new TypeMarker<
                                                             Optional<
                                                                     allexamples.com.palantir.product
@@ -948,9 +929,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
             private final Deserializer<Void> noReturnDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Void>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Void>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
+                            .returnType(new TypeMarker<Void>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -981,9 +961,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
 
             private final Deserializer<SimpleEnum> enumQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<SimpleEnum>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<SimpleEnum>() {})
+                    .deserializer(ExceptionDeserializerArgs.<SimpleEnum>builder()
+                            .returnType(new TypeMarker<SimpleEnum>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1014,9 +993,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumListQuery);
 
             private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<List<SimpleEnum>>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<List<SimpleEnum>>() {})
+                    .deserializer(ExceptionDeserializerArgs.<List<SimpleEnum>>builder()
+                            .returnType(new TypeMarker<List<SimpleEnum>>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1047,9 +1025,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEnumQuery);
 
             private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Optional<SimpleEnum>>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Optional<SimpleEnum>>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Optional<SimpleEnum>>builder()
+                            .returnType(new TypeMarker<Optional<SimpleEnum>>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1080,9 +1057,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumHeader);
 
             private final Deserializer<SimpleEnum> enumHeaderDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<SimpleEnum>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<SimpleEnum>() {})
+                    .deserializer(ExceptionDeserializerArgs.<SimpleEnum>builder()
+                            .returnType(new TypeMarker<SimpleEnum>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1113,9 +1089,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
 
             private final Deserializer<String> jsonErrorsHeaderDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<String>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<String>() {})
+                    .deserializer(ExceptionDeserializerArgs.<String>builder()
+                            .returnType(new TypeMarker<String>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1146,9 +1121,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
 
             private final Deserializer<String> errorParameterSerializationDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<String>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<String>() {})
+                    .deserializer(ExceptionDeserializerArgs.<String>builder()
+                            .returnType(new TypeMarker<String>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1179,9 +1153,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
 
             private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Optional<LongAlias>>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Optional<LongAlias>>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Optional<LongAlias>>builder()
+                            .returnType(new TypeMarker<Optional<LongAlias>>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1212,9 +1185,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
             private final Deserializer<Void> complexQueryParametersDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Void>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Void>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
+                            .returnType(new TypeMarker<Void>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1248,9 +1220,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
 
             private final Deserializer<Void> receiveListOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Void>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Void>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
+                            .returnType(new TypeMarker<Void>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1284,9 +1255,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
             private final Deserializer<Void> receiveSetOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Void>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Void>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
+                            .returnType(new TypeMarker<Void>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
@@ -1320,9 +1290,8 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
             private final Deserializer<Void> receiveListOfStringsDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Void>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Void>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
+                            .returnType(new TypeMarker<Void>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},

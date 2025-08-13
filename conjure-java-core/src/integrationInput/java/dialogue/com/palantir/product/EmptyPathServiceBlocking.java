@@ -4,12 +4,12 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
-import com.palantir.dialogue.DeserializerArgs;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
@@ -34,9 +34,8 @@ public interface EmptyPathServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEmptyPathEndpoints.emptyPath);
 
             private final Deserializer<Boolean> emptyPathDeserializer = _runtime.bodySerDe()
-                    .deserializer(DeserializerArgs.<Boolean>builder()
-                            .baseType(new TypeMarker<>() {})
-                            .success(new TypeMarker<Boolean>() {})
+                    .deserializer(ExceptionDeserializerArgs.<Boolean>builder()
+                            .returnType(new TypeMarker<Boolean>() {})
                             .exception(
                                     ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                     new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
