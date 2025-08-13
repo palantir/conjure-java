@@ -11,8 +11,8 @@ import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
-import org.jspecify.annotations.Nullable;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificErrors {

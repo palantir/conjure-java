@@ -52,7 +52,7 @@ public final class ConjureJavaOtherErrors {
 
     public static final class JavaCompilationFailedSerializableError
             extends AbstractSerializableError<JavaCompilationFailedParameters> {
-        @org.jspecify.annotations.Nullable
+        @Nullable
         private final Map<String, String> legacyParameters;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -61,8 +61,7 @@ public final class ConjureJavaOtherErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") JavaCompilationFailedParameters parameters,
-                @JsonProperty("legacyParameters") @org.jspecify.annotations.Nullable
-                        Map<String, String> legacyParameters) {
+                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
             this.legacyParameters = legacyParameters;
         }

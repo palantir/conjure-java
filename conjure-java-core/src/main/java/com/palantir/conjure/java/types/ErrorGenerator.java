@@ -56,8 +56,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
-import org.jspecify.annotations.Nullable;
 
 public final class ErrorGenerator implements Generator {
 

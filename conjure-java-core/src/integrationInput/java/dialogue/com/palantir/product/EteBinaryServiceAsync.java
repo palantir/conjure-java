@@ -10,8 +10,10 @@ import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
+import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
@@ -72,6 +74,36 @@ public interface EteBinaryServiceAsync {
 
             private final EndpointChannel getAliasedChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
+
+            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
+                return ExceptionDeserializerArgs.<T>builder()
+                        .returnType(returnType)
+                        .exception(
+                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
+                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
+                        .exception(
+                                ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
+                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
+                        .exception(
+                                ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
+                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
+                        .exception(
+                                ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
+                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
+                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
+                        .exception(
+                                ConjureErrors.INVALID_TYPE_DEFINITION.name(),
+                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
+                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
+                        .exception(
+                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
+                        .build();
+            }
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {

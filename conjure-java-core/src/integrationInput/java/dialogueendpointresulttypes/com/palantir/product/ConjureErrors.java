@@ -10,8 +10,8 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
-import org.jspecify.annotations.Nullable;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {

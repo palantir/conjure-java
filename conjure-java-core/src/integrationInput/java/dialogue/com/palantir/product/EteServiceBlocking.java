@@ -218,418 +218,80 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
-            private final Deserializer<String> stringDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<String>builder()
-                            .returnType(new TypeMarker<String>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<String> stringDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
 
             private final EndpointChannel integerChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.integer);
 
-            private final Deserializer<Integer> integerDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Integer>builder()
-                            .returnType(new TypeMarker<Integer>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Integer> integerDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Integer>() {}));
 
             private final EndpointChannel double_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.double_);
 
-            private final Deserializer<Double> double_Deserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Double>builder()
-                            .returnType(new TypeMarker<Double>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Double> double_Deserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Double>() {}));
 
             private final EndpointChannel boolean_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.boolean_);
 
-            private final Deserializer<Boolean> boolean_Deserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Boolean>builder()
-                            .returnType(new TypeMarker<Boolean>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Boolean> boolean_Deserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Boolean>() {}));
 
             private final EndpointChannel safelongChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.safelong);
 
-            private final Deserializer<SafeLong> safelongDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<SafeLong>builder()
-                            .returnType(new TypeMarker<SafeLong>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<SafeLong> safelongDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SafeLong>() {}));
 
             private final EndpointChannel ridChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.rid);
 
             private final Deserializer<ResourceIdentifier> ridDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<ResourceIdentifier>builder()
-                            .returnType(new TypeMarker<ResourceIdentifier>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<ResourceIdentifier>() {}));
 
             private final EndpointChannel bearertokenChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.bearertoken);
 
             private final Deserializer<BearerToken> bearertokenDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<BearerToken>builder()
-                            .returnType(new TypeMarker<BearerToken>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<BearerToken>() {}));
 
             private final EndpointChannel optionalStringChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalString);
 
             private final Deserializer<Optional<String>> optionalStringDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Optional<String>>builder()
-                            .returnType(new TypeMarker<Optional<String>>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<String>>() {}));
 
             private final EndpointChannel optionalEmptyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEmpty);
 
             private final Deserializer<Optional<String>> optionalEmptyDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Optional<String>>builder()
-                            .returnType(new TypeMarker<Optional<String>>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<String>>() {}));
 
             private final EndpointChannel datetimeChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.datetime);
 
             private final Deserializer<OffsetDateTime> datetimeDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<OffsetDateTime>builder()
-                            .returnType(new TypeMarker<OffsetDateTime>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<OffsetDateTime>() {}));
 
             private final EndpointChannel binaryChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.binary);
 
             private final EndpointChannel pathChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.path);
 
-            private final Deserializer<String> pathDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<String>builder()
-                            .returnType(new TypeMarker<String>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<String> pathDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
 
             private final EndpointChannel externalLongPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.externalLongPath);
 
-            private final Deserializer<Long> externalLongPathDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Long>builder()
-                            .returnType(new TypeMarker<Long>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Long> externalLongPathDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Long>() {}));
 
             private final EndpointChannel optionalExternalLongQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
 
             private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Optional<Long>>builder()
-                            .returnType(new TypeMarker<Optional<Long>>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<Long>>() {}));
 
             private final Serializer<StringAliasExample> notNullBodySerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
@@ -638,129 +300,25 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBody);
 
             private final Deserializer<StringAliasExample> notNullBodyDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<StringAliasExample>builder()
-                            .returnType(new TypeMarker<StringAliasExample>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
 
             private final EndpointChannel aliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasOne);
 
             private final Deserializer<StringAliasExample> aliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<StringAliasExample>builder()
-                            .returnType(new TypeMarker<StringAliasExample>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
 
             private final EndpointChannel optionalAliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalAliasOne);
 
             private final Deserializer<StringAliasExample> optionalAliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<StringAliasExample>builder()
-                            .returnType(new TypeMarker<StringAliasExample>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
 
             private final EndpointChannel aliasTwoChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasTwo);
 
             private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<NestedStringAliasExample>builder()
-                            .returnType(new TypeMarker<NestedStringAliasExample>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<NestedStringAliasExample>() {}));
 
             private final Serializer<allexamples.com.palantir.product.StringAliasExample>
                     notNullBodyExternalImportSerializer = _runtime.bodySerDe()
@@ -771,50 +329,8 @@ public interface EteServiceBlocking {
 
             private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
                     notNullBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(
-                                    ExceptionDeserializerArgs
-                                            .<allexamples.com.palantir.product.StringAliasExample>builder()
-                                            .returnType(
-                                                    new TypeMarker<
-                                                            allexamples.com.palantir.product.StringAliasExample>() {})
-                                            .exception(
-                                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .ConflictingCauseSafeArgSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                                            .exception(
-                                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .ConflictingCauseUnsafeArgSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                                            .exception(
-                                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                                            .exception(
-                                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .InvalidServiceDefinitionSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureErrors.InvalidServiceDefinitionException>() {})
-                                            .exception(
-                                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                                            .exception(
-                                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                                    new TypeMarker<
-                                                            ConjureJavaErrors
-                                                                    .JavaCompilationFailedSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureJavaErrors.JavaCompilationFailedException>() {})
-                                            .build());
+                            .deserializer(createExceptionDeserializerArgs(
+                                    new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {}));
 
             private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportSerializer = _runtime.bodySerDe()
@@ -826,392 +342,72 @@ public interface EteServiceBlocking {
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(
-                                    ExceptionDeserializerArgs
-                                            .<Optional<allexamples.com.palantir.product.StringAliasExample>>builder()
-                                            .returnType(
-                                                    new TypeMarker<
-                                                            Optional<
-                                                                    allexamples.com.palantir.product
-                                                                            .StringAliasExample>>() {})
-                                            .exception(
-                                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .ConflictingCauseSafeArgSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                                            .exception(
-                                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .ConflictingCauseUnsafeArgSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                                            .exception(
-                                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                                            .exception(
-                                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .InvalidServiceDefinitionSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureErrors.InvalidServiceDefinitionException>() {})
-                                            .exception(
-                                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                                            .exception(
-                                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                                    new TypeMarker<
-                                                            ConjureJavaErrors
-                                                                    .JavaCompilationFailedSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureJavaErrors.JavaCompilationFailedException>() {})
-                                            .build());
+                            .deserializer(createExceptionDeserializerArgs(
+                                    new TypeMarker<
+                                            Optional<allexamples.com.palantir.product.StringAliasExample>>() {}));
 
             private final EndpointChannel optionalQueryExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalQueryExternalImport);
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalQueryExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(
-                                    ExceptionDeserializerArgs
-                                            .<Optional<allexamples.com.palantir.product.StringAliasExample>>builder()
-                                            .returnType(
-                                                    new TypeMarker<
-                                                            Optional<
-                                                                    allexamples.com.palantir.product
-                                                                            .StringAliasExample>>() {})
-                                            .exception(
-                                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .ConflictingCauseSafeArgSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                                            .exception(
-                                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .ConflictingCauseUnsafeArgSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                                            .exception(
-                                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                                            .exception(
-                                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors
-                                                                    .InvalidServiceDefinitionSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureErrors.InvalidServiceDefinitionException>() {})
-                                            .exception(
-                                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                                    new TypeMarker<
-                                                            ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                                            .exception(
-                                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                                    new TypeMarker<
-                                                            ConjureJavaErrors
-                                                                    .JavaCompilationFailedSerializableError>() {},
-                                                    new TypeMarker<
-                                                            ConjureJavaErrors.JavaCompilationFailedException>() {})
-                                            .build());
+                            .deserializer(createExceptionDeserializerArgs(
+                                    new TypeMarker<
+                                            Optional<allexamples.com.palantir.product.StringAliasExample>>() {}));
 
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
-            private final Deserializer<Void> noReturnDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
-                            .returnType(new TypeMarker<Void>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Void> noReturnDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
 
-            private final Deserializer<SimpleEnum> enumQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<SimpleEnum>builder()
-                            .returnType(new TypeMarker<SimpleEnum>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<SimpleEnum> enumQueryDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleEnum>() {}));
 
             private final EndpointChannel enumListQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumListQuery);
 
             private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<List<SimpleEnum>>builder()
-                            .returnType(new TypeMarker<List<SimpleEnum>>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<List<SimpleEnum>>() {}));
 
             private final EndpointChannel optionalEnumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEnumQuery);
 
             private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Optional<SimpleEnum>>builder()
-                            .returnType(new TypeMarker<Optional<SimpleEnum>>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<SimpleEnum>>() {}));
 
             private final EndpointChannel enumHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumHeader);
 
-            private final Deserializer<SimpleEnum> enumHeaderDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<SimpleEnum>builder()
-                            .returnType(new TypeMarker<SimpleEnum>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<SimpleEnum> enumHeaderDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleEnum>() {}));
 
             private final EndpointChannel jsonErrorsHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
 
-            private final Deserializer<String> jsonErrorsHeaderDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<String>builder()
-                            .returnType(new TypeMarker<String>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<String> jsonErrorsHeaderDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
 
-            private final Deserializer<String> errorParameterSerializationDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<String>builder()
-                            .returnType(new TypeMarker<String>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<String> errorParameterSerializationDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
 
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
 
             private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Optional<LongAlias>>builder()
-                            .returnType(new TypeMarker<Optional<LongAlias>>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<LongAlias>>() {}));
 
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
-            private final Deserializer<Void> complexQueryParametersDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
-                            .returnType(new TypeMarker<Void>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Void> complexQueryParametersDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
@@ -1219,34 +415,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
 
-            private final Deserializer<Void> receiveListOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
-                            .returnType(new TypeMarker<Void>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Void> receiveListOfOptionalsDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
@@ -1254,34 +424,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
-            private final Deserializer<Void> receiveSetOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
-                            .returnType(new TypeMarker<Void>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<List<String>> receiveListOfStringsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
@@ -1289,34 +433,38 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveListOfStringsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
-            private final Deserializer<Void> receiveListOfStringsDeserializer = _runtime.bodySerDe()
-                    .deserializer(ExceptionDeserializerArgs.<Void>builder()
-                            .returnType(new TypeMarker<Void>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                            .exception(
-                                    ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                            .exception(
-                                    ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                            .exception(
-                                    ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                            .build());
+            private final Deserializer<Void> receiveListOfStringsDeserializer =
+                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+
+            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
+                return ExceptionDeserializerArgs.<T>builder()
+                        .returnType(returnType)
+                        .exception(
+                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
+                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
+                        .exception(
+                                ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
+                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
+                        .exception(
+                                ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
+                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
+                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
+                        .exception(
+                                ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
+                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
+                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
+                        .exception(
+                                ConjureErrors.INVALID_TYPE_DEFINITION.name(),
+                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
+                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
+                        .exception(
+                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
+                        .build();
+            }
 
             @Override
             public String string(AuthHeader authHeader) {
