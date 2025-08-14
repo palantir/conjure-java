@@ -54,6 +54,10 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --defensiveCollections
                       Makes immutable copies of collections for union and alias types, respecting the 
                       --nonNullCollections flag.
+        --sealedUnions
+                      Uses sealed classes for union type generation.
+        --sealedUnionVisitors
+                      If --sealedUnions is enabled, this flag enables visitor generation for back-compatibility.
 
 ### Known Tag Values
 

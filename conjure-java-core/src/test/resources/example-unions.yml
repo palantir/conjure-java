@@ -1,0 +1,26 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      SimpleUnion:
+        union:
+          foo: string
+          bar: integer
+          baz: safelong
+      UnionReservedNames:
+        union:
+          known: string
+          unknown: string
+          if: string
+          new: string
+          interface: string
+          void: string
+          return: string
+          private: string
+          public: string
+          int: string
+          import: string
+          final: string
+          throws: string
+          static: string
+          unionReservedNames: string

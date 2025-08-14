@@ -221,6 +221,28 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Uses sealed classes for union type generation.
+     * <p>
+     * Warning: Disabling this flag after publishing union objects with this flag enabled is an ABI break (additional
+     * methods which are generated for sealed unions would be removed).
+     */
+    @Value.Default
+    default boolean sealedUnions() {
+        return false;
+    }
+
+    /**
+     * If {@link #sealedUnions} is enabled, this enables visitor generation for back-compatibility.
+     * <p>
+     * Warning: Disabling this flag after publishing union objects with this flag enabled is an ABI break (all visitor
+     * related methods for sealed union types would be removed).
+     */
+    @Value.Default
+    default boolean sealedUnionVisitors() {
+        return true;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
