@@ -66,7 +66,6 @@ project('verification-server-api') {
         api 'com.palantir.dialogue:dialogue-clients'
         api 'com.palantir.dialogue:dialogue-serde'
 
-
         implementation 'com.fasterxml.jackson.core:jackson-annotations'
         implementation 'com.fasterxml.jackson.core:jackson-databind'
         implementation 'com.google.code.findbugs:jsr305'

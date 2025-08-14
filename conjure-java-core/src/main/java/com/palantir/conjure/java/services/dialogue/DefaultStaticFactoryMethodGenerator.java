@@ -15,6 +15,7 @@
  */
 package com.palantir.conjure.java.services.dialogue;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
@@ -213,7 +214,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
 
-        if (returnTypes.isBinaryOrOptionalBinary(className)) {
+        if (returnTypes.isBinaryOrOptionalBinary(className) && !options.deserializeErrorResponsesAsJson()) {
             return Optional.empty();
         }
 
@@ -292,7 +293,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
-                        .filter(type -> returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(type)))
+                        .filter(type -> !options.deserializeErrorResponsesAsJson()
+                                && returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(type)))
                         .map(type -> StaticFactoryMethodGenerator.RUNTIME
                                 + (returnTypes.isOptionalBinary(returnTypes.baseType(type))
                                         ? ".bodySerDe().optionalInputStreamDeserializer()"
