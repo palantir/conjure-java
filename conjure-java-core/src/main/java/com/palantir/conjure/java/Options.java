@@ -210,14 +210,11 @@ public interface Options {
      * This flag has been temporarily added to help us iterate on a safer rollout strategy for endpoint-associated
      * errors.
      * <p>
-     * It is initially set to true, but will quickly be set to false.
-     * <p>
-     * It will also eventually be removed, and you should not use it without letting the Conjure maintainers know.
-     * Otherwise, a future upgrade will break your builds.
+     * This flag will eventually be removed, and you should not use it without letting the Conjure maintainers know.
      */
     @Value.Default
     default boolean dangerousDoNotUseEnableEndpointAssociatedErrors() {
-        return true;
+        return false;
     }
 
     /**
