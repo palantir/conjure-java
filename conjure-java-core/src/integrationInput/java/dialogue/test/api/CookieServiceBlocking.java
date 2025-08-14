@@ -34,8 +34,8 @@ public interface CookieServiceBlocking {
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
-            private final Deserializer<Void> eatCookiesDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> eatCookiesDeserializer = _runtime.bodySerDe()
+                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 return ExceptionDeserializerArgs.<T>builder()

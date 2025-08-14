@@ -277,6 +277,9 @@ public interface EteServiceAsync {
 
             private final EndpointChannel binaryChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.binary);
 
+            private final Deserializer<InputStream> binaryDeserializer = _runtime.bodySerDe()
+                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
+
             private final EndpointChannel pathChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.path);
 
             private final Deserializer<String> pathDeserializer =
@@ -359,8 +362,8 @@ public interface EteServiceAsync {
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
-            private final Deserializer<Void> noReturnDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> noReturnDeserializer = _runtime.bodySerDe()
+                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
@@ -407,8 +410,8 @@ public interface EteServiceAsync {
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
-            private final Deserializer<Void> complexQueryParametersDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> complexQueryParametersDeserializer = _runtime.bodySerDe()
+                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
@@ -416,8 +419,8 @@ public interface EteServiceAsync {
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
 
-            private final Deserializer<Void> receiveListOfOptionalsDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> receiveListOfOptionalsDeserializer = _runtime.bodySerDe()
+                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
@@ -425,8 +428,8 @@ public interface EteServiceAsync {
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
-            private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> receiveSetOfOptionalsDeserializer = _runtime.bodySerDe()
+                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<List<String>> receiveListOfStringsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
@@ -434,8 +437,8 @@ public interface EteServiceAsync {
             private final EndpointChannel receiveListOfStringsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
-            private final Deserializer<Void> receiveListOfStringsDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> receiveListOfStringsDeserializer = _runtime.bodySerDe()
+                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 return ExceptionDeserializerArgs.<T>builder()
@@ -629,11 +632,7 @@ public interface EteServiceAsync {
                                     .get()
                                     .toString());
                 }
-                return _runtime.clients()
-                        .call(
-                                binaryChannel,
-                                _request.build(),
-                                _runtime.bodySerDe().inputStreamDeserializer());
+                return _runtime.clients().call(binaryChannel, _request.build(), binaryDeserializer);
             }
 
             @Override
