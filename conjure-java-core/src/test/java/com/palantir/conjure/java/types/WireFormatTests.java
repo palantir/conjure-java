@@ -82,6 +82,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
+import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -857,6 +858,19 @@ public final class WireFormatTests {
                         defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion.class))
                 .isEqualTo(defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion.map(
                         expected));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize() throws JsonProcessingException {
+        ExampleSealedInterfaceUnion exampleSealedInterfaceUnion = new ExampleSealedInterfaceUnion.Foo("test");
+        assertThat(mapper.writeValueAsString(exampleSealedInterfaceUnion))
+                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", ExampleSealedInterfaceUnion.class))
+                .isEqualTo(new ExampleSealedInterfaceUnion.Foo("test"));
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
