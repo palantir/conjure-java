@@ -108,7 +108,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
                 .build());
 
-        if (options.deserializeErrorResponsesAsJson()) {
+        if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
             impl.addMethod(createHelperToConstructExceptionDeserializerArgs(
                     def.getServiceName().getPackage()));
         }
@@ -214,7 +214,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
 
-        if (returnTypes.isBinaryOrOptionalBinary(className) && !options.deserializeErrorResponsesAsJson()) {
+        if (returnTypes.isBinaryOrOptionalBinary(className)
+                        && !options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
             return Optional.empty();
         }
 
@@ -224,10 +225,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         CodeBlock initializer = CodeBlock.of(
                 "$L.bodySerDe().$L",
                 StaticFactoryMethodGenerator.RUNTIME,
-                options.deserializeErrorResponsesAsJson()
+                options.generateErrorParameterFormatRespectingDialogueInterfaces()
                         ? constructDeserializerWithExceptions(type, className)
                         : constructDeserializer(type, className));
-
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(initializer)
@@ -293,7 +293,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
-                        .filter(type -> !options.deserializeErrorResponsesAsJson()
+                        .filter(type -> !options.generateErrorParameterFormatRespectingDialogueInterfaces()
                                 && returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(type)))
                         .map(type -> StaticFactoryMethodGenerator.RUNTIME
                                 + (returnTypes.isOptionalBinary(returnTypes.baseType(type))

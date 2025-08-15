@@ -178,7 +178,7 @@ public final class TestCases {
                     .files(Path.of("example-errors.yml"))
                     .options(Options.builder()
                             .apiVersion("1.2.3")
-                            .deserializeErrorResponsesAsJson(true)
+                            .generateErrorParameterFormatRespectingDialogueInterfaces(true)
                             .build())
                     .generatorTypes(List.of(GeneratorType.DIALOGUE, GeneratorType.OBJECT, GeneratorType.ERROR))
                     .build())
