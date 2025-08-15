@@ -22,6 +22,9 @@ public final class ConjureErrors {
     public static final ErrorType CONFLICTING_CAUSE_UNSAFE_ARG =
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ConflictingCauseUnsafeArg");
 
+    public static final ErrorType ERROR_WITH_COMPLEX_ARGS =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:ErrorWithComplexArgs");
+
     /** Invalid Conjure service definition. */
     public static final ErrorType INVALID_SERVICE_DEFINITION =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidServiceDefinition");
@@ -58,6 +61,82 @@ public final class ConjureErrors {
                 cause,
                 UnsafeArg.of("cause", cause_),
                 UnsafeArg.of("shouldThrow", shouldThrow_));
+    }
+
+    public static ServiceException errorWithComplexArgs(
+            @Safe PrimitiveExample primitiveExample,
+            @Safe CollectionExample collectionExample,
+            @Safe NestedCollectionExample nestedCollectionExample,
+            @Safe OptionalExample optionalExample,
+            @Safe ObjectReference objectReference,
+            @Safe UnionExample unionExample,
+            @Safe EnumExample enumExample,
+            @Safe StringAliasEx stringAlias,
+            @Safe OptionalAlias optionalAlias,
+            @Safe CollectionAlias collectionAlias,
+            @Safe NestedAlias nestedAlias,
+            @Safe ExternalExample externalExample,
+            @Safe AnyExample anyExample,
+            @Safe EmptyObject emptyObject,
+            @Safe ComplexExample complexExample,
+            @Unsafe SafetyExample safetyExample) {
+        return new ServiceException(
+                ERROR_WITH_COMPLEX_ARGS,
+                SafeArg.of("primitiveExample", primitiveExample),
+                SafeArg.of("collectionExample", collectionExample),
+                SafeArg.of("nestedCollectionExample", nestedCollectionExample),
+                SafeArg.of("optionalExample", optionalExample),
+                SafeArg.of("objectReference", objectReference),
+                SafeArg.of("unionExample", unionExample),
+                SafeArg.of("enumExample", enumExample),
+                SafeArg.of("stringAlias", stringAlias),
+                SafeArg.of("optionalAlias", optionalAlias),
+                SafeArg.of("collectionAlias", collectionAlias),
+                SafeArg.of("nestedAlias", nestedAlias),
+                SafeArg.of("externalExample", externalExample),
+                SafeArg.of("anyExample", anyExample),
+                SafeArg.of("emptyObject", emptyObject),
+                SafeArg.of("complexExample", complexExample),
+                UnsafeArg.of("safetyExample", safetyExample));
+    }
+
+    public static ServiceException errorWithComplexArgs(
+            @Nullable Throwable cause,
+            @Safe PrimitiveExample primitiveExample,
+            @Safe CollectionExample collectionExample,
+            @Safe NestedCollectionExample nestedCollectionExample,
+            @Safe OptionalExample optionalExample,
+            @Safe ObjectReference objectReference,
+            @Safe UnionExample unionExample,
+            @Safe EnumExample enumExample,
+            @Safe StringAliasEx stringAlias,
+            @Safe OptionalAlias optionalAlias,
+            @Safe CollectionAlias collectionAlias,
+            @Safe NestedAlias nestedAlias,
+            @Safe ExternalExample externalExample,
+            @Safe AnyExample anyExample,
+            @Safe EmptyObject emptyObject,
+            @Safe ComplexExample complexExample,
+            @Unsafe SafetyExample safetyExample) {
+        return new ServiceException(
+                ERROR_WITH_COMPLEX_ARGS,
+                cause,
+                SafeArg.of("primitiveExample", primitiveExample),
+                SafeArg.of("collectionExample", collectionExample),
+                SafeArg.of("nestedCollectionExample", nestedCollectionExample),
+                SafeArg.of("optionalExample", optionalExample),
+                SafeArg.of("objectReference", objectReference),
+                SafeArg.of("unionExample", unionExample),
+                SafeArg.of("enumExample", enumExample),
+                SafeArg.of("stringAlias", stringAlias),
+                SafeArg.of("optionalAlias", optionalAlias),
+                SafeArg.of("collectionAlias", collectionAlias),
+                SafeArg.of("nestedAlias", nestedAlias),
+                SafeArg.of("externalExample", externalExample),
+                SafeArg.of("anyExample", anyExample),
+                SafeArg.of("emptyObject", emptyObject),
+                SafeArg.of("complexExample", complexExample),
+                UnsafeArg.of("safetyExample", safetyExample));
     }
 
     /**
@@ -126,6 +205,67 @@ public final class ConjureErrors {
     }
 
     /**
+     * Throws a {@link ServiceException} of type ErrorWithComplexArgs when {@code shouldThrow} is true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     * @param primitiveExample
+     * @param collectionExample
+     * @param nestedCollectionExample
+     * @param optionalExample
+     * @param objectReference
+     * @param unionExample
+     * @param enumExample
+     * @param stringAlias
+     * @param optionalAlias
+     * @param collectionAlias
+     * @param nestedAlias
+     * @param externalExample
+     * @param anyExample
+     * @param emptyObject
+     * @param complexExample
+     * @param safetyExample
+     */
+    @Contract("true, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> fail")
+    public static void throwIfErrorWithComplexArgs(
+            boolean shouldThrow,
+            @Safe PrimitiveExample primitiveExample,
+            @Safe CollectionExample collectionExample,
+            @Safe NestedCollectionExample nestedCollectionExample,
+            @Safe OptionalExample optionalExample,
+            @Safe ObjectReference objectReference,
+            @Safe UnionExample unionExample,
+            @Safe EnumExample enumExample,
+            @Safe StringAliasEx stringAlias,
+            @Safe OptionalAlias optionalAlias,
+            @Safe CollectionAlias collectionAlias,
+            @Safe NestedAlias nestedAlias,
+            @Safe ExternalExample externalExample,
+            @Safe AnyExample anyExample,
+            @Safe EmptyObject emptyObject,
+            @Safe ComplexExample complexExample,
+            @Unsafe SafetyExample safetyExample) {
+        if (shouldThrow) {
+            throw errorWithComplexArgs(
+                    primitiveExample,
+                    collectionExample,
+                    nestedCollectionExample,
+                    optionalExample,
+                    objectReference,
+                    unionExample,
+                    enumExample,
+                    stringAlias,
+                    optionalAlias,
+                    collectionAlias,
+                    nestedAlias,
+                    externalExample,
+                    anyExample,
+                    emptyObject,
+                    complexExample,
+                    safetyExample);
+        }
+    }
+
+    /**
      * Throws a {@link ServiceException} of type InvalidServiceDefinition when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
@@ -169,6 +309,12 @@ public final class ConjureErrors {
         return CONFLICTING_CAUSE_UNSAFE_ARG
                 .name()
                 .equals(remoteException.getError().errorName());
+    }
+
+    /** Returns true if the {@link RemoteException} is named Conjure:ErrorWithComplexArgs */
+    public static boolean isErrorWithComplexArgs(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return ERROR_WITH_COMPLEX_ARGS.name().equals(remoteException.getError().errorName());
     }
 
     /** Returns true if the {@link RemoteException} is named Conjure:InvalidServiceDefinition */

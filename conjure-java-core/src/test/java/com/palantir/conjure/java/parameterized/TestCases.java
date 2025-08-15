@@ -159,7 +159,7 @@ public final class TestCases {
                             .excludeEmptyOptionals(true)
                             .jetbrainsContractAnnotations(true)
                             .build())
-                    .generatorTypes(GeneratorType.ERROR)
+                    .generatorTypes(List.of(GeneratorType.ERROR, GeneratorType.OBJECT))
                     .build())
             .add(ParameterizedTestCase.builder()
                     .name("service-vanilla")

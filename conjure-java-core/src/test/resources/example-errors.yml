@@ -1,6 +1,91 @@
 types:
+  imports:
+    ExternalLong:
+      base-type: string
+      external:
+        java: java.lang.Long
   definitions:
     default-package: com.palantir.product
+    objects:
+      PrimitiveExample:
+        fields:
+          stringVal: string
+          intVal: integer
+          longVal: safelong
+          doubleVal: double
+          boolVal: boolean
+          ridVal: rid
+          uuidVal: uuid
+          datetimeVal: datetime
+          binaryVal: binary
+          # skipping bearertoken: it's DO_NOT_LOG so it cannot be used anyway.
+      CollectionExample:
+        fields:
+          stringList: list<string>
+          stringSet: set<string>
+          stringMap: map<string, string>
+      NestedCollectionExample:
+        fields:
+          nestedList: list<list<string>>
+          nestedMap: map<string, map<string, string>>
+          mixedCollection: map<string, list<ObjectReference>>
+      OptionalExample:
+        fields:
+          optionalString: optional<string>
+          optionalObject: optional<ObjectReference>
+          optionalCollection: optional<list<string>>
+      ObjectReference:
+        fields:
+          name: string
+          value: integer
+      UnionExample:
+        union:
+          stringVariant: string
+          intVariant: integer
+          objectVariant: ObjectReference
+          collectionVariant: list<string>
+          optionalVariant: optional<string>
+      StringAliasEx:
+        alias: string
+        safety: safe
+      OptionalAlias:
+        alias: optional<string>
+        safety: safe
+      CollectionAlias:
+        alias: list<string>
+      NestedAlias:
+        alias: StringAliasEx
+      ExternalExample:
+        fields:
+          externalLong: ExternalLong
+          optionalExternal: optional<ExternalLong>
+      AnyExample:
+        fields:
+          anyValue: any
+          anyMap: map<string, any>
+      # We do not expect anything to differ in ser/de because of the safety. But let's be comprehensive.
+      SafetyExample:
+        fields:
+          safeString:
+            type: string
+            safety: safe
+          unsafeDouble:
+            type: double
+            safety: unsafe
+      EmptyObject:
+        fields: { }
+      EmptyUnion:
+        union: { }
+      ComplexExample:
+        fields:
+          metadata: map<StringAliasEx, optional<list<ObjectReference>>>
+          status: EnumExample
+          variants: list<UnionExample>
+          external: optional<ExternalLong>
+      EnumExample:
+        values:
+          - A
+          - B
     errors:
       InvalidTypeDefinition:
         namespace: Conjure
@@ -26,7 +111,7 @@ types:
         namespace: ConjureJava
         docs: Failed to compile Conjure definition to Java code.
         code: INTERNAL
-      DifferentPackage:
+      DifferentPackageError:
         package: com.palantir.another
         namespace: Conjure
         docs: Different package.
@@ -45,3 +130,24 @@ types:
         unsafe-args:
           cause: string
           shouldThrow: boolean
+      ErrorWithComplexArgs:
+        namespace: Conjure
+        code: INTERNAL
+        safe-args:
+          primitiveExample: PrimitiveExample
+          collectionExample: CollectionExample
+          nestedCollectionExample: NestedCollectionExample
+          optionalExample: OptionalExample
+          objectReference: ObjectReference
+          unionExample: UnionExample
+          enumExample: EnumExample
+          stringAlias: StringAliasEx
+          optionalAlias: OptionalAlias
+          collectionAlias: CollectionAlias
+          nestedAlias: NestedAlias
+          externalExample: ExternalExample
+          anyExample: AnyExample
+          emptyObject: EmptyObject
+          complexExample: ComplexExample
+        unsafe-args:
+          safetyExample: SafetyExample
