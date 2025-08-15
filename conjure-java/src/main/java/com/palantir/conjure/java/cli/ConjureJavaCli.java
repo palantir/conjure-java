@@ -248,7 +248,7 @@ public final class ConjureJavaCli implements Runnable {
 
         @CommandLine.Option(
                 names = "--dangerousDoNotUseEnableEndpointAssociatedErrors",
-                defaultValue = "true",
+                defaultValue = "false",
                 description = "Generate endpoint associated errors as EndpointServiceExceptions. "
                         + "This feature is currently not supported.")
         private boolean dangerousDoNotUseEnableEndpointAssociatedErrors;

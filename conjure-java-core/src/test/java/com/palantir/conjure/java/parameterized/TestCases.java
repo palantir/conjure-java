@@ -274,6 +274,7 @@ public final class TestCases {
                             .nonNullCollections(true)
                             .excludeEmptyOptionals(true)
                             .jetbrainsContractAnnotations(true)
+                            .dangerousDoNotUseEnableEndpointAssociatedErrors(true)
                             .build())
                     .generatorTypes(List.of(
                             GeneratorType.UNDERTOW,
@@ -335,6 +336,7 @@ public final class TestCases {
                             Path.of("src/test/resources/errors-for-endpoints.yml")))
                     .options(Options.builder()
                             .generateDialogueEndpointErrorResultTypes(true)
+                            .dangerousDoNotUseEnableEndpointAssociatedErrors(true)
                             .build())
                     .generatorTypes(List.of(
                             GeneratorType.OBJECT,
