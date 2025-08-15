@@ -175,10 +175,7 @@ public final class UndertowEteResource implements UndertowEteService {
 
     @Override
     public String jsonErrorsHeader(AuthHeader authHeader, String headerParameter) {
-        if (headerParameter.equals("JSON") || headerParameter.equals("TOSTRING")) {
-            throw ConjureErrors.invalidServiceDefinition("my-service-string", Optional.of(SimpleEnum.VALUE));
-        }
-        return "hello!";
+        throw ConjureErrors.invalidServiceDefinition("my-service-string", Optional.of(SimpleEnum.VALUE));
     }
 
     @Override
