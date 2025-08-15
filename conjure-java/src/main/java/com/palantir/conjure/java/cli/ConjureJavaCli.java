@@ -246,8 +246,15 @@ public final class ConjureJavaCli implements Runnable {
                         + "This feature is currently not supported.")
         private boolean dangerousDoNotUseEnableEndpointAssociatedErrors;
 
-        @CommandLine.Option(names = "--deserializeErrorResponsesAsJson", defaultValue = "false", description = "TODO.")
-        private boolean deserializeErrorResponsesAsJson;
+        @CommandLine.Option(
+                names = "--generateErrorParameterFormatRespectingDialogueInterfaces",
+                defaultValue = "false",
+                description =
+                        "Enabling this flag will lead to the generation of Dialogue client interfaces that are able to"
+                            + " send a header to servers specifying the Conjure error parameter serialization format"
+                            + " they expect, and create custom exceptions foreach error defined in the service's"
+                            + " package.")
+        private boolean generateErrorParameterFormatRespectingDialogueInterfaces;
 
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
@@ -323,7 +330,8 @@ public final class ConjureJavaCli implements Runnable {
                             .defensiveCollections(defensiveCollections)
                             .dangerousDoNotUseEnableEndpointAssociatedErrors(
                                     dangerousDoNotUseEnableEndpointAssociatedErrors)
-                            .deserializeErrorResponsesAsJson(deserializeErrorResponsesAsJson)
+                            .generateErrorParameterFormatRespectingDialogueInterfaces(
+                                    generateErrorParameterFormatRespectingDialogueInterfaces)
                             .build())
                     .build();
         }
