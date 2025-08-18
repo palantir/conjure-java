@@ -174,6 +174,12 @@ public class JerseyEteResource implements EteService {
     }
 
     @Override
+    public String jsonErrorsHeader(AuthHeader authHeader, String _headerParameter) {
+        // Conjure-Java has not supported Jersey for a while. We are not testing the error serialization feature here.
+        return "hello!";
+    }
+
+    @Override
     public Optional<LongAlias> aliasLongEndpoint(AuthHeader _authHeader, Optional<LongAlias> input) {
         return input;
     }

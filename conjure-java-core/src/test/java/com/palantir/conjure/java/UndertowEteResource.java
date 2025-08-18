@@ -21,6 +21,7 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import errors.com.palantir.product.ConjureErrors;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.nio.charset.StandardCharsets;
@@ -170,6 +171,11 @@ public final class UndertowEteResource implements UndertowEteService {
     @Override
     public SimpleEnum enumHeader(AuthHeader _authHeader, SimpleEnum headerParameter) {
         return headerParameter;
+    }
+
+    @Override
+    public String jsonErrorsHeader(AuthHeader authHeader, String headerParameter) {
+        throw ConjureErrors.invalidServiceDefinition("my-service-string", Optional.of(SimpleEnum.VALUE));
     }
 
     @Override

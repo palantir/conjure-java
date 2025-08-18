@@ -167,6 +167,15 @@ public interface EteServiceAsync {
     @ClientEndpoint(method = "GET", path = "/base/enum/header")
     ListenableFuture<SimpleEnum> enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
+    /**
+     * This endpoint is used to test that the <code>Accept-Conjure-Error-Parameter-Format</code> header is respected.
+     * Specifically, that error parameters are serialized as JSON when the header is set to <code>JSON</code>.
+     *
+     * @apiNote {@code GET /base/errors/header}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/header")
+    ListenableFuture<String> jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
+
     /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
@@ -362,6 +371,12 @@ public interface EteServiceAsync {
 
             private final Deserializer<SimpleEnum> enumHeaderDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
+
+            private final EndpointChannel jsonErrorsHeaderChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
+
+            private final Deserializer<String> jsonErrorsHeaderDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
@@ -644,6 +659,15 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
                 return _runtime.clients().call(enumHeaderChannel, _request.build(), enumHeaderDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<String> jsonErrorsHeader(AuthHeader authHeader, String headerParameter) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putHeaderParams(
+                        "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
+                return _runtime.clients().call(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
             }
 
             @Override

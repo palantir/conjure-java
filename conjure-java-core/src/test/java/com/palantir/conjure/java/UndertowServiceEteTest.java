@@ -62,6 +62,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import jersey.com.palantir.product.EmptyPathService;
@@ -543,6 +544,25 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isInstanceOfSatisfying(RemoteException.class, re -> {
                     assertThat(re.getStatus()).isEqualTo(422);
                 });
+    }
+
+    @Test
+    public void testErrorParametersSerializedAsJson() {
+        try {
+            client.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
+        } catch (RemoteException e) {
+            assertThat(e.getError().parameters())
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
+        }
+
+        try {
+            client.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING");
+        } catch (RemoteException e) {
+            assertThat(e.getError().parameters())
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]"));
+        }
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {

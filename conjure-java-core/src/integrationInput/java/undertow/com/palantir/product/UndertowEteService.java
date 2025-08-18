@@ -116,6 +116,14 @@ public interface UndertowEteService {
     /** @apiNote {@code GET /base/enum/header} */
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
+    /**
+     * This endpoint is used to test that the <code>Accept-Conjure-Error-Parameter-Format</code> header is respected.
+     * Specifically, that error parameters are serialized as JSON when the header is set to <code>JSON</code>.
+     *
+     * @apiNote {@code GET /base/errors/header}
+     */
+    String jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
+
     /** @apiNote {@code GET /base/alias-long} */
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 
