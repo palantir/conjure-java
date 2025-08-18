@@ -63,9 +63,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import jersey.com.palantir.product.EmptyPathService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -580,11 +582,9 @@ public final class UndertowServiceEteTest extends TestBase {
 
         // Get the parameters when we use JSON serialization
         try {
-            // The `JSON+JAVA-STRING` header is read by `ConjureExceptions` to change the serialization
-            // behavior. The `JSON` representation of the parameters is sent in the `parameters` field of the Conjure
-            // error, and a new field `legacyParameters` is added containing the string representation of the
-            // parameters.
-            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON+JAVA-STRING");
+            // The `JSON` header is read by `ConjureExceptions` to change the serialization behavior. The `JSON`
+            // representation of the parameters is sent in the `parameters` field of the Conjure error.
+            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON");
         } catch (RemoteException e) {
             // .getError() returns the SerializableError which should contain the legacy parameters sent over the wire.
             jsonParams = e.getError().parameters();
@@ -595,8 +595,28 @@ public final class UndertowServiceEteTest extends TestBase {
             });
         }
 
-        // Assert that the two maps contain the same keys and values, logging any differences
-        assertThat(jsonParams).containsExactlyEntriesOf(toStringParams);
+        // Assert that the two maps contain the same keys and values, except for the `primitiveExample` and `anyExample`
+        // keys. Those will differ.
+        List<String> keysThatDiffer = List.of("primitiveExample", "anyExample");
+        assertThat(filterKeys(toStringParams, keysThatDiffer))
+                .containsExactlyInAnyOrderEntriesOf(filterKeys(jsonParams, keysThatDiffer));
+
+        // The representation of bytes differs.
+        String commonFieldsForPrimitive =
+                "PrimitiveExample{stringVal: example-string, intVal: 42, longVal: 42, doubleVal: 3.14, "
+                        + "boolVal: true, ridVal: ri.service.instance.folder.object, "
+                        + "uuidVal: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee, "
+                        + "datetimeVal: -999999999-01-01T00:00+18:00, binaryVal: ";
+
+        assertThat(toStringParams.get("primitiveExample")).isEqualTo(commonFieldsForPrimitive + "Bytes{size: 5}}");
+        assertThat(jsonParams.get("primitiveExample"))
+                .isEqualTo(commonFieldsForPrimitive + "java.nio.HeapByteBuffer[pos=0 lim=5 cap=5]}");
+    }
+
+    private static Map<String, String> filterKeys(Map<String, String> map, List<String> keysToFilter) {
+        return map.entrySet().stream()
+                .filter(entry -> !keysToFilter.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {

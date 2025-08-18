@@ -56,7 +56,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 public final class ErrorGenerator implements Generator {
@@ -257,62 +256,39 @@ public final class ErrorGenerator implements Generator {
                                 .addMember("value", "$S", "parameters")
                                 .build())
                         .build())
-                .addParameter(ParameterSpec.builder(
-                                ParameterizedTypeName.get(Map.class, String.class, String.class), "legacyParameters")
-                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                .addMember("value", "$S", "legacyParameters")
-                                .build())
-                        .addAnnotation(Nullable.class)
-                        .build())
                 .addStatement("super(errorCode, errorName, errorInstanceId, parameters)")
-                .addStatement("this.legacyParameters = legacyParameters")
                 .build();
 
         // Create the toSerializableError method
         MethodSpec.Builder toSerializableErrorBuilder = MethodSpec.methodBuilder("toSerializableError")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(SerializableError.class);
-        CodeBlock.Builder builder = CodeBlock.builder()
-                .add("$T builder = $T.builder();", SerializableError.Builder.class, SerializableError.class);
-
-        // If therea are legacy parameters, just use those.
-
-        builder.beginControlFlow("if (legacyParameters != null)")
-                .addStatement("builder.putAllParameters(legacyParameters)")
-                .nextControlFlow("else");
+        CodeBlock.Builder builder = CodeBlock.builder().add("return $T.builder()", SerializableError.class);
 
         // Add all parameters
         List<FieldDefinition> allArgs = new ArrayList<>();
         allArgs.addAll(errorDefinition.getSafeArgs());
         allArgs.addAll(errorDefinition.getUnsafeArgs());
-
         for (int i = 0; i < allArgs.size(); i++) {
             FieldDefinition field = allArgs.get(i);
             String fieldName = field.getFieldName().get();
             builder.add(
-                    (i == 0 ? "builder" : "") + ".putParameters($S, $T.toString(parameters().$L()))"
-                            + (i == allArgs.size() - 1 ? ";" : ""),
+                    ".putParameters($S, $T.toString(parameters().$L()))",
                     fieldName,
                     Objects.class,
                     JavaNameSanitizer.sanitizeErrorParameterName(fieldName));
         }
-        builder.endControlFlow();
-        builder.add("builder.errorCode(errorCode())")
+        builder.add(".errorCode(errorCode())")
                 .add(".errorName(errorName())")
-                .add(".errorInstanceId(errorInstanceId());");
+                .add(".errorInstanceId(errorInstanceId())")
+                .add(".build();");
         toSerializableErrorBuilder.addCode(builder.build());
-        toSerializableErrorBuilder.addStatement("return builder.build()");
 
         // Create the class
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(serializableErrorClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(
                         ParameterizedTypeName.get(ClassName.get(AbstractSerializableError.class), parametersClassName))
-                .addField(FieldSpec.builder(
-                                ParameterizedTypeName.get(Map.class, String.class, String.class), "legacyParameters")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .addAnnotation(Nullable.class)
-                        .build())
                 .addMethod(constructor)
                 .addMethod(toSerializableErrorBuilder.build());
 
