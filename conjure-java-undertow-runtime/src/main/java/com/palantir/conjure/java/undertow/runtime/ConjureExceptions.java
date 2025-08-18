@@ -130,32 +130,18 @@ public enum ConjureExceptions implements ExceptionHandler {
                         .toString()
                         .equalsIgnoreCase(ConjureErrorParameterFormat.JSON_FORMAT.toString());
 
-        boolean isJsonStringErrorParameterValueFormat = isHeaderPresent
-                && maybeErrorParamFormatHeader
-                        .get()
-                        .toString()
-                        .equalsIgnoreCase(ConjureErrorParameterFormat.JSON_AND_JAVA_STRING_FORMAT.toString());
-
         // Log unrecognized format if present but not JSON
-        if (isHeaderPresent && !isJsonErrorParameterValueFormat && !isJsonStringErrorParameterValueFormat) {
+        if (isHeaderPresent && !isJsonErrorParameterValueFormat) {
             log.info(
                     "Unrecognized Conjure error parameter format header",
                     SafeArg.of("headerValue", maybeErrorParamFormatHeader.get()));
         }
 
         // Use the appropriate serialization based on format
-
-        ConjureError conjureError;
-        if (isJsonErrorParameterValueFormat) {
-            logWithSerializationFormat(exception, Optional.of(ConjureErrorParameterFormat.JSON_FORMAT));
-            conjureError = ConjureError.fromServiceExceptionWithJsonSerializedParameterValues(exception);
-        } else if (isJsonStringErrorParameterValueFormat) {
-            logWithSerializationFormat(exception, Optional.of(ConjureErrorParameterFormat.JSON_AND_JAVA_STRING_FORMAT));
-            conjureError = ConjureError.fromServiceExceptionWithJsonAndJavaStringSerializedParameterValues(exception);
-        } else {
-            logWithSerializationFormat(exception, Optional.empty());
-            conjureError = ConjureError.fromServiceException(exception);
-        }
+        logWithSerializationFormat(exception, isJsonErrorParameterValueFormat);
+        ConjureError conjureError = isJsonErrorParameterValueFormat
+                ? ConjureError.fromServiceExceptionWithJsonSerializedParameterValues(exception)
+                : ConjureError.fromServiceException(exception);
 
         writeResponse(
                 exchange, Optional.of(conjureError), exception.getErrorType().httpErrorCode());
@@ -304,20 +290,20 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     private static void logWithSerializationFormat(
-            ServiceException serviceException, Optional<ConjureErrorParameterFormat> parameterFormat) {
+            ServiceException serviceException, boolean isUsingJsonSerializationForParameters) {
         if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
             log.info(
                     "Error handling request",
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
-                    SafeArg.of("parameterFormat", parameterFormat),
+                    SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
                     serviceException);
         } else {
             log.error(
                     "Error handling request",
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
-                    SafeArg.of("parameterFormat", parameterFormat),
+                    SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
                     serviceException);
         }
     }

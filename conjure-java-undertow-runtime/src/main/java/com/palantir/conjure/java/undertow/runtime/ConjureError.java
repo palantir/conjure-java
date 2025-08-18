@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.EndpointServiceException;
@@ -58,15 +56,7 @@ record ConjureError(
         @JsonProperty("errorCode") String errorCode,
         @JsonProperty("errorName") String errorName,
         @JsonProperty("errorInstanceId") String errorInstanceId,
-        @JsonProperty("parameters") Map<String, Object> parameters,
-        @JsonIgnore Optional<Map<String, String>> legacyParameters) {
-
-    @JsonProperty("legacyParameters")
-    // Only populate the legacy parameters field if it is non-empty.
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    Map<String, String> getLegacyParametersForSerialization() {
-        return legacyParameters.orElse(null);
-    }
+        @JsonProperty("parameters") Map<String, Object> parameters) {
 
     ConjureError {
         Preconditions.checkNotNull(errorCode, "errorCode cannot be null");
@@ -81,8 +71,7 @@ record ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
                 exception.getErrorInstanceId(),
-                parameters,
-                Optional.empty());
+                parameters);
     }
 
     static ConjureError fromEndpointServiceException(EndpointServiceException exception) {
@@ -91,8 +80,7 @@ record ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
                 exception.getErrorInstanceId(),
-                parameters,
-                Optional.empty());
+                parameters);
     }
 
     static ConjureError fromServiceException(ServiceException exception) {
@@ -101,12 +89,7 @@ record ConjureError(
             parameters.put(arg.getName(), Objects.toString(arg.getValue()));
         }
         ErrorType errorType = exception.getErrorType();
-        return new ConjureError(
-                errorType.code().name(),
-                errorType.name(),
-                exception.getErrorInstanceId(),
-                parameters,
-                Optional.empty());
+        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
     }
 
     /**
@@ -117,27 +100,7 @@ record ConjureError(
     static ConjureError fromServiceExceptionWithJsonSerializedParameterValues(ServiceException exception) {
         Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
         ErrorType errorType = exception.getErrorType();
-        return new ConjureError(
-                errorType.code().name(),
-                errorType.name(),
-                exception.getErrorInstanceId(),
-                parameters,
-                Optional.empty());
-    }
-
-    static ConjureError fromServiceExceptionWithJsonAndJavaStringSerializedParameterValues(ServiceException exception) {
-        Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
-        Map<String, String> legacyParameters = new HashMap<>();
-        for (Arg<?> arg : exception.getArgs()) {
-            legacyParameters.put(arg.getName(), Objects.toString(arg.getValue()));
-        }
-        ErrorType errorType = exception.getErrorType();
-        return new ConjureError(
-                errorType.code().name(),
-                errorType.name(),
-                exception.getErrorInstanceId(),
-                parameters,
-                Optional.of(legacyParameters));
+        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
     }
 
     /**
@@ -149,12 +112,7 @@ record ConjureError(
      */
     static ConjureError fromRemoteException(RemoteException exception) {
         SerializableError error = exception.getError();
-        return new ConjureError(
-                error.errorCode(),
-                error.errorName(),
-                error.errorInstanceId(),
-                Collections.emptyMap(),
-                Optional.empty());
+        return new ConjureError(error.errorCode(), error.errorName(), error.errorInstanceId(), Collections.emptyMap());
     }
 
     private static boolean shouldIncludeArgInParameters(Arg<?> arg) {

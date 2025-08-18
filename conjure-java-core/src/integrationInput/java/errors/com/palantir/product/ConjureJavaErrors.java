@@ -9,7 +9,6 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
-import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -52,28 +51,21 @@ public final class ConjureJavaErrors {
 
     public static final class JavaCompilationFailedSerializableError
             extends AbstractSerializableError<JavaCompilationFailedParameters> {
-        @Nullable
-        private final Map<String, String> legacyParameters;
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         JavaCompilationFailedSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") JavaCompilationFailedParameters parameters,
-                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
+                @JsonProperty("parameters") JavaCompilationFailedParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
-            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder();
-            if (legacyParameters != null) {
-                builder.putAllParameters(legacyParameters);
-            } else {
-            }
-            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
-            return builder.build();
+            return SerializableError.builder()
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .build();
         }
     }
 

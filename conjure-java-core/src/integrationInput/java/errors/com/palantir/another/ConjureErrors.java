@@ -9,7 +9,6 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
-import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
@@ -48,44 +47,37 @@ public final class ConjureErrors {
         return DIFFERENT_PACKAGE_ERROR.name().equals(remoteException.getError().errorName());
     }
 
-    public static record DifferentPackageErrParameters() {}
+    public static record DifferentPackageErrorParameters() {}
 
-    public static final class DifferentPackageErrSerializableError
-            extends AbstractSerializableError<DifferentPackageErrParameters> {
-        @Nullable
-        private final Map<String, String> legacyParameters;
-
+    public static final class DifferentPackageErrorSerializableError
+            extends AbstractSerializableError<DifferentPackageErrorParameters> {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        DifferentPackageErrSerializableError(
+        DifferentPackageErrorSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") DifferentPackageErrParameters parameters,
-                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
+                @JsonProperty("parameters") DifferentPackageErrorParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
-            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder();
-            if (legacyParameters != null) {
-                builder.putAllParameters(legacyParameters);
-            } else {
-            }
-            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
-            return builder.build();
+            return SerializableError.builder()
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .build();
         }
     }
 
-    public static final class DifferentPackageErrException extends RemoteException {
-        private DifferentPackageErrSerializableError error;
+    public static final class DifferentPackageErrorException extends RemoteException {
+        private DifferentPackageErrorSerializableError error;
 
-        public DifferentPackageErrException(DifferentPackageErrSerializableError error, int status) {
+        public DifferentPackageErrorException(DifferentPackageErrorSerializableError error, int status) {
             super(error.toSerializableError(), status);
             this.error = error;
         }
 
-        public DifferentPackageErrSerializableError error() {
+        public DifferentPackageErrorSerializableError error() {
             return error;
         }
     }

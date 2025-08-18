@@ -11,7 +11,6 @@ import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
@@ -54,86 +53,66 @@ public final class TestErrors {
 
     public static final class ComplicatedParametersSerializableError
             extends AbstractSerializableError<ComplicatedParametersParameters> {
-        @Nullable
-        private final Map<String, String> legacyParameters;
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ComplicatedParametersSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") ComplicatedParametersParameters parameters,
-                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
+                @JsonProperty("parameters") ComplicatedParametersParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
-            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder();
-            if (legacyParameters != null) {
-                builder.putAllParameters(legacyParameters);
-            } else {
-                builder.putParameters(
-                        "complicatedObjectMap", Objects.toString(parameters().complicatedObjectMap()));
-            }
-            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
-            return builder.build();
+            return SerializableError.builder()
+                    .putParameters(
+                            "complicatedObjectMap",
+                            Objects.toString(parameters().complicatedObjectMap()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .build();
         }
     }
 
     public static final class InvalidArgumentSerializableError
             extends AbstractSerializableError<InvalidArgumentParameters> {
-        @Nullable
-        private final Map<String, String> legacyParameters;
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         InvalidArgumentSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") InvalidArgumentParameters parameters,
-                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
+                @JsonProperty("parameters") InvalidArgumentParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
-            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder();
-            if (legacyParameters != null) {
-                builder.putAllParameters(legacyParameters);
-            } else {
-                builder.putParameters("field", Objects.toString(parameters().field()))
-                        .putParameters("value", Objects.toString(parameters().value()));
-            }
-            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
-            return builder.build();
+            return SerializableError.builder()
+                    .putParameters("field", Objects.toString(parameters().field()))
+                    .putParameters("value", Objects.toString(parameters().value()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .build();
         }
     }
 
     public static final class NotFoundSerializableError extends AbstractSerializableError<NotFoundParameters> {
-        @Nullable
-        private final Map<String, String> legacyParameters;
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         NotFoundSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
-                @JsonProperty("parameters") NotFoundParameters parameters,
-                @JsonProperty("legacyParameters") @Nullable Map<String, String> legacyParameters) {
+                @JsonProperty("parameters") NotFoundParameters parameters) {
             super(errorCode, errorName, errorInstanceId, parameters);
-            this.legacyParameters = legacyParameters;
         }
 
         public SerializableError toSerializableError() {
-            SerializableError.Builder builder = SerializableError.builder();
-            if (legacyParameters != null) {
-                builder.putAllParameters(legacyParameters);
-            } else {
-                builder.putParameters("resource", Objects.toString(parameters().resource()));
-            }
-            builder.errorCode(errorCode()).errorName(errorName()).errorInstanceId(errorInstanceId());
-            return builder.build();
+            return SerializableError.builder()
+                    .putParameters("resource", Objects.toString(parameters().resource()))
+                    .errorCode(errorCode())
+                    .errorName(errorName())
+                    .errorInstanceId(errorInstanceId())
+                    .build();
         }
     }
 
