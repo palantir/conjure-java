@@ -17,72 +17,24 @@
 package com.palantir.conjure.java.lib.internal;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.AbstractList;
-import java.util.Collection;
-import java.util.RandomAccess;
 import org.eclipse.collections.api.list.primitive.MutableDoubleList;
-import org.eclipse.collections.impl.utility.Iterate;
+import org.eclipse.collections.impl.list.mutable.primitive.BoxedMutableDoubleList;
 
-/**
- * ConjureDoubleList is a boxed list wrapper for the eclipse-collections DoubleArrayList. In eclipse-collections 12,
- * a BoxedMutableDoubleList will be released. Once available, ConjureDoubleList should be replaced with that.
- */
-final class ConjureDoubleList extends AbstractList<Double> implements RandomAccess {
+final class ConjureDoubleList extends BoxedMutableDoubleList {
     private final MutableDoubleList delegate;
 
     ConjureDoubleList(MutableDoubleList delegate) {
+        super(delegate);
         this.delegate = delegate;
     }
 
-    @Override
-    public int size() {
-        return delegate.size();
-    }
-
-    @Override
-    public void add(int index, Double toAdd) {
-        delegate.addAtIndex(index, toAdd);
-    }
-
-    // Primitive optimized overload
+    // Primitive optimized overloads
     void add(double toAdd) {
         this.delegate.add(toAdd);
     }
 
-    @Override
-    public Double get(int index) {
-        return delegate.get(index);
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends Double> collection) {
-        double[] target = new double[collection.size()];
-        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.doubleValue());
-        return delegate.addAllAtIndex(index, target);
-    }
-
-    // Primitive optimized overload
     void addAll(double[] source) {
         this.delegate.addAll(source);
-    }
-
-    @Override
-    public Double remove(int index) {
-        return delegate.removeAtIndex(index);
-    }
-
-    @Override
-    public void clear() {
-        delegate.clear();
-    }
-
-    @Override
-    public Double set(int index, Double element) {
-        return delegate.set(index, element);
-    }
-
-    ConjureDoubleList asUnmodifiable() {
-        return new ConjureDoubleList(delegate.asUnmodifiable());
     }
 
     // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
