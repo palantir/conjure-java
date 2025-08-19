@@ -80,8 +80,6 @@ public final class ErrorGenerationUtils {
     /**
      * A mapping from a package name to the list of errors defined within that package. This is used when attempting to
      * deserialize error responses from endpoints.
-     *
-     * TODO(pm): does this work with imported errors?
      */
     public record PackageToErrorDefinitionsMapping(Map<String, List<ErrorDefinition>> packageToErrors) {
         public static PackageToErrorDefinitionsMapping from(ConjureDefinition definition) {
@@ -178,15 +176,27 @@ public final class ErrorGenerationUtils {
 
     public static ParameterSpec buildParameterWithSafetyAnnotation(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
-        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe)
+        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, true)
                 .build();
     }
 
-    private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
+    public static ParameterSpec buildUnsanitizedParameterWithSafetyAnnotationAndJsonProperty(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
+        ParameterSpec.Builder parameterBuilder =
+                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, false);
+        parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$S", argDefinition.getFieldName().get())
+                .build());
+        return parameterBuilder.build();
+    }
+
+    private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
+            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe, boolean sanitizeName) {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
-        String argName = JavaNameSanitizer.sanitizeErrorParameterName(
-                argDefinition.getFieldName().get());
+        String argName = sanitizeName
+                ? JavaNameSanitizer.sanitizeErrorParameterName(
+                        argDefinition.getFieldName().get())
+                : argDefinition.getFieldName().get();
         TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
         ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
         argDefinition
