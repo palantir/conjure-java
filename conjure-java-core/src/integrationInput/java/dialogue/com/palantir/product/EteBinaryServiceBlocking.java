@@ -136,13 +136,10 @@ public interface EteBinaryServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(body));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients().callBlocking(postBinaryChannel, _request.build(), postBinaryDeserializer);
             }
@@ -153,13 +150,10 @@ public interface EteBinaryServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(body));
                 _request.putQueryParams("bytesToRead", _plainSerDe.serializeInteger(bytesToRead));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(postBinaryThrowsChannel, _request.build(), postBinaryThrowsDeserializer);
@@ -169,13 +163,10 @@ public interface EteBinaryServiceBlocking {
             public Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(
@@ -188,13 +179,10 @@ public interface EteBinaryServiceBlocking {
             public Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(
@@ -207,13 +195,10 @@ public interface EteBinaryServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
                 _request.putQueryParams("useTryWithResources", _plainSerDe.serializeBoolean(useTryWithResources));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(getBinaryFailureChannel, _request.build(), getBinaryFailureDeserializer);
@@ -223,13 +208,10 @@ public interface EteBinaryServiceBlocking {
             public Optional<InputStream> getAliased(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients().callBlocking(getAliasedChannel, _request.build(), getAliasedDeserializer);
             }
