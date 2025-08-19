@@ -172,11 +172,14 @@ public final class ErrorGenerator implements Generator {
                 .addMethods(methodSpecs)
                 .addMethods(checkMethodSpecs)
                 .addMethods(isRemoteExceptionDefinitions)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class))
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class))
-                .addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper))
-                .addTypes(generateSerializableErrors(errorTypeDefinitions))
-                .addTypes(generateRemoteExceptionTypes(errorTypeDefinitions));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
+        if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+            typeBuilder
+                    .addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper))
+                    .addTypes(generateSerializableErrors(errorTypeDefinitions))
+                    .addTypes(generateRemoteExceptionTypes(errorTypeDefinitions));
+        }
+
         return JavaFile.builder(conjurePackage, typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
@@ -308,11 +311,11 @@ public final class ErrorGenerator implements Generator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder();
         for (FieldDefinition fieldDef : errorDefinition.getSafeArgs()) {
-            ctorBuilder.addParameter(
-                    ErrorGenerationUtils.buildParameterWithSafetyAnnotationAndJsonProperty(typeMapper, fieldDef, true));
+            ctorBuilder.addParameter(ErrorGenerationUtils.buildUnsanitizedParameterWithSafetyAnnotationAndJsonProperty(
+                    typeMapper, fieldDef, true));
         }
         for (FieldDefinition fieldDef : errorDefinition.getUnsafeArgs()) {
-            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationAndJsonProperty(
+            ctorBuilder.addParameter(ErrorGenerationUtils.buildUnsanitizedParameterWithSafetyAnnotationAndJsonProperty(
                     typeMapper, fieldDef, false));
         }
         return parametersRecordBuilder.recordConstructor(ctorBuilder.build()).build();
