@@ -47,13 +47,10 @@ public interface CookieServiceBlocking {
             public void eatCookies(BearerToken token) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
             }

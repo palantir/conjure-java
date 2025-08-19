@@ -189,14 +189,6 @@ public interface ErrorServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testBasicErrorSerializer.serialize(shouldThrowError));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
-                }
                 return _runtime.clients().call(testBasicErrorChannel, _request.build(), testBasicErrorDeserializer);
             }
 
@@ -206,14 +198,6 @@ public interface ErrorServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testImportedErrorSerializer.serialize(shouldThrowError));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
-                }
                 return _runtime.clients()
                         .call(testImportedErrorChannel, _request.build(), testImportedErrorDeserializer);
             }
@@ -224,14 +208,6 @@ public interface ErrorServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testMultipleErrorsAndPackagesSerializer.serialize(errorToThrow));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
-                }
                 return _runtime.clients()
                         .call(
                                 testMultipleErrorsAndPackagesChannel,
@@ -245,14 +221,6 @@ public interface ErrorServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testEmptyBodySerializer.serialize(shouldThrowError));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
-                }
                 return _runtime.clients().call(testEmptyBodyChannel, _request.build(), testEmptyBodyDeserializer);
             }
 
@@ -261,14 +229,6 @@ public interface ErrorServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testBinarySerializer.serialize(shouldThrowError));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
-                }
                 return _runtime.clients().call(testBinaryChannel, _request.build(), testBinaryDeserializer);
             }
 
@@ -278,14 +238,6 @@ public interface ErrorServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testOptionalBinarySerializer.serialize(mode));
-                if (_runtime.bodySerDe().errorParameterDeserializationFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe()
-                                    .errorParameterDeserializationFormat()
-                                    .get()
-                                    .toString());
-                }
                 return _runtime.clients()
                         .call(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
             }
