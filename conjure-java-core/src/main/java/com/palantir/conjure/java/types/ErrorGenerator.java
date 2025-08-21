@@ -31,7 +31,6 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
-import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -163,37 +162,10 @@ public final class ErrorGenerator implements Generator {
                 .addMethods(isRemoteExceptionDefinitions)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
 
-        if (options.generateDialogueEndpointErrorResultTypes()) {
-            typeBuilder.addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper));
-        }
-
         return JavaFile.builder(conjurePackage, typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
-    }
-
-    private static List<TypeSpec> generateErrorParameterRecords(
-            List<ErrorDefinition> errorTypeDefinitions, TypeMapper typeMapper) {
-        return errorTypeDefinitions.stream()
-                .map(errorDefinition -> generateErrorParameterRecord(errorDefinition, typeMapper))
-                .toList();
-    }
-
-    private static TypeSpec generateErrorParameterRecord(ErrorDefinition errorDefinition, TypeMapper typeMapper) {
-        TypeSpec.Builder parametersRecordBuilder = TypeSpec.recordBuilder(ErrorGenerationUtils.errorParametersClassName(
-                        errorDefinition.getErrorName().getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-        MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder();
-        for (FieldDefinition fieldDef : errorDefinition.getSafeArgs()) {
-            ctorBuilder.addParameter(
-                    ErrorGenerationUtils.buildParameterWithSafetyAnnotationAndJsonProperty(typeMapper, fieldDef, true));
-        }
-        for (FieldDefinition fieldDef : errorDefinition.getUnsafeArgs()) {
-            ctorBuilder.addParameter(ErrorGenerationUtils.buildParameterWithSafetyAnnotationAndJsonProperty(
-                    typeMapper, fieldDef, false));
-        }
-        return parametersRecordBuilder.recordConstructor(ctorBuilder.build()).build();
     }
 
     private static MethodSpec generateExceptionFactory(
@@ -217,7 +189,6 @@ public final class ErrorGenerator implements Generator {
         ErrorGenerationUtils.addAllLogSafeArgumentsToMethodBuilder(typeMapper, entry, methodBuilder);
 
         methodBuilder.addCode(");");
-
         return methodBuilder.build();
     }
 
