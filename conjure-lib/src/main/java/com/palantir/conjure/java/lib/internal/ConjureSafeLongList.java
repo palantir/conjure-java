@@ -26,7 +26,7 @@ import org.eclipse.collections.impl.utility.Iterate;
 
 /**
  * ConjureSafeLongList is a boxed list wrapper for the eclipse-collections LongArrayList. This handles boxing/unboxing
- * with SafeLongs.
+ * with SafeLongs, but stores the underlying longs densely in an long eclipse-collection.
  */
 final class ConjureSafeLongList extends AbstractList<SafeLong> implements RandomAccess {
     private final MutableLongList delegate;
