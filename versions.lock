@@ -44,35 +44,35 @@ com.palantir.conjure:conjure-api-objects:4.50.0 (3 constraints: 9327531f)
 
 com.palantir.conjure:conjure-generator-common:4.50.0 (2 constraints: fd13a782)
 
-com.palantir.conjure.java.api:errors:2.64.0 (8 constraints: a094bf79)
+com.palantir.conjure.java.api:errors:2.64.0 (8 constraints: a394547a)
 
-com.palantir.conjure.java.api:service-config:2.64.0 (6 constraints: 3466fcd7)
+com.palantir.conjure.java.api:service-config:2.64.0 (6 constraints: 37668fd8)
 
-com.palantir.conjure.java.api:ssl-config:2.64.0 (5 constraints: b44fa72d)
+com.palantir.conjure.java.api:ssl-config:2.64.0 (5 constraints: b54faa2d)
 
-com.palantir.conjure.java.runtime:client-config:8.24.0 (6 constraints: ab6bbb28)
+com.palantir.conjure.java.runtime:client-config:8.24.0 (6 constraints: ae6b4e29)
 
 com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.24.0 (1 constraints: 841cc4a4)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.24.0 (4 constraints: 2b4ac81e)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.24.0 (4 constraints: 2c4acb1e)
 
-com.palantir.conjure.java.runtime:keystores:8.24.0 (3 constraints: 162ac55d)
+com.palantir.conjure.java.runtime:keystores:8.24.0 (3 constraints: 172ac85d)
 
 com.palantir.deadlines:deadlines:0.15.0 (2 constraints: 9f1404ac)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.7.0 (2 constraints: 1a2974b6)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.8.0-7-gde83dba (2 constraints: 6e2cef8c)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.7.0 (2 constraints: 79232973)
+com.palantir.dialogue:dialogue-blocking-channels:6.8.0-7-gde83dba (2 constraints: 212a62b2)
 
-com.palantir.dialogue:dialogue-clients:6.7.0 (1 constraints: 2908e185)
+com.palantir.dialogue:dialogue-clients:6.8.0-7-gde83dba (1 constraints: 63080280)
 
-com.palantir.dialogue:dialogue-core:6.7.0 (3 constraints: ea3c6541)
+com.palantir.dialogue:dialogue-core:6.8.0-7-gde83dba (3 constraints: 924385ad)
 
-com.palantir.dialogue:dialogue-futures:6.7.0 (3 constraints: 3e33a938)
+com.palantir.dialogue:dialogue-futures:6.8.0-7-gde83dba (3 constraints: 3a3d7f36)
 
-com.palantir.dialogue:dialogue-serde:6.7.0 (3 constraints: 423189e6)
+com.palantir.dialogue:dialogue-serde:6.8.0-7-gde83dba (3 constraints: d034782d)
 
-com.palantir.dialogue:dialogue-target:6.7.0 (7 constraints: eb7a1d92)
+com.palantir.dialogue:dialogue-target:6.8.0-7-gde83dba (7 constraints: c98b0624)
 
 com.palantir.goethe:goethe:0.16.0 (1 constraints: 3905353b)
 
@@ -124,7 +124,7 @@ com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
 info.picocli:picocli:4.7.7 (1 constraints: 14051b36)
 
-io.dropwizard.metrics:metrics-core:4.2.33 (28 constraints: f5e67410)
+io.dropwizard.metrics:metrics-core:4.2.34 (28 constraints: f8e6781b)
 
 io.smallrye.common:smallrye-common-constraint:2.4.0 (3 constraints: c633ce60)
 
@@ -182,7 +182,7 @@ org.jboss.xnio:xnio-api:3.8.16.Final (2 constraints: d71a2474)
 
 org.jboss.xnio:xnio-nio:3.8.16.Final (1 constraints: f80dc53d)
 
-org.jetbrains:annotations:26.0.2 (4 constraints: 0a3aa099)
+org.jetbrains:annotations:26.0.2 (5 constraints: df499f90)
 
 org.jspecify:jspecify:1.0.0 (17 constraints: b80bb9e1)
 

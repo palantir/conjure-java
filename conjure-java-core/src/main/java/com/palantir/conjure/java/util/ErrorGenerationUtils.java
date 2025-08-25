@@ -70,7 +70,7 @@ public final class ErrorGenerationUtils {
     public static ParameterSpec buildParameterWithSafetyAnnotationAndJsonProperty(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
         ParameterSpec.Builder parameterBuilder =
-                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe);
+                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, true);
         parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                 .addMember("value", "$S", argDefinition.getFieldName().get())
                 .build());

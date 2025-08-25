@@ -329,11 +329,12 @@ public final class ConjureErrors {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());
     }
+
     public static record ConflictingCauseSafeArgParameters(
-            @JsonProperty("cause") @Safe String cause_, @JsonProperty("shouldThrow") @Safe boolean shouldThrow_) {}
+            @JsonProperty("cause") @Safe String cause, @JsonProperty("shouldThrow") @Safe boolean shouldThrow) {}
 
     public static record ConflictingCauseUnsafeArgParameters(
-            @JsonProperty("cause") @Unsafe String cause_, @JsonProperty("shouldThrow") @Unsafe boolean shouldThrow_) {}
+            @JsonProperty("cause") @Unsafe String cause, @JsonProperty("shouldThrow") @Unsafe boolean shouldThrow) {}
 
     public static record ErrorWithComplexArgsParameters(
             @JsonProperty("primitiveExample") @Safe PrimitiveExample primitiveExample,
@@ -377,8 +378,8 @@ public final class ConjureErrors {
 
         public SerializableError toSerializableError() {
             return SerializableError.builder()
-                    .putParameters("cause", Objects.toString(parameters().cause_()))
-                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow_()))
+                    .putParameters("cause", Objects.toString(parameters().cause()))
+                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow()))
                     .errorCode(errorCode())
                     .errorName(errorName())
                     .errorInstanceId(errorInstanceId())
@@ -399,8 +400,8 @@ public final class ConjureErrors {
 
         public SerializableError toSerializableError() {
             return SerializableError.builder()
-                    .putParameters("cause", Objects.toString(parameters().cause_()))
-                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow_()))
+                    .putParameters("cause", Objects.toString(parameters().cause()))
+                    .putParameters("shouldThrow", Objects.toString(parameters().shouldThrow()))
                     .errorCode(errorCode())
                     .errorName(errorName())
                     .errorInstanceId(errorInstanceId())
