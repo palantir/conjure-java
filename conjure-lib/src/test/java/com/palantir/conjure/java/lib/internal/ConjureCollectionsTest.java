@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.lib.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import java.util.List;
@@ -81,5 +82,18 @@ public class ConjureCollectionsTest {
 
         safeLongList.clear();
         assertThat(safeLongList).hasSize(0);
+    }
+
+    // This change https://github.com/palantir/conjure-java/pull/2548/ introduced some issues internally where
+    // some of our code was using `sublist()` from `AbstractList`, but moving to the Eclipse Collections caused
+    // this to throw a NotSupportedException. If you are reading this test, then you most likely moved over to
+    // use the Boxed* collections and you may need to implement `sublist()`
+    @Test
+    public void conjureCollectionsImplementSublist() {
+        List<Double> doubleList = ConjureCollections.newNonNullDoubleList(List.of(1.0, 2.0));
+        assertThatCode(() -> doubleList.subList(0, 1)).doesNotThrowAnyException();
+
+        List<Integer> intList = ConjureCollections.newNonNullIntegerList(List.of(1, 2));
+        assertThatCode(() -> intList.subList(0, 1)).doesNotThrowAnyException();
     }
 }
