@@ -30,7 +30,6 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
-import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -275,11 +274,7 @@ public final class ErrorGenerator implements Generator {
         for (int i = 0; i < allArgs.size(); i++) {
             FieldDefinition field = allArgs.get(i);
             String fieldName = field.getFieldName().get();
-            builder.add(
-                    ".putParameters($S, $T.toString(parameters().$L()))",
-                    fieldName,
-                    Objects.class,
-                    JavaNameSanitizer.sanitizeErrorParameterName(fieldName));
+            builder.add(".putParameters($S, $T.toString(parameters().$L()))", fieldName, Objects.class, fieldName);
         }
         builder.add(".errorCode(errorCode())")
                 .add(".errorName(errorName())")

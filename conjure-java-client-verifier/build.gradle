@@ -76,7 +76,6 @@ project('verification-server-api') {
         implementation 'com.palantir.safe-logging:preconditions'
         implementation 'com.palantir.safe-logging:safe-logging'
         implementation 'com.palantir.tokens:auth-tokens'
-        implementation 'com.palantir.conjure.java.api:errors'
     }
 }
 

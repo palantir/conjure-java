@@ -589,7 +589,7 @@ public final class UndertowServiceEteTest extends TestBase {
             // .getError() returns the SerializableError which should contain the legacy parameters sent over the wire.
             jsonParams = e.getError().parameters();
             // e should be an instance of ErrorWithComplexArgsException, which has rich parameters as well.
-            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
+            assertThat(e.getCause()).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
                 assertThat(exception.error().parameters().optionalExample().getOptionalString())
                         .contains("optional-value");
             });
