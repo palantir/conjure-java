@@ -17,24 +17,72 @@
 package com.palantir.conjure.java.lib.internal;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.AbstractList;
+import java.util.Collection;
+import java.util.RandomAccess;
 import org.eclipse.collections.api.list.primitive.MutableIntList;
-import org.eclipse.collections.impl.list.mutable.primitive.BoxedMutableIntList;
+import org.eclipse.collections.impl.utility.Iterate;
 
-final class ConjureIntegerList extends BoxedMutableIntList {
+/**
+ * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 12,
+ * a BoxedMutableIntList will be released. Once available, ConjureIntegerList should be replaced with that.
+ */
+final class ConjureIntegerList extends AbstractList<Integer> implements RandomAccess {
     private final MutableIntList delegate;
 
     ConjureIntegerList(MutableIntList delegate) {
-        super(delegate);
         this.delegate = delegate;
     }
 
-    // Primitive optimized overloads
+    @Override
+    public int size() {
+        return delegate.size();
+    }
+
+    @Override
+    public void add(int index, Integer toAdd) {
+        delegate.addAtIndex(index, toAdd);
+    }
+
+    // Primitive optimized overload
     void add(int toAdd) {
         this.delegate.add(toAdd);
     }
 
+    @Override
+    public Integer get(int index) {
+        return delegate.get(index);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Integer> collection) {
+        int[] target = new int[collection.size()];
+        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.intValue());
+        return delegate.addAllAtIndex(index, target);
+    }
+
+    // Primitive optimized overload
     void addAll(int[] source) {
         this.delegate.addAll(source);
+    }
+
+    @Override
+    public Integer remove(int index) {
+        return delegate.removeAtIndex(index);
+    }
+
+    @Override
+    public void clear() {
+        delegate.clear();
+    }
+
+    @Override
+    public Integer set(int index, Integer element) {
+        return delegate.set(index, element);
+    }
+
+    ConjureIntegerList asUnmodifiable() {
+        return new ConjureIntegerList(delegate.asUnmodifiable());
     }
 
     // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
