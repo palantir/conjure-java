@@ -587,12 +587,11 @@ public final class UndertowServiceEteTest extends TestBase {
         } catch (RemoteException e) {
             // .getError() returns the SerializableError which should contain the legacy parameters sent over the wire.
             jsonParams = e.getError().parameters();
-            // e should be an instance of ErrorWithComplexArgsException, which has rich parameters as well.
-            //            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception
-            // -> {
-            //                assertThat(exception.error().parameters().optionalExample().getOptionalString())
-            //                        .contains("optional-value");
-            //            });
+            // e should be an instance of ErrorWithComplexArgsException, which has rich parameters as well
+            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
+                assertThat(exception.error().parameters().optionalExample().getOptionalString())
+                        .contains("optional-value");
+            });
         }
 
         // Assert that the two maps contain the same keys and values, except for the `primitiveExample` and `anyExample`
