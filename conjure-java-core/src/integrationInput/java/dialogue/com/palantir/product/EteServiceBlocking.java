@@ -11,7 +11,6 @@ import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
-import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -219,82 +218,79 @@ public interface EteServiceBlocking {
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
             private final Deserializer<String> stringDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel integerChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.integer);
 
             private final Deserializer<Integer> integerDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Integer>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
 
             private final EndpointChannel double_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.double_);
 
             private final Deserializer<Double> double_Deserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Double>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
 
             private final EndpointChannel boolean_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.boolean_);
 
             private final Deserializer<Boolean> boolean_Deserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Boolean>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel safelongChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.safelong);
 
             private final Deserializer<SafeLong> safelongDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SafeLong>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<SafeLong>() {});
 
             private final EndpointChannel ridChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.rid);
 
-            private final Deserializer<ResourceIdentifier> ridDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<ResourceIdentifier>() {}));
+            private final Deserializer<ResourceIdentifier> ridDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<ResourceIdentifier>() {});
 
             private final EndpointChannel bearertokenChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.bearertoken);
 
-            private final Deserializer<BearerToken> bearertokenDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<BearerToken>() {}));
+            private final Deserializer<BearerToken> bearertokenDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<BearerToken>() {});
 
             private final EndpointChannel optionalStringChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalString);
 
-            private final Deserializer<Optional<String>> optionalStringDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<String>>() {}));
+            private final Deserializer<Optional<String>> optionalStringDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel optionalEmptyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEmpty);
 
-            private final Deserializer<Optional<String>> optionalEmptyDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<String>>() {}));
+            private final Deserializer<Optional<String>> optionalEmptyDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel datetimeChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.datetime);
 
-            private final Deserializer<OffsetDateTime> datetimeDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<OffsetDateTime>() {}));
+            private final Deserializer<OffsetDateTime> datetimeDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<OffsetDateTime>() {});
 
             private final EndpointChannel binaryChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.binary);
-
-            private final Deserializer<InputStream> binaryDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
 
             private final EndpointChannel pathChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.path);
 
             private final Deserializer<String> pathDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel externalLongPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.externalLongPath);
 
             private final Deserializer<Long> externalLongPathDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Long>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Long>() {});
 
             private final EndpointChannel optionalExternalLongQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
 
-            private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<Long>>() {}));
+            private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Long>>() {});
 
             private final Serializer<StringAliasExample> notNullBodySerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
@@ -302,26 +298,26 @@ public interface EteServiceBlocking {
             private final EndpointChannel notNullBodyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBody);
 
-            private final Deserializer<StringAliasExample> notNullBodyDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
+            private final Deserializer<StringAliasExample> notNullBodyDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel aliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasOne);
 
-            private final Deserializer<StringAliasExample> aliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
+            private final Deserializer<StringAliasExample> aliasOneDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel optionalAliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalAliasOne);
 
-            private final Deserializer<StringAliasExample> optionalAliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
+            private final Deserializer<StringAliasExample> optionalAliasOneDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel aliasTwoChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasTwo);
 
-            private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<NestedStringAliasExample>() {}));
+            private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<NestedStringAliasExample>() {});
 
             private final Serializer<allexamples.com.palantir.product.StringAliasExample>
                     notNullBodyExternalImportSerializer = _runtime.bodySerDe()
@@ -332,8 +328,7 @@ public interface EteServiceBlocking {
 
             private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
                     notNullBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(createExceptionDeserializerArgs(
-                                    new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {}));
+                            .deserializer(new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {});
 
             private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportSerializer = _runtime.bodySerDe()
@@ -345,72 +340,70 @@ public interface EteServiceBlocking {
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(createExceptionDeserializerArgs(
-                                    new TypeMarker<
-                                            Optional<allexamples.com.palantir.product.StringAliasExample>>() {}));
+                            .deserializer(
+                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel optionalQueryExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalQueryExternalImport);
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalQueryExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(createExceptionDeserializerArgs(
-                                    new TypeMarker<
-                                            Optional<allexamples.com.palantir.product.StringAliasExample>>() {}));
+                            .deserializer(
+                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
-            private final Deserializer<Void> noReturnDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> noReturnDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
 
             private final Deserializer<SimpleEnum> enumQueryDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleEnum>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
 
             private final EndpointChannel enumListQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumListQuery);
 
-            private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<List<SimpleEnum>>() {}));
+            private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<List<SimpleEnum>>() {});
 
             private final EndpointChannel optionalEnumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEnumQuery);
 
-            private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<SimpleEnum>>() {}));
+            private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<SimpleEnum>>() {});
 
             private final EndpointChannel enumHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumHeader);
 
             private final Deserializer<SimpleEnum> enumHeaderDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleEnum>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
 
             private final EndpointChannel jsonErrorsHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
 
             private final Deserializer<String> jsonErrorsHeaderDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
 
             private final Deserializer<String> errorParameterSerializationDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
 
-            private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<LongAlias>>() {}));
+            private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<LongAlias>>() {});
 
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
-            private final Deserializer<Void> complexQueryParametersDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> complexQueryParametersDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
@@ -418,8 +411,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
 
-            private final Deserializer<Void> receiveListOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> receiveListOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
@@ -427,8 +420,8 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
-            private final Deserializer<Void> receiveSetOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+            private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final Serializer<List<String>> receiveListOfStringsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
@@ -436,48 +429,13 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveListOfStringsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
-            private final Deserializer<Void> receiveListOfStringsDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
-
-            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
-                return ExceptionDeserializerArgs.<T>builder()
-                        .returnType(returnType)
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                        .exception(
-                                ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                        .exception(
-                                ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                        .exception(
-                                ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                        .exception(
-                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                        .build();
-            }
+            private final Deserializer<Void> receiveListOfStringsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
             public String string(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(stringChannel, _request.build(), stringDeserializer);
             }
 
@@ -485,11 +443,6 @@ public interface EteServiceBlocking {
             public int integer(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(integerChannel, _request.build(), integerDeserializer);
             }
 
@@ -497,11 +450,6 @@ public interface EteServiceBlocking {
             public double double_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(double_Channel, _request.build(), double_Deserializer);
             }
 
@@ -509,11 +457,6 @@ public interface EteServiceBlocking {
             public boolean boolean_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(boolean_Channel, _request.build(), boolean_Deserializer);
             }
 
@@ -521,11 +464,6 @@ public interface EteServiceBlocking {
             public SafeLong safelong(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(safelongChannel, _request.build(), safelongDeserializer);
             }
 
@@ -533,11 +471,6 @@ public interface EteServiceBlocking {
             public ResourceIdentifier rid(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(ridChannel, _request.build(), ridDeserializer);
             }
 
@@ -545,11 +478,6 @@ public interface EteServiceBlocking {
             public BearerToken bearertoken(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(bearertokenChannel, _request.build(), bearertokenDeserializer);
             }
 
@@ -557,11 +485,6 @@ public interface EteServiceBlocking {
             public Optional<String> optionalString(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(optionalStringChannel, _request.build(), optionalStringDeserializer);
             }
@@ -570,11 +493,6 @@ public interface EteServiceBlocking {
             public Optional<String> optionalEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(optionalEmptyChannel, _request.build(), optionalEmptyDeserializer);
             }
@@ -583,11 +501,6 @@ public interface EteServiceBlocking {
             public OffsetDateTime datetime(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(datetimeChannel, _request.build(), datetimeDeserializer);
             }
 
@@ -595,12 +508,11 @@ public interface EteServiceBlocking {
             public InputStream binary(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
-                return _runtime.clients().callBlocking(binaryChannel, _request.build(), binaryDeserializer);
+                return _runtime.clients()
+                        .callBlocking(
+                                binaryChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
@@ -608,11 +520,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("param", _plainSerDe.serializeString(param));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(pathChannel, _request.build(), pathDeserializer);
             }
 
@@ -621,11 +528,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("param", Objects.toString(param));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(externalLongPathChannel, _request.build(), externalLongPathDeserializer);
             }
@@ -636,11 +538,6 @@ public interface EteServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 if (param.isPresent()) {
                     _request.putQueryParams("param", Objects.toString(param.get()));
-                }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(
@@ -654,11 +551,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(notNullBodySerializer.serialize(notNullBody));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(notNullBodyChannel, _request.build(), notNullBodyDeserializer);
             }
 
@@ -667,11 +559,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("queryParamName", _plainSerDe.serializeString(queryParamName.get()));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(aliasOneChannel, _request.build(), aliasOneDeserializer);
             }
 
@@ -685,11 +572,6 @@ public interface EteServiceBlocking {
                             "queryParamName",
                             _plainSerDe.serializeString(queryParamName.get().get()));
                 }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(optionalAliasOneChannel, _request.build(), optionalAliasOneDeserializer);
             }
@@ -701,11 +583,6 @@ public interface EteServiceBlocking {
                 _request.putQueryParams(
                         "queryParamName",
                         _plainSerDe.serializeString(queryParamName.get().get()));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(aliasTwoChannel, _request.build(), aliasTwoDeserializer);
             }
 
@@ -715,11 +592,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(
                                 notNullBodyExternalImportChannel,
@@ -733,11 +605,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(optionalBodyExternalImportSerializer.serialize(body));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(
                                 optionalBodyExternalImportChannel,
@@ -753,11 +620,6 @@ public interface EteServiceBlocking {
                 if (query.isPresent()) {
                     _request.putQueryParams("query", Objects.toString(query.get()));
                 }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(
                                 optionalQueryExternalImportChannel,
@@ -769,11 +631,6 @@ public interface EteServiceBlocking {
             public void noReturn(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 _runtime.clients().callBlocking(noReturnChannel, _request.build(), noReturnDeserializer);
             }
 
@@ -782,11 +639,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("queryParamName", Objects.toString(queryParamName));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(enumQueryChannel, _request.build(), enumQueryDeserializer);
             }
 
@@ -796,11 +648,6 @@ public interface EteServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 for (SimpleEnum queryParamNameElement : queryParamName) {
                     _request.putQueryParams("queryParamName", Objects.toString(queryParamNameElement));
-                }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(enumListQueryChannel, _request.build(), enumListQueryDeserializer);
@@ -813,11 +660,6 @@ public interface EteServiceBlocking {
                 if (queryParamName.isPresent()) {
                     _request.putQueryParams("queryParamName", Objects.toString(queryParamName.get()));
                 }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(optionalEnumQueryChannel, _request.build(), optionalEnumQueryDeserializer);
             }
@@ -827,11 +669,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients().callBlocking(enumHeaderChannel, _request.build(), enumHeaderDeserializer);
             }
 
@@ -841,11 +678,6 @@ public interface EteServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
             }
@@ -856,11 +688,6 @@ public interface EteServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(
                                 errorParameterSerializationChannel,
@@ -875,11 +702,6 @@ public interface EteServiceBlocking {
                 if (input.isPresent()) {
                     _request.putQueryParams(
                             "input", Objects.toString(input.get().get()));
-                }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
                         .callBlocking(aliasLongEndpointChannel, _request.build(), aliasLongEndpointDeserializer);
@@ -904,11 +726,6 @@ public interface EteServiceBlocking {
                 for (int intsElement : ints) {
                     _request.putQueryParams("ints", _plainSerDe.serializeInteger(intsElement));
                 }
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 _runtime.clients()
                         .callBlocking(
                                 complexQueryParametersChannel, _request.build(), complexQueryParametersDeserializer);
@@ -919,11 +736,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(receiveListOfOptionalsSerializer.serialize(value));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 _runtime.clients()
                         .callBlocking(
                                 receiveListOfOptionalsChannel, _request.build(), receiveListOfOptionalsDeserializer);
@@ -934,11 +746,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(receiveSetOfOptionalsSerializer.serialize(value));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 _runtime.clients()
                         .callBlocking(
                                 receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
@@ -949,11 +756,6 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(receiveListOfStringsSerializer.serialize(value));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 _runtime.clients()
                         .callBlocking(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
             }
