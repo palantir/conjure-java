@@ -5,16 +5,13 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
-import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
@@ -64,84 +61,31 @@ public interface EteBinaryServiceBlocking {
             private final EndpointChannel postBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
-            private final Deserializer<InputStream> postBinaryDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
-
             private final EndpointChannel postBinaryThrowsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinaryThrows);
-
-            private final Deserializer<InputStream> postBinaryThrowsDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
 
             private final EndpointChannel getOptionalBinaryPresentChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
 
-            private final Deserializer<Optional<InputStream>> getOptionalBinaryPresentDeserializer =
-                    _runtime.bodySerDe()
-                            .optionalInputStreamDeserializer(
-                                    createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
-
             private final EndpointChannel getOptionalBinaryEmptyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
-
-            private final Deserializer<Optional<InputStream>> getOptionalBinaryEmptyDeserializer = _runtime.bodySerDe()
-                    .optionalInputStreamDeserializer(
-                            createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
 
             private final EndpointChannel getBinaryFailureChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
 
-            private final Deserializer<InputStream> getBinaryFailureDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
-
             private final EndpointChannel getAliasedChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
-
-            private final Deserializer<Optional<InputStream>> getAliasedDeserializer = _runtime.bodySerDe()
-                    .optionalInputStreamDeserializer(
-                            createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
-
-            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
-                return ExceptionDeserializerArgs.<T>builder()
-                        .returnType(returnType)
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                        .exception(
-                                ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                        .exception(
-                                ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                        .exception(
-                                ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                        .exception(
-                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                        .build();
-            }
 
             @Override
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(body));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
-                return _runtime.clients().callBlocking(postBinaryChannel, _request.build(), postBinaryDeserializer);
+                return _runtime.clients()
+                        .callBlocking(
+                                postBinaryChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
@@ -150,43 +94,33 @@ public interface EteBinaryServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(body));
                 _request.putQueryParams("bytesToRead", _plainSerDe.serializeInteger(bytesToRead));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
-                        .callBlocking(postBinaryThrowsChannel, _request.build(), postBinaryThrowsDeserializer);
+                        .callBlocking(
+                                postBinaryThrowsChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
             public Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(
                                 getOptionalBinaryPresentChannel,
                                 _request.build(),
-                                getOptionalBinaryPresentDeserializer);
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
             public Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
                         .callBlocking(
-                                getOptionalBinaryEmptyChannel, _request.build(), getOptionalBinaryEmptyDeserializer);
+                                getOptionalBinaryEmptyChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
@@ -195,25 +129,22 @@ public interface EteBinaryServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
                 _request.putQueryParams("useTryWithResources", _plainSerDe.serializeBoolean(useTryWithResources));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
                 return _runtime.clients()
-                        .callBlocking(getBinaryFailureChannel, _request.build(), getBinaryFailureDeserializer);
+                        .callBlocking(
+                                getBinaryFailureChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
             public Optional<InputStream> getAliased(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
-                return _runtime.clients().callBlocking(getAliasedChannel, _request.build(), getAliasedDeserializer);
+                return _runtime.clients()
+                        .callBlocking(
+                                getAliasedChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
