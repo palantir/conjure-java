@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -69,7 +68,6 @@ public final class ParameterizedConjureGenerationTest {
 
     @Test
     @Order(2)
-    @Disabled
     void validateOnlyRegisteredPackagesPresent() {
         File referenceFilesFolder = new File(REFERENCE_FILES_FOLDER);
         File[] files = referenceFilesFolder.listFiles();
