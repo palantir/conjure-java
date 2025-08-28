@@ -22,7 +22,6 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.util.ErrorGenerationUtils.PackageToErrorDefinitionsMapping;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -71,15 +70,13 @@ public final class DialogueServiceGenerator implements Generator {
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 types.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
 
-        PackageToErrorDefinitionsMapping packageToErrorDefinitionsMapping =
-                PackageToErrorDefinitionsMapping.from(conjureDefinition);
         StaticFactoryMethodGenerator asyncGenerator = new DefaultStaticFactoryMethodGenerator(
                 options,
                 typeNameResolver,
                 parameterMapper,
                 new ReturnTypeMapper(returnTypes),
                 StaticFactoryMethodType.ASYNC,
-                packageToErrorDefinitionsMapping);
+                conjureDefinition.getErrors());
 
         StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
                 options,
@@ -87,7 +84,7 @@ public final class DialogueServiceGenerator implements Generator {
                 parameterMapper,
                 new ReturnTypeMapper(returnTypes),
                 StaticFactoryMethodType.BLOCKING,
-                packageToErrorDefinitionsMapping);
+                conjureDefinition.getErrors());
 
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateFilesForService(

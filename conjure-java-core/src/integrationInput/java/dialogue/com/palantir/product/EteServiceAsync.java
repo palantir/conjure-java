@@ -177,8 +177,8 @@ public interface EteServiceAsync {
     ListenableFuture<String> jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
 
     /**
-     * This endpoint is used to test that that error parameters serialized as JSON or using <code>Objects.toString
-     * </code> are both handled correctly by the clients that return &quot;rich&quot; exceptions (which are sub-types of
+     * This endpoint is used to test that error parameters serialized as JSON or using <code>Objects.toString</code> are
+     * both handled correctly by the clients that can deserialize &quot;rich&quot; exceptions (which are sub-types of
      * <code>RemoteException</code>).
      *
      * @apiNote {@code GET /base/errors/serialization}

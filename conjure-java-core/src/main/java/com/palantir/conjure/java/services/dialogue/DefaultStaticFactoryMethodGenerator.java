@@ -18,9 +18,9 @@ package com.palantir.conjure.java.services.dialogue;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
 import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
-import com.palantir.conjure.java.util.ErrorGenerationUtils.PackageToErrorDefinitionsMapping;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -82,7 +82,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
-    private final PackageToErrorDefinitionsMapping packageToErrorDefinitionsMapping;
+    private final List<ErrorDefinition> errorDefinitions;
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
@@ -90,13 +90,13 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             ParameterTypeMapper parameterTypes,
             ReturnTypeMapper returnTypes,
             StaticFactoryMethodType methodType,
-            PackageToErrorDefinitionsMapping packageToErrorDefinitionsMapping) {
+            List<ErrorDefinition> errorDefinitions) {
         this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
         this.methodType = methodType;
-        this.packageToErrorDefinitionsMapping = packageToErrorDefinitionsMapping;
+        this.errorDefinitions = errorDefinitions;
     }
 
     @Override
@@ -110,8 +110,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build());
 
         if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
-            impl.addMethod(createHelperToConstructExceptionDeserializerArgs(
-                    def.getServiceName().getPackage()));
+            impl.addMethod(createHelperToConstructExceptionDeserializerArgs());
         }
 
         def.getEndpoints().forEach(endpoint -> {
@@ -142,8 +141,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return method;
     }
 
-    private MethodSpec createHelperToConstructExceptionDeserializerArgs(String serviceDefinitionPackageName) {
-        List<ErrorDefinition> errorDefinitions = packageToErrorDefinitionsMapping.get(serviceDefinitionPackageName);
+    private ClassName getClassNameInErrorsPackage(ErrorDefinition errorDef, String name) {
+        return ClassName.get(
+                Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
+                name);
+    }
+
+    private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
         TypeVariableName typeVariableT = TypeVariableName.get("T");
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createExceptionDeserializerArgs")
                 .addTypeVariable(typeVariableT)
@@ -157,18 +162,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         // Add exceptions from error definitions
         for (ErrorDefinition errorDef : errorDefinitions) {
             String errorName = errorDef.getErrorName().getName();
-            ClassName errorClass = ClassName.get(
-                    Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
-                    ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
-                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
-            ClassName serializableErrorClass = ClassName.get(
-                    Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
-                    ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
-                    errorName + "SerializableError");
-            ClassName exceptionClass = ClassName.get(
-                    Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
-                    ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
-                    errorName + "Exception");
+            ClassName errorClass = getClassNameInErrorsPackage(
+                    errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
+            ClassName serializableErrorClass = getClassNameInErrorsPackage(errorDef, errorName + "SerializableError");
+            ClassName exceptionClass = getClassNameInErrorsPackage(errorDef, errorName + "Exception");
             exceptions.add(
                     ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
                     errorClass,
@@ -308,9 +305,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             methodBuilder.addCode(CodeBlock.builder()
                     .beginControlFlow("if ($L.bodySerDe().errorParameterFormat().isPresent())", RUNTIME)
                     .add(
-                            "$L.putHeaderParams($S," + " $L.bodySerDe().errorParameterFormat().get().toString());",
+                            "$L.putHeaderParams($S, $L.bodySerDe().errorParameterFormat().get().toString());",
                             REQUEST,
-                            "Accept-Conjure-Error-Parameter-Format", // TODO(pm): make this public.
+                            ConjureErrorParameterFormats.ACCEPT_CONJURE_ERROR_PARAMETER_FORMAT_HEADER,
                             RUNTIME)
                     .endControlFlow()
                     .build());
