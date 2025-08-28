@@ -14,6 +14,8 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.BearerToken;
+import dialogue.com.palantir.another.ConjureErrors;
+import dialogue.com.palantir.product.ConjureJavaErrors;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
@@ -40,6 +42,53 @@ public interface CookieServiceBlocking {
             private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 return ExceptionDeserializerArgs.<T>builder()
                         .returnType(returnType)
+                        .exception(
+                                ConjureErrors.DIFFERENT_PACKAGE_ERROR.name(),
+                                new TypeMarker<ConjureErrors.DifferentPackageErrorSerializableError>() {},
+                                new TypeMarker<ConjureErrors.DifferentPackageErrorException>() {})
+                        .exception(
+                                dialogue.com.palantir.product.ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .ConflictingCauseSafeArgSerializableError>() {},
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .ConflictingCauseSafeArgException>() {})
+                        .exception(
+                                dialogue.com.palantir.product.ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .ConflictingCauseUnsafeArgSerializableError>() {},
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .ConflictingCauseUnsafeArgException>() {})
+                        .exception(
+                                dialogue.com.palantir.product.ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .ErrorWithComplexArgsSerializableError>() {},
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException>() {})
+                        .exception(
+                                dialogue.com.palantir.product.ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .InvalidServiceDefinitionSerializableError>() {},
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .InvalidServiceDefinitionException>() {})
+                        .exception(
+                                dialogue.com.palantir.product.ConjureErrors.INVALID_TYPE_DEFINITION.name(),
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .InvalidTypeDefinitionSerializableError>() {},
+                                new TypeMarker<
+                                        dialogue.com.palantir.product.ConjureErrors
+                                                .InvalidTypeDefinitionException>() {})
+                        .exception(
+                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
+                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
                         .build();
             }
 

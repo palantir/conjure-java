@@ -41,6 +41,14 @@ public interface EmptyPathServiceAsync {
                 return ExceptionDeserializerArgs.<T>builder()
                         .returnType(returnType)
                         .exception(
+                                dialogue.com.palantir.another.ConjureErrors.DIFFERENT_PACKAGE_ERROR.name(),
+                                new TypeMarker<
+                                        dialogue.com.palantir.another.ConjureErrors
+                                                .DifferentPackageErrorSerializableError>() {},
+                                new TypeMarker<
+                                        dialogue.com.palantir.another.ConjureErrors
+                                                .DifferentPackageErrorException>() {})
+                        .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
                                 new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
                                 new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
