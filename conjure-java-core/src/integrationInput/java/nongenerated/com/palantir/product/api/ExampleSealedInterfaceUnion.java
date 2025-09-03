@@ -25,8 +25,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Unsafe;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -35,13 +35,12 @@ import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion.Baz;
 import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion.Foo;
 import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion.UnknownVariant;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true,
-        defaultImpl = UnknownVariant.class)
-@JsonSubTypes({@JsonSubTypes.Type(Foo.class), @JsonSubTypes.Type(Bar.class), @JsonSubTypes.Type(Baz.class)})
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = UnknownVariant.class)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Foo.class, name = "foo"),
+    @JsonSubTypes.Type(value = Bar.class, name = "bar"),
+    @JsonSubTypes.Type(value = Baz.class, name = "baz")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface ExampleSealedInterfaceUnion {
 
@@ -56,29 +55,35 @@ public sealed interface ExampleSealedInterfaceUnion {
             this.value = value;
         }
 
-        @JsonProperty(value = "type", index = 0)
-        private String getType() {
-            return "foo";
-        }
-
-        private String getValue() {
-            return value;
+        @Override
+        public String toString() {
+            return "ExampleSealedInterfaceUnion.Foo{value: " + value + '}';
         }
     }
 
-    @JsonAppend(attrs = @JsonAppend.Attr(propName = "type", value = "bar"), prepend = true)
+    @JsonTypeName("bar")
     record Bar(@JsonProperty("bar") int value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Bar {
             Preconditions.checkNotNull(value, "bar cannot be null");
         }
+
+        @Override
+        public String toString() {
+            return "ExampleSealedInterfaceUnion.Bar{value: " + value + '}';
+        }
     }
 
-    @JsonAppend(attrs = @JsonAppend.Attr(propName = "type", value = "baz"), prepend = true)
+    @JsonTypeName("baz")
     record Baz(@JsonProperty("baz") long value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Baz {
             Preconditions.checkNotNull(value, "baz cannot be null");
+        }
+
+        @Override
+        public String toString() {
+            return "ExampleSealedInterfaceUnion.Baz{value: " + value + '}';
         }
     }
 
@@ -135,8 +140,9 @@ public sealed interface ExampleSealedInterfaceUnion {
         }
 
         @Override
+        @Unsafe
         public String toString() {
-            return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+            return "ExampleSealedInterfaceUnion.UnknownVariant{type: " + type + ", value: " + value + '}';
         }
     }
 }
