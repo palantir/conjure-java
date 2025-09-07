@@ -27,6 +27,7 @@ import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.DeclaredEndpointErrors;
@@ -164,7 +165,8 @@ public final class ErrorGenerator implements Generator {
                 })
                 .collect(Collectors.toList());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorTypesClassName(conjurePackage, namespace))
+        ClassName errorsClassName = errorTypesClassName(conjurePackage, namespace);
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorsClassName)
                 .addMethod(ErrorGenerationUtils.privateConstructor())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(generateErrorTypeFields(namespace, errorTypeDefinitions))
@@ -176,7 +178,7 @@ public final class ErrorGenerator implements Generator {
             typeBuilder
                     .addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper))
                     .addTypes(generateSerializableErrors(errorTypeDefinitions))
-                    .addTypes(generateRemoteExceptionTypes(errorTypeDefinitions));
+                    .addTypes(generateRemoteExceptionTypes(errorsClassName, errorTypeDefinitions));
         }
 
         return JavaFile.builder(conjurePackage, typeBuilder.build())
@@ -185,20 +187,25 @@ public final class ErrorGenerator implements Generator {
                 .build();
     }
 
-    private static List<TypeSpec> generateRemoteExceptionTypes(List<ErrorDefinition> errorDefinitions) {
+    private static List<TypeSpec> generateRemoteExceptionTypes(
+            ClassName errorsClassName, List<ErrorDefinition> errorDefinitions) {
         return errorDefinitions.stream()
-                .map(ErrorGenerator::generateRemoteExceptionType)
+                .map(def -> generateRemoteExceptionType(errorsClassName, def))
                 .toList();
     }
 
-    private static TypeSpec generateRemoteExceptionType(ErrorDefinition errorDefinition) {
+    private static TypeSpec generateRemoteExceptionType(ClassName errorsClassName, ErrorDefinition errorDefinition) {
         String remoteExceptionClassName = errorDefinition.getErrorName().getName() + "Exception";
         ClassName serializableErrorClassName =
-                ClassName.get("", errorDefinition.getErrorName().getName() + "SerializableError");
+                errorsClassName.nestedClass(errorDefinition.getErrorName().getName() + "SerializableError");
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(remoteExceptionClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(RemoteException.class)
+                .addSuperinterface(ParameterizedTypeName.get(
+                        ClassName.get(SerializableErrorProvider.class),
+                        errorsClassName.nestedClass(ErrorGenerationUtils.errorParametersClassName(
+                                errorDefinition.getErrorName().getName()))))
                 .addField(FieldSpec.builder(serializableErrorClassName, "error")
                         .addModifiers(Modifier.PRIVATE)
                         .build())
