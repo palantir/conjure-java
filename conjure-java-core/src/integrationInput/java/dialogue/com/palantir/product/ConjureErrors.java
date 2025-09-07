@@ -6,6 +6,7 @@ import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -500,7 +501,8 @@ public final class ConjureErrors {
         }
     }
 
-    public static final class ConflictingCauseSafeArgException extends RemoteException {
+    public static final class ConflictingCauseSafeArgException extends RemoteException
+            implements SerializableErrorProvider<ConflictingCauseSafeArgParameters> {
         private ConflictingCauseSafeArgSerializableError error;
 
         public ConflictingCauseSafeArgException(ConflictingCauseSafeArgSerializableError error, int status) {
@@ -513,7 +515,8 @@ public final class ConjureErrors {
         }
     }
 
-    public static final class ConflictingCauseUnsafeArgException extends RemoteException {
+    public static final class ConflictingCauseUnsafeArgException extends RemoteException
+            implements SerializableErrorProvider<ConflictingCauseUnsafeArgParameters> {
         private ConflictingCauseUnsafeArgSerializableError error;
 
         public ConflictingCauseUnsafeArgException(ConflictingCauseUnsafeArgSerializableError error, int status) {
@@ -526,7 +529,8 @@ public final class ConjureErrors {
         }
     }
 
-    public static final class ErrorWithComplexArgsException extends RemoteException {
+    public static final class ErrorWithComplexArgsException extends RemoteException
+            implements SerializableErrorProvider<ErrorWithComplexArgsParameters> {
         private ErrorWithComplexArgsSerializableError error;
 
         public ErrorWithComplexArgsException(ErrorWithComplexArgsSerializableError error, int status) {
@@ -539,7 +543,8 @@ public final class ConjureErrors {
         }
     }
 
-    public static final class InvalidServiceDefinitionException extends RemoteException {
+    public static final class InvalidServiceDefinitionException extends RemoteException
+            implements SerializableErrorProvider<InvalidServiceDefinitionParameters> {
         private InvalidServiceDefinitionSerializableError error;
 
         public InvalidServiceDefinitionException(InvalidServiceDefinitionSerializableError error, int status) {
@@ -552,7 +557,8 @@ public final class ConjureErrors {
         }
     }
 
-    public static final class InvalidTypeDefinitionException extends RemoteException {
+    public static final class InvalidTypeDefinitionException extends RemoteException
+            implements SerializableErrorProvider<InvalidTypeDefinitionParameters> {
         private InvalidTypeDefinitionSerializableError error;
 
         public InvalidTypeDefinitionException(InvalidTypeDefinitionSerializableError error, int status) {

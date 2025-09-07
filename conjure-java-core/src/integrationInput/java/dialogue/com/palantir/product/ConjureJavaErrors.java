@@ -6,6 +6,7 @@ import com.palantir.conjure.java.api.errors.AbstractSerializableError;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -67,7 +68,8 @@ public final class ConjureJavaErrors {
         }
     }
 
-    public static final class JavaCompilationFailedException extends RemoteException {
+    public static final class JavaCompilationFailedException extends RemoteException
+            implements SerializableErrorProvider<JavaCompilationFailedParameters> {
         private JavaCompilationFailedSerializableError error;
 
         public JavaCompilationFailedException(JavaCompilationFailedSerializableError error, int status) {
