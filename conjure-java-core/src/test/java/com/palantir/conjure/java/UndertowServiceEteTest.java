@@ -37,6 +37,7 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import dialogue.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
 import dialogue.com.palantir.product.EteBinaryServiceBlocking;
 import dialogue.com.palantir.product.EteServiceAsync;
 import dialogue.com.palantir.product.EteServiceBlocking;
