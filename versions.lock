@@ -44,19 +44,11 @@ com.palantir.conjure:conjure-api-objects:4.50.0 (3 constraints: 9327531f)
 
 com.palantir.conjure:conjure-generator-common:4.50.0 (2 constraints: fd13a782)
 
-<<<<<<< HEAD
 com.palantir.conjure.java.api:errors:2.65.0 (8 constraints: ab947e7e)
 
 com.palantir.conjure.java.api:service-config:2.65.0 (6 constraints: 3e66cdda)
 
 com.palantir.conjure.java.api:ssl-config:2.65.0 (5 constraints: b94f282f)
-=======
-com.palantir.conjure.java.api:errors:2.65.0 (8 constraints: 5d9db5bb)
-
-com.palantir.conjure.java.api:service-config:2.65.0 (6 constraints: f06e5f1f)
-
-com.palantir.conjure.java.api:ssl-config:2.65.0 (5 constraints: 9f52c3ac)
->>>>>>> c3b99345 (Use SerailizableErrorProvider)
 
 com.palantir.conjure.java.runtime:client-config:8.24.0 (6 constraints: ae6b4e29)
 
@@ -68,7 +60,6 @@ com.palantir.conjure.java.runtime:keystores:8.24.0 (3 constraints: 172ac85d)
 
 com.palantir.deadlines:deadlines:0.15.0 (2 constraints: 9f1404ac)
 
-<<<<<<< HEAD
 com.palantir.dialogue:dialogue-apache-hc5-client:6.9.0 (2 constraints: 1c297ab6)
 
 com.palantir.dialogue:dialogue-blocking-channels:6.9.0 (2 constraints: 7d238f73)
@@ -82,21 +73,6 @@ com.palantir.dialogue:dialogue-futures:6.9.0 (3 constraints: 4433c739)
 com.palantir.dialogue:dialogue-serde:6.9.0 (3 constraints: 2c2efb32)
 
 com.palantir.dialogue:dialogue-target:6.9.0 (7 constraints: dd778451)
-=======
-com.palantir.dialogue:dialogue-apache-hc5-client:6.8.0-22-g9d026eb (2 constraints: 3c2c49b6)
-
-com.palantir.dialogue:dialogue-blocking-channels:6.8.0-22-g9d026eb (2 constraints: bd295ee2)
-
-com.palantir.dialogue:dialogue-clients:6.8.0-22-g9d026eb (1 constraints: 31085185)
-
-com.palantir.dialogue:dialogue-core:6.8.0-22-g9d026eb (3 constraints: 2e432f0f)
-
-com.palantir.dialogue:dialogue-futures:6.8.0-22-g9d026eb (3 constraints: a43c338b)
-
-com.palantir.dialogue:dialogue-serde:6.8.0-22-g9d026eb (3 constraints: 6c34b54b)
-
-com.palantir.dialogue:dialogue-target:6.8.0-22-g9d026eb (7 constraints: 9d8a2158)
->>>>>>> c3b99345 (Use SerailizableErrorProvider)
 
 com.palantir.goethe:goethe:0.16.0 (1 constraints: 3905353b)
 
@@ -148,11 +124,7 @@ com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
 info.picocli:picocli:4.7.7 (1 constraints: 14051b36)
 
-<<<<<<< HEAD
 io.dropwizard.metrics:metrics-core:4.2.36 (28 constraints: 07e7a64d)
-=======
-io.dropwizard.metrics:metrics-core:4.2.36 (28 constraints: fee68031)
->>>>>>> c3b99345 (Use SerailizableErrorProvider)
 
 io.smallrye.common:smallrye-common-constraint:2.4.0 (3 constraints: c633ce60)
 
