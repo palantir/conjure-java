@@ -573,6 +573,13 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testExceptionThrowingClientCanReturnValue() {
+        assertThat(exceptionThrowingClient.errorParameterSerialization(
+                        AuthHeader.valueOf("authHeader"), "invalid-header"))
+                .isEqualTo("hello!");
+    }
+
+    @Test
     public void testStringParametersDoNotChangeWhenUsingJsonAndJavaString() {
         Map<String, String> toStringParams = Map.of();
         Map<String, String> jsonParams = Map.of();
