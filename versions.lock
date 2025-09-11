@@ -28,7 +28,7 @@ com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
 
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 10110b88)
 
-com.google.errorprone:error_prone_annotations:2.7.1 (31 constraints: b80299df)
+com.google.errorprone:error_prone_annotations:2.7.1 (31 constraints: bc020de2)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -44,11 +44,11 @@ com.palantir.conjure:conjure-api-objects:4.50.0 (3 constraints: 9327531f)
 
 com.palantir.conjure:conjure-generator-common:4.50.0 (2 constraints: fd13a782)
 
-com.palantir.conjure.java.api:errors:2.65.0 (8 constraints: a294bf7c)
+com.palantir.conjure.java.api:errors:2.65.0 (8 constraints: ab947e7e)
 
-com.palantir.conjure.java.api:service-config:2.65.0 (6 constraints: 356614d9)
+com.palantir.conjure.java.api:service-config:2.65.0 (6 constraints: 3e66cdda)
 
-com.palantir.conjure.java.api:ssl-config:2.65.0 (5 constraints: b64f1f2f)
+com.palantir.conjure.java.api:ssl-config:2.65.0 (5 constraints: b94f282f)
 
 com.palantir.conjure.java.runtime:client-config:8.24.0 (6 constraints: ae6b4e29)
 
@@ -60,19 +60,19 @@ com.palantir.conjure.java.runtime:keystores:8.24.0 (3 constraints: 172ac85d)
 
 com.palantir.deadlines:deadlines:0.15.0 (2 constraints: 9f1404ac)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.8.0 (2 constraints: 1b2977b6)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.9.0 (2 constraints: 1c297ab6)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.8.0 (2 constraints: 7b235c73)
+com.palantir.dialogue:dialogue-blocking-channels:6.9.0 (2 constraints: 7d238f73)
 
-com.palantir.dialogue:dialogue-clients:6.8.0 (1 constraints: 10052136)
+com.palantir.dialogue:dialogue-clients:6.9.0 (1 constraints: 11052436)
 
-com.palantir.dialogue:dialogue-core:6.8.0 (3 constraints: ec3c9a41)
+com.palantir.dialogue:dialogue-core:6.9.0 (3 constraints: ee3ccf41)
 
-com.palantir.dialogue:dialogue-futures:6.8.0 (3 constraints: 41333839)
+com.palantir.dialogue:dialogue-futures:6.9.0 (3 constraints: 4433c739)
 
-com.palantir.dialogue:dialogue-serde:6.8.0 (3 constraints: 2a2e8232)
+com.palantir.dialogue:dialogue-serde:6.9.0 (3 constraints: 2c2efb32)
 
-com.palantir.dialogue:dialogue-target:6.8.0 (7 constraints: d777644e)
+com.palantir.dialogue:dialogue-target:6.9.0 (7 constraints: dd778451)
 
 com.palantir.goethe:goethe:0.16.0 (1 constraints: 3905353b)
 
@@ -108,23 +108,23 @@ com.palantir.tracing:tracing-api:6.27.0 (6 constraints: a458832d)
 
 com.palantir.tracing:tracing-undertow:6.27.0 (1 constraints: 4105603b)
 
-com.palantir.tritium:tritium-api:0.104.0 (2 constraints: 8b1f76f3)
+com.palantir.tritium:tritium-api:0.105.0 (2 constraints: 8d1fabf3)
 
-com.palantir.tritium:tritium-caffeine:0.104.0 (1 constraints: e01004cf)
+com.palantir.tritium:tritium-caffeine:0.105.0 (1 constraints: e11007cf)
 
-com.palantir.tritium:tritium-core:0.104.0 (1 constraints: 6d10a3b2)
+com.palantir.tritium:tritium-core:0.105.0 (1 constraints: 6e10a6b2)
 
 com.palantir.tritium:tritium-ids:0.104.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-metrics:0.104.0 (6 constraints: 6f68251c)
+com.palantir.tritium:tritium-metrics:0.105.0 (6 constraints: 74681b1e)
 
-com.palantir.tritium:tritium-registry:0.104.0 (12 constraints: 2cef5c00)
+com.palantir.tritium:tritium-registry:0.105.0 (12 constraints: 33ef5e04)
 
 com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
 info.picocli:picocli:4.7.7 (1 constraints: 14051b36)
 
-io.dropwizard.metrics:metrics-core:4.2.33 (28 constraints: f5e67410)
+io.dropwizard.metrics:metrics-core:4.2.36 (28 constraints: 07e7a64d)
 
 io.smallrye.common:smallrye-common-constraint:2.4.0 (3 constraints: c633ce60)
 
@@ -154,11 +154,11 @@ org.apache.commons:commons-lang3:3.18.0 (3 constraints: fe2123fa)
 
 org.apache.httpcomponents.client5:httpclient5:5.4.3 (3 constraints: f43937e8)
 
-org.apache.httpcomponents.core5:httpcore5:5.3.4 (4 constraints: 034863a7)
+org.apache.httpcomponents.core5:httpcore5:5.3.5 (4 constraints: 0448f8a7)
 
 org.apache.httpcomponents.core5:httpcore5-h2:5.3.4 (1 constraints: 4013103c)
 
-org.checkerframework:checker-qual:3.49.1 (13 constraints: c8c1469b)
+org.checkerframework:checker-qual:3.49.1 (12 constraints: 4cb1cd72)
 
 org.derive4j:derive4j-annotation:1.1.1 (1 constraints: 0505f435)
 
