@@ -43,6 +43,7 @@ import dialogue.com.palantir.product.EteServiceBlocking;
 import dialogue.com.palantir.product.NestedStringAliasExample;
 import dialogue.com.palantir.product.SimpleEnum;
 import dialogue.com.palantir.product.StringAliasExample;
+import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -89,6 +90,7 @@ public final class UndertowServiceEteTest extends TestBase {
     private static Undertow server;
 
     private final EteServiceBlocking client;
+    private final exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking exceptionThrowingClient;
     private final EteServiceAsync asyncClient;
 
     private final EteBinaryServiceBlocking binaryClient;
@@ -97,6 +99,9 @@ public final class UndertowServiceEteTest extends TestBase {
 
     public UndertowServiceEteTest() {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(port));
+        this.exceptionThrowingClient = DialogueClients.create(
+                exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking.class,
+                clientConfiguration(port));
         this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
         this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
     }
@@ -551,7 +556,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testErrorParametersSerializedAsJson() {
         try {
-            client.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
+            exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
         } catch (RemoteException e) {
             assertThat(e.getError().parameters())
                     .containsExactlyInAnyOrderEntriesOf(
@@ -559,7 +564,7 @@ public final class UndertowServiceEteTest extends TestBase {
         }
 
         try {
-            client.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING");
+            exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING");
         } catch (RemoteException e) {
             assertThat(e.getError().parameters())
                     .containsExactlyInAnyOrderEntriesOf(
@@ -574,7 +579,7 @@ public final class UndertowServiceEteTest extends TestBase {
         try {
             // The `TOSTRING` header does nothing: it's not used in `ConjureExceptions` to change any serialization
             // behavior. It's just a way to tell the EteResource to throw an error.
-            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "TOSTRING");
+            exceptionThrowingClient.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "TOSTRING");
         } catch (RemoteException e) {
             toStringParams = e.getError().parameters();
         }
@@ -583,16 +588,15 @@ public final class UndertowServiceEteTest extends TestBase {
         try {
             // The `JSON` header is read by `ConjureExceptions` to change the serialization behavior. The `JSON`
             // representation of the parameters is sent in the `parameters` field of the Conjure error.
-            client.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON");
+            exceptionThrowingClient.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON");
         } catch (RemoteException e) {
             // .getError() returns the SerializableError which should contain the legacy parameters sent over the wire.
             jsonParams = e.getError().parameters();
             // e should be an instance of ErrorWithComplexArgsException, which has rich parameters as well.
-            //            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception
-            // -> {
-            //                assertThat(exception.error().parameters().optionalExample().getOptionalString())
-            //                        .contains("optional-value");
-            //            });
+            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
+                assertThat(exception.error().parameters().optionalExample().getOptionalString())
+                        .contains("optional-value");
+            });
         }
 
         // Assert that the two maps contain the same keys and values, except for the `primitiveExample` and `anyExample`
