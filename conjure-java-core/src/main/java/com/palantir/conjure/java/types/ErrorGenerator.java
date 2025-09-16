@@ -204,8 +204,7 @@ public final class ErrorGenerator implements Generator {
                 .superclass(RemoteException.class)
                 .addSuperinterface(ParameterizedTypeName.get(
                         ClassName.get(SerializableErrorProvider.class),
-                        errorsClassName.nestedClass(ErrorGenerationUtils.errorParametersClassName(
-                                errorDefinition.getErrorName().getName()))))
+                        errorsClassName.nestedClass(ErrorGenerationUtils.errorParametersClassName(errorDefinition))))
                 .addField(FieldSpec.builder(serializableErrorClassName, "error")
                         .addModifiers(Modifier.PRIVATE)
                         .build())
@@ -233,8 +232,7 @@ public final class ErrorGenerator implements Generator {
 
     private static TypeSpec generateSerializableError(ErrorDefinition errorDefinition) {
         String serializableErrorClassName = errorDefinition.getErrorName().getName() + "SerializableError";
-        String parameterClassNameString = ErrorGenerationUtils.errorParametersClassName(
-                errorDefinition.getErrorName().getName());
+        String parameterClassNameString = ErrorGenerationUtils.errorParametersClassName(errorDefinition);
         ClassName parametersClassName = ClassName.get("", parameterClassNameString);
 
         // Create constructor
@@ -308,8 +306,8 @@ public final class ErrorGenerator implements Generator {
     }
 
     private static TypeSpec generateErrorParameterRecord(ErrorDefinition errorDefinition, TypeMapper typeMapper) {
-        TypeSpec.Builder parametersRecordBuilder = TypeSpec.recordBuilder(ErrorGenerationUtils.errorParametersClassName(
-                        errorDefinition.getErrorName().getName()))
+        TypeSpec.Builder parametersRecordBuilder = TypeSpec.recordBuilder(
+                        ErrorGenerationUtils.errorParametersClassName(errorDefinition))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder();
         for (FieldDefinition fieldDef : errorDefinition.getSafeArgs()) {

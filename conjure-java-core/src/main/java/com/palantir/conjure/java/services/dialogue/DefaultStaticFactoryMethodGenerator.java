@@ -164,8 +164,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             String errorName = errorDef.getErrorName().getName();
             ClassName errorClass = getClassNameInErrorsPackage(
                     errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
-            ClassName serializableErrorClass = getClassNameInErrorsPackage(errorDef, errorName + "SerializableError");
-            ClassName exceptionClass = getClassNameInErrorsPackage(errorDef, errorName + "Exception");
+            ClassName serializableErrorClass =
+                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
+            ClassName exceptionClass =
+                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
             exceptions.add(
                     ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
                     errorClass,
@@ -240,14 +242,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
     private CodeBlock constructDeserializerWithExceptions(Optional<Type> type, TypeName className) {
         CodeBlock.Builder builder = CodeBlock.builder();
-        if (type.isEmpty()) {
-            builder.add("emptyBodyDeserializer(");
-        } else if (returnTypes.isBinary(className)) {
-            builder.add("inputStreamDeserializer(");
-        } else if (returnTypes.isOptionalBinary(className)) {
-            builder.add("optionalInputStreamDeserializer(");
-        } else {
-            builder.add("deserializer(");
+        switch (getDeserializerType(type, className)) {
+            case STANDARD -> builder.add("deserializer(");
+            case EMPTY_BODY -> builder.add("emptyBodyDeserializer(");
+            case BINARY -> builder.add("inputStreamDeserializer(");
+            case OPTIONAL_BINARY -> builder.add("optionalInputStreamDeserializer(");
         }
         return builder.add("createExceptionDeserializerArgs(new $T<$T>() {}))", TypeMarker.class, className)
                 .build();
@@ -538,5 +537,24 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
                         StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
                 .build();
+    }
+
+    private enum DeserializerType {
+        STANDARD,
+        EMPTY_BODY,
+        BINARY,
+        OPTIONAL_BINARY;
+    }
+
+    private DeserializerType getDeserializerType(Optional<Type> type, TypeName className) {
+        if (type.isEmpty()) {
+            return DeserializerType.EMPTY_BODY;
+        } else if (returnTypes.isBinary(className)) {
+            return DeserializerType.BINARY;
+        } else if (returnTypes.isOptionalBinary(className)) {
+            return DeserializerType.OPTIONAL_BINARY;
+        } else {
+            return DeserializerType.STANDARD;
+        }
     }
 }
