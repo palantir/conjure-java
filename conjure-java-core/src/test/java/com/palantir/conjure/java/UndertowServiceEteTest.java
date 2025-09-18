@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -35,6 +36,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import dialogue.com.palantir.product.EteBinaryServiceBlocking;
@@ -555,12 +557,24 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testErrorParametersSerializedAsJson() {
+        ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
         try {
             exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
         } catch (RemoteException e) {
             assertThat(e.getError().parameters())
                     .containsExactlyInAnyOrderEntriesOf(
                             Map.of("serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
+            // Assert that error parameters can be re-serialized as JSON.
+            assertThat(e).isInstanceOfSatisfying(SerializableErrorProvider.class, errorProvider -> {
+                try {
+                    String serialized = objectMapper.writeValueAsString(
+                            errorProvider.error().parameterMap());
+                    assertThat(serialized)
+                            .isEqualTo("{\"serviceName\":\"my-service-string\",\"serviceDef\":\"VALUE\"}");
+                } catch (IOException exception) {
+                    throw new SafeUncheckedIoException("Failed to serialize parameters", exception);
+                }
+            });
         }
 
         try {
