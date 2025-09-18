@@ -28,7 +28,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
-import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -45,7 +44,6 @@ import dialogue.com.palantir.product.NestedStringAliasExample;
 import dialogue.com.palantir.product.SimpleEnum;
 import dialogue.com.palantir.product.StringAliasExample;
 import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
-import exceptionthrowingdialogueinterfaces.com.palantir.product.ObjectReference;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -605,17 +603,6 @@ public final class UndertowServiceEteTest extends TestBase {
             assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
                 assertThat(exception.error().parameters().optionalExample().getOptionalString())
                         .contains("optional-value");
-            });
-            // Assert that we are able to extract the rich parameter types from a RemoteException without having to
-            // match on each error type.
-            assertThat(e).isInstanceOfSatisfying(SerializableErrorProvider.class, errorProvider -> {
-                assertThat(errorProvider.error().parameterMap())
-                        .containsEntry(
-                                "objectReference",
-                                ObjectReference.builder()
-                                        .name("reference-object")
-                                        .value(999)
-                                        .build());
             });
         }
 

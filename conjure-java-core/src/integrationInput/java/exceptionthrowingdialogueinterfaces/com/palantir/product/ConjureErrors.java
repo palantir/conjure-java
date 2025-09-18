@@ -13,7 +13,6 @@ import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
@@ -375,14 +374,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") ConflictingCauseSafeArgParameters parameters) {
-            super(
-                    errorCode,
-                    errorName,
-                    errorInstanceId,
-                    parameters,
-                    Map.ofEntries(
-                            Map.entry("cause", parameters.cause()),
-                            Map.entry("shouldThrow", parameters.shouldThrow())));
+            super(errorCode, errorName, errorInstanceId, parameters);
         }
 
         public SerializableError toSerializableError() {
@@ -404,14 +396,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") ConflictingCauseUnsafeArgParameters parameters) {
-            super(
-                    errorCode,
-                    errorName,
-                    errorInstanceId,
-                    parameters,
-                    Map.ofEntries(
-                            Map.entry("cause", parameters.cause()),
-                            Map.entry("shouldThrow", parameters.shouldThrow())));
+            super(errorCode, errorName, errorInstanceId, parameters);
         }
 
         public SerializableError toSerializableError() {
@@ -433,28 +418,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") ErrorWithComplexArgsParameters parameters) {
-            super(
-                    errorCode,
-                    errorName,
-                    errorInstanceId,
-                    parameters,
-                    Map.ofEntries(
-                            Map.entry("primitiveExample", parameters.primitiveExample()),
-                            Map.entry("collectionExample", parameters.collectionExample()),
-                            Map.entry("nestedCollectionExample", parameters.nestedCollectionExample()),
-                            Map.entry("optionalExample", parameters.optionalExample()),
-                            Map.entry("objectReference", parameters.objectReference()),
-                            Map.entry("unionExample", parameters.unionExample()),
-                            Map.entry("enumExample", parameters.enumExample()),
-                            Map.entry("stringAlias", parameters.stringAlias()),
-                            Map.entry("optionalAlias", parameters.optionalAlias()),
-                            Map.entry("collectionAlias", parameters.collectionAlias()),
-                            Map.entry("nestedAlias", parameters.nestedAlias()),
-                            Map.entry("externalExample", parameters.externalExample()),
-                            Map.entry("anyExample", parameters.anyExample()),
-                            Map.entry("emptyObject", parameters.emptyObject()),
-                            Map.entry("complexExample", parameters.complexExample()),
-                            Map.entry("safetyExample", parameters.safetyExample())));
+            super(errorCode, errorName, errorInstanceId, parameters);
         }
 
         public SerializableError toSerializableError() {
@@ -501,14 +465,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") InvalidServiceDefinitionParameters parameters) {
-            super(
-                    errorCode,
-                    errorName,
-                    errorInstanceId,
-                    parameters,
-                    Map.ofEntries(
-                            Map.entry("serviceName", parameters.serviceName()),
-                            Map.entry("serviceDef", parameters.serviceDef())));
+            super(errorCode, errorName, errorInstanceId, parameters);
         }
 
         public SerializableError toSerializableError() {
@@ -530,13 +487,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") InvalidTypeDefinitionParameters parameters) {
-            super(
-                    errorCode,
-                    errorName,
-                    errorInstanceId,
-                    parameters,
-                    Map.ofEntries(
-                            Map.entry("typeName", parameters.typeName()), Map.entry("typeDef", parameters.typeDef())));
+            super(errorCode, errorName, errorInstanceId, parameters);
         }
 
         public SerializableError toSerializableError() {

@@ -230,9 +230,13 @@ public final class ErrorGenerator implements Generator {
                 .toList();
     }
 
-    private static MethodSpec createAbstractSerializableErrorConstructor(
-            ErrorDefinition errorDefinition, ClassName parametersClassName) {
-        MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+    private static TypeSpec generateSerializableError(ErrorDefinition errorDefinition) {
+        String serializableErrorClassName = errorDefinition.getErrorName().getName() + "SerializableError";
+        String parameterClassNameString = ErrorGenerationUtils.errorParametersClassName(errorDefinition);
+        ClassName parametersClassName = ClassName.get("", parameterClassNameString);
+
+        // Create constructor
+        MethodSpec constructor = MethodSpec.constructorBuilder()
                 .addAnnotation(AnnotationSpec.builder(JsonCreator.class)
                         .addMember("mode", "$T.$L", JsonCreator.Mode.class, JsonCreator.Mode.PROPERTIES)
                         .build())
@@ -258,32 +262,9 @@ public final class ErrorGenerator implements Generator {
                         .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                                 .addMember("value", "$S", "parameters")
                                 .build())
-                        .build());
-
-        CodeBlock.Builder body = CodeBlock.builder()
-                .add("super(errorCode, errorName, errorInstanceId, parameters, $T.ofEntries(", Map.class);
-        List<CodeBlock> args = new ArrayList<>();
-        for (FieldDefinition field : errorDefinition.getSafeArgs()) {
-            String fieldName = field.getFieldName().get();
-            args.add(CodeBlock.of("$T.entry($S, parameters.$L())", Map.class, fieldName, fieldName));
-        }
-        for (FieldDefinition field : errorDefinition.getUnsafeArgs()) {
-            String fieldName = field.getFieldName().get();
-            args.add(CodeBlock.of("$T.entry($S, parameters.$L())", Map.class, fieldName, fieldName));
-        }
-        body.add(CodeBlock.join(args, ", "));
-        body.add("))");
-        constructor.addStatement(body.build());
-        return constructor.build();
-    }
-
-    private static TypeSpec generateSerializableError(ErrorDefinition errorDefinition) {
-        String serializableErrorClassName = errorDefinition.getErrorName().getName() + "SerializableError";
-        String parameterClassNameString = ErrorGenerationUtils.errorParametersClassName(errorDefinition);
-        ClassName parametersClassName = ClassName.get("", parameterClassNameString);
-
-        // Create constructor
-        MethodSpec constructor = createAbstractSerializableErrorConstructor(errorDefinition, parametersClassName);
+                        .build())
+                .addStatement("super(errorCode, errorName, errorInstanceId, parameters)")
+                .build();
 
         // Create the toSerializableError method
         MethodSpec.Builder toSerializableErrorBuilder = MethodSpec.methodBuilder("toSerializableError")

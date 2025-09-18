@@ -10,7 +10,6 @@ import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
-import java.util.Map;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
@@ -57,7 +56,7 @@ public final class ConjureErrors {
                 @JsonProperty("errorName") @Safe String errorName,
                 @JsonProperty("errorInstanceId") @Safe String errorInstanceId,
                 @JsonProperty("parameters") DifferentPackageErrorParameters parameters) {
-            super(errorCode, errorName, errorInstanceId, parameters, Map.ofEntries());
+            super(errorCode, errorName, errorInstanceId, parameters);
         }
 
         public SerializableError toSerializableError() {
