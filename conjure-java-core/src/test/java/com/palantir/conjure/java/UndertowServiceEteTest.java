@@ -568,7 +568,7 @@ public final class UndertowServiceEteTest extends TestBase {
             assertThat(e).isInstanceOfSatisfying(SerializableErrorProvider.class, errorProvider -> {
                 try {
                     String serialized = objectMapper.writeValueAsString(
-                            errorProvider.error().parameterMap());
+                            errorProvider.error().parameters());
                     assertThat(serialized)
                             .isEqualTo("{\"serviceName\":\"my-service-string\",\"serviceDef\":\"VALUE\"}");
                 } catch (IOException exception) {
