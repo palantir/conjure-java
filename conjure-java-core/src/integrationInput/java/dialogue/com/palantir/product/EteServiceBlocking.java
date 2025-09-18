@@ -175,6 +175,16 @@ public interface EteServiceBlocking {
     @ClientEndpoint(method = "GET", path = "/base/errors/header")
     String jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
 
+    /**
+     * This endpoint is used to test that error parameters serialized as JSON or using <code>Objects.toString</code> are
+     * both handled correctly by the clients that can deserialize &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     *
+     * @apiNote {@code GET /base/errors/serialization}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
+    String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
+
     /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
@@ -375,6 +385,12 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
 
             private final Deserializer<String> jsonErrorsHeaderDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+
+            private final EndpointChannel errorParameterSerializationChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
+
+            private final Deserializer<String> errorParameterSerializationDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel aliasLongEndpointChannel =
@@ -664,6 +680,19 @@ public interface EteServiceBlocking {
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
                 return _runtime.clients()
                         .callBlocking(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
+            }
+
+            @Override
+            public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putHeaderParams(
+                        "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
+                return _runtime.clients()
+                        .callBlocking(
+                                errorParameterSerializationChannel,
+                                _request.build(),
+                                errorParameterSerializationDeserializer);
             }
 
             @Override

@@ -124,6 +124,15 @@ public interface UndertowEteService {
      */
     String jsonErrorsHeader(AuthHeader authHeader, String headerParameter);
 
+    /**
+     * This endpoint is used to test that error parameters serialized as JSON or using <code>Objects.toString</code> are
+     * both handled correctly by the clients that can deserialize &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     *
+     * @apiNote {@code GET /base/errors/serialization}
+     */
+    String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
+
     /** @apiNote {@code GET /base/alias-long} */
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 

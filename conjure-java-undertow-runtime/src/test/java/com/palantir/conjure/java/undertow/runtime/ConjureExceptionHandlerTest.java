@@ -138,6 +138,7 @@ public final class ConjureExceptionHandlerTest {
                 Arguments.of((Supplier<Exception>) () -> new DifferentPackageEndpointException(null)));
     }
 
+    @SuppressWarnings("removal")
     private static final class DifferentPackageCheckedException extends CheckedServiceException {
         @SuppressWarnings("removal")
         private DifferentPackageCheckedException(@Nullable Throwable cause) {
@@ -145,6 +146,7 @@ public final class ConjureExceptionHandlerTest {
         }
     }
 
+    @SuppressWarnings("removal")
     private static final class DifferentPackageEndpointException extends CheckedServiceException {
         @SuppressWarnings("removal")
         private DifferentPackageEndpointException(@Nullable Throwable cause) {
@@ -186,6 +188,7 @@ public final class ConjureExceptionHandlerTest {
 
     private record ArgumentWithOptionals(Optional<List<String>> optOfList, List<Optional<String>> listOfOpt) {}
 
+    @SuppressWarnings("removal")
     private static final class OptionalCheckedException extends CheckedServiceException {
 
         @SuppressWarnings("removal")

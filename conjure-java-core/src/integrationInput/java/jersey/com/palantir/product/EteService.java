@@ -211,6 +211,18 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
 
+    /**
+     * This endpoint is used to test that error parameters serialized as JSON or using <code>Objects.toString</code> are
+     * both handled correctly by the clients that can deserialize &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     */
+    @GET
+    @Path("base/errors/serialization")
+    @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
+    String errorParameterSerialization(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
+
     @GET
     @Path("base/alias-long")
     @ClientEndpoint(method = "GET", path = "/base/alias-long")

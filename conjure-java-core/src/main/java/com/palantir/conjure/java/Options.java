@@ -203,6 +203,17 @@ public interface Options {
     }
 
     /**
+     * Enabling this flag will lead to the generation of Dialogue client interfaces that are able to send a header to
+     * servers specifying the Conjure error parameter serialization format they expect, and create custom exceptions for
+     * each error defined in the service's package.
+     */
+    @Value.Default
+    @Beta
+    default boolean generateErrorParameterFormatRespectingDialogueInterfaces() {
+        return false;
+    }
+
+    /**
      * Makes immutable copies of collections for union and alias types, respecting the --nonNullCollections flag.
      */
     @Value.Default

@@ -15,9 +15,13 @@
  */
 package com.palantir.conjure.java.services.dialogue;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
 import com.palantir.conjure.java.services.Auth;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -25,6 +29,7 @@ import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.HeaderParameterType;
@@ -46,6 +51,7 @@ import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -59,6 +65,7 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.javapoet.TypeVariableName;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.List;
@@ -75,18 +82,21 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
+    private final List<ErrorDefinition> errorDefinitions;
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
             TypeNameResolver typeNameResolver,
             ParameterTypeMapper parameterTypes,
             ReturnTypeMapper returnTypes,
-            StaticFactoryMethodType methodType) {
+            StaticFactoryMethodType methodType,
+            List<ErrorDefinition> errorDefinitions) {
         this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
         this.methodType = methodType;
+        this.errorDefinitions = errorDefinitions;
     }
 
     @Override
@@ -98,6 +108,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
                 .build());
+
+        if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+            impl.addMethod(createHelperToConstructExceptionDeserializerArgs());
+        }
 
         def.getEndpoints().forEach(endpoint -> {
             endpoint.getArgs().stream()
@@ -125,6 +139,45 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return method;
+    }
+
+    private ClassName getClassNameInErrorsPackage(ErrorDefinition errorDef, String name) {
+        return ClassName.get(
+                Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
+                name);
+    }
+
+    private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
+        TypeVariableName typeVariableT = TypeVariableName.get("T");
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createExceptionDeserializerArgs")
+                .addTypeVariable(typeVariableT)
+                .addModifiers(Modifier.PRIVATE)
+                .returns(ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.class), typeVariableT))
+                .addParameter(ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeVariableT), "returnType");
+
+        CodeBlock.Builder exceptions = CodeBlock.builder()
+                .add("return $T.<$T>builder()", ExceptionDeserializerArgs.class, typeVariableT)
+                .add(".returnType(returnType)");
+        // Add exceptions from error definitions
+        for (ErrorDefinition errorDef : errorDefinitions) {
+            String errorName = errorDef.getErrorName().getName();
+            ClassName errorClass = getClassNameInErrorsPackage(
+                    errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
+            ClassName serializableErrorClass =
+                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
+            ClassName exceptionClass =
+                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
+            exceptions.add(
+                    ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
+                    errorClass,
+                    TypeMarker.class,
+                    serializableErrorClass,
+                    TypeMarker.class,
+                    exceptionClass);
+        }
+        exceptions.add(".build();");
+        return methodBuilder.addCode(exceptions.build()).build();
     }
 
     private ClassName getClassName(ServiceDefinition def) {
@@ -161,7 +214,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
         TypeName className = Primitives.box(returnTypes.baseType(type));
 
-        if (returnTypes.isBinaryOrOptionalBinary(className)) {
+        if (returnTypes.isBinaryOrOptionalBinary(className)
+                && !options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
             return Optional.empty();
         }
 
@@ -169,8 +223,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 ParameterizedTypeName.get(ClassName.get(Deserializer.class), className);
 
         CodeBlock initializer = CodeBlock.of(
-                "$L.bodySerDe().$L", StaticFactoryMethodGenerator.RUNTIME, constructDeserializer(type, className));
-
+                "$L.bodySerDe().$L",
+                StaticFactoryMethodGenerator.RUNTIME,
+                options.generateErrorParameterFormatRespectingDialogueInterfaces()
+                        ? constructDeserializerWithExceptions(type, className)
+                        : constructDeserializer(type, className));
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(initializer)
@@ -181,6 +238,18 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return type.isPresent()
                 ? CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className)
                 : CodeBlock.of("emptyBodyDeserializer()");
+    }
+
+    private CodeBlock constructDeserializerWithExceptions(Optional<Type> type, TypeName className) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        switch (getDeserializerType(type, className)) {
+            case STANDARD -> builder.add("deserializer(");
+            case EMPTY_BODY -> builder.add("emptyBodyDeserializer(");
+            case BINARY -> builder.add("inputStreamDeserializer(");
+            case OPTIONAL_BINARY -> builder.add("optionalInputStreamDeserializer(");
+        }
+        return builder.add("createExceptionDeserializerArgs(new $T<$T>() {}))", TypeMarker.class, className)
+                .build();
     }
 
     private MethodSpec clientImpl(EndpointDefinition def) {
@@ -221,7 +290,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
-                        .filter(type -> returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(type)))
+                        .filter(type -> !options.generateErrorParameterFormatRespectingDialogueInterfaces()
+                                && returnTypes.isBinaryOrOptionalBinary(returnTypes.baseType(type)))
                         .map(type -> StaticFactoryMethodGenerator.RUNTIME
                                 + (returnTypes.isOptionalBinary(returnTypes.baseType(type))
                                         ? ".bodySerDe().optionalInputStreamDeserializer()"
@@ -229,6 +299,18 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         methodBuilder.addCode(request);
+        if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+            // If the BodySerDe.errorParameterFormat field is set, add the header
+            methodBuilder.addCode(CodeBlock.builder()
+                    .beginControlFlow("if ($L.bodySerDe().errorParameterFormat().isPresent())", RUNTIME)
+                    .add(
+                            "$L.putHeaderParams($S, $L.bodySerDe().errorParameterFormat().get().toString());",
+                            REQUEST,
+                            ConjureErrorParameterFormats.ACCEPT_CONJURE_ERROR_PARAMETER_FORMAT_HEADER,
+                            RUNTIME)
+                    .endControlFlow()
+                    .build());
+        }
         methodBuilder.addCode(methodType.switchBy(def.getReturns().isPresent() ? "return " : "", "return "));
         methodBuilder.addCode(execute);
 
@@ -455,5 +537,24 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
                         StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
                 .build();
+    }
+
+    private enum DeserializerType {
+        STANDARD,
+        EMPTY_BODY,
+        BINARY,
+        OPTIONAL_BINARY;
+    }
+
+    private DeserializerType getDeserializerType(Optional<Type> type, TypeName className) {
+        if (type.isEmpty()) {
+            return DeserializerType.EMPTY_BODY;
+        } else if (returnTypes.isBinary(className)) {
+            return DeserializerType.BINARY;
+        } else if (returnTypes.isOptionalBinary(className)) {
+            return DeserializerType.OPTIONAL_BINARY;
+        } else {
+            return DeserializerType.STANDARD;
+        }
     }
 }

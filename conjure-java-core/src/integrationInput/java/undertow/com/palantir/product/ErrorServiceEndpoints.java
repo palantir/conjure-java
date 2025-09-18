@@ -60,7 +60,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange)
-                throws IOException, TestServerErrors.InvalidArgument, ConjureServerErrors.ConflictingCauseSafeArg {
+                throws IOException, TestServerErrors.InvalidArgument, ConjureServerErrors.ConflictingCauseSafeArgErr {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Boolean shouldThrowError = deserializer.deserialize(exchange);
             String result = delegate.testBasicError(authHeader, shouldThrowError);

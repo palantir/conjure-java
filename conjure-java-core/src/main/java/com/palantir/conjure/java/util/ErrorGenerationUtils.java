@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.util;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -60,6 +61,19 @@ public final class ErrorGenerationUtils {
 
     public static String errorTypesClassName(ErrorNamespace namespace) {
         return namespace.get() + "Errors";
+    }
+
+    public static String serializableErrorClassName(String errorName) {
+        return errorName + "SerializableError";
+    }
+
+    public static String errorExceptionClassName(String errorName) {
+        return errorName + "Exception";
+    }
+
+    public static String errorParametersClassName(ErrorDefinition errorDefinition) {
+        String errorName = errorDefinition.getErrorName().getName();
+        return errorName + "Parameters";
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {
@@ -145,15 +159,27 @@ public final class ErrorGenerationUtils {
 
     public static ParameterSpec buildParameterWithSafetyAnnotation(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
-        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe)
+        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, true)
                 .build();
     }
 
-    private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
+    public static ParameterSpec buildUnsanitizedParameterWithSafetyAnnotationAndJsonProperty(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
+        ParameterSpec.Builder parameterBuilder =
+                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, false);
+        parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                .addMember("value", "$S", argDefinition.getFieldName().get())
+                .build());
+        return parameterBuilder.build();
+    }
+
+    private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
+            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe, boolean sanitizeName) {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
-        String argName = JavaNameSanitizer.sanitizeErrorParameterName(
-                argDefinition.getFieldName().get());
+        String argName = sanitizeName
+                ? JavaNameSanitizer.sanitizeErrorParameterName(
+                        argDefinition.getFieldName().get())
+                : argDefinition.getFieldName().get();
         TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
         ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
         argDefinition
