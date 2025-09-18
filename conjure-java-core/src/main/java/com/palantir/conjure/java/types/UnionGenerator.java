@@ -103,6 +103,34 @@ public final class UnionGenerator {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
+
+        if (true) { // TODO(kkak): Replace with feature flag
+
+            // Inline if name is static
+            ClassName unknownVariant = unionClass.nestedClass("UnknownVariant");
+            List<AnnotationSpec> safety =
+                    ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
+
+            TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
+                            typeDef.getTypeName().getName())
+                    .addAnnotations(safety)
+                    .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                    .addAnnotation(generateJsonTypeInfo(unknownVariant))
+
+                    // JsonSubTypes
+                    .addAnnotation(ignoreUnknownAnnotation())
+                    .addModifiers(Modifier.PUBLIC, Modifier.SEALED);
+            // generate known interfaces
+            // static factories
+            // unknown
+            // add docs
+
+            return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
+                    .skipJavaLangImports(true)
+                    .indent("    ")
+                    .build();
+        }
+
         ClassName baseClass = unionClass.nestedClass("Base");
         ClassName visitorClass = unionClass.nestedClass("Visitor");
         Optional<ClassName> maybeVisitorBuilderClass = typeDef.getUnion().size() <= MAX_VALUES_FOR_BUILDER
@@ -157,6 +185,37 @@ public final class UnionGenerator {
         return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
+                .build();
+    }
+
+    private static AnnotationSpec generateJsonTypeInfo(ClassName unknownVariant) {
+        return AnnotationSpec.builder(JsonTypeInfo.class)
+                .addMember("use", "JsonTypeInfo.Id.NAME")
+                .addMember("property", "\"type\"")
+                .addMember("defaultImpl", "$T.class", unknownVariant)
+                .build();
+    }
+
+    private static AnnotationSpec generateJsonSubTypes(
+            ClassName baseClass, Map<FieldDefinition, TypeName> memberTypes) {
+        List<AnnotationSpec> subAnnotations = memberTypes.keySet().stream()
+                .map(fieldDefinition -> {
+                    FieldName memberTypeName = sanitizeUnknown(fieldDefinition.getFieldName());
+                    ClassName result = baseClass.peerClass(StringUtils.capitalize(memberTypeName.get()));
+                    return AnnotationSpec.builder(JsonSubTypes.Type.class)
+                            .addMember("value", "$T.class", result)
+                            .addMember("name", "$S", memberTypeName) // non-capitalized
+                            .build();
+                })
+                .toList();
+        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
+        subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
+        return annotationBuilder.build();
+    }
+
+    private static AnnotationSpec ignoreUnknownAnnotation() {
+        return AnnotationSpec.builder(JsonIgnoreProperties.class)
+                .addMember("ignoreUnknown", "$L", true)
                 .build();
     }
 
