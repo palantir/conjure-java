@@ -314,7 +314,7 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.0 (3 constraints: 1b46dd11)
 
 junit:junit:4.13.2 (2 constraints: de1ce71a)
 
-net.bytebuddy:byte-buddy:1.17.6 (2 constraints: c716ff4f)
+net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9e161a3f)
 
 net.bytebuddy:byte-buddy-agent:1.17.6 (1 constraints: 490b4dde)
 
@@ -324,7 +324,7 @@ org.apache.commons:commons-text:1.13.0 (1 constraints: 3e1153ce)
 
 org.apiguardian:apiguardian-api:1.1.2 (6 constraints: 5366ce6e)
 
-org.assertj:assertj-core:3.27.4 (3 constraints: f82a9ca3)
+org.assertj:assertj-core:3.27.5 (3 constraints: f92a08a4)
 
 org.eclipse.jetty:jetty-http:11.0.25 (5 constraints: 4f4d83e8)
 
