@@ -314,9 +314,9 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.0 (3 constraints: 1b46dd11)
 
 junit:junit:4.13.2 (2 constraints: de1ce71a)
 
-net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9e161a3f)
+net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9f161b3f)
 
-net.bytebuddy:byte-buddy-agent:1.17.6 (1 constraints: 490b4dde)
+net.bytebuddy:byte-buddy-agent:1.17.7 (1 constraints: 4a0b4ede)
 
 net.sourceforge.argparse4j:argparse4j:0.9.0 (2 constraints: da1b0890)
 
@@ -400,9 +400,9 @@ org.junit.platform:junit-platform-launcher:1.13.4 (1 constraints: 3b05363b)
 
 org.jvnet:animal-sniffer-annotation:1.0 (1 constraints: f20b95eb)
 
-org.mockito:mockito-core:5.19.0 (2 constraints: 3a14bf87)
+org.mockito:mockito-core:5.20.0 (2 constraints: 2a143986)
 
-org.mockito:mockito-junit-jupiter:5.19.0 (1 constraints: 41055c3b)
+org.mockito:mockito-junit-jupiter:5.20.0 (1 constraints: 3905453b)
 
 org.objenesis:objenesis:3.3 (1 constraints: b20a14bd)
 
