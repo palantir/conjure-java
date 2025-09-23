@@ -46,6 +46,10 @@ public sealed interface ExampleSealedInterfaceUnion {
 
     sealed interface Known extends ExampleSealedInterfaceUnion permits Foo, Bar, Baz {}
 
+    static ExampleSealedInterfaceUnion foo(String value) {
+        return new Foo(value);
+    }
+
     @JsonTypeName("foo")
     record Foo(String value) implements Known {
 
