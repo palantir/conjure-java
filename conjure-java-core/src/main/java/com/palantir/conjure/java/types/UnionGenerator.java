@@ -111,7 +111,7 @@ public final class UnionGenerator {
                         entry -> ConjureAnnotations.withSafety(
                                 typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
 
-        if (true) { // TODO(kkak): Replace with feature flag
+        if (options.sealedUnions()) {
 
             // Inline if name is static
             ClassName unknownVariant = unionClass.nestedClass("UnknownVariant");

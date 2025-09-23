@@ -210,6 +210,14 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Uses sealed interfaces for union type generation.
+     */
+    @Value.Default
+    default boolean sealedUnions() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

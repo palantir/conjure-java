@@ -246,6 +246,12 @@ public final class ConjureJavaCli implements Runnable {
                         + "--nonNullCollections flag.")
         private boolean defensiveCollections;
 
+        @CommandLine.Option(
+                names = "--sealedUnions",
+                defaultValue = "false",
+                description = "Uses sealed interfaces for union type generation.")
+        private boolean sealedUnions;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -319,6 +325,7 @@ public final class ConjureJavaCli implements Runnable {
                             .preferObjectBuilders(preferObjectBuilders)
                             .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
                             .defensiveCollections(defensiveCollections)
+                            .sealedUnions(sealedUnions)
                             .build())
                     .build();
         }
