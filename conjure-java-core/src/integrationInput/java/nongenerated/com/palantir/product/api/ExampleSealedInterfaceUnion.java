@@ -29,7 +29,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Unsafe;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion.Bar;
 import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion.Baz;
 import nongenerated.com.palantir.product.api.ExampleSealedInterfaceUnion.Foo;
@@ -49,6 +48,8 @@ public sealed interface ExampleSealedInterfaceUnion {
     static ExampleSealedInterfaceUnion foo(String value) {
         return new Foo(value);
     }
+
+    // ...
 
     @JsonTypeName("foo")
     record Foo(String value) implements Known {
@@ -91,28 +92,17 @@ public sealed interface ExampleSealedInterfaceUnion {
         }
     }
 
-    // TODO(kkak): Clean up
-    final class UnknownVariant implements ExampleSealedInterfaceUnion {
-        private final String type;
+    record UnknownVariant(@JsonProperty("type") String type, @JsonProperty("value") Map<String, Object> value)
+            implements ExampleSealedInterfaceUnion {
 
-        private final Map<String, Object> value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private UnknownVariant(@JsonProperty("type") String type) {
-            this(type, new HashMap<String, Object>());
-        }
-
-        private UnknownVariant(@Nonnull String type, @Nonnull Map<String, Object> value) {
+        public UnknownVariant {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
-            this.type = type;
-            this.value = value;
         }
 
-        @JsonProperty
-        @SuppressWarnings("UnusedMethod")
-        private String getType() {
-            return type;
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        public UnknownVariant(@JsonProperty("type") String type) {
+            this(type, new HashMap<>());
         }
 
         @JsonAnyGetter
@@ -124,23 +114,6 @@ public sealed interface ExampleSealedInterfaceUnion {
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof UnknownVariant && equalTo((UnknownVariant) other));
-        }
-
-        private boolean equalTo(UnknownVariant other) {
-            return this.type.equals(other.type) && this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 1;
-            hash = 31 * hash + this.type.hashCode();
-            hash = 31 * hash + this.value.hashCode();
-            return hash;
         }
 
         @Override

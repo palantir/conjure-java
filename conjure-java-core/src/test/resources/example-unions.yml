@@ -1,0 +1,9 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      SimpleUnion:
+        union:
+          foo: string
+          bar: integer
+          baz: safelong
