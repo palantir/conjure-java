@@ -114,7 +114,7 @@ public final class UnionGenerator {
 
         if (options.sealedUnions()) {
             // Inline if name is static
-            ClassName unknownVariant = unionClass.nestedClass("UnknownVariant");
+            ClassName unknownVariant = unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME);
             List<AnnotationSpec> safety =
                     ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
             List<SanitizedMemberClassName> sanitizedMemberClassNames =
@@ -132,7 +132,8 @@ public final class UnionGenerator {
                     .addMethods(generateStaticFactories(
                             typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator, options))
                     .addMethod(generateSealedThrowOnUnknown(unionClass, unknownVariant))
-                    .addTypes(generateRecordClasses(typeMapper, typesMap, unionClass, typeDef.getUnion(), options))
+                    .addTypes(
+                            generateRecordClasses(typeMapper, typesMap, unionClass, sanitizedMemberClassNames, options))
                     .addType(generateUnknownVariant(unionClass));
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
@@ -211,7 +212,8 @@ public final class UnionGenerator {
             ClassName className, List<FieldDefinition> subTypes) {
         return subTypes.stream()
                 .map(fieldDefinition -> {
-                    FieldName memberTypeName = sanitizeReserved(fieldDefinition.getFieldName());
+                    String memberTypeName =
+                            JavaNameSanitizer.sanitize(sanitizeReserved(fieldDefinition.getFieldName()));
                     return new SanitizedMemberClassName(childRecordClass(className, memberTypeName), fieldDefinition);
                 })
                 .toList();
@@ -319,7 +321,8 @@ public final class UnionGenerator {
                                     options.sealedUnions()
                                             ? CodeBlock.of(
                                                     "return new $T($L);", // Why is this ";" needed
-                                                    childRecordClass(unionClass, memberName),
+                                                    childRecordClass(
+                                                            unionClass, JavaNameSanitizer.sanitize(memberName)),
                                                     variableName)
                                             : CodeBlock.of(
                                                     "return new $T(new $T($L))",
@@ -935,13 +938,14 @@ public final class UnionGenerator {
             TypeMapper typeMapper,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             ClassName baseClass,
-            List<FieldDefinition> memberTypeDefs,
+            List<SanitizedMemberClassName> sanitizedMemberClassNames,
             Options options) {
-        return memberTypeDefs.stream()
+        return sanitizedMemberClassNames.stream()
                 .map(memberTypeDef -> {
-                    FieldName memberName = sanitizeReserved(memberTypeDef.getFieldName());
-                    ClassName recordClassName = childRecordClass(baseClass, memberName);
-                    TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
+                    ClassName recordClassName = childRecordClass(
+                            baseClass, memberTypeDef.className().simpleName());
+                    TypeName memberType = typeMapper.getClassName(
+                            memberTypeDef.fieldDefinition().getType());
 
                     TypeSpec.Builder typeBuilder = TypeSpec.recordBuilder(recordClassName)
                             .recordConstructor(MethodSpec.constructorBuilder()
@@ -950,7 +954,10 @@ public final class UnionGenerator {
                                     .build())
                             .addSuperinterface(baseClass.nestedClass(SEALED_KNOWN_INTERFACE))
                             .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
-                                    .addMember("value", "$S", memberTypeDef.getFieldName())
+                                    .addMember(
+                                            "value",
+                                            "$S",
+                                            memberTypeDef.className().simpleName())
                                     .build())
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addMethod(MethodSpec.constructorBuilder()
@@ -958,14 +965,18 @@ public final class UnionGenerator {
                                     .addModifiers(Modifier.PUBLIC)
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(wrapperConstructorParameterAnnotation(
-                                                    memberTypeDef, typeMapper, typesMap, options))
+                                                    memberTypeDef.fieldDefinition(), typeMapper, typesMap, options))
                                             .addAnnotation(Nonnull.class)
                                             .build())
                                     .addStatement(
                                             "$L",
                                             Expressions.requireNonNull(
                                                     VALUE_FIELD_NAME,
-                                                    String.format("%s cannot be null", memberName.get())))
+                                                    String.format(
+                                                            "%s cannot be null",
+                                                            memberTypeDef
+                                                                    .className()
+                                                                    .simpleName())))
                                     .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
                                     .build())
                             .addMethod(MethodSpecs.createToString(
@@ -1187,8 +1198,11 @@ public final class UnionGenerator {
     }
 
     private static ClassName childRecordClass(ClassName unionClass, FieldName memberTypeName) {
-        return ClassName.get(
-                unionClass.packageName(), unionClass.simpleName(), StringUtils.capitalize(memberTypeName.get()));
+        return childRecordClass(unionClass, memberTypeName.get());
+    }
+
+    private static ClassName childRecordClass(ClassName unionClass, String memberTypeName) {
+        return ClassName.get(unionClass.packageName(), unionClass.simpleName(), StringUtils.capitalize(memberTypeName));
     }
 
     private static String visitMethodName(String fieldName) {

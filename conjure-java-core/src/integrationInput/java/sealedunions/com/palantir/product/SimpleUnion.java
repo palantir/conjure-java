@@ -68,11 +68,11 @@ public sealed interface SimpleUnion {
 
     sealed interface Known extends SimpleUnion permits Foo, Bar, Baz {}
 
-    @JsonTypeName("foo")
+    @JsonTypeName("Foo")
     record Foo(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Foo(@JsonSetter("foo") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "foo cannot be null");
+            Preconditions.checkNotNull(value, "Foo cannot be null");
             this.value = value;
         }
 
@@ -82,11 +82,11 @@ public sealed interface SimpleUnion {
         }
     }
 
-    @JsonTypeName("bar")
+    @JsonTypeName("Bar")
     record Bar(int value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Bar(@JsonSetter("bar") @Nonnull int value) {
-            Preconditions.checkNotNull(value, "bar cannot be null");
+            Preconditions.checkNotNull(value, "Bar cannot be null");
             this.value = value;
         }
 
@@ -96,11 +96,11 @@ public sealed interface SimpleUnion {
         }
     }
 
-    @JsonTypeName("baz")
+    @JsonTypeName("Baz")
     record Baz(SafeLong value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
-            Preconditions.checkNotNull(value, "baz cannot be null");
+            Preconditions.checkNotNull(value, "Baz cannot be null");
             this.value = value;
         }
 
