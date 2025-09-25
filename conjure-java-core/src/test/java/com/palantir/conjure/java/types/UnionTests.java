@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import allexamples.com.palantir.product.EmptyUnionTypeExample;
+import allexamples.com.palantir.product.EmptyUnionTypeExample.Visitor;
 import allexamples.com.palantir.product.Union;
 import allexamples.com.palantir.product.UnionTypeExample;
 import allexamples.com.palantir.product.UnionWithUnknownString;
@@ -30,6 +31,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionListsUnion;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion;
@@ -39,9 +41,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
+import sealedunions.com.palantir.product.SimpleUnion;
+import sealedunions.com.palantir.product.SimpleUnion.Foo;
 
 class UnionTests {
 
@@ -51,8 +56,7 @@ class UnionTests {
     void testUnknownThrowingVariant() throws IOException {
         EmptyUnionTypeExample value =
                 MAPPER.readValue("{\"type\":\"foo\",\"foo\":\"bar\"}", EmptyUnionTypeExample.class);
-        EmptyUnionTypeExample.Visitor<?> visitor =
-                EmptyUnionTypeExample.Visitor.builder().throwOnUnknown().build();
+        Visitor<?> visitor = Visitor.builder().throwOnUnknown().build();
         assertThatLoggableExceptionThrownBy(() -> value.accept(visitor))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Unknown variant of the 'EmptyUnionTypeExample' union")
@@ -205,6 +209,25 @@ class UnionTests {
                         .throwOnUnknown()
                         .build());
         assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.put("test", "update"));
+    }
+
+    @Test
+    void sealedUnionCanBeConsumedWithSwitchStatement() {
+        String expected = "foo";
+
+        String s =
+                switch (SimpleUnion.foo(expected).throwOnUnknown()) {
+                    case Foo foo -> foo.value();
+                    default -> throw new SafeIllegalStateException();
+                };
+        assertThat(s).isEqualTo(expected);
+
+        Optional<String> optionalString =
+                switch (SimpleUnion.foo(expected)) {
+                    case Foo foo -> Optional.of(foo.value());
+                    default -> Optional.empty();
+                };
+        assertThat(optionalString).contains(expected);
     }
 
     private Void failOnKnownType(String type, Object value) {
