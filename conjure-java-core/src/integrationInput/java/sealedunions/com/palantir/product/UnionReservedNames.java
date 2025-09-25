@@ -20,7 +20,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = UnionReservedNames.UnknownVariant.class)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "type",
+        visible = true,
+        defaultImpl = UnionReservedNames.UnknownVariant.class)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = UnionReservedNames.Known_.class, name = "known_"),
     @JsonSubTypes.Type(value = UnionReservedNames.Unknown_.class, name = "unknown_"),
@@ -148,7 +153,7 @@ public sealed interface UnionReservedNames {
         if (this instanceof UnknownVariant) {
             throw new SafeIllegalArgumentException(
                     "Unknown variant of the 'UnionReservedNames' union",
-                    SafeArg.of("type", ((UnknownVariant) this).type()));
+                    SafeArg.of("unknownType", ((UnknownVariant) this).type()));
         } else {
             return (Known) this;
         }
@@ -174,7 +179,7 @@ public sealed interface UnionReservedNames {
     record Known_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Known_(@JsonSetter("known") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Known_ cannot be null");
+            Preconditions.checkNotNull(value, "known_ cannot be null");
             this.value = value;
         }
 
@@ -188,7 +193,7 @@ public sealed interface UnionReservedNames {
     record Unknown_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Unknown_(@JsonSetter("unknown") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Unknown_ cannot be null");
+            Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
         }
 
@@ -202,7 +207,7 @@ public sealed interface UnionReservedNames {
     record If_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public If_(@JsonSetter("if") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "If_ cannot be null");
+            Preconditions.checkNotNull(value, "if_ cannot be null");
             this.value = value;
         }
 
@@ -216,7 +221,7 @@ public sealed interface UnionReservedNames {
     record New_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public New_(@JsonSetter("new") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "New_ cannot be null");
+            Preconditions.checkNotNull(value, "new_ cannot be null");
             this.value = value;
         }
 
@@ -230,7 +235,7 @@ public sealed interface UnionReservedNames {
     record Interface_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Interface_(@JsonSetter("interface") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Interface_ cannot be null");
+            Preconditions.checkNotNull(value, "interface_ cannot be null");
             this.value = value;
         }
 
@@ -244,7 +249,7 @@ public sealed interface UnionReservedNames {
     record Void_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Void_(@JsonSetter("void") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Void_ cannot be null");
+            Preconditions.checkNotNull(value, "void_ cannot be null");
             this.value = value;
         }
 
@@ -258,7 +263,7 @@ public sealed interface UnionReservedNames {
     record Return_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Return_(@JsonSetter("return") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Return_ cannot be null");
+            Preconditions.checkNotNull(value, "return_ cannot be null");
             this.value = value;
         }
 
@@ -272,7 +277,7 @@ public sealed interface UnionReservedNames {
     record Private_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Private_(@JsonSetter("private") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Private_ cannot be null");
+            Preconditions.checkNotNull(value, "private_ cannot be null");
             this.value = value;
         }
 
@@ -286,7 +291,7 @@ public sealed interface UnionReservedNames {
     record Public_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Public_(@JsonSetter("public") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Public_ cannot be null");
+            Preconditions.checkNotNull(value, "public_ cannot be null");
             this.value = value;
         }
 
@@ -300,7 +305,7 @@ public sealed interface UnionReservedNames {
     record Int_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Int_(@JsonSetter("int") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Int_ cannot be null");
+            Preconditions.checkNotNull(value, "int_ cannot be null");
             this.value = value;
         }
 
@@ -314,7 +319,7 @@ public sealed interface UnionReservedNames {
     record Import_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Import_(@JsonSetter("import") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Import_ cannot be null");
+            Preconditions.checkNotNull(value, "import_ cannot be null");
             this.value = value;
         }
 
@@ -328,7 +333,7 @@ public sealed interface UnionReservedNames {
     record Final_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Final_(@JsonSetter("final") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Final_ cannot be null");
+            Preconditions.checkNotNull(value, "final_ cannot be null");
             this.value = value;
         }
 
@@ -342,7 +347,7 @@ public sealed interface UnionReservedNames {
     record Throws_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Throws_(@JsonSetter("throws") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Throws_ cannot be null");
+            Preconditions.checkNotNull(value, "throws_ cannot be null");
             this.value = value;
         }
 
@@ -356,7 +361,7 @@ public sealed interface UnionReservedNames {
     record Static_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Static_(@JsonSetter("static") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Static_ cannot be null");
+            Preconditions.checkNotNull(value, "static_ cannot be null");
             this.value = value;
         }
 

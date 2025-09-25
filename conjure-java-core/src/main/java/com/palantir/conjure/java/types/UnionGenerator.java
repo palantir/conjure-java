@@ -113,7 +113,6 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
 
         if (options.sealedUnions()) {
-            // Inline if name is static
             ClassName unknownVariant = unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME);
             List<AnnotationSpec> safety =
                     ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
@@ -201,7 +200,9 @@ public final class UnionGenerator {
     private static AnnotationSpec generateJsonTypeInfo(ClassName unknownVariant) {
         return AnnotationSpec.builder(JsonTypeInfo.class)
                 .addMember("use", "JsonTypeInfo.Id.NAME")
+                .addMember("include", "JsonTypeInfo.As.EXISTING_PROPERTY")
                 .addMember("property", "\"type\"")
+                .addMember("visible", "$L", true)
                 .addMember("defaultImpl", "$T.class", unknownVariant)
                 .build();
     }
@@ -212,6 +213,7 @@ public final class UnionGenerator {
             ClassName className, List<FieldDefinition> subTypes) {
         return subTypes.stream()
                 .map(fieldDefinition -> {
+                    // TODO(kkak): Remove java sanitation here and only use in class and method names
                     String memberTypeName =
                             JavaNameSanitizer.sanitize(sanitizeReserved(fieldDefinition.getFieldName()));
                     return new SanitizedMemberClassName(childRecordClass(className, memberTypeName), fieldDefinition);
@@ -266,7 +268,7 @@ public final class UnionGenerator {
                         SafeIllegalArgumentException.class,
                         "Unknown variant of the '" + unionClass.simpleName() + "' union",
                         SafeArg.class,
-                        "type",
+                        "unknownType",
                         unknownVariantClass)
                 .nextControlFlow("else")
                 .addStatement("return ($T) this", knownInterface)
@@ -974,9 +976,9 @@ public final class UnionGenerator {
                                                     VALUE_FIELD_NAME,
                                                     String.format(
                                                             "%s cannot be null",
-                                                            memberTypeDef
+                                                            StringUtils.lowerCase(memberTypeDef
                                                                     .className()
-                                                                    .simpleName())))
+                                                                    .simpleName()))))
                                     .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
                                     .build())
                             .addMethod(MethodSpecs.createToString(

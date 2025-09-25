@@ -21,7 +21,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = SimpleUnion.UnknownVariant.class)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "type",
+        visible = true,
+        defaultImpl = SimpleUnion.UnknownVariant.class)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = SimpleUnion.Foo.class, name = "foo"),
     @JsonSubTypes.Type(value = SimpleUnion.Bar.class, name = "bar"),
@@ -60,7 +65,8 @@ public sealed interface SimpleUnion {
     default Known throwOnUnknown() {
         if (this instanceof UnknownVariant) {
             throw new SafeIllegalArgumentException(
-                    "Unknown variant of the 'SimpleUnion' union", SafeArg.of("type", ((UnknownVariant) this).type()));
+                    "Unknown variant of the 'SimpleUnion' union",
+                    SafeArg.of("unknownType", ((UnknownVariant) this).type()));
         } else {
             return (Known) this;
         }
@@ -72,7 +78,7 @@ public sealed interface SimpleUnion {
     record Foo(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Foo(@JsonSetter("foo") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "Foo cannot be null");
+            Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
 
@@ -86,7 +92,7 @@ public sealed interface SimpleUnion {
     record Bar(int value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Bar(@JsonSetter("bar") @Nonnull int value) {
-            Preconditions.checkNotNull(value, "Bar cannot be null");
+            Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
 
@@ -100,7 +106,7 @@ public sealed interface SimpleUnion {
     record Baz(SafeLong value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
-            Preconditions.checkNotNull(value, "Baz cannot be null");
+            Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
 

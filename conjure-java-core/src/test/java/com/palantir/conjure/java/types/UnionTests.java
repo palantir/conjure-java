@@ -47,6 +47,8 @@ import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.SimpleUnion.Foo;
+import sealedunions.com.palantir.product.SimpleUnion.Known;
+import sealedunions.com.palantir.product.SimpleUnion.UnknownVariant;
 
 class UnionTests {
 
@@ -228,6 +230,34 @@ class UnionTests {
                     default -> Optional.empty();
                 };
         assertThat(optionalString).contains(expected);
+    }
+
+    @Test
+    void testUnknownThrowingVariant_sealedUnion() throws IOException {
+        SimpleUnion value = MAPPER.readValue("{\"type\":\"abc\",\"abc\":\"123\"}", SimpleUnion.class);
+        assertThatLoggableExceptionThrownBy(value::throwOnUnknown)
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasLogMessage("Unknown variant of the 'SimpleUnion' union")
+                .hasExactlyArgs(SafeArg.of("unknownType", "abc"));
+    }
+
+    @Test
+    public void testCannotCreateUnknownTypeFromKnownType_sealedUnion() {
+        assertThatThrownBy(() -> SimpleUnion.unknown("foo", "value"));
+    }
+
+    @Test
+    public void testCreateUnknownType_sealedUnion() {
+        String expectedUnknownType = "qux";
+        List<String> expectedUnknownValue = List.of("quux", "quuz");
+        SimpleUnion union = SimpleUnion.unknown(expectedUnknownType, expectedUnknownValue);
+
+        switch (union) {
+            // UnknownVariant is a bit verbose - should we just call this "Unknown"?
+            case UnknownVariant u ->
+                verifyUnknownType(u.type(), u.value().get(u.type()), expectedUnknownType, expectedUnknownValue);
+            case Known k -> failOnKnownType("known", k);
+        }
     }
 
     private Void failOnKnownType(String type, Object value) {
