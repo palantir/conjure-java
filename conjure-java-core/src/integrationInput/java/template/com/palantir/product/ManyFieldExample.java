@@ -382,6 +382,7 @@ public final class ManyFieldExample {
 
         private DefaultBuilder() {}
 
+        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public Builder from(ManyFieldExample other) {
             checkNotBuilt();

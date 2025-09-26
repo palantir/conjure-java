@@ -36,6 +36,7 @@ public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
     /** @deprecated Prefer <code>ONE</code> where possible. */
+    @SuppressWarnings("for-rollout:deprecation")
     @Deprecated
     public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
 
@@ -44,6 +45,7 @@ public final class EnumExample {
      *
      * @deprecated One is easier to manage.
      */
+    @SuppressWarnings("for-rollout:deprecation")
     @Deprecated
     public static final EnumExample ONE_HUNDRED = new EnumExample(Value.ONE_HUNDRED, "ONE_HUNDRED");
 
