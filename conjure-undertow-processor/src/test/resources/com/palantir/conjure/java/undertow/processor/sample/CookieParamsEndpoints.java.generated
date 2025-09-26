@@ -1,7 +1,6 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
@@ -56,8 +55,6 @@ public final class CookieParamsEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderCookieDeserializer;
 
-        private final Deserializer<BearerToken> tokenDeserializer;
-
         private final Serializer<String> cookieParamsSerializer;
 
         CookieParamsEndpoint(UndertowRuntime runtime, CookieParams delegate) {
@@ -71,7 +68,6 @@ public final class CookieParamsEndpoints implements UndertowService {
                     "optionalIntCookie", ParamDecoders.optionalIntegerParamDecoder(runtime.plainSerDe()));
             this.decoderCookieDeserializer =
                     new CookieDeserializer<>("decoderCookie", CookieParams.StringParamDecoder.INSTANCE);
-            this.tokenDeserializer = new BearerTokenCookieDeserializer(runtime, "AUTH_TOKEN");
             this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -81,7 +77,7 @@ public final class CookieParamsEndpoints implements UndertowService {
             Optional<String> optionalStringCookie = this.optionalStringCookieDeserializer.deserialize(exchange);
             OptionalInt optionalIntCookie = this.optionalIntCookieDeserializer.deserialize(exchange);
             String decoderCookie = this.decoderCookieDeserializer.deserialize(exchange);
-            BearerToken token = this.tokenDeserializer.deserialize(exchange);
+            BearerToken token = this.runtime.auth().cookie(exchange, "AUTH_TOKEN");
             write(
                     this.delegate.cookieParams(
                             stringCookie, optionalStringCookie, optionalIntCookie, decoderCookie, token),

@@ -49,6 +49,15 @@ public final class ResolverContext implements ErrorContext {
         return types.isSameType(typeMirror, getTypeMirror(clazz));
     }
 
+    public boolean isOptionalSameTypes(TypeMirror typeMirror, Class<?> clazz) {
+        TypeMirror innerType = getGenericInnerType(Optional.class, typeMirror).orElse(null);
+        if (innerType == null) {
+            return false;
+        }
+
+        return isSameTypes(innerType, clazz);
+    }
+
     public boolean isAssignable(TypeMirror typeMirror, Class<?> clazz) {
         return types.isAssignable(typeMirror, getTypeMirror(clazz));
     }

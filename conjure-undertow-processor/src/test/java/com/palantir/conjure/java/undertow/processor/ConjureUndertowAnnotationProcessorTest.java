@@ -34,6 +34,9 @@ import com.palantir.conjure.java.undertow.processor.sample.ExtendsNested;
 import com.palantir.conjure.java.undertow.processor.sample.ExtendsSimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.GenericImpl;
 import com.palantir.conjure.java.undertow.processor.sample.MismatchedPathParam;
+import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthCookieParam;
+import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthHeaderCookieParam;
+import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthHeaderParam;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
@@ -167,7 +170,7 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testSafeLoggingAuthCookie() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
-                .hadErrorContaining("BearerToken parameter cannot be annotated with safe logging annotations");
+                .hadErrorContaining("Parameter type cannot be annotated with safe logging annotations");
     }
 
     @Test
@@ -259,6 +262,24 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void unmatchedPathTemplateParam() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, UnmatchedPathTemplateParam.class))
                 .hadErrorContaining("Path template parameters do not match method path parameters");
+    }
+
+    @Test
+    public void multipleAuthHeaderParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MultipleAuthHeaderParam.class))
+                .hadErrorContaining("Methods cannot have multiple auth parameters");
+    }
+
+    @Test
+    public void multipleAuthCookieParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MultipleAuthCookieParam.class))
+                .hadErrorContaining("Methods cannot have multiple auth parameters");
+    }
+
+    @Test
+    public void multipleAuthHeaderCookieParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MultipleAuthHeaderCookieParam.class))
+                .hadErrorContaining("Methods cannot have multiple auth parameters");
     }
 
     @Test

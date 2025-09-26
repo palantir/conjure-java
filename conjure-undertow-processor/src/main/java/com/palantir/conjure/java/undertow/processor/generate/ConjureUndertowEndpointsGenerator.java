@@ -26,7 +26,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
-import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
@@ -62,8 +61,10 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
@@ -388,30 +389,34 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
-            public Void authCookie(String variableName, String cookieName, String deserializerFieldName) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T(runtime, $S)",
-                                        deserializerFieldName,
-                                        BearerTokenCookieDeserializer.class,
-                                        cookieName)
-                                .build())
-                        .build());
-                handlerBuilder.addStatement("$T $N = $L", paramType, variableName, invokeDeserializer(def));
+            public Void authCookie(String variableName, String _cookieName) {
+                handlerBuilder.addStatement("$T $N = $L", BearerToken.class, variableName, invokeDeserializer(def));
+                return null;
+            }
+
+            @Override
+            public Void optionalAuthCookie(String variableName, String _cookieName) {
+                handlerBuilder.addStatement(
+                        "$T $N = $L",
+                        ParameterizedTypeName.get(Optional.class, BearerToken.class),
+                        variableName,
+                        invokeDeserializer(def));
                 return null;
             }
 
             @Override
             public Void authHeader(String variableName) {
                 handlerBuilder.addStatement("$T $N = $L", AuthHeader.class, variableName, invokeDeserializer(def));
+                return null;
+            }
+
+            @Override
+            public Void optionalAuthHeader(String variableName) {
+                handlerBuilder.addStatement(
+                        "$T $N = $L",
+                        ParameterizedTypeName.get(Optional.class, AuthHeader.class),
+                        variableName,
+                        invokeDeserializer(def));
                 return null;
             }
 
@@ -629,13 +634,35 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
-            public CodeBlock authCookie(String _variableName, String _cookieName, String deserializerFieldName) {
-                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            public CodeBlock authCookie(String _variableName, String cookieName) {
+                return CodeBlock.of("this.$N.auth().cookie($N, $S)", RUNTIME_NAME, EXCHANGE_NAME, cookieName);
+            }
+
+            @Override
+            public CodeBlock optionalAuthCookie(String _variableName, String cookieName) {
+                return CodeBlock.of(
+                        "$2N.getRequestCookies().containsKey($3S) "
+                                + "? Optional.of(this.$1N.auth().cookie($2N, $3S)) "
+                                + ": Optional.empty()",
+                        RUNTIME_NAME,
+                        EXCHANGE_NAME,
+                        cookieName);
             }
 
             @Override
             public CodeBlock authHeader(String _variableName) {
                 return CodeBlock.of("this.$N.auth().header($N)", RUNTIME_NAME, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock optionalAuthHeader(String _variableName) {
+                return CodeBlock.of(
+                        "$2N.getRequestHeaders().contains($3T.AUTHORIZATION) "
+                                + "? Optional.of(this.$1N.auth().header($2N)) "
+                                + ": Optional.empty()",
+                        RUNTIME_NAME,
+                        EXCHANGE_NAME,
+                        Headers.class);
             }
 
             @Override
@@ -721,13 +748,22 @@ public final class ConjureUndertowEndpointsGenerator {
                     }
 
                     @Override
-                    public CodeBlock authCookie(
-                            String variableName, String _cookieName, String _deserializerFieldName) {
+                    public CodeBlock authCookie(String variableName, String _cookieName) {
+                        return CodeBlock.of(variableName);
+                    }
+
+                    @Override
+                    public CodeBlock optionalAuthCookie(String variableName, String _cookieName) {
                         return CodeBlock.of(variableName);
                     }
 
                     @Override
                     public CodeBlock authHeader(String variableName) {
+                        return CodeBlock.of(variableName);
+                    }
+
+                    @Override
+                    public CodeBlock optionalAuthHeader(String variableName) {
                         return CodeBlock.of(variableName);
                     }
 

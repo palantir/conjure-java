@@ -23,6 +23,7 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 
+@Deprecated
 public final class BearerTokenCookieDeserializer implements Deserializer<BearerToken> {
 
     private final UndertowRuntime runtime;
