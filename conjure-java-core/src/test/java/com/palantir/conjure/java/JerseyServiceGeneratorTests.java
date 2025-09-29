@@ -46,6 +46,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
 
     @Test
     public void testConjureImports() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),
                 new File("src/test/resources/example-types.yml"),

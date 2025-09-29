@@ -173,6 +173,7 @@ public final class ErrorGenerationUtils {
         return parameterBuilder.build();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe, boolean sanitizeName) {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
@@ -240,6 +241,7 @@ public final class ErrorGenerationUtils {
         return methodBuilder.endControlFlow();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static List<ParameterSpec> createParametersForConditionalStaticFactory(
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, ErrorDefinition errorDefinition) {
         return Stream.concat(

@@ -122,11 +122,13 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
+        @SuppressWarnings("for-rollout:deprecation")
         ConjureJavaCli.GenerateCommand cmd =
                 new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenTargetDoesNotExist() {
         String[] args = {"generate", "foo", "bar"};
@@ -135,6 +137,7 @@ public final class ConjureJavaCliTest {
                 .hasMessageContaining("Target must exist and be a file");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenOutputDoesNotExist() {
         String[] args = {"generate", targetFile.getAbsolutePath(), "bar"};
@@ -143,6 +146,7 @@ public final class ConjureJavaCliTest {
                 .hasMessageContaining("Output must exist and be a directory");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenMissingGeneratorFlags() {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath()};
@@ -151,6 +155,7 @@ public final class ConjureJavaCliTest {
                 .hasMessageContaining("Must specify exactly one project to generate");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenTooManyGeneratorFlags() {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--jersey"};
@@ -159,6 +164,7 @@ public final class ConjureJavaCliTest {
                 .hasMessageContaining("Must specify exactly one project to generate");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void generatesCode() throws Exception {
         String[] args = {
@@ -178,6 +184,7 @@ public final class ConjureJavaCliTest {
         assertThat(baos.toString(StandardCharsets.UTF_8)).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenInvalidDefinition() throws Exception {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects"};
@@ -186,6 +193,7 @@ public final class ConjureJavaCliTest {
                 .hasMessageContaining("Error parsing definition");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     @Disabled("Unable to capture output")
     public void writesWarningWhenBytesIsDisabled() throws IOException {
@@ -194,6 +202,7 @@ public final class ConjureJavaCliTest {
         // assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     @Disabled("Unable to capture output")
     public void doesNotWriteWarningWhenObjectsAreNotGenerated() throws IOException {

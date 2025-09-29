@@ -46,6 +46,7 @@ public final class ServiceGeneratorTests extends TestBase {
 
     @Test
     public void testConjureIncubatingJavadoc() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         ConjureDefinition conjure =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-conjure-incubating.yml")));
         File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();

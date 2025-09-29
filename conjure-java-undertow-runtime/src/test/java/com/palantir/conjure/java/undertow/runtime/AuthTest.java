@@ -69,6 +69,7 @@ public final class AuthTest {
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testParseAuthCookie() {
         BearerToken expected = BearerToken.valueOf("token");
@@ -85,6 +86,7 @@ public final class AuthTest {
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials"));
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testAuthCookieEmptyValue() {
         String cookieName = "Auth-Token";
@@ -108,6 +110,7 @@ public final class AuthTest {
         assertThat(handler.fired).isTrue();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testAuthCookieTriggersJsonWebTokenHandler() {
         TestJsonWebTokenHandler handler = new TestJsonWebTokenHandler();

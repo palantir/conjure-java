@@ -72,6 +72,7 @@ public final class DialogueInterfaceGenerator {
         return generate(def, Names.asyncClassName(def, options), StaticFactoryMethodType.ASYNC, methodGenerator);
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private JavaFile generate(
             ServiceDefinition def,
             ClassName className,
