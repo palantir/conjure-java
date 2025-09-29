@@ -415,7 +415,7 @@ class ExampleServiceTest {
                 assertThat(responseStream).hasBinaryContent(expected);
             }
 
-            // Cookie value is present
+            // Cookie value is empty
             connection =
                     (HttpURLConnection) new URL("http://localhost:" + port + "/optionalAuthCookie").openConnection();
             byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
