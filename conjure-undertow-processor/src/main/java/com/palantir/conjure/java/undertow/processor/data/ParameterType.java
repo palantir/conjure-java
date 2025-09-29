@@ -69,9 +69,13 @@ public interface ParameterType {
                 CodeBlock deserializerFactory,
                 SafeLoggingAnnotation safeLoggable);
 
-        R authCookie(String variableName, String cookieName, String deserializerFieldName);
+        R authCookie(String variableName, String cookieName);
+
+        R optionalAuthCookie(String variableName, String cookieName);
 
         R authHeader(String variableName);
+
+        R optionalAuthHeader(String variableName);
 
         R exchange();
 

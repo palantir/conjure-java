@@ -162,7 +162,6 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
                     "Failed validation");
             return maybeEndpoints.stream().map(Optional::get).collect(Collectors.toList());
         });
-
         ClassName serviceInterface = (ClassName) TypeName.get(annotatedType.asType());
 
         ServiceDefinition serviceDefinition = ImmutableServiceDefinition.builder()

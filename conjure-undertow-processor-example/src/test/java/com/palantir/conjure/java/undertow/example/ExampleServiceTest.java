@@ -260,10 +260,43 @@ class ExampleServiceTest {
             HttpURLConnection connection =
                     (HttpURLConnection) new URL("http://localhost:" + port + "/authHeader").openConnection();
             connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authHeader.toString());
-            byte[] expected = ("\"" + authHeader.getBearerToken().toString() + "\"").getBytes(StandardCharsets.UTF_8);
+            byte[] expected = ("\"" + authHeader + "\"").getBytes(StandardCharsets.UTF_8);
             assertThat(connection.getResponseCode()).isEqualTo(200);
             assertThat(connection.getContentType()).startsWith("application/json");
             assertThat(connection.getInputStream()).hasBinaryContent(expected);
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    void testOptionalAuthHeader() throws IOException {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+
+            // Header value is present
+            AuthHeader authHeader =
+                    AuthHeader.of(BearerToken.valueOf(UUID.randomUUID().toString()));
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalAuthHeader").openConnection();
+            connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authHeader.toString());
+            byte[] expected = ("\"" + authHeader + "\"").getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(expected);
+            }
+
+            // Header value is empty
+            connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalAuthHeader").openConnection();
+            byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(emptyResponse);
+            }
         } finally {
             server.stop();
         }
@@ -360,6 +393,37 @@ class ExampleServiceTest {
             assertThat(connection.getResponseCode()).isEqualTo(200);
             assertThat(connection.getContentType()).startsWith("application/json");
             assertThat(connection.getInputStream()).hasBinaryContent(expected);
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    void testOptionalAuthCookieParam() throws Exception {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+
+            // Cookie value is present
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalAuthCookie").openConnection();
+            connection.setRequestProperty(HttpHeaders.COOKIE, "AUTH_TOKEN=my-token");
+            byte[] expected = "\"my-token\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(expected);
+            }
+
+            // Cookie value is present
+            connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalAuthCookie").openConnection();
+            byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(emptyResponse);
+            }
         } finally {
             server.stop();
         }

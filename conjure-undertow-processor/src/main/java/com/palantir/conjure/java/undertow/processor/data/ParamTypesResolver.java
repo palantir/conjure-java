@@ -143,6 +143,9 @@ public final class ParamTypesResolver {
             if (context.isSameTypes(parameterType, AuthHeader.class)) {
                 return Optional.of(ParameterTypes.authHeader(
                         variableElement.getSimpleName().toString()));
+            } else if (context.isOptionalSameTypes(parameterType, AuthHeader.class)) {
+                return Optional.of(ParameterTypes.optionalAuthHeader(
+                        variableElement.getSimpleName().toString()));
             } else if (context.isSameTypes(parameterType, HttpServerExchange.class)) {
                 return Optional.of(ParameterTypes.exchange());
             } else if (context.isSameTypes(parameterType, RequestContext.class)) {
@@ -278,19 +281,31 @@ public final class ParamTypesResolver {
             AnnotationReflector annotationReflector,
             SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
-        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         if (context.isSameTypes(variableElement.asType(), BearerToken.class)) {
             if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
                 context.reportError(
-                        "BearerToken parameter cannot be annotated with safe logging annotations",
+                        "Parameter type cannot be annotated with safe logging annotations",
                         variableElement,
                         SafeArg.of("type", variableElement.asType()));
                 return Optional.empty();
             }
-            // TODO(fwindheuser): Add some validation no more than one BearerToken cookie param is used.
-            return Optional.of(ParameterTypes.authCookie(
-                    javaParameterName, annotationReflector.getAnnotationValue(String.class), deserializerName));
+
+            return Optional.of(
+                    ParameterTypes.authCookie(javaParameterName, annotationReflector.getAnnotationValue(String.class)));
+        } else if (context.isOptionalSameTypes(variableElement.asType(), BearerToken.class)) {
+            if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
+                context.reportError(
+                        "Parameter type cannot be annotated with safe logging annotations",
+                        variableElement,
+                        SafeArg.of("type", variableElement.asType()));
+                return Optional.empty();
+            }
+
+            return Optional.of(ParameterTypes.optionalAuthCookie(
+                    javaParameterName, annotationReflector.getAnnotationValue(String.class)));
         }
+
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
 
         return Optional.of(ParameterTypes.cookie(
                 javaParameterName,
