@@ -77,8 +77,7 @@ public interface MyService {
 }
 ```
 
-When using an HTTP authentication header in the form of `Bearer [token]`, the token can be automatically injected when
-using an [`AuthHeader`](https://github.com/palantir/auth-tokens/blob/develop/auth-tokens/src/main/java/com/palantir/tokens/auth/AuthHeader.java) parameter:
+To access a bearer token provided using the HTTP `Authorization` header in the form of `Bearer [token]`, you can use an unannotated [`AuthHeader`](https://github.com/palantir/auth-tokens/blob/develop/auth-tokens/src/main/java/com/palantir/tokens/auth/AuthHeader.java) or `Optional<AuthHeader>` parameter, which will be deserialized using the [`AuthorizationExtractor`](../conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/AuthorizationExtractor.java):
 
 ```java
 public interface MyService {
@@ -88,14 +87,30 @@ public interface MyService {
 }
 ```
 
-Similarly, you can access a bearer token from a cookie when using the `@Handle.Cookie` annotation together with the
-[`BearerToken`](https://github.com/palantir/auth-tokens/blob/develop/auth-tokens/src/main/java/com/palantir/tokens/auth/BearerToken.java) type which also sets the respective auth state:
+```java
+public interface MyService {
+
+    @Handle(method = HttpMethod.GET, path = "/path")
+    void myEndpoint(Optional<AuthHeader> authHeader);
+}
+```
+
+Similarly, to access a bearer token provided using a cookie, you can use the `@Handle.Cookie` annotation on a 
+[`BearerToken`](https://github.com/palantir/auth-tokens/blob/develop/auth-tokens/src/main/java/com/palantir/tokens/auth/BearerToken.java) or `Optional<BearerToken>` parameter, which will be deserialized using the [`AuthorizationExtractor`](../conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/AuthorizationExtractor.java):
 
 ```java
 public interface MyService {
 
     @Handle(method = HttpMethod.GET, path = "/path")
     void myEndpoint(@Handle.Cookie("AUTH_TOKEN") BearerToken token);
+}
+```
+
+```java
+public interface MyService {
+
+    @Handle(method = HttpMethod.GET, path = "/path")
+    void myEndpoint(@Handle.Cookie("AUTH_TOKEN") Optional<BearerToken> token);
 }
 ```
 
