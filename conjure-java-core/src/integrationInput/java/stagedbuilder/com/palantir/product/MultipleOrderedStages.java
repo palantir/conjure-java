@@ -252,7 +252,6 @@ public final class MultipleOrderedStages {
 
         private DefaultBuilder() {}
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public Builder from(MultipleOrderedStages other) {
             checkNotBuilt();

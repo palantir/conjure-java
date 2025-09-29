@@ -230,7 +230,6 @@ public final class ManyFieldExample {
 
         private Builder() {}
 
-        @SuppressWarnings("for-rollout:deprecation")
         public Builder from(ManyFieldExample other) {
             checkNotBuilt();
             string(other.getString());

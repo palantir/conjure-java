@@ -98,7 +98,6 @@ public final class MultipleFieldsOneFinalStage {
                 + optionalItem + '}';
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     public static MultipleFieldsOneFinalStage of(
             Map<ResourceIdentifier, String> mappedRids, OneField token, OneField optionalItem) {
         return builder()
@@ -204,7 +203,6 @@ public final class MultipleFieldsOneFinalStage {
 
         private DefaultBuilder() {}
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public Builder from(MultipleFieldsOneFinalStage other) {
             checkNotBuilt();

@@ -295,7 +295,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         private DefaultBuilder() {}
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public Builder from(StrictMultipleDeprecatedAndUnsafeFields other) {
             checkNotBuilt();

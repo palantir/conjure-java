@@ -223,7 +223,6 @@ public final class MultipleFieldsOnlyFinalStage {
 
         private Builder() {}
 
-        @SuppressWarnings("for-rollout:deprecation")
         public Builder from(MultipleFieldsOnlyFinalStage other) {
             checkNotBuilt();
             items(other.getItems());
