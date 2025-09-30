@@ -16,6 +16,8 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.processing.Generated;
 
@@ -159,6 +161,8 @@ public sealed interface UnionReservedNames {
         }
     }
 
+    <T> T accept(Visitor<T> visitor);
+
     sealed interface Known extends UnionReservedNames
             permits Known_,
                     Unknown_,
@@ -184,6 +188,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitKnown_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Known_{value: " + value + '}';
         }
@@ -195,6 +204,11 @@ public sealed interface UnionReservedNames {
         public Unknown_(@JsonSetter("unknown") @Nonnull String value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown_(value);
         }
 
         @Override
@@ -212,6 +226,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitIf_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.If_{value: " + value + '}';
         }
@@ -223,6 +242,11 @@ public sealed interface UnionReservedNames {
         public New_(@JsonSetter("new") @Nonnull String value) {
             Preconditions.checkNotNull(value, "new_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitNew_(value);
         }
 
         @Override
@@ -240,6 +264,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitInterface_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Interface_{value: " + value + '}';
         }
@@ -251,6 +280,11 @@ public sealed interface UnionReservedNames {
         public Void_(@JsonSetter("void") @Nonnull String value) {
             Preconditions.checkNotNull(value, "void_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitVoid_(value);
         }
 
         @Override
@@ -268,6 +302,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitReturn_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Return_{value: " + value + '}';
         }
@@ -279,6 +318,11 @@ public sealed interface UnionReservedNames {
         public Private_(@JsonSetter("private") @Nonnull String value) {
             Preconditions.checkNotNull(value, "private_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitPrivate_(value);
         }
 
         @Override
@@ -296,6 +340,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitPublic_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Public_{value: " + value + '}';
         }
@@ -307,6 +356,11 @@ public sealed interface UnionReservedNames {
         public Int_(@JsonSetter("int") @Nonnull String value) {
             Preconditions.checkNotNull(value, "int_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitInt_(value);
         }
 
         @Override
@@ -324,6 +378,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitImport_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Import_{value: " + value + '}';
         }
@@ -335,6 +394,11 @@ public sealed interface UnionReservedNames {
         public Final_(@JsonSetter("final") @Nonnull String value) {
             Preconditions.checkNotNull(value, "final_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitFinal_(value);
         }
 
         @Override
@@ -352,6 +416,11 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitThrows_(value);
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Throws_{value: " + value + '}';
         }
@@ -363,6 +432,11 @@ public sealed interface UnionReservedNames {
         public Static_(@JsonSetter("static") @Nonnull String value) {
             Preconditions.checkNotNull(value, "static_ cannot be null");
             this.value = value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitStatic_(value);
         }
 
         @Override
@@ -393,8 +467,381 @@ public sealed interface UnionReservedNames {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown(type, value.get(type));
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.UnknownVariant{value: " + value + '}';
         }
+    }
+
+    interface Visitor<T> {
+        T visitKnown(String value);
+
+        T visitUnknown_(String value);
+
+        T visitIf(String value);
+
+        T visitNew(String value);
+
+        T visitInterface(String value);
+
+        T visitVoid(String value);
+
+        T visitReturn(String value);
+
+        T visitPrivate(String value);
+
+        T visitPublic(String value);
+
+        T visitInt(String value);
+
+        T visitImport(String value);
+
+        T visitFinal(String value);
+
+        T visitThrows(String value);
+
+        T visitStatic(String value);
+
+        T visitUnknown(@Safe String unknownType, Object unknownValue);
+
+        static <T> FinalStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
+        }
+    }
+
+    final class VisitorBuilder<T>
+            implements FinalStageVisitorBuilder<T>,
+                    IfStageVisitorBuilder<T>,
+                    ImportStageVisitorBuilder<T>,
+                    IntStageVisitorBuilder<T>,
+                    InterfaceStageVisitorBuilder<T>,
+                    KnownStageVisitorBuilder<T>,
+                    NewStageVisitorBuilder<T>,
+                    PrivateStageVisitorBuilder<T>,
+                    PublicStageVisitorBuilder<T>,
+                    ReturnStageVisitorBuilder<T>,
+                    StaticStageVisitorBuilder<T>,
+                    ThrowsStageVisitorBuilder<T>,
+                    Unknown_StageVisitorBuilder<T>,
+                    VoidStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    Completed_StageVisitorBuilder<T> {
+        private Function<String, T> finalVisitor;
+
+        private Function<String, T> ifVisitor;
+
+        private Function<String, T> importVisitor;
+
+        private Function<String, T> intVisitor;
+
+        private Function<String, T> interfaceVisitor;
+
+        private Function<String, T> knownVisitor;
+
+        private Function<String, T> newVisitor;
+
+        private Function<String, T> privateVisitor;
+
+        private Function<String, T> publicVisitor;
+
+        private Function<String, T> returnVisitor;
+
+        private Function<String, T> staticVisitor;
+
+        private Function<String, T> throwsVisitor;
+
+        private Function<String, T> unknown_Visitor;
+
+        private Function<String, T> voidVisitor;
+
+        private BiFunction<@Safe String, Object, T> unknownVisitor;
+
+        @Override
+        public IfStageVisitorBuilder<T> final_(@Nonnull Function<String, T> finalVisitor) {
+            Preconditions.checkNotNull(finalVisitor, "finalVisitor cannot be null");
+            this.finalVisitor = finalVisitor;
+            return this;
+        }
+
+        @Override
+        public ImportStageVisitorBuilder<T> if_(@Nonnull Function<String, T> ifVisitor) {
+            Preconditions.checkNotNull(ifVisitor, "ifVisitor cannot be null");
+            this.ifVisitor = ifVisitor;
+            return this;
+        }
+
+        @Override
+        public IntStageVisitorBuilder<T> import_(@Nonnull Function<String, T> importVisitor) {
+            Preconditions.checkNotNull(importVisitor, "importVisitor cannot be null");
+            this.importVisitor = importVisitor;
+            return this;
+        }
+
+        @Override
+        public InterfaceStageVisitorBuilder<T> int_(@Nonnull Function<String, T> intVisitor) {
+            Preconditions.checkNotNull(intVisitor, "intVisitor cannot be null");
+            this.intVisitor = intVisitor;
+            return this;
+        }
+
+        @Override
+        public KnownStageVisitorBuilder<T> interface_(@Nonnull Function<String, T> interfaceVisitor) {
+            Preconditions.checkNotNull(interfaceVisitor, "interfaceVisitor cannot be null");
+            this.interfaceVisitor = interfaceVisitor;
+            return this;
+        }
+
+        @Override
+        public NewStageVisitorBuilder<T> known(@Nonnull Function<String, T> knownVisitor) {
+            Preconditions.checkNotNull(knownVisitor, "knownVisitor cannot be null");
+            this.knownVisitor = knownVisitor;
+            return this;
+        }
+
+        @Override
+        public PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor) {
+            Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
+            this.newVisitor = newVisitor;
+            return this;
+        }
+
+        @Override
+        public PublicStageVisitorBuilder<T> private_(@Nonnull Function<String, T> privateVisitor) {
+            Preconditions.checkNotNull(privateVisitor, "privateVisitor cannot be null");
+            this.privateVisitor = privateVisitor;
+            return this;
+        }
+
+        @Override
+        public ReturnStageVisitorBuilder<T> public_(@Nonnull Function<String, T> publicVisitor) {
+            Preconditions.checkNotNull(publicVisitor, "publicVisitor cannot be null");
+            this.publicVisitor = publicVisitor;
+            return this;
+        }
+
+        @Override
+        public StaticStageVisitorBuilder<T> return_(@Nonnull Function<String, T> returnVisitor) {
+            Preconditions.checkNotNull(returnVisitor, "returnVisitor cannot be null");
+            this.returnVisitor = returnVisitor;
+            return this;
+        }
+
+        @Override
+        public ThrowsStageVisitorBuilder<T> static_(@Nonnull Function<String, T> staticVisitor) {
+            Preconditions.checkNotNull(staticVisitor, "staticVisitor cannot be null");
+            this.staticVisitor = staticVisitor;
+            return this;
+        }
+
+        @Override
+        public Unknown_StageVisitorBuilder<T> throws_(@Nonnull Function<String, T> throwsVisitor) {
+            Preconditions.checkNotNull(throwsVisitor, "throwsVisitor cannot be null");
+            this.throwsVisitor = throwsVisitor;
+            return this;
+        }
+
+        @Override
+        public VoidStageVisitorBuilder<T> unknown_(@Nonnull Function<String, T> unknown_Visitor) {
+            Preconditions.checkNotNull(unknown_Visitor, "unknown_Visitor cannot be null");
+            this.unknown_Visitor = unknown_Visitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> void_(@Nonnull Function<String, T> voidVisitor) {
+            Preconditions.checkNotNull(voidVisitor, "voidVisitor cannot be null");
+            this.voidVisitor = voidVisitor;
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
+            this.unknownVisitor = (unknownType, _unknownValue) -> {
+                throw new SafeIllegalArgumentException(
+                        "Unknown variant of the 'UnionReservedNames' union", SafeArg.of("unknownType", unknownType));
+            };
+            return this;
+        }
+
+        @Override
+        public Visitor<T> build() {
+            final Function<String, T> finalVisitor = this.finalVisitor;
+            final Function<String, T> ifVisitor = this.ifVisitor;
+            final Function<String, T> importVisitor = this.importVisitor;
+            final Function<String, T> intVisitor = this.intVisitor;
+            final Function<String, T> interfaceVisitor = this.interfaceVisitor;
+            final Function<String, T> knownVisitor = this.knownVisitor;
+            final Function<String, T> newVisitor = this.newVisitor;
+            final Function<String, T> privateVisitor = this.privateVisitor;
+            final Function<String, T> publicVisitor = this.publicVisitor;
+            final Function<String, T> returnVisitor = this.returnVisitor;
+            final Function<String, T> staticVisitor = this.staticVisitor;
+            final Function<String, T> throwsVisitor = this.throwsVisitor;
+            final Function<String, T> unknown_Visitor = this.unknown_Visitor;
+            final Function<String, T> voidVisitor = this.voidVisitor;
+            final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
+            return new Visitor<T>() {
+                @Override
+                public T visitFinal(String value) {
+                    return finalVisitor.apply(value);
+                }
+
+                @Override
+                public T visitIf(String value) {
+                    return ifVisitor.apply(value);
+                }
+
+                @Override
+                public T visitImport(String value) {
+                    return importVisitor.apply(value);
+                }
+
+                @Override
+                public T visitInt(String value) {
+                    return intVisitor.apply(value);
+                }
+
+                @Override
+                public T visitInterface(String value) {
+                    return interfaceVisitor.apply(value);
+                }
+
+                @Override
+                public T visitKnown(String value) {
+                    return knownVisitor.apply(value);
+                }
+
+                @Override
+                public T visitNew(String value) {
+                    return newVisitor.apply(value);
+                }
+
+                @Override
+                public T visitPrivate(String value) {
+                    return privateVisitor.apply(value);
+                }
+
+                @Override
+                public T visitPublic(String value) {
+                    return publicVisitor.apply(value);
+                }
+
+                @Override
+                public T visitReturn(String value) {
+                    return returnVisitor.apply(value);
+                }
+
+                @Override
+                public T visitStatic(String value) {
+                    return staticVisitor.apply(value);
+                }
+
+                @Override
+                public T visitThrows(String value) {
+                    return throwsVisitor.apply(value);
+                }
+
+                @Override
+                public T visitUnknown_(String value) {
+                    return unknown_Visitor.apply(value);
+                }
+
+                @Override
+                public T visitVoid(String value) {
+                    return voidVisitor.apply(value);
+                }
+
+                @Override
+                public T visitUnknown(String unknownType, Object unknownValue) {
+                    return unknownVisitor.apply(unknownType, unknownValue);
+                }
+            };
+        }
+    }
+
+    interface FinalStageVisitorBuilder<T> {
+        IfStageVisitorBuilder<T> final_(@Nonnull Function<String, T> finalVisitor);
+    }
+
+    interface IfStageVisitorBuilder<T> {
+        ImportStageVisitorBuilder<T> if_(@Nonnull Function<String, T> ifVisitor);
+    }
+
+    interface ImportStageVisitorBuilder<T> {
+        IntStageVisitorBuilder<T> import_(@Nonnull Function<String, T> importVisitor);
+    }
+
+    interface IntStageVisitorBuilder<T> {
+        InterfaceStageVisitorBuilder<T> int_(@Nonnull Function<String, T> intVisitor);
+    }
+
+    interface InterfaceStageVisitorBuilder<T> {
+        KnownStageVisitorBuilder<T> interface_(@Nonnull Function<String, T> interfaceVisitor);
+    }
+
+    interface KnownStageVisitorBuilder<T> {
+        NewStageVisitorBuilder<T> known(@Nonnull Function<String, T> knownVisitor);
+    }
+
+    interface NewStageVisitorBuilder<T> {
+        PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor);
+    }
+
+    interface PrivateStageVisitorBuilder<T> {
+        PublicStageVisitorBuilder<T> private_(@Nonnull Function<String, T> privateVisitor);
+    }
+
+    interface PublicStageVisitorBuilder<T> {
+        ReturnStageVisitorBuilder<T> public_(@Nonnull Function<String, T> publicVisitor);
+    }
+
+    interface ReturnStageVisitorBuilder<T> {
+        StaticStageVisitorBuilder<T> return_(@Nonnull Function<String, T> returnVisitor);
+    }
+
+    interface StaticStageVisitorBuilder<T> {
+        ThrowsStageVisitorBuilder<T> static_(@Nonnull Function<String, T> staticVisitor);
+    }
+
+    interface ThrowsStageVisitorBuilder<T> {
+        Unknown_StageVisitorBuilder<T> throws_(@Nonnull Function<String, T> throwsVisitor);
+    }
+
+    interface Unknown_StageVisitorBuilder<T> {
+        VoidStageVisitorBuilder<T> unknown_(@Nonnull Function<String, T> unknown_Visitor);
+    }
+
+    interface VoidStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> void_(@Nonnull Function<String, T> voidVisitor);
+    }
+
+    interface UnknownStageVisitorBuilder<T> {
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> throwOnUnknown();
+    }
+
+    interface Completed_StageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 }

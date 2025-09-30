@@ -363,6 +363,20 @@ public final class TestCases {
                             .build())
                     .generatorTypes(GeneratorType.OBJECT)
                     .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("classic-unions")
+                    .docs("Temp, will remove")
+                    .files(Path.of("src/test/resources/example-unions.yml"))
+                    .options(Options.builder()
+                            .useImmutableBytes(true)
+                            .strictObjects(true)
+                            .nonNullCollections(true)
+                            .excludeEmptyOptionals(true)
+                            .unionsWithUnknownValues(true)
+                            .sealedUnions(false)
+                            .build())
+                    .generatorTypes(GeneratorType.OBJECT)
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {

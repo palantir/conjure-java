@@ -106,6 +106,11 @@ public final class UnionGenerator {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
+        ClassName visitorClass = unionClass.nestedClass("Visitor");
+        Optional<ClassName> maybeVisitorBuilderClass = typeDef.getUnion().size() <= MAX_VALUES_FOR_BUILDER
+                ? Optional.of(unionClass.nestedClass("VisitorBuilder"))
+                : Optional.empty();
+
         Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
@@ -131,11 +136,24 @@ public final class UnionGenerator {
                     .addMethods(generateStaticFactories(
                             typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator, options))
                     .addMethod(generateSealedThrowOnUnknown(unionClass, unknownVariant))
-                    .addTypes(
-                            generateRecordClasses(typeMapper, typesMap, unionClass, sanitizedMemberClassNames, options))
-                    .addType(generateUnknownVariant(unionClass));
+                    .addTypes(generateRecordClasses(
+                            typeMapper, typesMap, unionClass, visitorClass, sanitizedMemberClassNames, options))
+                    .addType(generateUnknownVariant(unionClass, visitorClass, options));
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
+
+            if (true) { // TODO(kkak): Visitor FF
+                typeBuilder
+                        .addMethod(generateAcceptVisitorMethodSignature(visitorClass))
+                        .addType(generateVisitor(
+                                unionClass, visitorClass, memberTypes, maybeVisitorBuilderClass, options));
+
+                maybeVisitorBuilderClass.ifPresent(visitorBuilderClass -> typeBuilder
+                        .addType(generateVisitorBuilder(
+                                unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
+                        .addTypes(
+                                generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options)));
+            }
 
             return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
                     .skipJavaLangImports(true)
@@ -144,10 +162,6 @@ public final class UnionGenerator {
         }
 
         ClassName baseClass = unionClass.nestedClass("Base");
-        ClassName visitorClass = unionClass.nestedClass("Visitor");
-        Optional<ClassName> maybeVisitorBuilderClass = typeDef.getUnion().size() <= MAX_VALUES_FOR_BUILDER
-                ? Optional.of(unionClass.nestedClass("VisitorBuilder"))
-                : Optional.empty();
 
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -327,7 +341,7 @@ public final class UnionGenerator {
                                                             unionClass, JavaNameSanitizer.sanitize(memberName)),
                                                     variableName)
                                             : CodeBlock.of(
-                                                    "return new $T(new $T($L))",
+                                                    "return new $T(new $T($L));",
                                                     unionClass,
                                                     wrapperClass(unionClass, memberName),
                                                     variableName))
@@ -377,7 +391,7 @@ public final class UnionGenerator {
                                 typeParam,
                                 singletonMap)
                         : CodeBlock.of(
-                                "return new $T(new $T($N, $L))",
+                                "return new $T(new $T($N, $L));",
                                 unionClass,
                                 wrapperClass(unionClass, FieldName.of("unknown")),
                                 typeParam,
@@ -399,6 +413,18 @@ public final class UnionGenerator {
                 .build();
     }
 
+    private static MethodSpec generateAcceptVisitorMethodSignature(ClassName visitorClass) {
+        ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
+        ParameterSpec visitor =
+                ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
+        return MethodSpec.methodBuilder("accept")
+                .addParameter(visitor)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .addTypeVariable(TYPE_VARIABLE)
+                .returns(TYPE_VARIABLE)
+                .build();
+    }
+
     private static TypeSpec generateVisitor(
             ClassName unionClass,
             ClassName visitorClass,
@@ -406,7 +432,7 @@ public final class UnionGenerator {
             Optional<ClassName> maybeVisitorBuilderClass,
             Options options) {
         TypeSpec.Builder visitorBuilder = TypeSpec.interfaceBuilder(visitorClass)
-                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addMethods(generateMemberVisitMethods(memberTypes));
         MethodSpec.Builder visitUnknownBuilder = MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
@@ -470,7 +496,8 @@ public final class UnionGenerator {
             Options options) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         return TypeSpec.classBuilder(visitorBuilder)
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .addModifiers(
+                        options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addTypeVariable(visitResultType)
                 .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap, visitResultType))
                 .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType, options))
@@ -730,7 +757,7 @@ public final class UnionGenerator {
             ClassName nextStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStageName);
             interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, member.memberName))
                     .addTypeVariable(visitResultType)
-                    .addModifiers(Modifier.PUBLIC)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addMethod(visitorBuilderSetterPrototype(member, visitResultType, nextStageClassName, options)
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .build())
@@ -742,7 +769,7 @@ public final class UnionGenerator {
         }
         interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, COMPLETED))
                 .addTypeVariable(visitResultType)
-                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addMethod(MethodSpec.methodBuilder("build")
                         .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -940,6 +967,7 @@ public final class UnionGenerator {
             TypeMapper typeMapper,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             ClassName baseClass,
+            ClassName visitorClass,
             List<SanitizedMemberClassName> sanitizedMemberClassNames,
             Options options) {
         return sanitizedMemberClassNames.stream()
@@ -981,6 +1009,20 @@ public final class UnionGenerator {
                                                                     .simpleName()))))
                                     .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
                                     .build())
+                            .addMethods(
+                                    true // TODO(kkak): FF
+                                            ? List.of(createWrapperAcceptMethod(
+                                                    visitorClass,
+                                                    visitMethodName(memberTypeDef
+                                                            .className()
+                                                            .simpleName()),
+                                                    VALUE_FIELD_NAME,
+                                                    memberTypeDef
+                                                            .fieldDefinition()
+                                                            .getDeprecated()
+                                                            .isPresent(),
+                                                    options))
+                                            : List.of())
                             .addMethod(MethodSpecs.createToString(
                                     // TODO(kkak): Cleanup
                                     baseClass.simpleName() + "." + recordClassName.simpleName(),
@@ -991,7 +1033,7 @@ public final class UnionGenerator {
                 .toList();
     }
 
-    private static TypeSpec generateUnknownVariant(ClassName baseClass) {
+    private static TypeSpec generateUnknownVariant(ClassName baseClass, ClassName visitorClass, Options options) {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
@@ -1042,6 +1084,11 @@ public final class UnionGenerator {
                                 AnnotationSpec.builder(JsonAnySetter.class).build())
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build())
+                .addMethods(
+                        true // TODO(kkak): FF
+                                ? List.of(createWrapperAcceptMethod(
+                                        visitorClass, VISIT_UNKNOWN_METHOD_NAME, VALUE_FIELD_NAME, false, options))
+                                : List.of())
                 .addMethod(MethodSpecs.createToString(
                         baseClass.simpleName() + "." + SEALED_UNKNOWN_VARIANT_NAME,
                         List.of(FieldName.of(VALUE_FIELD_NAME))));
