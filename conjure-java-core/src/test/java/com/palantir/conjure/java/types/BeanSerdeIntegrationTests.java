@@ -167,7 +167,6 @@ public final class BeanSerdeIntegrationTests {
         assertThat(boolExample.getCoin()).isTrue();
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testEnumKeyDeserialization() throws IOException {
         Map<EnumExample, String> value =
