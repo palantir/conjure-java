@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.AliasAsMapKeyExample;
 import allexamples.com.palantir.product.BinaryAliasExample;
 import allexamples.com.palantir.product.BinaryExample;
 import allexamples.com.palantir.product.DateTimeExample;
@@ -31,6 +32,7 @@ import allexamples.com.palantir.product.ExternalStringAliasExample;
 import allexamples.com.palantir.product.IntegerAliasExample;
 import allexamples.com.palantir.product.ListAlias;
 import allexamples.com.palantir.product.ListExample;
+import allexamples.com.palantir.product.ManyFieldExample;
 import allexamples.com.palantir.product.MapAliasExample;
 import allexamples.com.palantir.product.MapExample;
 import allexamples.com.palantir.product.OptionalAlias;
@@ -531,13 +533,51 @@ public final class WireFormatTests {
 
     @Test
     public void double_alias_should_serialize_with_decimal_point() throws Exception {
+        assertThat(String.valueOf(10e2)).isEqualTo("1000.0");
         assertThat(mapper.writeValueAsString(DoubleAliasExample.of(100L))).isEqualTo("100.0");
+    }
+
+    @Test
+    public void double_alias_should_serialize_with_e() throws Exception {
+        assertThat(mapper.writeValueAsString(DoubleAliasExample.of(100e2))).isEqualTo("100.0e2");
     }
 
     @Test
     public void double_alias_should_deserialize_without_decimal_point() throws Exception {
         // frontends can send numbers like this!
         assertThat(mapper.readValue("100", DoubleAliasExample.class)).isEqualTo(DoubleAliasExample.of(100L));
+    }
+
+    @Test
+    public void double_alias_map_key_should_serialize_as_string() throws Exception {
+        ManyFieldExample value = ManyFieldExample.builder()
+                .integer(1)
+                .doubleValue(1.0)
+                .string("hello")
+                .alias(StringAliasExample.of("hello"))
+                .build();
+
+        String expectedPretty =
+                // language=JSON
+                """
+                {
+                    "strings":{},
+                    "rids":{},
+                    "bearertokens":{},
+                    "integers":{},
+                    "doubles":{"1.0": {"string":"hello","integer":1,"doubleValue":1.0,"items":[],"set":[],"map":{},"alias":"hello"}},
+                    "safelongs":{},
+                    "datetimes":{},
+                    "uuids":{}
+                    }
+                """;
+        String expected = expectedPretty.strip().replaceAll("\n", "").replaceAll(" ", "");
+        AliasAsMapKeyExample example = AliasAsMapKeyExample.builder()
+                // .integers(ImmutableMap.of(IntegerAliasExample.of(1), value))
+                .doubles(ImmutableMap.of(DoubleAliasExample.of(1.0), value))
+                .build();
+        assertThat(mapper.writeValueAsString(example)).isEqualTo(expected);
+        assertThat(mapper.readValue(expected, AliasAsMapKeyExample.class)).isEqualTo(example);
     }
 
     @Test

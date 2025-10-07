@@ -77,7 +77,16 @@ public final class AliasedDouble implements Comparable<AliasedDouble> {
             case "-Infinity":
                 return AliasedDouble.of(Double.NEGATIVE_INFINITY);
             default:
-                throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                try {
+                    double doubleValue = Double.parseDouble(value);
+                    if (Double.toString(doubleValue).equals(value)) {
+                        return AliasedDouble.of(doubleValue);
+                    } else {
+                        throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                }
         }
     }
 }

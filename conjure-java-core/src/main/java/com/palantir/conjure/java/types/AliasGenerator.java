@@ -208,9 +208,20 @@ public final class AliasGenerator {
                     .unindent()
                     .add("default:\n")
                     .indent()
+                    .beginControlFlow("try")
+                    .addStatement("double doubleValue = $T.parseDouble(value)", Double.class)
+                    .beginControlFlow("if ($T.toString(doubleValue).equals(value))", Double.class)
+                    .addStatement("return $T.of(doubleValue)", thisClass)
+                    .nextControlFlow("else")
                     .addStatement(
                             "throw new $T(\"Cannot deserialize string into double: \" + value)",
                             IllegalArgumentException.class)
+                    .endControlFlow()
+                    .nextControlFlow("catch ($T e)", NumberFormatException.class)
+                    .addStatement(
+                            "throw new $T(\"Cannot deserialize string into double: \" + value)",
+                            IllegalArgumentException.class)
+                    .endControlFlow()
                     .unindent()
                     .endControlFlow()
                     .build();
