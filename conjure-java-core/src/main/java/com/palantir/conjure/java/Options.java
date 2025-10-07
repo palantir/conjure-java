@@ -218,6 +218,14 @@ public interface Options {
         return false;
     }
 
+    /**
+     * If {@link #sealedUnions} is enabled, this enables visitor generation for back-compatibility.
+     */
+    @Value.Default
+    default boolean sealedUnionVisitors() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

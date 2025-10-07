@@ -60,6 +60,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --defensiveCollections
                       Makes immutable copies of collections for union and alias types, respecting the 
                       --nonNullCollections flag.
+        --sealedUnions
+                      Uses sealed interfaces for union type generation.
 
 ### Known Tag Values
 

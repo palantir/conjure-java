@@ -118,6 +118,7 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
 
         if (options.sealedUnions()) {
+            ClassName knownInterface = unionClass.nestedClass(SEALED_KNOWN_INTERFACE);
             ClassName unknownVariant = unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME);
             List<AnnotationSpec> safety =
                     ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
@@ -132,6 +133,7 @@ public final class UnionGenerator {
                     .addAnnotation(generateJsonSubTypes(unionClass, sanitizedMemberClassNames))
                     .addAnnotation(ignoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
+                    .addPermittedSubclasses(List.of(knownInterface, unknownVariant))
                     .addType(generateSealedKnownInterface(unionClass, sanitizedMemberClassNames))
                     .addMethods(generateStaticFactories(
                             typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator, options))
@@ -142,7 +144,7 @@ public final class UnionGenerator {
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-            if (true) { // TODO(kkak): Visitor FF
+            if (options.sealedUnionVisitors()) {
                 typeBuilder
                         .addMethod(generateAcceptVisitorMethodSignature(visitorClass))
                         .addType(generateVisitor(
