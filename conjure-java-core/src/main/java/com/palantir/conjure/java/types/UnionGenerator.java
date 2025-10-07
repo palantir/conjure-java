@@ -312,14 +312,14 @@ public final class UnionGenerator {
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(ParameterSpec.builder(memberType, variableName)
                                     .build())
-                            .addCode(
+                            .addStatement(
                                     options.sealedUnions()
                                             ? CodeBlock.of(
-                                                    "return new $T($L);", // Why is this ";" needed
+                                                    "return new $T($L)",
                                                     childRecordClass(unionClass, memberName),
                                                     variableName)
                                             : CodeBlock.of(
-                                                    "return new $T(new $T($L));",
+                                                    "return new $T(new $T($L))",
                                                     unionClass,
                                                     wrapperClass(unionClass, memberName),
                                                     variableName))
@@ -361,15 +361,15 @@ public final class UnionGenerator {
         // add default case, which actually builds the unknown
         builder.addCode("default:");
         CodeBlock singletonMap = CodeBlock.of("$T.singletonMap($N, $N)", Collections.class, typeParam, valueParam);
-        builder.addCode(
+        builder.addStatement(
                 options.sealedUnions()
                         ? CodeBlock.of(
-                                "return new $T($N, $L);", // Why is this ";" needed
+                                "return new $T($N, $L)",
                                 childRecordClass(unionClass, FieldName.of(SEALED_UNKNOWN_VARIANT_NAME)),
                                 typeParam,
                                 singletonMap)
                         : CodeBlock.of(
-                                "return new $T(new $T($N, $L));",
+                                "return new $T(new $T($N, $L))",
                                 unionClass,
                                 wrapperClass(unionClass, FieldName.of("unknown")),
                                 typeParam,
