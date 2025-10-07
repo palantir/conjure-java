@@ -1000,8 +1000,7 @@ public final class UnionGenerator {
                                                     options))
                                             : List.of())
                             .addMethod(MethodSpecs.createToString(
-                                    // TODO(kkak): Cleanup
-                                    baseClass.simpleName() + "." + recordClassName.simpleName(),
+                                    getQualifiedClassName(baseClass, recordClassName),
                                     List.of(FieldName.of(VALUE_FIELD_NAME))));
 
                     return typeBuilder.build();
@@ -1256,6 +1255,10 @@ public final class UnionGenerator {
 
     private static String sanitizeReserved(String input) {
         return "unknown".equalsIgnoreCase(input) || "known".equalsIgnoreCase(input) ? input + '_' : input;
+    }
+
+    private static String getQualifiedClassName(ClassName baseClass, ClassName recordClassName) {
+        return baseClass.simpleName() + "." + recordClassName.simpleName();
     }
 
     private UnionGenerator() {}
