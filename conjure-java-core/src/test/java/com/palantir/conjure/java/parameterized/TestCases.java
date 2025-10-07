@@ -360,6 +360,7 @@ public final class TestCases {
                             .excludeEmptyOptionals(true)
                             .unionsWithUnknownValues(true)
                             .sealedUnions(true)
+                            .sealedUnionVisitors(true)
                             .build())
                     .generatorTypes(GeneratorType.OBJECT)
                     .build())

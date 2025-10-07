@@ -29,24 +29,24 @@ import javax.annotation.processing.Generated;
         visible = true,
         defaultImpl = UnionReservedNames.UnknownVariant.class)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = UnionReservedNames.Known_.class, name = "known_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Unknown_.class, name = "unknown_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.If_.class, name = "if_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.New_.class, name = "new_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Interface_.class, name = "interface_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Void_.class, name = "void_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Return_.class, name = "return_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Private_.class, name = "private_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Public_.class, name = "public_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Int_.class, name = "int_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Import_.class, name = "import_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Final_.class, name = "final_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Throws_.class, name = "throws_"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Static_.class, name = "static_")
+    @JsonSubTypes.Type(value = UnionReservedNames.Known_.class, name = "known"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Unknown_.class, name = "unknown"),
+    @JsonSubTypes.Type(value = UnionReservedNames.If.class, name = "if"),
+    @JsonSubTypes.Type(value = UnionReservedNames.New.class, name = "new"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Interface.class, name = "interface"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Void.class, name = "void"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Return.class, name = "return"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Private.class, name = "private"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Public.class, name = "public"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Int.class, name = "int"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Import.class, name = "import"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Final.class, name = "final"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Throws.class, name = "throws"),
+    @JsonSubTypes.Type(value = UnionReservedNames.Static.class, name = "static")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public sealed interface UnionReservedNames {
-    static UnionReservedNames known_(String value) {
+public sealed interface UnionReservedNames permits UnionReservedNames.Known, UnionReservedNames.UnknownVariant {
+    static UnionReservedNames known(String value) {
         return new Known_(value);
     }
 
@@ -55,51 +55,51 @@ public sealed interface UnionReservedNames {
     }
 
     static UnionReservedNames if_(String value) {
-        return new If_(value);
+        return new If(value);
     }
 
     static UnionReservedNames new_(String value) {
-        return new New_(value);
+        return new New(value);
     }
 
     static UnionReservedNames interface_(String value) {
-        return new Interface_(value);
+        return new Interface(value);
     }
 
     static UnionReservedNames void_(String value) {
-        return new Void_(value);
+        return new Void(value);
     }
 
     static UnionReservedNames return_(String value) {
-        return new Return_(value);
+        return new Return(value);
     }
 
     static UnionReservedNames private_(String value) {
-        return new Private_(value);
+        return new Private(value);
     }
 
     static UnionReservedNames public_(String value) {
-        return new Public_(value);
+        return new Public(value);
     }
 
     static UnionReservedNames int_(String value) {
-        return new Int_(value);
+        return new Int(value);
     }
 
     static UnionReservedNames import_(String value) {
-        return new Import_(value);
+        return new Import(value);
     }
 
     static UnionReservedNames final_(String value) {
-        return new Final_(value);
+        return new Final(value);
     }
 
     static UnionReservedNames throws_(String value) {
-        return new Throws_(value);
+        return new Throws(value);
     }
 
     static UnionReservedNames static_(String value) {
-        return new Static_(value);
+        return new Static(value);
     }
 
     static UnionReservedNames unknown(@Safe String type, Object value) {
@@ -166,30 +166,30 @@ public sealed interface UnionReservedNames {
     sealed interface Known extends UnionReservedNames
             permits Known_,
                     Unknown_,
-                    If_,
-                    New_,
-                    Interface_,
-                    Void_,
-                    Return_,
-                    Private_,
-                    Public_,
-                    Int_,
-                    Import_,
-                    Final_,
-                    Throws_,
-                    Static_ {}
+                    If,
+                    New,
+                    Interface,
+                    Void,
+                    Return,
+                    Private,
+                    Public,
+                    Int,
+                    Import,
+                    Final,
+                    Throws,
+                    Static {}
 
-    @JsonTypeName("Known_")
+    @JsonTypeName("known")
     record Known_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Known_(@JsonSetter("known") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "known_ cannot be null");
+            Preconditions.checkNotNull(value, "known cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitKnown_(value);
+            return visitor.visitKnown(value);
         }
 
         @Override
@@ -198,11 +198,11 @@ public sealed interface UnionReservedNames {
         }
     }
 
-    @JsonTypeName("Unknown_")
+    @JsonTypeName("unknown")
     record Unknown_(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Unknown_(@JsonSetter("unknown") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "unknown_ cannot be null");
+            Preconditions.checkNotNull(value, "unknown cannot be null");
             this.value = value;
         }
 
@@ -217,231 +217,231 @@ public sealed interface UnionReservedNames {
         }
     }
 
-    @JsonTypeName("If_")
-    record If_(String value) implements Known {
+    @JsonTypeName("if")
+    record If(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public If_(@JsonSetter("if") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "if_ cannot be null");
+        public If(@JsonSetter("if") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitIf_(value);
+            return visitor.visitIf(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.If_{value: " + value + '}';
+            return "UnionReservedNames.If{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("New_")
-    record New_(String value) implements Known {
+    @JsonTypeName("new")
+    record New(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public New_(@JsonSetter("new") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "new_ cannot be null");
+        public New(@JsonSetter("new") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "new cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitNew_(value);
+            return visitor.visitNew(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.New_{value: " + value + '}';
+            return "UnionReservedNames.New{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Interface_")
-    record Interface_(String value) implements Known {
+    @JsonTypeName("interface")
+    record Interface(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Interface_(@JsonSetter("interface") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "interface_ cannot be null");
+        public Interface(@JsonSetter("interface") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitInterface_(value);
+            return visitor.visitInterface(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Interface_{value: " + value + '}';
+            return "UnionReservedNames.Interface{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Void_")
-    record Void_(String value) implements Known {
+    @JsonTypeName("void")
+    record Void(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Void_(@JsonSetter("void") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "void_ cannot be null");
+        public Void(@JsonSetter("void") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "void cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitVoid_(value);
+            return visitor.visitVoid(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Void_{value: " + value + '}';
+            return "UnionReservedNames.Void{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Return_")
-    record Return_(String value) implements Known {
+    @JsonTypeName("return")
+    record Return(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Return_(@JsonSetter("return") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "return_ cannot be null");
+        public Return(@JsonSetter("return") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "return cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitReturn_(value);
+            return visitor.visitReturn(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Return_{value: " + value + '}';
+            return "UnionReservedNames.Return{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Private_")
-    record Private_(String value) implements Known {
+    @JsonTypeName("private")
+    record Private(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Private_(@JsonSetter("private") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "private_ cannot be null");
+        public Private(@JsonSetter("private") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "private cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitPrivate_(value);
+            return visitor.visitPrivate(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Private_{value: " + value + '}';
+            return "UnionReservedNames.Private{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Public_")
-    record Public_(String value) implements Known {
+    @JsonTypeName("public")
+    record Public(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Public_(@JsonSetter("public") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "public_ cannot be null");
+        public Public(@JsonSetter("public") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "public cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitPublic_(value);
+            return visitor.visitPublic(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Public_{value: " + value + '}';
+            return "UnionReservedNames.Public{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Int_")
-    record Int_(String value) implements Known {
+    @JsonTypeName("int")
+    record Int(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Int_(@JsonSetter("int") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "int_ cannot be null");
+        public Int(@JsonSetter("int") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "int cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitInt_(value);
+            return visitor.visitInt(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Int_{value: " + value + '}';
+            return "UnionReservedNames.Int{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Import_")
-    record Import_(String value) implements Known {
+    @JsonTypeName("import")
+    record Import(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Import_(@JsonSetter("import") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "import_ cannot be null");
+        public Import(@JsonSetter("import") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "import cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitImport_(value);
+            return visitor.visitImport(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Import_{value: " + value + '}';
+            return "UnionReservedNames.Import{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Final_")
-    record Final_(String value) implements Known {
+    @JsonTypeName("final")
+    record Final(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Final_(@JsonSetter("final") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "final_ cannot be null");
+        public Final(@JsonSetter("final") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "final cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitFinal_(value);
+            return visitor.visitFinal(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Final_{value: " + value + '}';
+            return "UnionReservedNames.Final{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Throws_")
-    record Throws_(String value) implements Known {
+    @JsonTypeName("throws")
+    record Throws(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Throws_(@JsonSetter("throws") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "throws_ cannot be null");
+        public Throws(@JsonSetter("throws") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "throws cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitThrows_(value);
+            return visitor.visitThrows(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Throws_{value: " + value + '}';
+            return "UnionReservedNames.Throws{value: " + value + '}';
         }
     }
 
-    @JsonTypeName("Static_")
-    record Static_(String value) implements Known {
+    @JsonTypeName("static")
+    record Static(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Static_(@JsonSetter("static") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "static_ cannot be null");
+        public Static(@JsonSetter("static") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "static cannot be null");
             this.value = value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitStatic_(value);
+            return visitor.visitStatic(value);
         }
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Static_{value: " + value + '}';
+            return "UnionReservedNames.Static{value: " + value + '}';
         }
     }
 

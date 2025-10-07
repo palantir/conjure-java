@@ -36,7 +36,7 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = SimpleUnion.Baz.class, name = "baz")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public sealed interface SimpleUnion {
+public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.UnknownVariant {
     static SimpleUnion foo(String value) {
         return new Foo(value);
     }
@@ -79,7 +79,7 @@ public sealed interface SimpleUnion {
 
     sealed interface Known extends SimpleUnion permits Foo, Bar, Baz {}
 
-    @JsonTypeName("Foo")
+    @JsonTypeName("foo")
     record Foo(String value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Foo(@JsonSetter("foo") @Nonnull String value) {
@@ -98,7 +98,7 @@ public sealed interface SimpleUnion {
         }
     }
 
-    @JsonTypeName("Bar")
+    @JsonTypeName("bar")
     record Bar(int value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Bar(@JsonSetter("bar") @Nonnull int value) {
@@ -117,7 +117,7 @@ public sealed interface SimpleUnion {
         }
     }
 
-    @JsonTypeName("Baz")
+    @JsonTypeName("baz")
     record Baz(SafeLong value) implements Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         public Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
