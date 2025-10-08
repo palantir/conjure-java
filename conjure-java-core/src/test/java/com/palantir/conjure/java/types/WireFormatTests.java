@@ -559,6 +559,11 @@ public final class WireFormatTests {
                 .alias(StringAliasExample.of("hello"))
                 .build();
 
+        String doubleValue = Set.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
+                        .contains(doubleKey)
+                ? "\"" + doubleKey + "\""
+                : doubleKey.toString();
+
         String expectedPretty = String.format(
                 """
                 {
@@ -573,16 +578,7 @@ public final class WireFormatTests {
                     "uuids":{}
                     }
                 """,
-                doubleKey,
-                Set.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
-                                .contains(doubleKey)
-                        ? "\"" + doubleKey + "\""
-                        : doubleKey,
-                doubleKey,
-                Set.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
-                                .contains(doubleKey)
-                        ? "\"" + doubleKey + "\""
-                        : doubleKey);
+                doubleKey, doubleValue, doubleKey, doubleValue);
         String expected = expectedPretty.strip().replaceAll("\n", "").replaceAll(" ", "");
         AliasAsMapKeyExample example = AliasAsMapKeyExample.builder()
                 .doubles(ImmutableMap.of(DoubleAliasExample.of(doubleKey), value))
