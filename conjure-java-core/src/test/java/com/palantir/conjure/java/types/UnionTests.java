@@ -250,12 +250,10 @@ class UnionTests {
     @Test
     void sealedUnionCanUseAllExistingPatterns() {
         String expected = "foo";
-        classicunions.com.palantir.product.SimpleUnion simpleUnion =
-                classicunions.com.palantir.product.SimpleUnion.foo(expected);
-        classicunions.com.palantir.product.SimpleUnion unknown =
-                classicunions.com.palantir.product.SimpleUnion.unknown("test", expected);
+        SimpleUnion simpleUnion = SimpleUnion.foo(expected);
+        SimpleUnion unknown = SimpleUnion.unknown("test", expected);
 
-        String actual = simpleUnion.accept(classicunions.com.palantir.product.SimpleUnion.Visitor.<String>builder()
+        String actual = simpleUnion.accept(SimpleUnion.Visitor.<String>builder()
                 .bar(String::valueOf)
                 .baz(String::valueOf)
                 .foo(Function.identity())
@@ -263,7 +261,7 @@ class UnionTests {
                 .build());
         assertThat(actual).isEqualTo(expected);
 
-        String unknownString = unknown.accept(classicunions.com.palantir.product.SimpleUnion.Visitor.<String>builder()
+        String unknownString = unknown.accept(SimpleUnion.Visitor.<String>builder()
                 .bar(String::valueOf)
                 .baz(String::valueOf)
                 .foo(_x -> "")
@@ -271,8 +269,7 @@ class UnionTests {
                 .build());
         assertThat(unknownString).isEqualTo(expected);
 
-        assertThat(simpleUnion.equals(classicunions.com.palantir.product.SimpleUnion.foo(expected)))
-                .isTrue();
+        assertThat(simpleUnion.equals(SimpleUnion.foo(expected))).isTrue();
         assertThat(simpleUnion.toString()).contains(expected);
     }
 
