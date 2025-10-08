@@ -32,6 +32,8 @@ public final class AliasAsMapKeyExample {
 
     private final Map<DoubleAliasExample, ManyFieldExample> doubles;
 
+    private final Map<Double, ManyFieldExample> rawDoubles;
+
     private final Map<SafeLongAliasExample, ManyFieldExample> safelongs;
 
     private final Map<DateTimeAliasExample, ManyFieldExample> datetimes;
@@ -46,15 +48,17 @@ public final class AliasAsMapKeyExample {
             Map<BearerTokenAliasExample, ManyFieldExample> bearertokens,
             Map<IntegerAliasExample, ManyFieldExample> integers,
             Map<DoubleAliasExample, ManyFieldExample> doubles,
+            Map<Double, ManyFieldExample> rawDoubles,
             Map<SafeLongAliasExample, ManyFieldExample> safelongs,
             Map<DateTimeAliasExample, ManyFieldExample> datetimes,
             Map<UuidAliasExample, ManyFieldExample> uuids) {
-        validateFields(strings, rids, bearertokens, integers, doubles, safelongs, datetimes, uuids);
+        validateFields(strings, rids, bearertokens, integers, doubles, rawDoubles, safelongs, datetimes, uuids);
         this.strings = Collections.unmodifiableMap(strings);
         this.rids = Collections.unmodifiableMap(rids);
         this.bearertokens = Collections.unmodifiableMap(bearertokens);
         this.integers = Collections.unmodifiableMap(integers);
         this.doubles = Collections.unmodifiableMap(doubles);
+        this.rawDoubles = Collections.unmodifiableMap(rawDoubles);
         this.safelongs = Collections.unmodifiableMap(safelongs);
         this.datetimes = Collections.unmodifiableMap(datetimes);
         this.uuids = Collections.unmodifiableMap(uuids);
@@ -83,6 +87,11 @@ public final class AliasAsMapKeyExample {
     @JsonProperty("doubles")
     public Map<DoubleAliasExample, ManyFieldExample> getDoubles() {
         return this.doubles;
+    }
+
+    @JsonProperty("rawDoubles")
+    public Map<Double, ManyFieldExample> getRawDoubles() {
+        return this.rawDoubles;
     }
 
     @JsonProperty("safelongs")
@@ -116,6 +125,7 @@ public final class AliasAsMapKeyExample {
                 && this.bearertokens.equals(other.bearertokens)
                 && this.integers.equals(other.integers)
                 && this.doubles.equals(other.doubles)
+                && this.rawDoubles.equals(other.rawDoubles)
                 && this.safelongs.equals(other.safelongs)
                 && this.datetimes.equals(other.datetimes)
                 && this.uuids.equals(other.uuids);
@@ -131,6 +141,7 @@ public final class AliasAsMapKeyExample {
             hash = 31 * hash + this.bearertokens.hashCode();
             hash = 31 * hash + this.integers.hashCode();
             hash = 31 * hash + this.doubles.hashCode();
+            hash = 31 * hash + this.rawDoubles.hashCode();
             hash = 31 * hash + this.safelongs.hashCode();
             hash = 31 * hash + this.datetimes.hashCode();
             hash = 31 * hash + this.uuids.hashCode();
@@ -144,8 +155,8 @@ public final class AliasAsMapKeyExample {
     @DoNotLog
     public String toString() {
         return "AliasAsMapKeyExample{strings: " + strings + ", rids: " + rids + ", bearertokens: " + bearertokens
-                + ", integers: " + integers + ", doubles: " + doubles + ", safelongs: " + safelongs + ", datetimes: "
-                + datetimes + ", uuids: " + uuids + '}';
+                + ", integers: " + integers + ", doubles: " + doubles + ", rawDoubles: " + rawDoubles + ", safelongs: "
+                + safelongs + ", datetimes: " + datetimes + ", uuids: " + uuids + '}';
     }
 
     private static void validateFields(
@@ -154,6 +165,7 @@ public final class AliasAsMapKeyExample {
             Map<BearerTokenAliasExample, ManyFieldExample> bearertokens,
             Map<IntegerAliasExample, ManyFieldExample> integers,
             Map<DoubleAliasExample, ManyFieldExample> doubles,
+            Map<Double, ManyFieldExample> rawDoubles,
             Map<SafeLongAliasExample, ManyFieldExample> safelongs,
             Map<DateTimeAliasExample, ManyFieldExample> datetimes,
             Map<UuidAliasExample, ManyFieldExample> uuids) {
@@ -163,6 +175,7 @@ public final class AliasAsMapKeyExample {
         missingFields = addFieldIfMissing(missingFields, bearertokens, "bearertokens");
         missingFields = addFieldIfMissing(missingFields, integers, "integers");
         missingFields = addFieldIfMissing(missingFields, doubles, "doubles");
+        missingFields = addFieldIfMissing(missingFields, rawDoubles, "rawDoubles");
         missingFields = addFieldIfMissing(missingFields, safelongs, "safelongs");
         missingFields = addFieldIfMissing(missingFields, datetimes, "datetimes");
         missingFields = addFieldIfMissing(missingFields, uuids, "uuids");
@@ -176,7 +189,7 @@ public final class AliasAsMapKeyExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(8);
+                missingFields = new ArrayList<>(9);
             }
             missingFields.add(fieldName);
         }
@@ -201,6 +214,8 @@ public final class AliasAsMapKeyExample {
 
         private Map<DoubleAliasExample, ManyFieldExample> doubles = new LinkedHashMap<>();
 
+        private Map<Double, ManyFieldExample> rawDoubles = new LinkedHashMap<>();
+
         private Map<SafeLongAliasExample, ManyFieldExample> safelongs = new LinkedHashMap<>();
 
         private Map<DateTimeAliasExample, ManyFieldExample> datetimes = new LinkedHashMap<>();
@@ -216,6 +231,7 @@ public final class AliasAsMapKeyExample {
             bearertokens(other.getBearertokens());
             integers(other.getIntegers());
             doubles(other.getDoubles());
+            rawDoubles(other.getRawDoubles());
             safelongs(other.getSafelongs());
             datetimes(other.getDatetimes());
             uuids(other.getUuids());
@@ -318,6 +334,25 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
+        @JsonSetter(value = "rawDoubles", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder rawDoubles(@Nonnull Map<Double, ManyFieldExample> rawDoubles) {
+            checkNotBuilt();
+            this.rawDoubles = new LinkedHashMap<>(Preconditions.checkNotNull(rawDoubles, "rawDoubles cannot be null"));
+            return this;
+        }
+
+        public Builder putAllRawDoubles(@Nonnull Map<Double, ManyFieldExample> rawDoubles) {
+            checkNotBuilt();
+            this.rawDoubles.putAll(Preconditions.checkNotNull(rawDoubles, "rawDoubles cannot be null"));
+            return this;
+        }
+
+        public Builder rawDoubles(double key, ManyFieldExample value) {
+            checkNotBuilt();
+            this.rawDoubles.put(key, value);
+            return this;
+        }
+
         @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             checkNotBuilt();
@@ -380,7 +415,7 @@ public final class AliasAsMapKeyExample {
             checkNotBuilt();
             this._buildInvoked = true;
             return new AliasAsMapKeyExample(
-                    strings, rids, bearertokens, integers, doubles, safelongs, datetimes, uuids);
+                    strings, rids, bearertokens, integers, doubles, rawDoubles, safelongs, datetimes, uuids);
         }
 
         private void checkNotBuilt() {

@@ -567,6 +567,7 @@ public final class WireFormatTests {
                     "bearertokens":{},
                     "integers":{},
                     "doubles":{"%s": {"string":"hello","integer":1,"doubleValue":%s,"items":[],"set":[],"map":{},"alias":"hello"}},
+                    "rawDoubles":{"%s": {"string":"hello","integer":1,"doubleValue":%s,"items":[],"set":[],"map":{},"alias":"hello"}},
                     "safelongs":{},
                     "datetimes":{},
                     "uuids":{}
@@ -576,10 +577,16 @@ public final class WireFormatTests {
                 Set.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
                                 .contains(doubleKey)
                         ? "\"" + doubleKey + "\""
+                        : doubleKey,
+                doubleKey,
+                Set.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
+                                .contains(doubleKey)
+                        ? "\"" + doubleKey + "\""
                         : doubleKey);
         String expected = expectedPretty.strip().replaceAll("\n", "").replaceAll(" ", "");
         AliasAsMapKeyExample example = AliasAsMapKeyExample.builder()
                 .doubles(ImmutableMap.of(DoubleAliasExample.of(doubleKey), value))
+                .rawDoubles(doubleKey, value)
                 .build();
         assertThat(mapper.writeValueAsString(example)).isEqualTo(expected);
         assertThat(mapper.readValue(expected, AliasAsMapKeyExample.class)).isEqualTo(example);
