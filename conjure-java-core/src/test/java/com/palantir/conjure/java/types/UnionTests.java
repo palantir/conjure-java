@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 import sealedunions.com.palantir.product.SimpleUnion;
@@ -244,6 +245,35 @@ class UnionTests {
     @Test
     public void testCannotCreateUnknownTypeFromKnownType_sealedUnion() {
         assertThatThrownBy(() -> SimpleUnion.unknown("foo", "value"));
+    }
+
+    @Test
+    void sealedUnionCanUseAllExistingPatterns() {
+        String expected = "foo";
+        classicunions.com.palantir.product.SimpleUnion simpleUnion =
+                classicunions.com.palantir.product.SimpleUnion.foo(expected);
+        classicunions.com.palantir.product.SimpleUnion unknown =
+                classicunions.com.palantir.product.SimpleUnion.unknown("test", expected);
+
+        String actual = simpleUnion.accept(classicunions.com.palantir.product.SimpleUnion.Visitor.<String>builder()
+                .bar(String::valueOf)
+                .baz(String::valueOf)
+                .foo(Function.identity())
+                .throwOnUnknown()
+                .build());
+        assertThat(actual).isEqualTo(expected);
+
+        String unknownString = unknown.accept(classicunions.com.palantir.product.SimpleUnion.Visitor.<String>builder()
+                .bar(String::valueOf)
+                .baz(String::valueOf)
+                .foo(_x -> "")
+                .unknown((_type, value) -> value.toString())
+                .build());
+        assertThat(unknownString).isEqualTo(expected);
+
+        assertThat(simpleUnion.equals(classicunions.com.palantir.product.SimpleUnion.foo(expected)))
+                .isTrue();
+        assertThat(simpleUnion.toString()).contains(expected);
     }
 
     @Test
