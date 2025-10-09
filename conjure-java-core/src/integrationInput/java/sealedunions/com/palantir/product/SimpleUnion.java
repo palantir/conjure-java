@@ -36,20 +36,21 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = SimpleUnion.Baz.class, name = "baz")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.UnknownVariant {
-    static SimpleUnion foo(String value) {
+public abstract sealed class SimpleUnion
+        permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.UnknownVariant {
+    public static SimpleUnion foo(String value) {
         return new Foo(value);
     }
 
-    static SimpleUnion bar(int value) {
+    public static SimpleUnion bar(int value) {
         return new Bar(value);
     }
 
-    static SimpleUnion baz(SafeLong value) {
+    public static SimpleUnion baz(SafeLong value) {
         return new Baz(value);
     }
 
-    static SimpleUnion unknown(@Safe String type, Object value) {
+    public static SimpleUnion unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "foo":
                 throw new SafeIllegalArgumentException(
@@ -65,7 +66,7 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         }
     }
 
-    default Known throwOnUnknown() {
+    public Known throwOnUnknown() {
         if (this instanceof UnknownVariant) {
             throw new SafeIllegalArgumentException(
                     "Unknown variant of the 'SimpleUnion' union",
@@ -75,14 +76,20 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         }
     }
 
-    <T> T accept(Visitor<T> visitor);
+    public abstract <T> T accept(Visitor<T> visitor);
 
-    sealed interface Known extends SimpleUnion permits Foo, Bar, Baz {}
+    public sealed interface Known permits Foo, Bar, Baz {}
 
     @JsonTypeName("foo")
-    record Foo(String value) implements Known {
+    public static final class Foo extends SimpleUnion implements Known {
+        private final String value;
+
+        public String value() {
+            return value;
+        }
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Foo(@JsonSetter("foo") @Nonnull String value) {
+        private Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -99,9 +106,15 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
     }
 
     @JsonTypeName("bar")
-    record Bar(int value) implements Known {
+    public static final class Bar extends SimpleUnion implements Known {
+        private final int value;
+
+        public int value() {
+            return value;
+        }
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Bar(@JsonSetter("bar") @Nonnull int value) {
+        private Bar(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
@@ -118,9 +131,15 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
     }
 
     @JsonTypeName("baz")
-    record Baz(SafeLong value) implements Known {
+    public static final class Baz extends SimpleUnion implements Known {
+        private final SafeLong value;
+
+        public SafeLong value() {
+            return value;
+        }
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
+        private Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
@@ -136,10 +155,23 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         }
     }
 
-    record UnknownVariant(String type, Map<String, Object> value) implements SimpleUnion {
-        public UnknownVariant {
+    public static final class UnknownVariant extends SimpleUnion {
+        private final String type;
+        private final Map<String, Object> value;
+
+        public String type() {
+            return type;
+        }
+
+        public Map<String, Object> value() {
+            return value;
+        }
+
+        public UnknownVariant(String type, Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "type cannot be null");
+            this.type = type;
+            this.value = value;
         }
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -168,7 +200,7 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         }
     }
 
-    interface Visitor<T> {
+    public interface Visitor<T> {
         T visitFoo(String value);
 
         T visitBar(int value);
@@ -182,7 +214,7 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         }
     }
 
-    final class VisitorBuilder<T>
+    private static final class VisitorBuilder<T>
             implements BarStageVisitorBuilder<T>,
                     BazStageVisitorBuilder<T>,
                     FooStageVisitorBuilder<T>,
@@ -270,19 +302,19 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         }
     }
 
-    interface BarStageVisitorBuilder<T> {
+    public interface BarStageVisitorBuilder<T> {
         BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor);
     }
 
-    interface BazStageVisitorBuilder<T> {
+    public interface BazStageVisitorBuilder<T> {
         FooStageVisitorBuilder<T> baz(@Nonnull Function<SafeLong, T> bazVisitor);
     }
 
-    interface FooStageVisitorBuilder<T> {
+    public interface FooStageVisitorBuilder<T> {
         UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor);
     }
 
-    interface UnknownStageVisitorBuilder<T> {
+    public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
@@ -290,7 +322,7 @@ public sealed interface SimpleUnion permits SimpleUnion.Known, SimpleUnion.Unkno
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
 
-    interface Completed_StageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 }
