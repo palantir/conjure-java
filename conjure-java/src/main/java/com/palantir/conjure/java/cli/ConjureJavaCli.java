@@ -68,7 +68,7 @@ public final class ConjureJavaCli implements Runnable {
     public static final class GenerateCommand implements Runnable {
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
                 .registerModule(new Jdk8Module())
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
 
         @CommandLine.Parameters(paramLabel = "<input>", description = "Path to the input IR file", index = "0")
         private String input;
