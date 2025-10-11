@@ -21,6 +21,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -84,19 +85,33 @@ public abstract sealed class SimpleUnion
     public static final class Foo extends SimpleUnion implements Known {
         private final String value;
 
-        public String value() {
-            return value;
-        }
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
 
+        public String value() {
+            return value;
+        }
+
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitFoo(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Foo && equalTo((Foo) other));
+        }
+
+        private boolean equalTo(Foo other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -109,19 +124,33 @@ public abstract sealed class SimpleUnion
     public static final class Bar extends SimpleUnion implements Known {
         private final int value;
 
-        public int value() {
-            return value;
-        }
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private Bar(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
 
+        public int value() {
+            return value;
+        }
+
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitBar(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Bar && equalTo((Bar) other));
+        }
+
+        private boolean equalTo(Bar other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value;
         }
 
         @Override
@@ -134,19 +163,33 @@ public abstract sealed class SimpleUnion
     public static final class Baz extends SimpleUnion implements Known {
         private final SafeLong value;
 
-        public SafeLong value() {
-            return value;
-        }
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
 
+        public SafeLong value() {
+            return value;
+        }
+
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitBaz(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Baz && equalTo((Baz) other));
+        }
+
+        private boolean equalTo(Baz other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -157,30 +200,27 @@ public abstract sealed class SimpleUnion
 
     public static final class UnknownVariant extends SimpleUnion {
         private final String type;
+
         private final Map<String, Object> value;
-
-        public String type() {
-            return type;
-        }
-
-        public Map<String, Object> value() {
-            return value;
-        }
-
-        public UnknownVariant(String type, Map<String, Object> value) {
-            Preconditions.checkNotNull(type, "type cannot be null");
-            Preconditions.checkNotNull(value, "type cannot be null");
-            this.type = type;
-            this.value = value;
-        }
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownVariant(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }
 
+        private UnknownVariant(@Nonnull String type, @Nonnull Map<String, Object> value) {
+            Preconditions.checkNotNull(type, "type cannot be null");
+            Preconditions.checkNotNull(value, "value cannot be null");
+            this.type = type;
+            this.value = value;
+        }
+
+        public String type() {
+            return type;
+        }
+
         @JsonAnyGetter
-        private Map<String, Object> getValue() {
+        public Map<String, Object> value() {
             return value;
         }
 
@@ -195,8 +235,25 @@ public abstract sealed class SimpleUnion
         }
 
         @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof UnknownVariant && equalTo((UnknownVariant) other));
+        }
+
+        private boolean equalTo(UnknownVariant other) {
+            return this.type.equals(other.type) && this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = 31 * hash + this.type.hashCode();
+            hash = 31 * hash + this.value.hashCode();
+            return hash;
+        }
+
+        @Override
         public String toString() {
-            return "SimpleUnion.UnknownVariant{value: " + value + '}';
+            return "SimpleUnion.UnknownVariant{type: " + type + ", value: " + value + '}';
         }
     }
 

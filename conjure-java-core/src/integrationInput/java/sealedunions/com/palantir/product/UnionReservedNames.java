@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -45,64 +46,79 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = UnionReservedNames.Static.class, name = "static")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public sealed interface UnionReservedNames permits UnionReservedNames.Known, UnionReservedNames.UnknownVariant {
-    static UnionReservedNames known(String value) {
+public abstract sealed class UnionReservedNames
+        permits UnionReservedNames.Known_,
+                UnionReservedNames.Unknown_,
+                UnionReservedNames.If,
+                UnionReservedNames.New,
+                UnionReservedNames.Interface,
+                UnionReservedNames.Void,
+                UnionReservedNames.Return,
+                UnionReservedNames.Private,
+                UnionReservedNames.Public,
+                UnionReservedNames.Int,
+                UnionReservedNames.Import,
+                UnionReservedNames.Final,
+                UnionReservedNames.Throws,
+                UnionReservedNames.Static,
+                UnionReservedNames.UnknownVariant {
+    public static UnionReservedNames known(String value) {
         return new Known_(value);
     }
 
-    static UnionReservedNames unknown_(String value) {
+    public static UnionReservedNames unknown_(String value) {
         return new Unknown_(value);
     }
 
-    static UnionReservedNames if_(String value) {
+    public static UnionReservedNames if_(String value) {
         return new If(value);
     }
 
-    static UnionReservedNames new_(String value) {
+    public static UnionReservedNames new_(String value) {
         return new New(value);
     }
 
-    static UnionReservedNames interface_(String value) {
+    public static UnionReservedNames interface_(String value) {
         return new Interface(value);
     }
 
-    static UnionReservedNames void_(String value) {
+    public static UnionReservedNames void_(String value) {
         return new Void(value);
     }
 
-    static UnionReservedNames return_(String value) {
+    public static UnionReservedNames return_(String value) {
         return new Return(value);
     }
 
-    static UnionReservedNames private_(String value) {
+    public static UnionReservedNames private_(String value) {
         return new Private(value);
     }
 
-    static UnionReservedNames public_(String value) {
+    public static UnionReservedNames public_(String value) {
         return new Public(value);
     }
 
-    static UnionReservedNames int_(String value) {
+    public static UnionReservedNames int_(String value) {
         return new Int(value);
     }
 
-    static UnionReservedNames import_(String value) {
+    public static UnionReservedNames import_(String value) {
         return new Import(value);
     }
 
-    static UnionReservedNames final_(String value) {
+    public static UnionReservedNames final_(String value) {
         return new Final(value);
     }
 
-    static UnionReservedNames throws_(String value) {
+    public static UnionReservedNames throws_(String value) {
         return new Throws(value);
     }
 
-    static UnionReservedNames static_(String value) {
+    public static UnionReservedNames static_(String value) {
         return new Static(value);
     }
 
-    static UnionReservedNames unknown(@Safe String type, Object value) {
+    public static UnionReservedNames unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "known":
                 throw new SafeIllegalArgumentException(
@@ -151,7 +167,7 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         }
     }
 
-    default Known throwOnUnknown() {
+    public Known throwOnUnknown() {
         if (this instanceof UnknownVariant) {
             throw new SafeIllegalArgumentException(
                     "Unknown variant of the 'UnionReservedNames' union",
@@ -161,9 +177,9 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         }
     }
 
-    <T> T accept(Visitor<T> visitor);
+    public abstract <T> T accept(Visitor<T> visitor);
 
-    sealed interface Known extends UnionReservedNames
+    public sealed interface Known
             permits Known_,
                     Unknown_,
                     If,
@@ -180,16 +196,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
                     Static {}
 
     @JsonTypeName("known")
-    record Known_(String value) implements Known {
+    public static final class Known_ extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Known_(@JsonSetter("known") @Nonnull String value) {
+        private Known_(@JsonSetter("known") @Nonnull String value) {
             Preconditions.checkNotNull(value, "known cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitKnown(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Known_ && equalTo((Known_) other));
+        }
+
+        private boolean equalTo(Known_ other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -199,16 +235,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("unknown")
-    record Unknown_(String value) implements Known {
+    public static final class Unknown_ extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Unknown_(@JsonSetter("unknown") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "unknown cannot be null");
+        private Unknown_(@JsonSetter("unknown") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitUnknown_(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Unknown_ && equalTo((Unknown_) other));
+        }
+
+        private boolean equalTo(Unknown_ other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -218,16 +274,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("if")
-    record If(String value) implements Known {
+    public static final class If extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public If(@JsonSetter("if") @Nonnull String value) {
+        private If(@JsonSetter("if") @Nonnull String value) {
             Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitIf(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof If && equalTo((If) other));
+        }
+
+        private boolean equalTo(If other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -237,16 +313,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("new")
-    record New(String value) implements Known {
+    public static final class New extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public New(@JsonSetter("new") @Nonnull String value) {
+        private New(@JsonSetter("new") @Nonnull String value) {
             Preconditions.checkNotNull(value, "new cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitNew(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof New && equalTo((New) other));
+        }
+
+        private boolean equalTo(New other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -256,16 +352,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("interface")
-    record Interface(String value) implements Known {
+    public static final class Interface extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Interface(@JsonSetter("interface") @Nonnull String value) {
+        private Interface(@JsonSetter("interface") @Nonnull String value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitInterface(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Interface && equalTo((Interface) other));
+        }
+
+        private boolean equalTo(Interface other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -275,16 +391,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("void")
-    record Void(String value) implements Known {
+    public static final class Void extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Void(@JsonSetter("void") @Nonnull String value) {
+        private Void(@JsonSetter("void") @Nonnull String value) {
             Preconditions.checkNotNull(value, "void cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitVoid(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Void && equalTo((Void) other));
+        }
+
+        private boolean equalTo(Void other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -294,16 +430,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("return")
-    record Return(String value) implements Known {
+    public static final class Return extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Return(@JsonSetter("return") @Nonnull String value) {
+        private Return(@JsonSetter("return") @Nonnull String value) {
             Preconditions.checkNotNull(value, "return cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitReturn(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Return && equalTo((Return) other));
+        }
+
+        private boolean equalTo(Return other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -313,16 +469,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("private")
-    record Private(String value) implements Known {
+    public static final class Private extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Private(@JsonSetter("private") @Nonnull String value) {
+        private Private(@JsonSetter("private") @Nonnull String value) {
             Preconditions.checkNotNull(value, "private cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitPrivate(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Private && equalTo((Private) other));
+        }
+
+        private boolean equalTo(Private other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -332,16 +508,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("public")
-    record Public(String value) implements Known {
+    public static final class Public extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Public(@JsonSetter("public") @Nonnull String value) {
+        private Public(@JsonSetter("public") @Nonnull String value) {
             Preconditions.checkNotNull(value, "public cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitPublic(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Public && equalTo((Public) other));
+        }
+
+        private boolean equalTo(Public other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -351,16 +547,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("int")
-    record Int(String value) implements Known {
+    public static final class Int extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Int(@JsonSetter("int") @Nonnull String value) {
+        private Int(@JsonSetter("int") @Nonnull String value) {
             Preconditions.checkNotNull(value, "int cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitInt(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Int && equalTo((Int) other));
+        }
+
+        private boolean equalTo(Int other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -370,16 +586,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("import")
-    record Import(String value) implements Known {
+    public static final class Import extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Import(@JsonSetter("import") @Nonnull String value) {
+        private Import(@JsonSetter("import") @Nonnull String value) {
             Preconditions.checkNotNull(value, "import cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitImport(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Import && equalTo((Import) other));
+        }
+
+        private boolean equalTo(Import other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -389,16 +625,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("final")
-    record Final(String value) implements Known {
+    public static final class Final extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Final(@JsonSetter("final") @Nonnull String value) {
+        private Final(@JsonSetter("final") @Nonnull String value) {
             Preconditions.checkNotNull(value, "final cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitFinal(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Final && equalTo((Final) other));
+        }
+
+        private boolean equalTo(Final other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -408,16 +664,36 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("throws")
-    record Throws(String value) implements Known {
+    public static final class Throws extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Throws(@JsonSetter("throws") @Nonnull String value) {
+        private Throws(@JsonSetter("throws") @Nonnull String value) {
             Preconditions.checkNotNull(value, "throws cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitThrows(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Throws && equalTo((Throws) other));
+        }
+
+        private boolean equalTo(Throws other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
         }
 
         @Override
@@ -427,11 +703,17 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
     }
 
     @JsonTypeName("static")
-    record Static(String value) implements Known {
+    public static final class Static extends UnionReservedNames implements Known {
+        private final String value;
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Static(@JsonSetter("static") @Nonnull String value) {
+        private Static(@JsonSetter("static") @Nonnull String value) {
             Preconditions.checkNotNull(value, "static cannot be null");
             this.value = value;
+        }
+
+        public String value() {
+            return value;
         }
 
         @Override
@@ -440,24 +722,48 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         }
 
         @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Static && equalTo((Static) other));
+        }
+
+        private boolean equalTo(Static other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
+        }
+
+        @Override
         public String toString() {
             return "UnionReservedNames.Static{value: " + value + '}';
         }
     }
 
-    record UnknownVariant(String type, Map<String, Object> value) implements UnionReservedNames {
-        public UnknownVariant {
-            Preconditions.checkNotNull(type, "type cannot be null");
-            Preconditions.checkNotNull(value, "type cannot be null");
-        }
+    public static final class UnknownVariant extends UnionReservedNames {
+        private final String type;
+
+        private final Map<String, Object> value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownVariant(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }
 
+        private UnknownVariant(@Nonnull String type, @Nonnull Map<String, Object> value) {
+            Preconditions.checkNotNull(type, "type cannot be null");
+            Preconditions.checkNotNull(value, "value cannot be null");
+            this.type = type;
+            this.value = value;
+        }
+
+        public String type() {
+            return type;
+        }
+
         @JsonAnyGetter
-        private Map<String, Object> getValue() {
+        public Map<String, Object> value() {
             return value;
         }
 
@@ -472,12 +778,29 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         }
 
         @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof UnknownVariant && equalTo((UnknownVariant) other));
+        }
+
+        private boolean equalTo(UnknownVariant other) {
+            return this.type.equals(other.type) && this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = 31 * hash + this.type.hashCode();
+            hash = 31 * hash + this.value.hashCode();
+            return hash;
+        }
+
+        @Override
         public String toString() {
-            return "UnionReservedNames.UnknownVariant{value: " + value + '}';
+            return "UnionReservedNames.UnknownVariant{type: " + type + ", value: " + value + '}';
         }
     }
 
-    interface Visitor<T> {
+    public interface Visitor<T> {
         T visitKnown(String value);
 
         T visitUnknown_(String value);
@@ -513,7 +836,7 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         }
     }
 
-    final class VisitorBuilder<T>
+    private static final class VisitorBuilder<T>
             implements FinalStageVisitorBuilder<T>,
                     IfStageVisitorBuilder<T>,
                     ImportStageVisitorBuilder<T>,
@@ -777,63 +1100,63 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         }
     }
 
-    interface FinalStageVisitorBuilder<T> {
+    public interface FinalStageVisitorBuilder<T> {
         IfStageVisitorBuilder<T> final_(@Nonnull Function<String, T> finalVisitor);
     }
 
-    interface IfStageVisitorBuilder<T> {
+    public interface IfStageVisitorBuilder<T> {
         ImportStageVisitorBuilder<T> if_(@Nonnull Function<String, T> ifVisitor);
     }
 
-    interface ImportStageVisitorBuilder<T> {
+    public interface ImportStageVisitorBuilder<T> {
         IntStageVisitorBuilder<T> import_(@Nonnull Function<String, T> importVisitor);
     }
 
-    interface IntStageVisitorBuilder<T> {
+    public interface IntStageVisitorBuilder<T> {
         InterfaceStageVisitorBuilder<T> int_(@Nonnull Function<String, T> intVisitor);
     }
 
-    interface InterfaceStageVisitorBuilder<T> {
+    public interface InterfaceStageVisitorBuilder<T> {
         KnownStageVisitorBuilder<T> interface_(@Nonnull Function<String, T> interfaceVisitor);
     }
 
-    interface KnownStageVisitorBuilder<T> {
+    public interface KnownStageVisitorBuilder<T> {
         NewStageVisitorBuilder<T> known(@Nonnull Function<String, T> knownVisitor);
     }
 
-    interface NewStageVisitorBuilder<T> {
+    public interface NewStageVisitorBuilder<T> {
         PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor);
     }
 
-    interface PrivateStageVisitorBuilder<T> {
+    public interface PrivateStageVisitorBuilder<T> {
         PublicStageVisitorBuilder<T> private_(@Nonnull Function<String, T> privateVisitor);
     }
 
-    interface PublicStageVisitorBuilder<T> {
+    public interface PublicStageVisitorBuilder<T> {
         ReturnStageVisitorBuilder<T> public_(@Nonnull Function<String, T> publicVisitor);
     }
 
-    interface ReturnStageVisitorBuilder<T> {
+    public interface ReturnStageVisitorBuilder<T> {
         StaticStageVisitorBuilder<T> return_(@Nonnull Function<String, T> returnVisitor);
     }
 
-    interface StaticStageVisitorBuilder<T> {
+    public interface StaticStageVisitorBuilder<T> {
         ThrowsStageVisitorBuilder<T> static_(@Nonnull Function<String, T> staticVisitor);
     }
 
-    interface ThrowsStageVisitorBuilder<T> {
+    public interface ThrowsStageVisitorBuilder<T> {
         Unknown_StageVisitorBuilder<T> throws_(@Nonnull Function<String, T> throwsVisitor);
     }
 
-    interface Unknown_StageVisitorBuilder<T> {
+    public interface Unknown_StageVisitorBuilder<T> {
         VoidStageVisitorBuilder<T> unknown_(@Nonnull Function<String, T> unknown_Visitor);
     }
 
-    interface VoidStageVisitorBuilder<T> {
+    public interface VoidStageVisitorBuilder<T> {
         UnknownStageVisitorBuilder<T> void_(@Nonnull Function<String, T> voidVisitor);
     }
 
-    interface UnknownStageVisitorBuilder<T> {
+    public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
@@ -841,7 +1164,7 @@ public sealed interface UnionReservedNames permits UnionReservedNames.Known, Uni
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
 
-    interface Completed_StageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 }

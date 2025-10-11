@@ -249,7 +249,7 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--sealedUnions",
                 defaultValue = "false",
-                description = "Uses sealed interfaces for union type generation.")
+                description = "Uses sealed classes for union type generation.")
         private boolean sealedUnions;
 
         @SuppressWarnings("unused")

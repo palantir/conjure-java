@@ -211,12 +211,10 @@ public interface Options {
     }
 
     /**
-     * Uses sealed interfaces for union type generation.
+     * Uses sealed classes for union type generation.
      * <p>
-     * Warning: Enabling this will cause union types to be generated as interfaces instead of classes, which is an ABI
-     * break, but this change is source compatible. Disabling this flag after publishing union objects, on the other
-     * hand, is both an ABI break and is not source compatible (since additional methods for sealed unions would be
-     * removed).
+     * Warning: Disabling this flag after publishing union objects with this flag enabled, is an ABI break (additional
+     * methods which are generated for sealed unions would be removed).
      */
     @Value.Default
     default boolean sealedUnions() {
