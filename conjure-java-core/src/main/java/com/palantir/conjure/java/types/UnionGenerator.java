@@ -78,7 +78,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 public final class UnionGenerator {
 
@@ -861,6 +860,7 @@ public final class UnionGenerator {
         return baseBuilder.build();
     }
 
+    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private static List<TypeSpec> generateWrapperClasses(
             TypeMapper typeMapper,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
@@ -905,17 +905,7 @@ public final class UnionGenerator {
                                                     VALUE_FIELD_NAME,
                                                     String.format("%s cannot be null", memberName.get())))
                                     .addStatement(createConstructor(memberTypeDef.getType(), options))
-                                    .build());
-
-                    if (options.sealedUnions()) {
-                        typeBuilder
-                                .superclass(baseClass)
-                                .addSuperinterface(baseClass.nestedClass(SEALED_KNOWN_INTERFACE));
-                    } else {
-                        typeBuilder.addSuperinterface(baseClass);
-                    }
-
-                    typeBuilder
+                                    .build())
                             .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "type" : "getType")
                                     .addModifiers(Modifier.PRIVATE)
                                     .addAnnotation(getTypeJsonPropertyAnnotation(options))
@@ -943,6 +933,14 @@ public final class UnionGenerator {
                                 options));
                     }
 
+                    if (options.sealedUnions()) {
+                        typeBuilder
+                                .superclass(baseClass)
+                                .addSuperinterface(baseClass.nestedClass(SEALED_KNOWN_INTERFACE));
+                    } else {
+                        typeBuilder.addSuperinterface(baseClass);
+                    }
+
                     typeBuilder
                             .addMethod(MethodSpecs.createEquals(wrapperClass))
                             .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
@@ -960,7 +958,7 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    private static @NotNull AnnotationSpec getTypeJsonPropertyAnnotation(Options options) {
+    private static AnnotationSpec getTypeJsonPropertyAnnotation(Options options) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonProperty.class);
         if (!options.sealedUnions()) {
             builder.addMember("value", "$S", "type");
@@ -1001,6 +999,7 @@ public final class UnionGenerator {
         return builder.build();
     }
 
+    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass, Options options) {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
@@ -1044,15 +1043,7 @@ public final class UnionGenerator {
                                         VALUE_FIELD_NAME, String.format("%s cannot be null", VALUE_FIELD_NAME)))
                         .addStatement("this.$1N = $1N", typeParameter)
                         .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
-                        .build());
-
-        if (options.sealedUnions()) {
-            typeBuilder.superclass(baseClass);
-        } else {
-            typeBuilder.addSuperinterface(baseClass);
-        }
-
-        typeBuilder
+                        .build())
                 .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "type" : "getType")
                         .addModifiers(options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE)
                         .addAnnotation(
@@ -1075,10 +1066,18 @@ public final class UnionGenerator {
                                 AnnotationSpec.builder(JsonAnySetter.class).build())
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build());
+
         if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
             typeBuilder.addMethod(createWrapperAcceptMethod(
                     visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name(), false, options));
         }
+
+        if (options.sealedUnions()) {
+            typeBuilder.superclass(baseClass);
+        } else {
+            typeBuilder.addSuperinterface(baseClass);
+        }
+
         typeBuilder
                 .addMethod(MethodSpecs.createEquals(wrapperClass))
                 .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))

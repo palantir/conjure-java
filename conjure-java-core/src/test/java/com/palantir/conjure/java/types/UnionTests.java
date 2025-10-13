@@ -218,12 +218,12 @@ class UnionTests {
     void sealedUnionCanBeConsumedWithSwitchStatement() {
         String expected = "foo";
 
-        String s =
+        String actual =
                 switch (SimpleUnion.foo(expected).throwOnUnknown()) {
                     case Foo foo -> foo.value();
                     default -> throw new SafeIllegalStateException();
                 };
-        assertThat(s).isEqualTo(expected);
+        assertThat(actual).isEqualTo(expected);
 
         Optional<String> optionalString =
                 switch (SimpleUnion.foo(expected)) {
