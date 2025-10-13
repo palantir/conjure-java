@@ -78,6 +78,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 public final class UnionGenerator {
 
@@ -909,47 +910,29 @@ public final class UnionGenerator {
                     if (options.sealedUnions()) {
                         typeBuilder
                                 .superclass(baseClass)
-                                .addSuperinterface(baseClass.nestedClass(SEALED_KNOWN_INTERFACE))
-                                .addMethod(MethodSpec.methodBuilder("value")
-                                        .addModifiers(Modifier.PUBLIC)
-                                        //
-                                        // .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                        //                                                .addMember(
-                                        //                                                        "value",
-                                        //                                                        "$S",
-                                        //
-                                        // memberTypeDef.getFieldName().get())
-                                        //                                                .build())
-                                        .addStatement("return $L", VALUE_FIELD_NAME)
-                                        .returns(memberType)
-                                        .build());
-
+                                .addSuperinterface(baseClass.nestedClass(SEALED_KNOWN_INTERFACE));
                     } else {
-                        typeBuilder
-                                .addSuperinterface(baseClass)
-                                .addMethod(MethodSpec.methodBuilder("getType")
-                                        .addModifiers(Modifier.PRIVATE)
-                                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                                .addMember("value", "$S", "type")
-                                                .addMember("index", "$L", 0)
-                                                .build())
-                                        .addStatement("return $S", memberTypeDef.getFieldName())
-                                        .returns(String.class)
-                                        .build())
-                                .addMethod(MethodSpec.methodBuilder("getValue")
-                                        .addModifiers(Modifier.PRIVATE)
-                                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                                .addMember(
-                                                        "value",
-                                                        "$S",
-                                                        memberTypeDef
-                                                                .getFieldName()
-                                                                .get())
-                                                .build())
-                                        .addStatement("return $L", VALUE_FIELD_NAME)
-                                        .returns(memberType)
-                                        .build());
+                        typeBuilder.addSuperinterface(baseClass);
                     }
+
+                    typeBuilder
+                            .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "type" : "getType")
+                                    .addModifiers(Modifier.PRIVATE)
+                                    .addAnnotation(getTypeJsonPropertyAnnotation(options))
+                                    .addStatement("return $S", memberTypeDef.getFieldName())
+                                    .returns(String.class)
+                                    .build())
+                            .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "value" : "getValue")
+                                    .addModifiers(options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE)
+                                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                            .addMember(
+                                                    "value",
+                                                    "$S",
+                                                    memberTypeDef.getFieldName().get())
+                                            .build())
+                                    .addStatement("return $L", VALUE_FIELD_NAME)
+                                    .returns(memberType)
+                                    .build());
 
                     if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
                         typeBuilder.addMethod(createWrapperAcceptMethod(
@@ -975,6 +958,14 @@ public final class UnionGenerator {
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static @NotNull AnnotationSpec getTypeJsonPropertyAnnotation(Options options) {
+        AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonProperty.class);
+        if (!options.sealedUnions()) {
+            builder.addMember("value", "$S", "type");
+        }
+        return builder.addMember("index", "$L", 0).build();
     }
 
     private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field) {
@@ -1056,45 +1047,34 @@ public final class UnionGenerator {
                         .build());
 
         if (options.sealedUnions()) {
-            typeBuilder
-                    .superclass(baseClass)
-                    .addMethod(MethodSpec.methodBuilder("type")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addStatement("return type")
-                            .returns(UNKNOWN_MEMBER_TYPE)
-                            .build())
-                    .addMethod(MethodSpec.methodBuilder("value")
-                            .addModifiers(Modifier.PUBLIC)
-                            .addAnnotation(
-                                    AnnotationSpec.builder(JsonAnyGetter.class).build())
-                            .addStatement("return $L", VALUE_FIELD_NAME)
-                            .returns(genericMapType)
-                            .build());
+            typeBuilder.superclass(baseClass);
         } else {
-            typeBuilder
-                    .addSuperinterface(baseClass)
-                    .addMethod(MethodSpec.methodBuilder("getType")
-                            .addModifiers(Modifier.PRIVATE)
-                            .addAnnotation(
-                                    AnnotationSpec.builder(JsonProperty.class).build())
-                            .addStatement("return type")
-                            .returns(UNKNOWN_MEMBER_TYPE)
-                            .build())
-                    .addMethod(MethodSpec.methodBuilder("getValue")
-                            .addModifiers(Modifier.PRIVATE)
-                            .addAnnotation(
-                                    AnnotationSpec.builder(JsonAnyGetter.class).build())
-                            .addStatement("return $L", VALUE_FIELD_NAME)
-                            .returns(genericMapType)
-                            .build());
+            typeBuilder.addSuperinterface(baseClass);
         }
-        typeBuilder.addMethod(MethodSpec.methodBuilder("put")
-                .addModifiers(Modifier.PRIVATE)
-                .addParameter(String.class, "key")
-                .addParameter(Object.class, "val")
-                .addAnnotation(AnnotationSpec.builder(JsonAnySetter.class).build())
-                .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
-                .build());
+
+        typeBuilder
+                .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "type" : "getType")
+                        .addModifiers(options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE)
+                        .addAnnotation(
+                                AnnotationSpec.builder(JsonProperty.class).build())
+                        .addStatement("return type")
+                        .returns(UNKNOWN_MEMBER_TYPE)
+                        .build())
+                .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "value" : "getValue")
+                        .addModifiers(options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE)
+                        .addAnnotation(
+                                AnnotationSpec.builder(JsonAnyGetter.class).build())
+                        .addStatement("return $L", VALUE_FIELD_NAME)
+                        .returns(genericMapType)
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("put")
+                        .addModifiers(Modifier.PRIVATE)
+                        .addParameter(String.class, "key")
+                        .addParameter(Object.class, "val")
+                        .addAnnotation(
+                                AnnotationSpec.builder(JsonAnySetter.class).build())
+                        .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
+                        .build());
         if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
             typeBuilder.addMethod(createWrapperAcceptMethod(
                     visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name(), false, options));

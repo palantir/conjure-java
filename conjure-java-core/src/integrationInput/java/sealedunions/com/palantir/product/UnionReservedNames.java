@@ -205,6 +205,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "known";
+        }
+
+        @JsonProperty("known")
         public String value() {
             return value;
         }
@@ -244,6 +250,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "unknown";
+        }
+
+        @JsonProperty("unknown")
         public String value() {
             return value;
         }
@@ -283,6 +295,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "if";
+        }
+
+        @JsonProperty("if")
         public String value() {
             return value;
         }
@@ -322,6 +340,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "new";
+        }
+
+        @JsonProperty("new")
         public String value() {
             return value;
         }
@@ -361,6 +385,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "interface";
+        }
+
+        @JsonProperty("interface")
         public String value() {
             return value;
         }
@@ -400,6 +430,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "void";
+        }
+
+        @JsonProperty("void")
         public String value() {
             return value;
         }
@@ -439,6 +475,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "return";
+        }
+
+        @JsonProperty("return")
         public String value() {
             return value;
         }
@@ -478,6 +520,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "private";
+        }
+
+        @JsonProperty("private")
         public String value() {
             return value;
         }
@@ -517,6 +565,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "public";
+        }
+
+        @JsonProperty("public")
         public String value() {
             return value;
         }
@@ -556,6 +610,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "int";
+        }
+
+        @JsonProperty("int")
         public String value() {
             return value;
         }
@@ -595,6 +655,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "import";
+        }
+
+        @JsonProperty("import")
         public String value() {
             return value;
         }
@@ -634,6 +700,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "final";
+        }
+
+        @JsonProperty("final")
         public String value() {
             return value;
         }
@@ -673,6 +745,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "throws";
+        }
+
+        @JsonProperty("throws")
         public String value() {
             return value;
         }
@@ -712,6 +790,12 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "static";
+        }
+
+        @JsonProperty("static")
         public String value() {
             return value;
         }
@@ -758,6 +842,7 @@ public abstract sealed class UnionReservedNames
             this.value = value;
         }
 
+        @JsonProperty
         public String type() {
             return type;
         }

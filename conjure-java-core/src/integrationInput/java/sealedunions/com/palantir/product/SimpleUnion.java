@@ -91,6 +91,12 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "foo";
+        }
+
+        @JsonProperty("foo")
         public String value() {
             return value;
         }
@@ -130,6 +136,12 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "bar";
+        }
+
+        @JsonProperty("bar")
         public int value() {
             return value;
         }
@@ -169,6 +181,12 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
+        @JsonProperty(index = 0)
+        private String type() {
+            return "baz";
+        }
+
+        @JsonProperty("baz")
         public SafeLong value() {
             return value;
         }
@@ -215,6 +233,7 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
+        @JsonProperty
         public String type() {
             return type;
         }
