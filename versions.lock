@@ -2,25 +2,25 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.19.2 (24 constraints: 42a0d4b6)
+com.fasterxml.jackson.core:jackson-annotations:2.20 (24 constraints: d29d585d)
 
-com.fasterxml.jackson.core:jackson-core:2.19.2 (23 constraints: 54d98607)
+com.fasterxml.jackson.core:jackson-core:2.20.0 (23 constraints: d2d8df2d)
 
-com.fasterxml.jackson.core:jackson-databind:2.19.2 (34 constraints: 97925738)
+com.fasterxml.jackson.core:jackson-databind:2.20.0 (34 constraints: 1f929e80)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.19.2 (4 constraints: 906c0bca)
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.20.0 (4 constraints: 866c28c1)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.19.2 (1 constraints: 841cada4)
+com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.20.0 (1 constraints: 841cada4)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.19.2 (3 constraints: 4b25f212)
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.0 (3 constraints: 41254b0f)
 
-com.fasterxml.jackson.datatype:jackson-datatype-guava:2.19.2 (2 constraints: 3b2be6b0)
+com.fasterxml.jackson.datatype:jackson-datatype-guava:2.20.0 (2 constraints: 3b2be6b0)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.19.2 (4 constraints: 3f3fd896)
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.20.0 (4 constraints: 353f6190)
 
-com.fasterxml.jackson.datatype:jackson-datatype-joda:2.19.2 (1 constraints: 841cada4)
+com.fasterxml.jackson.datatype:jackson-datatype-joda:2.20.0 (1 constraints: 841cada4)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.2 (2 constraints: 3b2be6b0)
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0 (2 constraints: 3b2be6b0)
 
 com.github.ben-manes.caffeine:caffeine:3.2.2 (10 constraints: 5caf40db)
 
@@ -212,17 +212,17 @@ ch.qos.logback.access:logback-access-jetty11:2.0.6 (1 constraints: b6114ae2)
 
 com.fasterxml:classmate:1.7.0 (3 constraints: 8730835b)
 
-com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.19.2 (2 constraints: 0736426f)
+com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.20.0 (2 constraints: f335226c)
 
-com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.19.2 (1 constraints: 511c8aa1)
+com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.20.0 (1 constraints: 511c8aa1)
 
-com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.19.2 (3 constraints: 6c221ff9)
+com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.20.0 (3 constraints: 6222c8f5)
 
-com.fasterxml.jackson.module:jackson-module-blackbird:2.19.2 (1 constraints: b80e705e)
+com.fasterxml.jackson.module:jackson-module-blackbird:2.20.0 (1 constraints: b80e705e)
 
-com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.19.2 (2 constraints: 0736426f)
+com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.20.0 (2 constraints: f335226c)
 
-com.fasterxml.jackson.module:jackson-module-parameter-names:2.19.2 (1 constraints: b80e705e)
+com.fasterxml.jackson.module:jackson-module-parameter-names:2.20.0 (1 constraints: b80e705e)
 
 com.google.auto.value:auto-value-annotations:1.11.0 (2 constraints: d01cd319)
 
