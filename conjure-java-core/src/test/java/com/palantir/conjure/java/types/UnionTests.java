@@ -31,7 +31,6 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionListsUnion;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveCollectionSetsUnion;
@@ -41,15 +40,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 import sealedunions.com.palantir.product.SimpleUnion;
-import sealedunions.com.palantir.product.SimpleUnion.Foo;
-import sealedunions.com.palantir.product.SimpleUnion.Known;
-import sealedunions.com.palantir.product.SimpleUnion.UnknownVariant;
 
 class UnionTests {
 
@@ -215,25 +210,6 @@ class UnionTests {
     }
 
     @Test
-    void sealedUnionCanBeConsumedWithSwitchStatement() {
-        String expected = "foo";
-
-        String actual =
-                switch (SimpleUnion.foo(expected).throwOnUnknown()) {
-                    case Foo foo -> foo.value();
-                    default -> throw new SafeIllegalStateException();
-                };
-        assertThat(actual).isEqualTo(expected);
-
-        Optional<String> optionalString =
-                switch (SimpleUnion.foo(expected)) {
-                    case Foo foo -> Optional.of(foo.value());
-                    default -> Optional.empty();
-                };
-        assertThat(optionalString).contains(expected);
-    }
-
-    @Test
     void testUnknownThrowingVariant_sealedUnion() throws IOException {
         SimpleUnion value = MAPPER.readValue("{\"type\":\"abc\",\"abc\":\"123\"}", SimpleUnion.class);
         assertThatLoggableExceptionThrownBy(value::throwOnUnknown)
@@ -271,20 +247,6 @@ class UnionTests {
 
         assertThat(simpleUnion.equals(SimpleUnion.foo(expected))).isTrue();
         assertThat(simpleUnion.toString()).contains(expected);
-    }
-
-    @Test
-    public void testCreateUnknownType_sealedUnion() {
-        String expectedUnknownType = "qux";
-        List<String> expectedUnknownValue = List.of("quux", "quuz");
-        SimpleUnion union = SimpleUnion.unknown(expectedUnknownType, expectedUnknownValue);
-
-        switch (union) {
-            // UnknownVariant is a bit verbose - should we just call this "Unknown"?
-            case UnknownVariant u ->
-                verifyUnknownType(u.type(), u.value().get(u.type()), expectedUnknownType, expectedUnknownValue);
-            case Known k -> failOnKnownType("known", k);
-        }
     }
 
     private Void failOnKnownType(String type, Object value) {

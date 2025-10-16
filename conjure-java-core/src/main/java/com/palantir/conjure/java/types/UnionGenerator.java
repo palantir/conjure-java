@@ -366,7 +366,7 @@ public final class UnionGenerator {
                 options.sealedUnions()
                         ? CodeBlock.of(
                                 "return new $T($N, $L)",
-                                sealedVariantClass(unionClass, FieldName.of(SEALED_UNKNOWN_VARIANT_NAME)),
+                                unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME),
                                 typeParam,
                                 singletonMap)
                         : CodeBlock.of(
@@ -1141,7 +1141,8 @@ public final class UnionGenerator {
                 unionClass.packageName(),
                 unionClass.simpleName(),
                 // Sanitize "Known" and "Unknown". Not sanitizing Java reserved names, since these are valid for classes
-                StringUtils.capitalize(sanitizeReserved(memberTypeName)));
+                // Also need to guard against union class name
+                StringUtils.capitalize(sanitizeReserved(unionClass.simpleName(), memberTypeName)));
     }
 
     private static String visitMethodName(String fieldName) {
@@ -1164,8 +1165,12 @@ public final class UnionGenerator {
         return "unknown".equalsIgnoreCase(input.get()) ? FieldName.of(input.get() + '_') : input;
     }
 
-    private static String sanitizeReserved(String input) {
-        return "unknown".equalsIgnoreCase(input) || "known".equalsIgnoreCase(input) ? input + '_' : input;
+    private static String sanitizeReserved(String unionClass, String input) {
+        return unionClass.equalsIgnoreCase(input)
+                        || "unknown".equalsIgnoreCase(input)
+                        || "known".equalsIgnoreCase(input)
+                ? input + '_'
+                : input;
     }
 
     private static String getQualifiedClassName(ClassName baseClass, ClassName subTypeClassName) {

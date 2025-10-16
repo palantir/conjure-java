@@ -30,7 +30,7 @@ import javax.annotation.processing.Generated;
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
-        defaultImpl = SimpleUnion.UnknownVariant.class)
+        defaultImpl = SimpleUnion.Unknown.class)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = SimpleUnion.Foo.class, name = "foo"),
     @JsonSubTypes.Type(value = SimpleUnion.Bar.class, name = "bar"),
@@ -38,7 +38,7 @@ import javax.annotation.processing.Generated;
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class SimpleUnion
-        permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.UnknownVariant {
+        permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
     public static SimpleUnion foo(String value) {
         return new Foo(value);
     }
@@ -63,15 +63,14 @@ public abstract sealed class SimpleUnion
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: baz");
             default:
-                return new UnknownVariant(type, Collections.singletonMap(type, value));
+                return new Unknown(type, Collections.singletonMap(type, value));
         }
     }
 
     public Known throwOnUnknown() {
-        if (this instanceof UnknownVariant) {
+        if (this instanceof Unknown) {
             throw new SafeIllegalArgumentException(
-                    "Unknown variant of the 'SimpleUnion' union",
-                    SafeArg.of("unknownType", ((UnknownVariant) this).type()));
+                    "Unknown variant of the 'SimpleUnion' union", SafeArg.of("unknownType", ((Unknown) this).type()));
         } else {
             return (Known) this;
         }
@@ -216,17 +215,17 @@ public abstract sealed class SimpleUnion
         }
     }
 
-    public static final class UnknownVariant extends SimpleUnion {
+    public static final class Unknown extends SimpleUnion {
         private final String type;
 
         private final Map<String, Object> value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private UnknownVariant(@JsonProperty("type") String type) {
+        private Unknown(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }
 
-        private UnknownVariant(@Nonnull String type, @Nonnull Map<String, Object> value) {
+        private Unknown(@Nonnull String type, @Nonnull Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;
@@ -255,10 +254,10 @@ public abstract sealed class SimpleUnion
 
         @Override
         public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof UnknownVariant && equalTo((UnknownVariant) other));
+            return this == other || (other instanceof Unknown && equalTo((Unknown) other));
         }
 
-        private boolean equalTo(UnknownVariant other) {
+        private boolean equalTo(Unknown other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 
@@ -272,7 +271,7 @@ public abstract sealed class SimpleUnion
 
         @Override
         public String toString() {
-            return "SimpleUnion.UnknownVariant{type: " + type + ", value: " + value + '}';
+            return "SimpleUnion.Unknown{type: " + type + ", value: " + value + '}';
         }
     }
 
