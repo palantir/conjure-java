@@ -95,7 +95,7 @@ public final class UnionGenerator {
     private static final TypeName UNKNOWN_VALUE_TYPE = ClassName.get(Object.class);
 
     private static final String SEALED_KNOWN_INTERFACE = "Known";
-    private static final String SEALED_UNKNOWN_VARIANT_NAME = "UnknownVariant";
+    private static final String SEALED_UNKNOWN_VARIANT_NAME = "Unknown";
 
     public static JavaFile generateUnionType(
             TypeMapper typeMapper,

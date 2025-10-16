@@ -94,9 +94,6 @@ subprojects {
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-Werror']
         options.errorprone.disable 'PreferSafeLoggableExceptions', 'PreferSafeLoggingPreconditions', 'UnnecessaryLambda'
-
-        // TODO(kkak): For quick iteration, remove and fix before merging
-        options.errorprone.disable'PatternMatchingInstanceof'
     }
 
     // Run `./gradlew test -Drecreate=true` to recreate all the expected

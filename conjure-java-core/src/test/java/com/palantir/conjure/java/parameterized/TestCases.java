@@ -340,7 +340,7 @@ public final class TestCases {
                     .build())
             .add(ParameterizedTestCase.builder()
                     .name("sealed-unions")
-                    .docs("Testing generating union types as sealed interfaces")
+                    .docs("Testing generating union types as sealed classes")
                     .files(Path.of("src/test/resources/example-unions.yml"))
                     .options(Options.builder()
                             .useImmutableBytes(true)

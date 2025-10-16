@@ -252,6 +252,13 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Uses sealed classes for union type generation.")
         private boolean sealedUnions;
 
+        @CommandLine.Option(
+                names = "--sealedUnionVisitors",
+                defaultValue = "true",
+                description =
+                        "If --sealedUnions is enabled, this flag enables visitor generation for back-compatibility.")
+        private boolean sealedUnionVisitors;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -326,6 +333,7 @@ public final class ConjureJavaCli implements Runnable {
                             .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
                             .defensiveCollections(defensiveCollections)
                             .sealedUnions(sealedUnions)
+                            .sealedUnionVisitors(sealedUnionVisitors)
                             .build())
                     .build();
         }
