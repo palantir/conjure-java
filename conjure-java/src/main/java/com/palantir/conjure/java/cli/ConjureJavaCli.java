@@ -29,11 +29,11 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
-import com.palantir.conjure.java.types.CheckedErrorGenerator;
+import com.palantir.conjure.java.types.EndpointErrorGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -50,6 +50,7 @@ import picocli.CommandLine;
         subcommands = ConjureJavaCli.GenerateCommand.class)
 public final class ConjureJavaCli implements Runnable {
 
+    @SuppressWarnings("for-rollout:deprecation")
     public static void main(String[] args) {
         CommandLine.run(new ConjureJavaCli(), args);
     }
@@ -67,7 +68,7 @@ public final class ConjureJavaCli implements Runnable {
     public static final class GenerateCommand implements Runnable {
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
                 .registerModule(new Jdk8Module())
-                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
 
         @CommandLine.Parameters(paramLabel = "<input>", description = "Path to the input IR file", index = "0")
         private String input;
@@ -233,18 +234,28 @@ public final class ConjureJavaCli implements Runnable {
         private boolean preferObjectBuilders;
 
         @CommandLine.Option(
-                names = "--generateDialogueEndpointErrorResultTypes",
-                defaultValue = "false",
-                description =
-                        "Generate result types in Dialogue clients for endpoints with errors associated with them.")
-        private boolean generateDialogueEndpointErrorResultTypes;
-
-        @CommandLine.Option(
                 names = "--defensiveCollections",
                 defaultValue = "false",
                 description = "Makes immutable copies of collections for union and alias types, respecting the "
                         + "--nonNullCollections flag.")
         private boolean defensiveCollections;
+
+        @CommandLine.Option(
+                names = "--dangerousDoNotUseEnableEndpointAssociatedErrors",
+                defaultValue = "false",
+                description = "Generate endpoint associated errors as EndpointServiceExceptions. "
+                        + "This feature is currently not supported.")
+        private boolean dangerousDoNotUseEnableEndpointAssociatedErrors;
+
+        @CommandLine.Option(
+                names = "--generateErrorParameterFormatRespectingDialogueInterfaces",
+                defaultValue = "false",
+                description =
+                        "Enabling this flag will lead to the generation of Dialogue client interfaces that are able to"
+                            + " send a header to servers specifying the Conjure error parameter serialization format"
+                            + " they expect, and create custom exceptions for each error defined in the service's"
+                            + " package.")
+        private boolean generateErrorParameterFormatRespectingDialogueInterfaces;
 
         @CommandLine.Option(
                 names = "--sealedUnions",
@@ -286,7 +297,7 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateUndertow()) {
                     generatorBuilder.add(
                             new UndertowServiceGenerator(config.options()),
-                            new CheckedErrorGenerator(config.options()));
+                            new EndpointErrorGenerator(config.options()));
                 }
                 if (config.generateDialogue()) {
                     generatorBuilder.add(new DialogueServiceGenerator(config.options()));
@@ -294,7 +305,7 @@ public final class ConjureJavaCli implements Runnable {
                 new GenerationCoordinator(executor, generatorBuilder.build(), config.options())
                         .emit(conjureDefinition, config.outputDirectory());
             } catch (IOException e) {
-                throw new SafeRuntimeException("Error parsing definition", e);
+                throw new SafeUncheckedIoException("Error parsing definition", e);
             } finally {
                 executor.shutdown();
             }
@@ -330,8 +341,11 @@ public final class ConjureJavaCli implements Runnable {
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
                             .preferObjectBuilders(preferObjectBuilders)
-                            .generateDialogueEndpointErrorResultTypes(generateDialogueEndpointErrorResultTypes)
                             .defensiveCollections(defensiveCollections)
+                            .dangerousDoNotUseEnableEndpointAssociatedErrors(
+                                    dangerousDoNotUseEnableEndpointAssociatedErrors)
+                            .generateErrorParameterFormatRespectingDialogueInterfaces(
+                                    generateErrorParameterFormatRespectingDialogueInterfaces)
                             .sealedUnions(sealedUnions)
                             .sealedUnionVisitors(sealedUnionVisitors)
                             .build())

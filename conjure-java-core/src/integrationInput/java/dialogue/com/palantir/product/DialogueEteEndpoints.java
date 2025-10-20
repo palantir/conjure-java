@@ -845,6 +845,81 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
+    /**
+     * This endpoint is used to test that the <code>Accept-Conjure-Error-Parameter-Format</code> header is respected.
+     * Specifically, that error parameters are serialized as JSON when the header is set to <code>JSON</code>.
+     */
+    jsonErrorsHeader {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("errors")
+                .fixed("header")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "jsonErrorsHeader";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
+    /**
+     * This endpoint is used to test that error parameters serialized as JSON or using <code>Objects.toString</code> are
+     * both handled correctly by the clients that can deserialize &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     */
+    errorParameterSerialization {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("errors")
+                .fixed("serialization")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "errorParameterSerialization";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
     aliasLongEndpoint {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("base").fixed("alias-long").build();

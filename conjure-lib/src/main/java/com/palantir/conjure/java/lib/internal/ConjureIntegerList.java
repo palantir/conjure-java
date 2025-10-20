@@ -24,8 +24,9 @@ import org.eclipse.collections.api.list.primitive.MutableIntList;
 import org.eclipse.collections.impl.utility.Iterate;
 
 /**
- * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 12,
- * a BoxedMutableIntList will be released. Once available, ConjureIntegerList should be replaced with that.
+ * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 13,
+ * a BoxedMutableIntList was released. However, there is an issue where MutableIntList does not implement subList.
+ * https://github.com/eclipse-collections/eclipse-collections/issues/1053
  */
 final class ConjureIntegerList extends AbstractList<Integer> implements RandomAccess {
     private final MutableIntList delegate;

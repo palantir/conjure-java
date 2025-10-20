@@ -414,37 +414,40 @@ public final class AliasGenerator {
     private static CodeBlock valueOfFactoryMethodForPrimitive(PrimitiveType primitiveType, TypeName aliasTypeName) {
         TypeName boxedTypeName = Primitives.box(aliasTypeName).withoutAnnotations();
         switch (primitiveType.get()) {
-            case STRING:
+            case STRING -> {
                 return CodeBlock.builder().addStatement("return of(value)").build();
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 return CodeBlock.builder()
                         .addStatement("return of($T.parseDouble(value))", boxedTypeName)
                         .build();
-            case INTEGER:
+            }
+            case INTEGER -> {
                 return CodeBlock.builder()
                         .addStatement("return of($T.parseInt(value))", boxedTypeName)
                         .build();
-            case BOOLEAN:
+            }
+            case BOOLEAN -> {
                 return CodeBlock.builder()
                         .addStatement("return of($T.parseBoolean(value))", boxedTypeName)
                         .build();
-            case SAFELONG:
-            case RID:
-            case BEARERTOKEN:
+            }
+            case SAFELONG, RID, BEARERTOKEN -> {
                 return CodeBlock.builder()
                         .addStatement("return of($T.valueOf(value))", aliasTypeName.withoutAnnotations())
                         .build();
-            case UUID:
+            }
+            case UUID -> {
                 return CodeBlock.builder()
                         .addStatement("return of($T.fromString(value))", aliasTypeName.withoutAnnotations())
                         .build();
-            case DATETIME:
+            }
+            case DATETIME -> {
                 return CodeBlock.builder()
                         .addStatement("return of($T.parse(value))", aliasTypeName.withoutAnnotations())
                         .build();
-            case BINARY:
-            case ANY:
-            case UNKNOWN:
+            }
+            case BINARY, ANY, UNKNOWN -> {}
         }
         throw new IllegalStateException("Unsupported primitive type: " + primitiveType + "for `valueOf` method.");
     }

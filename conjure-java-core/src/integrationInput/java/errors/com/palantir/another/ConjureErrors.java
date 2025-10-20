@@ -11,34 +11,34 @@ import org.jetbrains.annotations.Contract;
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
     /** Different package. */
-    public static final ErrorType DIFFERENT_PACKAGE =
-            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:DifferentPackage");
+    public static final ErrorType DIFFERENT_PACKAGE_ERROR =
+            ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:DifferentPackageError");
 
     private ConjureErrors() {}
 
-    public static ServiceException differentPackage() {
-        return new ServiceException(DIFFERENT_PACKAGE);
+    public static ServiceException differentPackageError() {
+        return new ServiceException(DIFFERENT_PACKAGE_ERROR);
     }
 
-    public static ServiceException differentPackage(@Nullable Throwable cause) {
-        return new ServiceException(DIFFERENT_PACKAGE, cause);
+    public static ServiceException differentPackageError(@Nullable Throwable cause) {
+        return new ServiceException(DIFFERENT_PACKAGE_ERROR, cause);
     }
 
     /**
-     * Throws a {@link ServiceException} of type DifferentPackage when {@code shouldThrow} is true.
+     * Throws a {@link ServiceException} of type DifferentPackageError when {@code shouldThrow} is true.
      *
      * @param shouldThrow Cause the method to throw when true
      */
     @Contract("true -> fail")
-    public static void throwIfDifferentPackage(boolean shouldThrow) {
+    public static void throwIfDifferentPackageError(boolean shouldThrow) {
         if (shouldThrow) {
-            throw differentPackage();
+            throw differentPackageError();
         }
     }
 
-    /** Returns true if the {@link RemoteException} is named Conjure:DifferentPackage */
-    public static boolean isDifferentPackage(RemoteException remoteException) {
+    /** Returns true if the {@link RemoteException} is named Conjure:DifferentPackageError */
+    public static boolean isDifferentPackageError(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
-        return DIFFERENT_PACKAGE.name().equals(remoteException.getError().errorName());
+        return DIFFERENT_PACKAGE_ERROR.name().equals(remoteException.getError().errorName());
     }
 }

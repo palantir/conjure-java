@@ -21,6 +21,8 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -29,8 +31,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.StreamingOutput;
 import jersey.com.palantir.product.EteService;
 import jersey.com.palantir.product.LongAlias;
 import jersey.com.palantir.product.NestedStringAliasExample;
@@ -171,6 +171,18 @@ public class JerseyEteResource implements EteService {
     @Override
     public SimpleEnum enumHeader(AuthHeader _authHeader, SimpleEnum headerParameter) {
         return headerParameter;
+    }
+
+    @Override
+    public String jsonErrorsHeader(AuthHeader authHeader, String _headerParameter) {
+        // Conjure-Java has not supported Jersey for a while. We are not testing the error serialization feature here.
+        throw new UnsupportedOperationException("Conjure-Java does not support Jersey any longer.");
+    }
+
+    @Override
+    public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
+        // Conjure-Java has not supported Jersey for a while. We are not testing the error serialization feature here.
+        throw new UnsupportedOperationException("Conjure-Java does not support Jersey any longer.");
     }
 
     @Override

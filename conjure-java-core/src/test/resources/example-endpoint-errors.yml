@@ -33,6 +33,13 @@ types:
         code: INTERNAL
         safe-args:
           complicatedObjectMap: map<integer, ComplicatedObject>
+      ConflictingCauseSafeArgErr:
+        namespace: Conjure
+        docs: Cause argument conflicts with reserved Throwable cause parameter.
+        code: INTERNAL
+        safe-args:
+          cause: string
+          shouldThrow: boolean
 services:
   ErrorService:
     name: Error Service
@@ -47,6 +54,7 @@ services:
         returns: string
         errors:
           - InvalidArgument
+          - ConflictingCauseSafeArgErr
       testImportedError:
         http: POST /imported
         args:

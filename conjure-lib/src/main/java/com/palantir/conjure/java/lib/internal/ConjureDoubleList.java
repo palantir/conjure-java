@@ -24,8 +24,9 @@ import org.eclipse.collections.api.list.primitive.MutableDoubleList;
 import org.eclipse.collections.impl.utility.Iterate;
 
 /**
- * ConjureDoubleList is a boxed list wrapper for the eclipse-collections DoubleArrayList. In eclipse-collections 12,
- * a BoxedMutableDoubleList will be released. Once available, ConjureDoubleList should be replaced with that.
+ * ConjureDoubleList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 13,
+ * a BoxedMutableDoubleList was released. However, there is an issue where MutableDoubleList does not implement subList.
+ * https://github.com/eclipse-collections/eclipse-collections/issues/1053
  */
 final class ConjureDoubleList extends AbstractList<Double> implements RandomAccess {
     private final MutableDoubleList delegate;

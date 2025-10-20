@@ -22,6 +22,107 @@ import com.palantir.javapoet.CodeBlock;
 
 public final class ParameterTypeVisitors {
 
+    public enum IsAuthVisitor implements Cases<Boolean> {
+        INSTANCE;
+
+        @Override
+        public Boolean body(
+                String _variableName,
+                CodeBlock _deserializerFactory,
+                String _deserializerFieldName,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean header(
+                String _variableName,
+                String _headerName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean path(
+                String _paramName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean pathMulti(
+                String _paramName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean query(
+                String _variableName,
+                String _paramName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean form(
+                String _variableName,
+                String _paramName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean cookie(
+                String _variableName,
+                String _cookieName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean authCookie(String _variableName, String _cookieName) {
+            return true;
+        }
+
+        @Override
+        public Boolean optionalAuthCookie(String _variableName, String _cookieName) {
+            return true;
+        }
+
+        @Override
+        public Boolean authHeader(String _variableName) {
+            return true;
+        }
+
+        @Override
+        public Boolean optionalAuthHeader(String _variableName) {
+            return true;
+        }
+
+        @Override
+        public Boolean exchange() {
+            return false;
+        }
+
+        @Override
+        public Boolean context() {
+            return false;
+        }
+    }
+
     public enum UsesRequestContextVisitor implements Cases<Boolean> {
         INSTANCE;
 
@@ -93,12 +194,22 @@ public final class ParameterTypeVisitors {
         }
 
         @Override
-        public Boolean authCookie(String _variableName, String _cookieName, String _deserializerFieldName) {
+        public Boolean authCookie(String _variableName, String _cookieName) {
+            return false;
+        }
+
+        @Override
+        public Boolean optionalAuthCookie(String _variableName, String _cookieName) {
             return false;
         }
 
         @Override
         public Boolean authHeader(String _variableName) {
+            return false;
+        }
+
+        @Override
+        public Boolean optionalAuthHeader(String _variableName) {
             return false;
         }
 

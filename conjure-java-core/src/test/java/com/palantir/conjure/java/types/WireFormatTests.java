@@ -605,7 +605,7 @@ public final class WireFormatTests {
     public void testEmptyOptionalFieldSerialization_nonEmptyValues() throws IOException {
         PrimitiveOptionalsExample original = PrimitiveOptionalsExample.builder()
                 .num(OptionalDouble.of(0D))
-                .bool(Optional.of(Boolean.FALSE))
+                .bool(Optional.of(false))
                 .integer(OptionalInt.of(0))
                 .map(ImmutableMap.of())
                 .list(ImmutableList.of())

@@ -1,6 +1,6 @@
 package undertow.com.palantir.product;
 
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
-@Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class EndpointSpecificServerErrors {
     private EndpointSpecificServerErrors() {}
 
@@ -30,14 +30,13 @@ public final class EndpointSpecificServerErrors {
      * @param typeDef
      */
     @Contract("true, _, _ -> fail")
-    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef)
-            throws EndpointError {
+    public static void throwIfEndpointError(boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef) {
         if (shouldThrow) {
             throw endpointError(typeName, typeDef);
         }
     }
 
-    public static final class EndpointError extends CheckedServiceException {
+    public static final class EndpointError extends EndpointServiceException {
         private EndpointError(@Safe String typeName, @Unsafe Object typeDef, @Nullable Throwable cause) {
             super(
                     EndpointSpecificErrors.ENDPOINT_ERROR,

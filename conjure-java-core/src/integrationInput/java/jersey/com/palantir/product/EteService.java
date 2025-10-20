@@ -5,24 +5,24 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Generated;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.StreamingOutput;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -199,6 +199,29 @@ public interface EteService {
     SimpleEnum enumHeader(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Custom-Header") SimpleEnum headerParameter);
+
+    /**
+     * This endpoint is used to test that the <code>Accept-Conjure-Error-Parameter-Format</code> header is respected.
+     * Specifically, that error parameters are serialized as JSON when the header is set to <code>JSON</code>.
+     */
+    @GET
+    @Path("base/errors/header")
+    @ClientEndpoint(method = "GET", path = "/base/errors/header")
+    String jsonErrorsHeader(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
+
+    /**
+     * This endpoint is used to test that error parameters serialized as JSON or using <code>Objects.toString</code> are
+     * both handled correctly by the clients that can deserialize &quot;rich&quot; exceptions (which are sub-types of
+     * <code>RemoteException</code>).
+     */
+    @GET
+    @Path("base/errors/serialization")
+    @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
+    String errorParameterSerialization(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
 
     @GET
     @Path("base/alias-long")

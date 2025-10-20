@@ -86,7 +86,10 @@ public interface ExampleService {
             @Handle.Header(value = "Foo", decoder = StringCollectionParameterDecoder.class) String headerValue);
 
     @Handle(method = HttpMethod.GET, path = "/authHeader")
-    String authenticated(AuthHeader auth);
+    String authHeader(AuthHeader authHeader);
+
+    @Handle(method = HttpMethod.GET, path = "/optionalAuthHeader")
+    String optionalAuthHeader(Optional<AuthHeader> authHeader);
 
     @Handle(method = HttpMethod.GET, path = "/exchange")
     void exchange(HttpServerExchange exchange);
@@ -101,7 +104,10 @@ public interface ExampleService {
     String optionalCookie(@Cookie(value = "MY_COOKIE") Optional<String> cookieValue);
 
     @Handle(method = HttpMethod.GET, path = "/authCookie")
-    BearerToken authCookie(@Cookie(value = "AUTH_TOKEN") BearerToken token);
+    String authCookie(@Cookie(value = "AUTH_TOKEN") BearerToken token);
+
+    @Handle(method = HttpMethod.GET, path = "/optionalAuthCookie")
+    String optionalAuthCookie(@Cookie(value = "AUTH_TOKEN") Optional<BearerToken> token);
 
     @Handle(method = HttpMethod.GET, path = "/optionalBigIntegerCookie")
     String optionalBigIntegerCookie(@Cookie(value = "BIG_INTEGER") Optional<BigInteger> cookieValue);

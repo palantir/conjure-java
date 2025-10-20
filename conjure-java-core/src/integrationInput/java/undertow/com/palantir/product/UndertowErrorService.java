@@ -10,8 +10,10 @@ public interface UndertowErrorService {
     /**
      * @apiNote {@code POST /errors/basic}
      * @throws TestServerErrors.InvalidArgument
+     * @throws ConjureServerErrors.ConflictingCauseSafeArgErr
      */
-    String testBasicError(AuthHeader authHeader, boolean shouldThrowError) throws TestServerErrors.InvalidArgument;
+    String testBasicError(AuthHeader authHeader, boolean shouldThrowError)
+            throws TestServerErrors.InvalidArgument, ConjureServerErrors.ConflictingCauseSafeArgErr;
 
     /**
      * @apiNote {@code POST /errors/imported}

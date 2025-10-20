@@ -34,9 +34,13 @@ import com.palantir.conjure.java.undertow.processor.sample.ExtendsNested;
 import com.palantir.conjure.java.undertow.processor.sample.ExtendsSimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.GenericImpl;
 import com.palantir.conjure.java.undertow.processor.sample.MismatchedPathParam;
+import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthCookieParam;
+import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthHeaderCookieParam;
+import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthHeaderParam;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
+import com.palantir.conjure.java.undertow.processor.sample.NestedInterface;
 import com.palantir.conjure.java.undertow.processor.sample.OptionalPrimitives;
 import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterConstructorThrows;
@@ -57,7 +61,7 @@ import com.palantir.conjure.java.undertow.processor.sample.StaticMethodAnnotated
 import com.palantir.conjure.java.undertow.processor.sample.TaggedEndpoints;
 import com.palantir.conjure.java.undertow.processor.sample.UnmatchedPathParam;
 import com.palantir.conjure.java.undertow.processor.sample.UnmatchedPathTemplateParam;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -65,6 +69,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import org.junit.jupiter.api.Test;
@@ -78,6 +83,12 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testExampleFileCompiles() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, SimpleInterface.class);
+    }
+
+    @Test
+    public void testNestedExampleFileCompiles() {
+        assertTestFileCompileAndMatches(
+                TEST_CLASSES_BASE_DIR, NestedInterface.class, NestedInterface.SimpleInterface.class);
     }
 
     @Test
@@ -159,7 +170,7 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testSafeLoggingAuthCookie() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
-                .hadErrorContaining("BearerToken parameter cannot be annotated with safe logging annotations");
+                .hadErrorContaining("Parameter type cannot be annotated with safe logging annotations");
     }
 
     @Test
@@ -254,19 +265,42 @@ public class ConjureUndertowAnnotationProcessorTest {
     }
 
     @Test
+    public void multipleAuthHeaderParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MultipleAuthHeaderParam.class))
+                .hadErrorContaining("Methods cannot have multiple auth parameters");
+    }
+
+    @Test
+    public void multipleAuthCookieParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MultipleAuthCookieParam.class))
+                .hadErrorContaining("Methods cannot have multiple auth parameters");
+    }
+
+    @Test
+    public void multipleAuthHeaderCookieParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MultipleAuthHeaderCookieParam.class))
+                .hadErrorContaining("Methods cannot have multiple auth parameters");
+    }
+
+    @Test
     public void testTaggedEndpoints() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, TaggedEndpoints.class);
     }
 
-    private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {
-        Compilation compilation = compileTestClass(basePath, clazz);
+    private void assertTestFileCompileAndMatches(Path basePath, Class<?> fileClass, Class<?>... serviceClasses) {
+        Compilation compilation = compileTestClass(basePath, fileClass);
         assertThat(compilation).succeededWithoutWarnings();
-        String generatedClassName = clazz.getSimpleName() + "Endpoints";
-        String generatedFqnClassName = clazz.getPackage().getName() + "." + generatedClassName;
-        String generatedClassFileRelativePath = generatedFqnClassName.replaceAll("\\.", "/") + ".java";
-        assertThat(compilation.generatedFile(StandardLocation.SOURCE_OUTPUT, generatedClassFileRelativePath))
-                .hasValueSatisfying(
-                        javaFileObject -> assertContentsMatch(javaFileObject, generatedClassFileRelativePath));
+
+        List<Class<?>> classes = serviceClasses.length > 0 ? List.of(serviceClasses) : List.of(fileClass);
+
+        classes.forEach(clazz -> {
+            String generatedClassFileRelativePath =
+                    clazz.getName().replace(".", "/").replace("$", "") + "Endpoints.java";
+            assertThat(compilation.generatedFile(StandardLocation.SOURCE_OUTPUT, generatedClassFileRelativePath))
+                    .hasValueSatisfying(javaFileObject -> {
+                        assertContentsMatch(javaFileObject, generatedClassFileRelativePath);
+                    });
+        });
     }
 
     private Compilation compileTestClass(Path basePath, Class<?> clazz) {
@@ -280,7 +314,7 @@ public class ConjureUndertowAnnotationProcessorTest {
                     .withProcessors(new ConjureUndertowAnnotationProcessor())
                     .compile(JavaFileObjects.forResource(clazzPath.toUri().toURL()));
         } catch (MalformedURLException e) {
-            throw new SafeRuntimeException(e);
+            throw new SafeUncheckedIoException(e);
         }
     }
 
@@ -295,7 +329,7 @@ public class ConjureUndertowAnnotationProcessorTest {
             }
             assertThat(generatedContents).isEqualTo(Files.readString(output));
         } catch (IOException e) {
-            throw new SafeRuntimeException(e);
+            throw new SafeUncheckedIoException(e);
         }
     }
 

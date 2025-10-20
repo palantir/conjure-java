@@ -16,21 +16,41 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import errors.com.palantir.product.AnyExample;
+import errors.com.palantir.product.CollectionAlias;
+import errors.com.palantir.product.CollectionExample;
+import errors.com.palantir.product.ComplexExample;
+import errors.com.palantir.product.ConjureErrors;
+import errors.com.palantir.product.EmptyObject;
+import errors.com.palantir.product.EnumExample;
+import errors.com.palantir.product.ExternalExample;
+import errors.com.palantir.product.NestedAlias;
+import errors.com.palantir.product.NestedCollectionExample;
+import errors.com.palantir.product.ObjectReference;
+import errors.com.palantir.product.OptionalAlias;
+import errors.com.palantir.product.OptionalExample;
+import errors.com.palantir.product.PrimitiveExample;
+import errors.com.palantir.product.SafetyExample;
+import errors.com.palantir.product.StringAliasEx;
+import errors.com.palantir.product.UnionExample;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.StreamingOutput;
+import java.util.UUID;
 import undertow.com.palantir.product.LongAlias;
 import undertow.com.palantir.product.NestedStringAliasExample;
 import undertow.com.palantir.product.SimpleEnum;
@@ -170,6 +190,114 @@ public final class UndertowEteResource implements UndertowEteService {
     @Override
     public SimpleEnum enumHeader(AuthHeader _authHeader, SimpleEnum headerParameter) {
         return headerParameter;
+    }
+
+    @Override
+    public String jsonErrorsHeader(AuthHeader authHeader, String headerParameter) {
+        throw ConjureErrors.invalidServiceDefinition("my-service-string", Optional.of(SimpleEnum.VALUE));
+    }
+
+    @Override
+    public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
+        if (headerParameter.startsWith("JSON") || headerParameter.equals("TOSTRING")) {
+            throw ConjureErrors.errorWithComplexArgs(
+                    PrimitiveExample.builder()
+                            .stringVal("example-string")
+                            .intVal(42)
+                            .longVal(SafeLong.of(42))
+                            .doubleVal(3.14)
+                            .boolVal(true)
+                            .ridVal(ResourceIdentifier.of("ri.service.instance.folder.object"))
+                            .uuidVal(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
+                            .datetimeVal(OffsetDateTime.MIN)
+                            .binaryVal(Bytes.from("hello".getBytes(StandardCharsets.UTF_8)))
+                            .build(),
+                    CollectionExample.builder()
+                            .stringList(List.of("foo", "bar", "baz"))
+                            .stringSet(Set.of("alpha", "beta"))
+                            .stringMap(Map.of("key1", "value1", "key2", "value2"))
+                            .build(),
+                    NestedCollectionExample.builder()
+                            .nestedList(List.of(List.of("nested1", "nested2"), List.of("nested3", "nested4")))
+                            .nestedMap(Map.of(
+                                    "outer1", Map.of("inner1", "value1", "inner2", "value2"),
+                                    "outer2", Map.of("inner3", "value3")))
+                            .mixedCollection(Map.of(
+                                    "objects",
+                                    List.of(
+                                            ObjectReference.builder()
+                                                    .name("obj1")
+                                                    .value(100)
+                                                    .build(),
+                                            ObjectReference.builder()
+                                                    .name("obj2")
+                                                    .value(200)
+                                                    .build())))
+                            .build(),
+                    OptionalExample.builder()
+                            .optionalString(Optional.of("optional-value"))
+                            .optionalObject(Optional.of(ObjectReference.builder()
+                                    .name("optional-obj")
+                                    .value(42)
+                                    .build()))
+                            .optionalCollection(Optional.of(List.of("opt1", "opt2")))
+                            .build(),
+                    ObjectReference.builder()
+                            .name("reference-object")
+                            .value(999)
+                            .build(),
+                    UnionExample.stringVariant("union-string-value"),
+                    EnumExample.A,
+                    StringAliasEx.of("aliased-string"),
+                    OptionalAlias.of(Optional.of("optional-aliased-string")),
+                    CollectionAlias.of(List.of("alias1", "alias2", "alias3")),
+                    NestedAlias.of(StringAliasEx.of("nested-alias-value")),
+                    ExternalExample.builder()
+                            .externalLong(456L)
+                            .optionalExternal(Optional.of(789L))
+                            .build(),
+                    AnyExample.builder()
+                            .anyValue("any-type-value")
+                            .anyMap(Map.of(
+                                    "anyKey",
+                                    "anyValue",
+                                    "anotherKey",
+                                    123,
+                                    "complexObjectKey",
+                                    ObjectReference.builder()
+                                            .name("complex1")
+                                            .value(1)
+                                            .build()))
+                            .build(),
+                    EmptyObject.of(),
+                    ComplexExample.builder()
+                            .metadata(Map.of(
+                                    StringAliasEx.of("meta1"),
+                                            Optional.of(List.of(
+                                                    ObjectReference.builder()
+                                                            .name("complex1")
+                                                            .value(1)
+                                                            .build(),
+                                                    ObjectReference.builder()
+                                                            .name("complex2")
+                                                            .value(2)
+                                                            .build())),
+                                    StringAliasEx.of("meta2"), Optional.empty()))
+                            .status(EnumExample.B)
+                            .variants(List.of(
+                                    UnionExample.intVariant(42),
+                                    UnionExample.objectVariant(ObjectReference.builder()
+                                            .name("variant-obj")
+                                            .value(99)
+                                            .build())))
+                            .external(Optional.of(999L))
+                            .build(),
+                    SafetyExample.builder()
+                            .safeString("safe-string-value")
+                            .unsafeDouble(2.718)
+                            .build());
+        }
+        return "hello!";
     }
 
     @Override

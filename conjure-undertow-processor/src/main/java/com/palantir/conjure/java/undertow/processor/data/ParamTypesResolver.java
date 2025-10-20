@@ -143,6 +143,9 @@ public final class ParamTypesResolver {
             if (context.isSameTypes(parameterType, AuthHeader.class)) {
                 return Optional.of(ParameterTypes.authHeader(
                         variableElement.getSimpleName().toString()));
+            } else if (context.isOptionalSameTypes(parameterType, AuthHeader.class)) {
+                return Optional.of(ParameterTypes.optionalAuthHeader(
+                        variableElement.getSimpleName().toString()));
             } else if (context.isSameTypes(parameterType, HttpServerExchange.class)) {
                 return Optional.of(ParameterTypes.exchange());
             } else if (context.isSameTypes(parameterType, RequestContext.class)) {
@@ -278,19 +281,31 @@ public final class ParamTypesResolver {
             AnnotationReflector annotationReflector,
             SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
-        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         if (context.isSameTypes(variableElement.asType(), BearerToken.class)) {
             if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
                 context.reportError(
-                        "BearerToken parameter cannot be annotated with safe logging annotations",
+                        "Parameter type cannot be annotated with safe logging annotations",
                         variableElement,
                         SafeArg.of("type", variableElement.asType()));
                 return Optional.empty();
             }
-            // TODO(fwindheuser): Add some validation no more than one BearerToken cookie param is used.
-            return Optional.of(ParameterTypes.authCookie(
-                    javaParameterName, annotationReflector.getAnnotationValue(String.class), deserializerName));
+
+            return Optional.of(
+                    ParameterTypes.authCookie(javaParameterName, annotationReflector.getAnnotationValue(String.class)));
+        } else if (context.isOptionalSameTypes(variableElement.asType(), BearerToken.class)) {
+            if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
+                context.reportError(
+                        "Parameter type cannot be annotated with safe logging annotations",
+                        variableElement,
+                        SafeArg.of("type", variableElement.asType()));
+                return Optional.empty();
+            }
+
+            return Optional.of(ParameterTypes.optionalAuthCookie(
+                    javaParameterName, annotationReflector.getAnnotationValue(String.class)));
         }
+
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
 
         return Optional.of(ParameterTypes.cookie(
                 javaParameterName,
@@ -425,23 +440,29 @@ public final class ParamTypesResolver {
     private Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
         // No need to handle int/double/boolean because they're covered by default handlers
         switch (typeMirror.getKind()) {
-            case FLOAT:
+            case FLOAT -> {
                 return Optional.of(CodeBlock.of("$T::parseFloat", Float.class));
-            case LONG:
+            }
+            case LONG -> {
                 return Optional.of(CodeBlock.of("$T::parseLong", Long.class));
-            case BYTE:
+            }
+            case BYTE -> {
                 return Optional.of(CodeBlock.of("$T::parseByte", Byte.class));
-            case SHORT:
+            }
+            case SHORT -> {
                 return Optional.of(CodeBlock.of("$T::parseShort", Short.class));
-            case DECLARED:
+            }
+            case DECLARED -> {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 return getFactoryDecoderFactoryFunction(declaredType, "valueOf")
                         .or(() -> getConstructorDecoderFactoryFunction(declaredType))
                         .or(() -> getFactoryDecoderFactoryFunction(declaredType, "of"))
                         .or(() -> getFactoryDecoderFactoryFunction(declaredType, "fromString"))
                         .or(() -> getFactoryDecoderFactoryFunction(declaredType, "create"));
-            default:
+            }
+            default -> {
                 return Optional.empty();
+            }
         }
     }
 
@@ -516,18 +537,23 @@ public final class ParamTypesResolver {
     private static Optional<String> getClassNameForTypeMirror(TypeMirror typeMirror) {
         // Only need to support primitives that are also supported by {@link PlainSerDe}.
         switch (typeMirror.getKind()) {
-            case INT:
+            case INT -> {
                 return Optional.of(Integer.class.getName());
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 return Optional.of(Double.class.getName());
-            case BOOLEAN:
+            }
+            case BOOLEAN -> {
                 return Optional.of(Boolean.class.getName());
-            case DECLARED:
+            }
+            case DECLARED -> {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 TypeElement typeElement = (TypeElement) declaredType.asElement();
                 return Optional.of(typeElement.getQualifiedName().toString());
-            default:
+            }
+            default -> {
                 return Optional.empty();
+            }
         }
     }
 

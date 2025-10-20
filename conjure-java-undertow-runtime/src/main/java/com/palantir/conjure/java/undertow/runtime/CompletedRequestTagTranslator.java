@@ -57,10 +57,12 @@ enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> 
     static String statusString(int statusCode) {
         // handle common cases quickly
         switch (statusCode) {
-            case 200:
+            case 200 -> {
                 return "200";
-            case 204:
+            }
+            case 204 -> {
                 return "204";
+            }
         }
         return Integer.toString(statusCode);
     }

@@ -34,6 +34,7 @@ import com.palantir.goethe.Goethe;
 import com.palantir.goethe.GoetheException;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Preconditions;
@@ -161,10 +162,7 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
                     "Failed validation");
             return maybeEndpoints.stream().map(Optional::get).collect(Collectors.toList());
         });
-
-        ClassName serviceInterface = ClassName.get(
-                MoreElements.getPackage(annotatedType).getQualifiedName().toString(),
-                annotatedType.getSimpleName().toString());
+        ClassName serviceInterface = (ClassName) TypeName.get(annotatedType.asType());
 
         ServiceDefinition serviceDefinition = ImmutableServiceDefinition.builder()
                 .serviceInterface(serviceInterface)

@@ -25,9 +25,7 @@ import com.palantir.conjure.java.types.Expressions;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointError;
-import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.ErrorTypeName;
@@ -40,7 +38,6 @@ import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.TypeName;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,48 +63,17 @@ public final class ErrorGenerationUtils {
         return namespace.get() + "Errors";
     }
 
-    public static String errorParametersClassName(String errorName) {
+    public static String serializableErrorClassName(String errorName) {
+        return errorName + "SerializableError";
+    }
+
+    public static String errorExceptionClassName(String errorName) {
+        return errorName + "Exception";
+    }
+
+    public static String errorParametersClassName(ErrorDefinition errorDefinition) {
+        String errorName = errorDefinition.getErrorName().getName();
         return errorName + "Parameters";
-    }
-
-    /**
-     * The name of the sealed interface returned by endpoints with associated errors, permitting implementations for a
-     * successful result and each error type.
-     */
-    public static String endpointResponseResultTypeName(EndpointName endpointName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, endpointName.get()) + "Response";
-    }
-
-    public static boolean shouldGenerateResultTypesForEndpoint(
-            boolean generateResultTypesFlag, EndpointDefinition endpointDefinition) {
-        return generateResultTypesFlag && !endpointDefinition.getErrors().isEmpty();
-    }
-
-    /**
-     * This mapping from an error type to whether the error has parameters is used when constructing error records in
-     * Dialogue response types.
-     */
-    public record ErrorNameToParameterExistenceMapping(Map<ErrorTypeName, Boolean> errorTypeToHasParameters) {
-        public static ErrorNameToParameterExistenceMapping from(ConjureDefinition definition) {
-            return new ErrorNameToParameterExistenceMapping(definition.getErrors().stream()
-                    .collect(Collectors.toMap(
-                            error -> ErrorTypeName.builder()
-                                    .name(error.getErrorName().getName())
-                                    .package_(error.getErrorName().getPackage())
-                                    .namespace(error.getNamespace())
-                                    .build(),
-                            error -> !error.getUnsafeArgs().isEmpty()
-                                    || !error.getSafeArgs().isEmpty())));
-        }
-
-        public boolean hasParameters(ErrorTypeName errorTypeName) {
-            try {
-                return errorTypeToHasParameters.get(errorTypeName);
-            } catch (NullPointerException e) {
-                throw new SafeIllegalStateException(
-                        "Error type definition not found", e, SafeArg.of("errorTypeName", errorTypeName));
-            }
-        }
     }
 
     public record DeclaredEndpointErrors(Set<ErrorTypeName> errors) {
@@ -169,11 +135,14 @@ public final class ErrorGenerationUtils {
 
     private static void addLogSafeArgumentToMethodBuilder(
             TypeMapper typeMapper, MethodSpec.Builder methodBuilder, FieldDefinition argDefinition, boolean isSafe) {
-        String argName = argDefinition.getFieldName().get();
+        String argName = JavaNameSanitizer.sanitizeErrorParameterName(
+                argDefinition.getFieldName().get());
         methodBuilder.addParameter(
                 ErrorGenerationUtils.buildParameterWithSafetyAnnotation(typeMapper, argDefinition, isSafe));
         Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
-        methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
+        // This will generate e.g. SafeArg.of("argName", argName) or SafeArg.of("cause", cause_) if deconflicted
+        methodBuilder.addCode(
+                ",\n    $T.of($S, $L)", clazz, argDefinition.getFieldName().get(), argName);
     }
 
     public static void addAllParametersWithSafetyAnnotationsToMethodBuilder(
@@ -190,24 +159,28 @@ public final class ErrorGenerationUtils {
 
     public static ParameterSpec buildParameterWithSafetyAnnotation(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
-        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe)
+        return buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, true)
                 .build();
     }
 
-    public static ParameterSpec buildParameterWithSafetyAnnotationAndJsonProperty(
+    public static ParameterSpec buildUnsanitizedParameterWithSafetyAnnotationAndJsonProperty(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
         ParameterSpec.Builder parameterBuilder =
-                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe);
+                buildParameterWithSafetyAnnotationInternal(typeMapper, argDefinition, isSafe, false);
         parameterBuilder.addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                .addMember("value", "$S", argDefinition.getFieldName())
+                .addMember("value", "$S", argDefinition.getFieldName().get())
                 .build());
         return parameterBuilder.build();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
-            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe) {
+            TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe, boolean sanitizeName) {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
-        String argName = argDefinition.getFieldName().get();
+        String argName = sanitizeName
+                ? JavaNameSanitizer.sanitizeErrorParameterName(
+                        argDefinition.getFieldName().get())
+                : argDefinition.getFieldName().get();
         TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
         ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
         argDefinition
@@ -252,7 +225,8 @@ public final class ErrorGenerationUtils {
                                 Stream.concat(
                                                 errorDefinition.getSafeArgs().stream(),
                                                 errorDefinition.getUnsafeArgs().stream())
-                                        .map(arg -> arg.getFieldName().get())
+                                        .map(arg -> JavaNameSanitizer.sanitizeErrorParameterName(
+                                                arg.getFieldName().get()))
                                         .collect(Collectors.toList())));
         if (errorType.isPresent()) {
             methodBuilder.addJavadoc(
@@ -267,6 +241,7 @@ public final class ErrorGenerationUtils {
         return methodBuilder.endControlFlow();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static List<ParameterSpec> createParametersForConditionalStaticFactory(
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, ErrorDefinition errorDefinition) {
         return Stream.concat(
@@ -291,8 +266,9 @@ public final class ErrorGenerationUtils {
                                 errorDefinition.getErrorName().getName(),
                                 arg.getFieldName()));
                     }
-                    return ParameterSpec.builder(
-                                    argumentTypeName, arg.getFieldName().get())
+                    String name = JavaNameSanitizer.sanitizeErrorParameterName(
+                            arg.getFieldName().get());
+                    return ParameterSpec.builder(argumentTypeName, name)
                             .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
                             .addJavadoc(
                                     "$L",

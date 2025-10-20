@@ -106,10 +106,13 @@ final class ExampleResource implements ExampleService {
     }
 
     @Override
-    public String authenticated(AuthHeader auth) {
-        return Preconditions.checkNotNull(auth, "AuthHeader is required")
-                .getBearerToken()
-                .toString();
+    public String authHeader(AuthHeader authHeader) {
+        return Preconditions.checkNotNull(authHeader, "AuthHeader is required").toString();
+    }
+
+    @Override
+    public String optionalAuthHeader(Optional<AuthHeader> authHeader) {
+        return authHeader.map(AuthHeader::toString).orElse("empty");
     }
 
     @Override
@@ -133,8 +136,13 @@ final class ExampleResource implements ExampleService {
     }
 
     @Override
-    public BearerToken authCookie(BearerToken token) {
-        return Preconditions.checkNotNull(token, "Token parameter is required");
+    public String authCookie(BearerToken token) {
+        return Preconditions.checkNotNull(token, "Token parameter is required").toString();
+    }
+
+    @Override
+    public String optionalAuthCookie(Optional<BearerToken> token) {
+        return token.map(BearerToken::toString).orElse("empty");
     }
 
     @Override

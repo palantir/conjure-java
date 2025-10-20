@@ -1,11 +1,11 @@
 package undertow.com.palantir.another;
 
-import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
-@Generated("com.palantir.conjure.java.types.CheckedErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class EndpointSpecificServerErrors {
     private EndpointSpecificServerErrors() {}
 
@@ -23,13 +23,13 @@ public final class EndpointSpecificServerErrors {
      * @param shouldThrow Cause the method to throw when true
      */
     @Contract("true -> fail")
-    public static void throwIfDifferentPackage(boolean shouldThrow) throws DifferentPackage {
+    public static void throwIfDifferentPackage(boolean shouldThrow) {
         if (shouldThrow) {
             throw differentPackage();
         }
     }
 
-    public static final class DifferentPackage extends CheckedServiceException {
+    public static final class DifferentPackage extends EndpointServiceException {
         private DifferentPackage(@Nullable Throwable cause) {
             super(EndpointSpecificErrors.DIFFERENT_PACKAGE, cause);
         }

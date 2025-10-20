@@ -18,6 +18,10 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats.ConjureErrorParameterFormatRequestDecodingAdapter;
+import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.QosReasons;
@@ -34,6 +38,7 @@ import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 import java.io.IOException;
@@ -63,22 +68,26 @@ public enum ConjureExceptions implements ExceptionHandler {
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (throwable instanceof CheckedServiceException checkedServiceException) {
+        if (throwable instanceof EndpointServiceException endpointServiceException) {
+            endpointServiceException(exchange, endpointServiceException);
+        } else if (throwable instanceof CheckedServiceException checkedServiceException) {
+            // This is kept around for backward compatibility. Support for this can be removed in a future version of
+            // Conjure.
             checkedServiceException(exchange, checkedServiceException);
-        } else if (throwable instanceof ServiceException) {
-            serviceException(exchange, (ServiceException) throwable);
-        } else if (throwable instanceof QosException) {
-            qosException(exchange, (QosException) throwable);
-        } else if (throwable instanceof RemoteException) {
-            remoteException(exchange, (RemoteException) throwable);
+        } else if (throwable instanceof ServiceException serviceException) {
+            serviceException(exchange, serviceException);
+        } else if (throwable instanceof QosException qosException) {
+            qosException(exchange, qosException);
+        } else if (throwable instanceof RemoteException remoteException) {
+            remoteException(exchange, remoteException);
         } else if (throwable instanceof IllegalArgumentException) {
             illegalArgumentException(exchange, throwable);
-        } else if (throwable instanceof FrameworkException) {
-            frameworkException(exchange, (FrameworkException) throwable);
-        } else if (throwable instanceof DeadlineExpiredException) {
-            deadlineExpiredException(exchange, (DeadlineExpiredException) throwable);
-        } else if (throwable instanceof Error) {
-            error(exchange, (Error) throwable);
+        } else if (throwable instanceof FrameworkException frameworkException) {
+            frameworkException(exchange, frameworkException);
+        } else if (throwable instanceof DeadlineExpiredException deadlineExpiredException) {
+            deadlineExpiredException(exchange, deadlineExpiredException);
+        } else if (throwable instanceof Error error) {
+            error(exchange, error);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
             log.info(
                     "I/O exception from a closed connection. The request may have been aborted by the client",
@@ -101,12 +110,50 @@ public enum ConjureExceptions implements ExceptionHandler {
                 exception.getErrorType().httpErrorCode());
     }
 
-    private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
+    private static void endpointServiceException(HttpServerExchange exchange, EndpointServiceException exception) {
         log(exception);
         writeResponse(
                 exchange,
-                Optional.of(ConjureError.fromServiceException(exception)),
+                Optional.of(ConjureError.fromEndpointServiceException(exception)),
                 exception.getErrorType().httpErrorCode());
+    }
+
+    private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
+        Optional<ConjureErrorParameterFormat> maybeErrorParamFormatHeader =
+                ConjureErrorParameterFormats.parseFromRequest(
+                        exchange.getRequestHeaders(), ConjureErrorParamsDecoder.INSTANCE);
+
+        boolean isHeaderPresent = maybeErrorParamFormatHeader.isPresent();
+        boolean isJsonErrorParameterValueFormat = isHeaderPresent
+                && maybeErrorParamFormatHeader
+                        .get()
+                        .toString()
+                        .equalsIgnoreCase(ConjureErrorParameterFormat.JSON_FORMAT.toString());
+
+        // Log unrecognized format if present but not JSON
+        if (isHeaderPresent && !isJsonErrorParameterValueFormat) {
+            log.info(
+                    "Unrecognized Conjure error parameter format header",
+                    SafeArg.of("headerValue", maybeErrorParamFormatHeader.get()));
+        }
+
+        // Use the appropriate serialization based on format
+        logWithSerializationFormat(exception, isJsonErrorParameterValueFormat);
+        ConjureError conjureError = isJsonErrorParameterValueFormat
+                ? ConjureError.fromServiceExceptionWithJsonSerializedParameterValues(exception)
+                : ConjureError.fromServiceException(exception);
+
+        writeResponse(
+                exchange, Optional.of(conjureError), exception.getErrorType().httpErrorCode());
+    }
+
+    private enum ConjureErrorParamsDecoder implements ConjureErrorParameterFormatRequestDecodingAdapter<HeaderMap> {
+        INSTANCE;
+
+        @Override
+        public String getFirstHeader(HeaderMap requestHeaderMap, String headerName) {
+            return requestHeaderMap.getFirst(headerName);
+        }
     }
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
@@ -236,10 +283,29 @@ public enum ConjureExceptions implements ExceptionHandler {
         // The blocking exchange output stream may have un-committed data buffered.
         // In this case we can clear the buffer allowing us to send a serializable error.
         OutputStream outputStream = exchange.getOutputStream();
-        if (outputStream instanceof UndertowOutputStream) {
-            ((UndertowOutputStream) outputStream).resetBuffer();
+        if (outputStream instanceof UndertowOutputStream undertowOutputStream) {
+            undertowOutputStream.resetBuffer();
         }
         return false;
+    }
+
+    private static void logWithSerializationFormat(
+            ServiceException serviceException, boolean isUsingJsonSerializationForParameters) {
+        if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+            log.info(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                    SafeArg.of("errorName", serviceException.getErrorType().name()),
+                    SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
+                    serviceException);
+        } else {
+            log.error(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                    SafeArg.of("errorName", serviceException.getErrorType().name()),
+                    SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
+                    serviceException);
+        }
     }
 
     private static void log(ServiceException serviceException, Throwable exceptionForLogging) {
@@ -276,8 +342,22 @@ public enum ConjureExceptions implements ExceptionHandler {
         }
     }
 
-    private static void log(ServiceException exception) {
-        log(exception, exception);
+    private static void log(EndpointServiceException endpointServiceException) {
+        if (endpointServiceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+            log.info(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", endpointServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", endpointServiceException.getErrorType().name()),
+                    endpointServiceException);
+        } else {
+            log.error(
+                    "Error handling request",
+                    SafeArg.of("errorInstanceId", endpointServiceException.getErrorInstanceId()),
+                    SafeArg.of(
+                            "errorName", endpointServiceException.getErrorType().name()),
+                    endpointServiceException);
+        }
     }
 
     private static void setFailure(HttpServerExchange exchange, Throwable failure) {

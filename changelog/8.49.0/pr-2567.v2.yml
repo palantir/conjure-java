@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Deconflict `cause` conjure error arguments
+  links:
+  - https://github.com/palantir/conjure-java/pull/2567

@@ -54,6 +54,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
     // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
     testRuntimeOnly 'ch.qos.logback:logback-classic'

@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -35,6 +36,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import dialogue.com.palantir.product.EteBinaryServiceBlocking;
@@ -43,6 +45,7 @@ import dialogue.com.palantir.product.EteServiceBlocking;
 import dialogue.com.palantir.product.NestedStringAliasExample;
 import dialogue.com.palantir.product.SimpleEnum;
 import dialogue.com.palantir.product.StringAliasExample;
+import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -62,8 +65,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import jersey.com.palantir.product.EmptyPathService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -76,7 +82,6 @@ import undertow.com.palantir.product.EmptyPathServiceEndpoints;
 import undertow.com.palantir.product.EteBinaryServiceEndpoints;
 import undertow.com.palantir.product.EteServiceEndpoints;
 
-// MARK(pm).
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -87,6 +92,7 @@ public final class UndertowServiceEteTest extends TestBase {
     private static Undertow server;
 
     private final EteServiceBlocking client;
+    private final exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking exceptionThrowingClient;
     private final EteServiceAsync asyncClient;
 
     private final EteBinaryServiceBlocking binaryClient;
@@ -95,6 +101,9 @@ public final class UndertowServiceEteTest extends TestBase {
 
     public UndertowServiceEteTest() {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(port));
+        this.exceptionThrowingClient = DialogueClients.create(
+                exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking.class,
+                clientConfiguration(port));
         this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
         this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
     }
@@ -544,6 +553,95 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isInstanceOfSatisfying(RemoteException.class, re -> {
                     assertThat(re.getStatus()).isEqualTo(422);
                 });
+    }
+
+    @Test
+    public void testErrorParametersSerializedAsJson() {
+        ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
+        try {
+            exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
+        } catch (RemoteException e) {
+            assertThat(e.getError().parameters())
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
+            // Assert that error parameters can be re-serialized as JSON.
+            assertThat(e).isInstanceOfSatisfying(SerializableErrorProvider.class, errorProvider -> {
+                try {
+                    String serialized = objectMapper.writeValueAsString(
+                            errorProvider.error().parameters());
+                    assertThat(serialized)
+                            .isEqualTo("{\"serviceName\":\"my-service-string\",\"serviceDef\":\"VALUE\"}");
+                } catch (IOException exception) {
+                    throw new SafeUncheckedIoException("Failed to serialize parameters", exception);
+                }
+            });
+        }
+
+        try {
+            exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING");
+        } catch (RemoteException e) {
+            assertThat(e.getError().parameters())
+                    .containsExactlyInAnyOrderEntriesOf(
+                            Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]"));
+        }
+    }
+
+    @Test
+    public void testExceptionThrowingClientCanReturnValue() {
+        assertThat(exceptionThrowingClient.errorParameterSerialization(
+                        AuthHeader.valueOf("authHeader"), "invalid-header"))
+                .isEqualTo("hello!");
+    }
+
+    @Test
+    public void testStringParametersDoNotChangeWhenUsingJsonAndJavaString() {
+        Map<String, String> toStringParams = Map.of();
+        Map<String, String> jsonParams = Map.of();
+        try {
+            // The `TOSTRING` header does nothing: it's not used in `ConjureExceptions` to change any serialization
+            // behavior. It's just a way to tell the EteResource to throw an error.
+            exceptionThrowingClient.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "TOSTRING");
+        } catch (RemoteException e) {
+            toStringParams = e.getError().parameters();
+        }
+
+        // Get the parameters when we use JSON serialization
+        try {
+            // The `JSON` header is read by `ConjureExceptions` to change the serialization behavior. The `JSON`
+            // representation of the parameters is sent in the `parameters` field of the Conjure error.
+            exceptionThrowingClient.errorParameterSerialization(AuthHeader.valueOf("authHeader"), "JSON");
+        } catch (RemoteException e) {
+            // .getError() returns the SerializableError which should contain the legacy parameters sent over the wire.
+            jsonParams = e.getError().parameters();
+            // e should be an instance of ErrorWithComplexArgsException, which has rich parameters as well.
+            assertThat(e).isInstanceOfSatisfying(ErrorWithComplexArgsException.class, exception -> {
+                assertThat(exception.error().parameters().optionalExample().getOptionalString())
+                        .contains("optional-value");
+            });
+        }
+
+        // Assert that the two maps contain the same keys and values, except for the `primitiveExample` and `anyExample`
+        // keys. Those will differ.
+        List<String> keysThatDiffer = List.of("primitiveExample", "anyExample");
+        assertThat(filterKeys(toStringParams, keysThatDiffer))
+                .containsExactlyInAnyOrderEntriesOf(filterKeys(jsonParams, keysThatDiffer));
+
+        // The representation of bytes differs.
+        String commonFieldsForPrimitive =
+                "PrimitiveExample{stringVal: example-string, intVal: 42, longVal: 42, doubleVal: 3.14, "
+                        + "boolVal: true, ridVal: ri.service.instance.folder.object, "
+                        + "uuidVal: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee, "
+                        + "datetimeVal: -999999999-01-01T00:00+18:00, binaryVal: ";
+
+        assertThat(toStringParams.get("primitiveExample")).isEqualTo(commonFieldsForPrimitive + "Bytes{size: 5}}");
+        assertThat(jsonParams.get("primitiveExample"))
+                .isEqualTo(commonFieldsForPrimitive + "java.nio.HeapByteBuffer[pos=0 lim=5 cap=5]}");
+    }
+
+    private static Map<String, String> filterKeys(Map<String, String> map, List<String> keysToFilter) {
+        return map.entrySet().stream()
+                .filter(entry -> !keysToFilter.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {

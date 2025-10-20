@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: '`conjure-undertow-annotations` now supports service interfaces nested
+    in other classes.'
+  links:
+  - https://github.com/palantir/conjure-java/pull/2551

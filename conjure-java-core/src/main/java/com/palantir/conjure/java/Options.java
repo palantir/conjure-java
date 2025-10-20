@@ -35,7 +35,7 @@ public interface Options {
     }
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to add {@link javax.validation.constraints.NotNull} annotations to all auth parameters, as well
+     * Instructs the {@link JerseyServiceGenerator} to add {@link jakarta.validation.constraints.NotNull} annotations to all auth parameters, as well
      * as all non-optional body params on service endpoints.
      */
     @Value.Default
@@ -188,17 +188,28 @@ public interface Options {
     }
 
     /**
-     * Warning: This is an experimental feature that may cause compilation failures!
+     * Enabling this option will enable associating errors with endpoints, which currently causes parameters of these
+     * errors to be serialized as JSON. This is a wire break and can cause errors for clients that parse error
+     * parameters. Do not enable this.
      * <p>
-     * If enabled, endpoints that have associated errors will return a result type: a sealed interface permitting
-     * subclasses for the endpoint's return value, and each endpoint error. Each endpoint error is a subclass of
-     * {@link com.palantir.dialogue.EndpointError}.
-     *<p>
-     * Producing JARs with this feature enabled will result in a compile-time break when consumers bump their dependency
-     * on the JAR. This is because the return types of every endpoint with associated errors will change.
+     * This flag has been temporarily added to help us iterate on a safer rollout strategy for endpoint-associated
+     * errors.
+     * <p>
+     * This flag will eventually be removed, and you should not use it without letting the Conjure maintainers know.
      */
     @Value.Default
-    default boolean generateDialogueEndpointErrorResultTypes() {
+    default boolean dangerousDoNotUseEnableEndpointAssociatedErrors() {
+        return false;
+    }
+
+    /**
+     * Enabling this flag will lead to the generation of Dialogue client interfaces that are able to send a header to
+     * servers specifying the Conjure error parameter serialization format they expect, and create custom exceptions for
+     * each error defined in the service's package.
+     */
+    @Value.Default
+    @Beta
+    default boolean generateErrorParameterFormatRespectingDialogueInterfaces() {
         return false;
     }
 

@@ -36,6 +36,7 @@ tasks.checkstyleIntegrationInput.enabled = false
 
 tasks.named('compileIntegrationInputJava', JavaCompile) {
     options.errorprone.disable 'IncubatingMethod'
+    options.errorprone.disable 'DeprecatedApiUsage'
 }
 
 dependencies {
@@ -71,13 +72,13 @@ dependencies {
     testImplementation sourceSets.integrationInput.output
     testImplementation project(':conjure-java-undertow-runtime')
     testImplementation 'com.fasterxml.jackson.core:jackson-core'
-    testImplementation 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
+    testImplementation 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider'
     testImplementation 'com.palantir.conjure.java.api:service-config'
     testImplementation 'com.palantir.conjure.java.api:ssl-config'
     testImplementation 'com.palantir.conjure.java.runtime:client-config'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
-    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-jakarta-server'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-legacy-clients'
     testImplementation 'com.palantir.conjure.java.runtime:keystores'
     testImplementation 'com.palantir.conjure:conjure-core'
@@ -89,14 +90,14 @@ dependencies {
     testImplementation 'io.dropwizard:dropwizard-jetty'
     testImplementation 'io.dropwizard:dropwizard-logging'
     testImplementation 'io.dropwizard:dropwizard-testing'
-    testImplementation 'javax.validation:validation-api'
+    testImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    testImplementation 'jakarta.validation:jakarta.validation-api'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.glassfish.jersey.core:jersey-server'
     testImplementation 'org.jboss.xnio:xnio-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.junit.jupiter:junit-jupiter-params'
-    testImplementation 'javax.ws.rs:javax.ws.rs-api'
 
     integrationInputImplementation project(':conjure-lib')
     integrationInputImplementation project(':conjure-undertow-lib')
@@ -112,11 +113,9 @@ dependencies {
     integrationInputImplementation 'com.palantir.safe-logging:safe-logging'
     integrationInputImplementation 'com.palantir.tokens:auth-tokens'
     integrationInputImplementation 'io.undertow:undertow-core'
-    integrationInputImplementation 'javax.annotation:javax.annotation-api'
-    integrationInputImplementation 'javax.validation:validation-api'
-    integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
-    integrationInputImplementation 'org.jetbrains:annotations'
+    integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
     integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    integrationInputImplementation 'org.jetbrains:annotations'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'

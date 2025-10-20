@@ -55,12 +55,12 @@ public final class ConjureCollections {
      */
     public static <T> List<T> unmodifiableList(List<T> list) {
         // Return the unmodifiable version of the Eclipse types
-        if (list instanceof ConjureIntegerList) {
-            return (List<T>) ((ConjureIntegerList) list).asUnmodifiable();
-        } else if (list instanceof ConjureDoubleList) {
-            return (List<T>) ((ConjureDoubleList) list).asUnmodifiable();
-        } else if (list instanceof ConjureSafeLongList) {
-            return (List<T>) ((ConjureSafeLongList) list).asUnmodifiable();
+        if (list instanceof ConjureIntegerList conjureIntegerList) {
+            return (List<T>) conjureIntegerList.asUnmodifiable();
+        } else if (list instanceof ConjureDoubleList conjureDoubleList) {
+            return (List<T>) conjureDoubleList.asUnmodifiable();
+        } else if (list instanceof ConjureSafeLongList conjureSafeLongList) {
+            return (List<T>) conjureSafeLongList.asUnmodifiable();
         } else {
             // Otherwise use the JDK types
             return Collections.unmodifiableList(list);
@@ -169,12 +169,6 @@ public final class ConjureCollections {
         return set;
     }
 
-    /**
-     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
-     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
-     * Conjure[type]List should be replaced with that.
-     */
-
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
         return new ConjureDoubleList(new DoubleArrayList());
@@ -200,8 +194,8 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addToDoubleList(Collection<Double> addTo, double toAdd) {
-        if (addTo instanceof ConjureDoubleList) {
-            ((ConjureDoubleList) addTo).add(toAdd);
+        if (addTo instanceof ConjureDoubleList conjureDoubleList) {
+            conjureDoubleList.add(toAdd);
         } else {
             addTo.add(toAdd);
         }
@@ -209,8 +203,8 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToDoubleList(Collection<Double> addTo, double[] elementsToAdd) {
-        if (addTo instanceof ConjureDoubleList) {
-            ((ConjureDoubleList) addTo).addAll(elementsToAdd);
+        if (addTo instanceof ConjureDoubleList conjureDoubleList) {
+            conjureDoubleList.addAll(elementsToAdd);
         } else {
             for (double el : elementsToAdd) {
                 addTo.add(el);
@@ -243,8 +237,8 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addToIntegerList(Collection<Integer> addTo, int toAdd) {
-        if (addTo instanceof ConjureIntegerList) {
-            ((ConjureIntegerList) addTo).add(toAdd);
+        if (addTo instanceof ConjureIntegerList conjureIntegerList) {
+            conjureIntegerList.add(toAdd);
         } else {
             addTo.add(toAdd);
         }
@@ -252,8 +246,8 @@ public final class ConjureCollections {
 
     // This method modifies a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static void addAllToIntegerList(Collection<Integer> addTo, int[] elementsToAdd) {
-        if (addTo instanceof ConjureIntegerList) {
-            ((ConjureIntegerList) addTo).addAll(elementsToAdd);
+        if (addTo instanceof ConjureIntegerList conjureIntegerList) {
+            conjureIntegerList.addAll(elementsToAdd);
         } else {
             for (int el : elementsToAdd) {
                 addTo.add(el);

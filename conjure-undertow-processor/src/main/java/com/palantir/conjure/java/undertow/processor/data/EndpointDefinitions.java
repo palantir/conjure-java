@@ -21,6 +21,7 @@ import com.google.common.base.Predicates;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
+import com.palantir.conjure.java.undertow.processor.data.ParameterTypeVisitors.IsAuthVisitor;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.util.PathTemplate;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public final class EndpointDefinitions {
         this.returnTypesResolver = new ReturnTypesResolver(context);
     }
 
+    @SuppressWarnings("CyclomaticComplexity")
     public Optional<EndpointDefinition> tryParseEndpointDefinition(
             DeclaredType annotatedType, ExecutableElement element) {
         AnnotationReflector requestAnnotationReflector = MoreElements.getAnnotationMirror(element, Handle.class)
@@ -130,6 +132,13 @@ public final class EndpointDefinitions {
         if (!actualPathParams.equals(expectedPathParams)) {
             errorContext.reportError("Path template parameters do not match method path parameters", element);
             return Optional.empty();
+        }
+
+        long numAuthParameters = argumentDefinitions.stream()
+                .filter(argument -> argument.paramType().match(IsAuthVisitor.INSTANCE))
+                .count();
+        if (numAuthParameters > 1) {
+            errorContext.reportError("Methods cannot have multiple auth parameters", element);
         }
 
         return Optional.of(ImmutableEndpointDefinition.builder()

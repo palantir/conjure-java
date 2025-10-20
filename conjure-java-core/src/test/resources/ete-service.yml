@@ -205,6 +205,31 @@ services:
             type: SimpleEnum
         returns: SimpleEnum
 
+      jsonErrorsHeader:
+        http: GET /errors/header
+        docs: |
+          This endpoint is used to test that the `Accept-Conjure-Error-Parameter-Format` header is respected. 
+          Specifically, that error parameters are serialized as JSON when the header is set to `JSON`.
+        args:
+          headerParameter:
+            param-type: header
+            param-id: Accept-Conjure-Error-Parameter-Format
+            type: string
+        returns: string
+
+      errorParameterSerialization:
+        http: GET /errors/serialization
+        docs: |
+          This endpoint is used to test that error parameters serialized as JSON or using `Objects.toString` are 
+          both handled correctly by the clients that can deserialize "rich" exceptions (which are sub-types of 
+          `RemoteException`).
+        args:
+          headerParameter:
+            param-type: header
+            param-id: Accept-Conjure-Error-Parameter-Format
+            type: string
+        returns: string
+
       aliasLongEndpoint:
         http: GET /alias-long
         args:

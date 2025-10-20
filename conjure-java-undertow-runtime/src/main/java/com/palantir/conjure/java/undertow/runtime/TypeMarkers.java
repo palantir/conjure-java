@@ -33,8 +33,8 @@ final class TypeMarkers {
         if (OptionalDouble.class.equals(type) || OptionalInt.class.equals(type) || OptionalLong.class.equals(type)) {
             return true;
         }
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
+        if (type instanceof ParameterizedType parameterizedType) {
+
             return Optional.class.equals(parameterizedType.getRawType());
         }
         return false;
@@ -43,7 +43,8 @@ final class TypeMarkers {
     @SuppressWarnings("unchecked")
     static <T> T getEmptyOptional(TypeMarker<T> marker) {
         Type type = marker.getType();
-        if (type instanceof ParameterizedType && Optional.class.equals(((ParameterizedType) type).getRawType())) {
+        if (type instanceof ParameterizedType parameterizedType
+                && Optional.class.equals(parameterizedType.getRawType())) {
             return (T) Optional.empty();
         } else if (OptionalDouble.class.equals(type)) {
             return (T) OptionalDouble.empty();
