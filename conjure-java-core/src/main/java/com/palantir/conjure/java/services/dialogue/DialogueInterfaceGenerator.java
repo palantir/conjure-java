@@ -16,18 +16,20 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
-import static java.util.stream.Collectors.toList;
-
+import com.google.common.base.CaseFormat;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
 import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
@@ -42,12 +44,15 @@ import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.io.InputStream;
+import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -100,9 +105,14 @@ public final class DialogueInterfaceGenerator {
 
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
-        serviceBuilder.addMethods(def.getEndpoints().stream()
-                .map(endpoint -> apiMethod(endpoint, serviceCallType))
-                .collect(toList()));
+        for (EndpointDefinition endpoint : def.getEndpoints()) {
+            serviceBuilder.addMethod(apiMethod(endpoint, serviceCallType));
+            endpointErrorUtilityType(
+                            endpoint,
+                            Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
+                            className)
+                    .ifPresent(serviceBuilder::addType);
+        }
 
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
@@ -190,5 +200,67 @@ public final class DialogueInterfaceGenerator {
         }
 
         return methodBuilder.build();
+    }
+
+    private Optional<TypeSpec> endpointErrorUtilityType(
+            EndpointDefinition endpointDef, String packageName, ClassName className) {
+        ClassName utiltyClassName = ClassName.get(
+                packageName,
+                className.simpleName(),
+                CaseFormat.LOWER_CAMEL.to(
+                                CaseFormat.UPPER_CAMEL,
+                                endpointDef.getEndpointName().get()) + "Errors");
+        if (endpointDef.getErrors().isEmpty()) {
+            return Optional.empty();
+        }
+        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(utiltyClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SEALED);
+        MethodSpec.Builder fromBuilder = MethodSpec.methodBuilder("from")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(RemoteException.class, "e")
+                .returns(utiltyClassName);
+
+        boolean first = true;
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        for (EndpointError error : endpointDef.getErrors()) {
+            String errorName = error.getError().getName();
+            String errorPackage = error.getError().getPackage();
+            ClassName exceptionClassName = ClassName.get(
+                    Packages.getPrefixedPackage(errorPackage, options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()),
+                    ErrorGenerationUtils.errorExceptionClassName(errorName));
+            // exceptionClassNames.add(exceptionClassName);
+            // Construct the record
+            TypeSpec errorRecord = TypeSpec.recordBuilder(errorName)
+                    .recordConstructor(MethodSpec.constructorBuilder()
+                            .addParameter(ParameterSpec.builder(exceptionClassName, "e")
+                                    .build())
+                            .build())
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .addSuperinterface(utiltyClassName)
+                    .build();
+            // Not strictly required. Seems a bit cleaner to not have it.
+            // builder.addPermittedSubclass(ClassName.get(errorPackage, errorName));
+            builder.addType(errorRecord);
+
+            // Add to the `from` method
+            if (first) {
+                first = false;
+                codeBlock.beginControlFlow("if (e instanceof $T ex)", exceptionClassName);
+            } else {
+                codeBlock.nextControlFlow("else if (e instanceof $T ex)", exceptionClassName);
+            }
+            codeBlock.addStatement("return new $L(ex)", errorName);
+        }
+        codeBlock
+                .nextControlFlow("else")
+                .addStatement(
+                        "throw new $T(\"Not an error associated with $L\", e)",
+                        SafeIllegalArgumentException.class,
+                        endpointDef.getEndpointName().get());
+        codeBlock.endControlFlow();
+        fromBuilder.addCode(codeBlock.build());
+        builder.addMethod(fromBuilder.build());
+        return Optional.of(builder.build());
     }
 }

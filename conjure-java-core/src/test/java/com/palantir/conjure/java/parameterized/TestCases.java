@@ -300,6 +300,24 @@ public final class TestCases {
                             GeneratorType.ENDPOINT_ERROR))
                     .build())
             .add(ParameterizedTestCase.builder()
+                    .name("endpoint-errors")
+                    .docs("Generate service objects for endpoint associated errors.")
+                    .files(Path.of("example-endpoint-errors.yml"))
+                    .options(Options.builder()
+                            .undertowServicePrefix(true)
+                            .nonNullCollections(true)
+                            .excludeEmptyOptionals(true)
+                            .jetbrainsContractAnnotations(true)
+                            .dangerousDoNotUseEnableEndpointAssociatedErrors(true)
+                            .generateErrorParameterFormatRespectingDialogueInterfaces(true)
+                            .build())
+                    .generatorTypes(List.of(
+                            GeneratorType.OBJECT,
+                            GeneratorType.ERROR,
+                            GeneratorType.ENDPOINT_ERROR,
+                            GeneratorType.DIALOGUE))
+                    .build())
+            .add(ParameterizedTestCase.builder()
                     .name("async-request")
                     .docs("Generate undertow and jersey objects to test processing async requests.")
                     .files(Path.of("async-request-processing-test.yml"))

@@ -1,7 +1,6 @@
 package exceptionthrowingdialogueinterfaces.com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
-import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
@@ -20,9 +19,14 @@ import com.palantir.dialogue.TypeMarker;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.InvalidTypeDefinitionException;
-import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureJavaErrors.JavaCompilationFailedException;
 import java.io.InputStream;
+import java.lang.Boolean;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Long;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -489,7 +493,6 @@ public interface EteServiceBlocking {
 
             @Override
             public String string(AuthHeader authHeader) {
-
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
@@ -996,24 +999,6 @@ public interface EteServiceBlocking {
                         + '}';
             }
         };
-    }
-
-    public sealed interface StringErrors {
-        public record JavaCompilationFailed(JavaCompilationFailedException e) implements StringErrors {}
-
-        public record InvalidTypeDefinition(InvalidTypeDefinitionException e) implements StringErrors {}
-
-        public record Unknown(RemoteException e) implements StringErrors {}
-
-        public static StringErrors of(RemoteException e) {
-            if (e instanceof JavaCompilationFailedException ex) {
-                return new JavaCompilationFailed(ex);
-            } else if (e instanceof InvalidTypeDefinitionException ex) {
-                return new InvalidTypeDefinition(ex);
-            } else {
-                return new Unknown(e);
-            }
-        }
     }
 
     /** Creates an asynchronous/non-blocking client for a EteService service. */
