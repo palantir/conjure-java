@@ -134,10 +134,10 @@ public final class UnionGenerator {
                             .map(memberTypeDef -> sealedVariantClass(unionClass, memberTypeDef.getFieldName()))
                             .toList())
                     .addPermittedSubclass(unknownVariant)
-                    .addType(generateSealedKnownInterface(unionClass, typeDef.getUnion()))
+                    .addTypes(generateSealedKnownInterface(unionClass, typeDef.getUnion()))
                     .addMethods(generateStaticFactories(
                             typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator, options))
-                    .addMethod(generateSealedThrowOnUnknown(unionClass, unknownVariant))
+                    .addMethods(generateSealedThrowOnUnknown(unionClass, unknownVariant, typeDef.getUnion()))
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
                     .addType(generateUnknownWrapper(unionClass, visitorClass, options));
@@ -237,6 +237,9 @@ public final class UnionGenerator {
                 .toList();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
         subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
+        if (subAnnotations.isEmpty()) {
+            annotationBuilder.addMember("value", "{}");
+        }
         return annotationBuilder.build();
     }
 
@@ -246,19 +249,29 @@ public final class UnionGenerator {
                 .build();
     }
 
-    private static TypeSpec generateSealedKnownInterface(ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
-        return TypeSpec.interfaceBuilder(SEALED_KNOWN_INTERFACE)
+    private static List<TypeSpec> generateSealedKnownInterface(
+            ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
+        if (memberTypeDefs.isEmpty()) {
+            return List.of();
+        }
+
+        return List.of(TypeSpec.interfaceBuilder(SEALED_KNOWN_INTERFACE)
                 .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
                 .addPermittedSubclasses(memberTypeDefs.stream()
                         .map(FieldDefinition::getFieldName)
                         .map(fieldName -> sealedVariantClass(unionClass, fieldName))
                         .toList())
-                .build();
+                .build());
     }
 
-    private static MethodSpec generateSealedThrowOnUnknown(ClassName unionClass, ClassName unknownVariantClass) {
+    private static List<MethodSpec> generateSealedThrowOnUnknown(
+            ClassName unionClass, ClassName unknownVariantClass, List<FieldDefinition> memberTypeDefs) {
+        if (memberTypeDefs.isEmpty()) {
+            return List.of();
+        }
+
         ClassName knownInterface = unionClass.nestedClass(SEALED_KNOWN_INTERFACE);
-        return MethodSpec.methodBuilder("throwOnUnknown")
+        return List.of(MethodSpec.methodBuilder("throwOnUnknown")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(knownInterface)
                 .beginControlFlow("if (this instanceof $T)", unknownVariantClass)
@@ -272,7 +285,7 @@ public final class UnionGenerator {
                 .nextControlFlow("else")
                 .addStatement("return ($T) this", knownInterface)
                 .endControlFlow()
-                .build();
+                .build());
     }
 
     private static MethodSpec generateConstructor(ClassName baseClass) {

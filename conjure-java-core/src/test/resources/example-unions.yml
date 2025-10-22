@@ -24,3 +24,5 @@ types:
           throws: string
           static: string
           unionReservedNames: string
+      EmptyUnion:
+        union: {}
