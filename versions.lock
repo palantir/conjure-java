@@ -74,7 +74,7 @@ com.palantir.dialogue:dialogue-serde:6.11.0 (3 constraints: 802e5c79)
 
 com.palantir.dialogue:dialogue-target:6.11.0 (7 constraints: d5787790)
 
-com.palantir.goethe:goethe:0.16.0 (1 constraints: 3905353b)
+com.palantir.goethe:goethe:0.17.0 (1 constraints: 3a05383b)
 
 com.palantir.human-readable-types:human-readable-types:1.7.0 (1 constraints: 0a050536)
 
