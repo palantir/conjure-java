@@ -332,10 +332,12 @@ public final class ConjureErrors {
     }
 
     public static record ConflictingCauseSafeArgParameters(
-            @JsonProperty("cause") @Safe String cause, @JsonProperty("shouldThrow") @Safe boolean shouldThrow) {}
+            @JsonProperty("cause") @Safe String cause,
+            @JsonProperty("shouldThrow") @Safe boolean shouldThrow) {}
 
     public static record ConflictingCauseUnsafeArgParameters(
-            @JsonProperty("cause") @Unsafe String cause, @JsonProperty("shouldThrow") @Unsafe boolean shouldThrow) {}
+            @JsonProperty("cause") @Unsafe String cause,
+            @JsonProperty("shouldThrow") @Unsafe boolean shouldThrow) {}
 
     public static record ErrorWithComplexArgsParameters(
             @JsonProperty("primitiveExample") @Safe PrimitiveExample primitiveExample,
@@ -364,7 +366,8 @@ public final class ConjureErrors {
             @JsonProperty("serviceDef") @Unsafe Object serviceDef) {}
 
     public static record InvalidTypeDefinitionParameters(
-            @JsonProperty("typeName") @Safe String typeName, @JsonProperty("typeDef") @Unsafe Object typeDef) {}
+            @JsonProperty("typeName") @Safe String typeName,
+            @JsonProperty("typeDef") @Unsafe Object typeDef) {}
 
     public static final class ConflictingCauseSafeArgSerializableError
             extends AbstractSerializableError<ConflictingCauseSafeArgParameters> {
