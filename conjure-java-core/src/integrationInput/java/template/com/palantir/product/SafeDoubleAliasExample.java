@@ -80,7 +80,16 @@ public final class SafeDoubleAliasExample implements Comparable<SafeDoubleAliasE
             case "-Infinity":
                 return SafeDoubleAliasExample.of(Double.NEGATIVE_INFINITY);
             default:
-                throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                try {
+                    double doubleValue = Double.parseDouble(value);
+                    if (Double.toString(doubleValue).equals(value)) {
+                        return SafeDoubleAliasExample.of(doubleValue);
+                    } else {
+                        throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                }
         }
     }
 }

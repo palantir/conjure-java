@@ -77,7 +77,16 @@ public final class DoubleAliasExample implements Comparable<DoubleAliasExample> 
             case "-Infinity":
                 return DoubleAliasExample.of(Double.NEGATIVE_INFINITY);
             default:
-                throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                try {
+                    double doubleValue = Double.parseDouble(value);
+                    if (Double.toString(doubleValue).equals(value)) {
+                        return DoubleAliasExample.of(doubleValue);
+                    } else {
+                        throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                }
         }
     }
 }

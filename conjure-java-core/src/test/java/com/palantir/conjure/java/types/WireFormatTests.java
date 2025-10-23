@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.AliasAsMapKeyExample;
 import allexamples.com.palantir.product.BinaryAliasExample;
 import allexamples.com.palantir.product.BinaryExample;
 import allexamples.com.palantir.product.DateTimeExample;
@@ -31,6 +32,7 @@ import allexamples.com.palantir.product.ExternalStringAliasExample;
 import allexamples.com.palantir.product.IntegerAliasExample;
 import allexamples.com.palantir.product.ListAlias;
 import allexamples.com.palantir.product.ListExample;
+import allexamples.com.palantir.product.ManyFieldExample;
 import allexamples.com.palantir.product.MapAliasExample;
 import allexamples.com.palantir.product.MapExample;
 import allexamples.com.palantir.product.OptionalAlias;
@@ -85,6 +87,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class WireFormatTests {
@@ -535,9 +539,53 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void double_alias_should_serialize_with_e() throws Exception {
+        assertThat(mapper.writeValueAsString(DoubleAliasExample.of(100e20))).isEqualTo("1.0E22");
+    }
+
+    @Test
     public void double_alias_should_deserialize_without_decimal_point() throws Exception {
         // frontends can send numbers like this!
         assertThat(mapper.readValue("100", DoubleAliasExample.class)).isEqualTo(DoubleAliasExample.of(100L));
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {1, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, -0.0, 1e20})
+    public void double_alias_map_key_should_serialize_as_string(Double doubleKey) throws Exception {
+        ManyFieldExample value = ManyFieldExample.builder()
+                .integer(1)
+                .doubleValue(doubleKey)
+                .string("hello")
+                .alias(StringAliasExample.of("hello"))
+                .build();
+
+        String doubleValue = Set.of(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)
+                        .contains(doubleKey)
+                ? "\"" + doubleKey + "\""
+                : doubleKey.toString();
+
+        String expectedPretty = String.format(
+                """
+                {
+                    "strings":{},
+                    "rids":{},
+                    "bearertokens":{},
+                    "integers":{},
+                    "doubles":{"%s": {"string":"hello","integer":1,"doubleValue":%s,"items":[],"set":[],"map":{},"alias":"hello"}},
+                    "rawDoubles":{"%s": {"string":"hello","integer":1,"doubleValue":%s,"items":[],"set":[],"map":{},"alias":"hello"}},
+                    "safelongs":{},
+                    "datetimes":{},
+                    "uuids":{}
+                    }
+                """,
+                doubleKey, doubleValue, doubleKey, doubleValue);
+        String expected = expectedPretty.strip().replaceAll("\n", "").replaceAll(" ", "");
+        AliasAsMapKeyExample example = AliasAsMapKeyExample.builder()
+                .doubles(ImmutableMap.of(DoubleAliasExample.of(doubleKey), value))
+                .rawDoubles(doubleKey, value)
+                .build();
+        assertThat(mapper.writeValueAsString(example)).isEqualTo(expected);
+        assertThat(mapper.readValue(expected, AliasAsMapKeyExample.class)).isEqualTo(example);
     }
 
     @Test
