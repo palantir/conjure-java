@@ -78,7 +78,8 @@ public final class EteServiceEndpoints implements UndertowService {
                 new ComplexQueryParametersEndpoint(runtime, delegate),
                 new ReceiveListOfOptionalsEndpoint(runtime, delegate),
                 new ReceiveSetOfOptionalsEndpoint(runtime, delegate),
-                new ReceiveListOfStringsEndpoint(runtime, delegate));
+                new ReceiveListOfStringsEndpoint(runtime, delegate),
+                new UnionEndpoint(runtime, delegate));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
@@ -1716,6 +1717,56 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "receiveListOfStrings";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class UnionEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<SimpleUnion> deserializer;
+
+        private final Serializer<SimpleUnion> serializer;
+
+        UnionEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<SimpleUnion>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<SimpleUnion>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            SimpleUnion value = deserializer.deserialize(exchange);
+            SimpleUnion result = delegate.union(authHeader, value);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/base/union";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "union";
         }
 
         @Override

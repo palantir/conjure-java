@@ -258,6 +258,11 @@ public interface EteService {
     void receiveListOfStrings(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull List<String> value);
 
+    @PUT
+    @Path("base/union")
+    @ClientEndpoint(method = "PUT", path = "/base/union")
+    SimpleUnion union(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull SimpleUnion value);
+
     @Deprecated
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {

@@ -21,6 +21,11 @@ types:
           - VALUE
       LongAlias:
         alias: Long
+      SimpleUnion:
+        union:
+          value:
+            type: string
+            safety: safe
 
 services:
   EmptyPathService:
@@ -267,3 +272,9 @@ services:
         http: PUT /list/strings
         args:
           value: list<string>
+
+      union:
+        http: PUT /union
+        args:
+          value: SimpleUnion
+        returns: SimpleUnion

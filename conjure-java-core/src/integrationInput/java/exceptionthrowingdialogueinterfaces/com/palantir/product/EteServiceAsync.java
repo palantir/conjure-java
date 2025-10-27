@@ -212,6 +212,10 @@ public interface EteServiceAsync {
     @ClientEndpoint(method = "PUT", path = "/base/list/strings")
     ListenableFuture<Void> receiveListOfStrings(AuthHeader authHeader, List<String> value);
 
+    /** @apiNote {@code PUT /base/union} */
+    @ClientEndpoint(method = "PUT", path = "/base/union")
+    ListenableFuture<SimpleUnion> union(AuthHeader authHeader, SimpleUnion value);
+
     /** Creates an asynchronous/non-blocking client for a EteService service. */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceAsync() {
@@ -439,6 +443,14 @@ public interface EteServiceAsync {
 
             private final Deserializer<Void> receiveListOfStringsDeserializer = _runtime.bodySerDe()
                     .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
+
+            private final Serializer<SimpleUnion> unionSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<SimpleUnion>() {});
+
+            private final EndpointChannel unionChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.union);
+
+            private final Deserializer<SimpleUnion> unionDeserializer = _runtime.bodySerDe()
+                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleUnion>() {}));
 
             private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 return ExceptionDeserializerArgs.<T>builder()
@@ -968,6 +980,19 @@ public interface EteServiceAsync {
                 }
                 return _runtime.clients()
                         .call(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<SimpleUnion> union(AuthHeader authHeader, SimpleUnion value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(unionSerializer.serialize(value));
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
+                }
+                return _runtime.clients().call(unionChannel, _request.build(), unionDeserializer);
             }
 
             @Override

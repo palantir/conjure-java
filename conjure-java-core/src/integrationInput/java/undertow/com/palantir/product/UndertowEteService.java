@@ -152,4 +152,7 @@ public interface UndertowEteService {
 
     /** @apiNote {@code PUT /base/list/strings} */
     void receiveListOfStrings(AuthHeader authHeader, List<String> value);
+
+    /** @apiNote {@code PUT /base/union} */
+    SimpleUnion union(AuthHeader authHeader, SimpleUnion value);
 }

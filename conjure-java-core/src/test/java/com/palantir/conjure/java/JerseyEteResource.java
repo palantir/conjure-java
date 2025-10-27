@@ -35,6 +35,7 @@ import jersey.com.palantir.product.EteService;
 import jersey.com.palantir.product.LongAlias;
 import jersey.com.palantir.product.NestedStringAliasExample;
 import jersey.com.palantir.product.SimpleEnum;
+import jersey.com.palantir.product.SimpleUnion;
 import jersey.com.palantir.product.StringAliasExample;
 
 @SuppressWarnings("checkstyle:designforextension")
@@ -208,6 +209,11 @@ public class JerseyEteResource implements EteService {
 
     @Override
     public void receiveListOfStrings(AuthHeader _authHeader, List<String> _value) {}
+
+    @Override
+    public SimpleUnion union(AuthHeader _authHeader, SimpleUnion value) {
+        return value;
+    }
 
     interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -25,20 +27,83 @@ import javax.annotation.processing.Generated;
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
-        defaultImpl = EmptyUnion.Unknown.class)
-@JsonSubTypes({})
+        defaultImpl = SimpleUnion.Unknown.class)
+@JsonSubTypes(@JsonSubTypes.Type(value = SimpleUnion.Value.class, name = "value"))
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
-    public static EmptyUnion unknown(@Safe String type, Object value) {
+public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.Unknown {
+    public static SimpleUnion value(@Safe String value) {
+        return new Value(value);
+    }
+
+    public static SimpleUnion unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
+            case "value":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: value");
             default:
                 return new Unknown(type, Collections.singletonMap(type, value));
         }
     }
 
+    public Known throwOnUnknown() {
+        if (this instanceof Unknown) {
+            throw new SafeIllegalArgumentException(
+                    "Unknown variant of the 'SimpleUnion' union", SafeArg.of("unknownType", ((Unknown) this).type()));
+        } else {
+            return (Known) this;
+        }
+    }
+
     public abstract <T> T accept(Visitor<T> visitor);
 
-    public static final class Unknown extends EmptyUnion {
+    public sealed interface Known permits Value {}
+
+    @JsonTypeName("value")
+    public static final class Value extends SimpleUnion implements Known {
+        private final String value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private Value(@JsonSetter("value") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "value cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(index = 0)
+        private String type() {
+            return "value";
+        }
+
+        @JsonProperty("value")
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitValue(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Value && equalTo((Value) other));
+        }
+
+        private boolean equalTo(Value other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "SimpleUnion.Value{value: " + value + '}';
+        }
+    }
+
+    public static final class Unknown extends SimpleUnion {
         private final String type;
 
         private final Map<String, Object> value;
@@ -94,21 +159,32 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
 
         @Override
         public String toString() {
-            return "EmptyUnion.Unknown{type: " + type + ", value: " + value + '}';
+            return "SimpleUnion.Unknown{type: " + type + ", value: " + value + '}';
         }
     }
 
     public interface Visitor<T> {
+        T visitValue(@Safe String value);
+
         T visitUnknown(@Safe String unknownType);
 
-        static <T> UnknownStageVisitorBuilder<T> builder() {
+        static <T> ValueStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }
     }
 
     private static final class VisitorBuilder<T>
-            implements UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
+            implements ValueStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
+        private Function<@Safe String, T> valueVisitor;
+
         private Function<String, T> unknownVisitor;
+
+        @Override
+        public UnknownStageVisitorBuilder<T> value(@Nonnull Function<@Safe String, T> valueVisitor) {
+            Preconditions.checkNotNull(valueVisitor, "valueVisitor cannot be null");
+            this.valueVisitor = valueVisitor;
+            return this;
+        }
 
         @Override
         public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
@@ -121,21 +197,31 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
-                        "Unknown variant of the 'EmptyUnion' union", SafeArg.of("unknownType", unknownType));
+                        "Unknown variant of the 'SimpleUnion' union", SafeArg.of("unknownType", unknownType));
             };
             return this;
         }
 
         @Override
         public Visitor<T> build() {
+            final Function<@Safe String, T> valueVisitor = this.valueVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
+                @Override
+                public T visitValue(@Safe String value) {
+                    return valueVisitor.apply(value);
+                }
+
                 @Override
                 public T visitUnknown(String value) {
                     return unknownVisitor.apply(value);
                 }
             };
         }
+    }
+
+    public interface ValueStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> value(@Nonnull Function<@Safe String, T> valueVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
