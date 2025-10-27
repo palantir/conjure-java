@@ -28,7 +28,8 @@ public final class EndpointSpecificErrors {
     }
 
     public static record EndpointErrorParameters(
-            @JsonProperty("typeName") @Safe String typeName, @JsonProperty("typeDef") @Unsafe Object typeDef) {}
+            @JsonProperty("typeName") @Safe String typeName,
+            @JsonProperty("typeDef") @Unsafe Object typeDef) {}
 
     public static final class EndpointErrorSerializableError
             extends AbstractSerializableError<EndpointErrorParameters> {

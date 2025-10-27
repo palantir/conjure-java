@@ -29,7 +29,8 @@ public final class ConjureErrors {
     }
 
     public static record ConflictingCauseSafeArgErrParameters(
-            @JsonProperty("cause") @Safe String cause, @JsonProperty("shouldThrow") @Safe boolean shouldThrow) {}
+            @JsonProperty("cause") @Safe String cause,
+            @JsonProperty("shouldThrow") @Safe boolean shouldThrow) {}
 
     public static final class ConflictingCauseSafeArgErrSerializableError
             extends AbstractSerializableError<ConflictingCauseSafeArgErrParameters> {

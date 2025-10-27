@@ -48,9 +48,11 @@ public final class TestErrors {
             @JsonProperty("complicatedObjectMap") @Safe Map<Integer, ComplicatedObject> complicatedObjectMap) {}
 
     public static record InvalidArgumentParameters(
-            @JsonProperty("field") @Safe String field, @JsonProperty("value") @Unsafe String value) {}
+            @JsonProperty("field") @Safe String field,
+            @JsonProperty("value") @Unsafe String value) {}
 
-    public static record NotFoundParameters(@JsonProperty("resource") @Safe String resource) {}
+    public static record NotFoundParameters(
+            @JsonProperty("resource") @Safe String resource) {}
 
     public static final class ComplicatedParametersSerializableError
             extends AbstractSerializableError<ComplicatedParametersParameters> {
