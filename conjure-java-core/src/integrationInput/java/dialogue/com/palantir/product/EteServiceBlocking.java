@@ -210,6 +210,10 @@ public interface EteServiceBlocking {
     @ClientEndpoint(method = "PUT", path = "/base/list/strings")
     void receiveListOfStrings(AuthHeader authHeader, List<String> value);
 
+    /** @apiNote {@code PUT /base/union} */
+    @ClientEndpoint(method = "PUT", path = "/base/union")
+    SimpleUnion union(AuthHeader authHeader, SimpleUnion value);
+
     /** Creates a synchronous/blocking client for a EteService service. */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceBlocking() {
@@ -431,6 +435,14 @@ public interface EteServiceBlocking {
 
             private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<SimpleUnion> unionSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<SimpleUnion>() {});
+
+            private final EndpointChannel unionChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.union);
+
+            private final Deserializer<SimpleUnion> unionDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<SimpleUnion>() {});
 
             @Override
             public String string(AuthHeader authHeader) {
@@ -758,6 +770,14 @@ public interface EteServiceBlocking {
                 _request.body(receiveListOfStringsSerializer.serialize(value));
                 _runtime.clients()
                         .callBlocking(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
+            }
+
+            @Override
+            public SimpleUnion union(AuthHeader authHeader, SimpleUnion value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(unionSerializer.serialize(value));
+                return _runtime.clients().callBlocking(unionChannel, _request.build(), unionDeserializer);
             }
 
             @Override

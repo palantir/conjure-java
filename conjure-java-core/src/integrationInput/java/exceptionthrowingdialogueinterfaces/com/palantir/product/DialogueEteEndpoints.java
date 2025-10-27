@@ -1081,5 +1081,35 @@ enum DialogueEteEndpoints implements Endpoint {
         public String version() {
             return "1.2.3";
         }
+    },
+
+    union {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("base").fixed("union").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.PUT;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "union";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
     }
 }

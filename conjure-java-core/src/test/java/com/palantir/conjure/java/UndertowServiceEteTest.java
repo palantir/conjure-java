@@ -44,6 +44,7 @@ import dialogue.com.palantir.product.EteServiceAsync;
 import dialogue.com.palantir.product.EteServiceBlocking;
 import dialogue.com.palantir.product.NestedStringAliasExample;
 import dialogue.com.palantir.product.SimpleEnum;
+import dialogue.com.palantir.product.SimpleUnion;
 import dialogue.com.palantir.product.StringAliasExample;
 import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.ErrorWithComplexArgsException;
 import io.undertow.Handlers;
@@ -636,6 +637,12 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThat(toStringParams.get("primitiveExample")).isEqualTo(commonFieldsForPrimitive + "Bytes{size: 5}}");
         assertThat(jsonParams.get("primitiveExample"))
                 .isEqualTo(commonFieldsForPrimitive + "java.nio.HeapByteBuffer[pos=0 lim=5 cap=5]}");
+    }
+
+    @Test
+    void testSealedUnionParameter() {
+        assertThat(client.union(AuthHeader.valueOf("authHeader"), SimpleUnion.value("foo")))
+                .isEqualTo(SimpleUnion.value("foo"));
     }
 
     private static Map<String, String> filterKeys(Map<String, String> map, List<String> keysToFilter) {

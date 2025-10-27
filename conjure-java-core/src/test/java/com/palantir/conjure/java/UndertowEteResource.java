@@ -54,6 +54,7 @@ import java.util.UUID;
 import undertow.com.palantir.product.LongAlias;
 import undertow.com.palantir.product.NestedStringAliasExample;
 import undertow.com.palantir.product.SimpleEnum;
+import undertow.com.palantir.product.SimpleUnion;
 import undertow.com.palantir.product.StringAliasExample;
 import undertow.com.palantir.product.UndertowEteService;
 
@@ -323,6 +324,11 @@ public final class UndertowEteResource implements UndertowEteService {
 
     @Override
     public void receiveListOfStrings(AuthHeader _authHeader, List<String> _value) {}
+
+    @Override
+    public SimpleUnion union(AuthHeader _authHeader, SimpleUnion value) {
+        return value;
+    }
 
     interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }

@@ -257,6 +257,19 @@ public final class ConjureJavaCli implements Runnable {
                             + " package.")
         private boolean generateErrorParameterFormatRespectingDialogueInterfaces;
 
+        @CommandLine.Option(
+                names = "--sealedUnions",
+                defaultValue = "false",
+                description = "Uses sealed classes for union type generation.")
+        private boolean sealedUnions;
+
+        @CommandLine.Option(
+                names = "--sealedUnionVisitors",
+                defaultValue = "true",
+                description =
+                        "If --sealedUnions is enabled, this flag enables visitor generation for back-compatibility.")
+        private boolean sealedUnionVisitors;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -333,6 +346,8 @@ public final class ConjureJavaCli implements Runnable {
                                     dangerousDoNotUseEnableEndpointAssociatedErrors)
                             .generateErrorParameterFormatRespectingDialogueInterfaces(
                                     generateErrorParameterFormatRespectingDialogueInterfaces)
+                            .sealedUnions(sealedUnions)
+                            .sealedUnionVisitors(sealedUnionVisitors)
                             .build())
                     .build();
         }

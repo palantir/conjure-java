@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import allexamples.com.palantir.product.EmptyUnionTypeExample;
+import allexamples.com.palantir.product.EmptyUnionTypeExample.Visitor;
 import allexamples.com.palantir.product.Union;
 import allexamples.com.palantir.product.UnionTypeExample;
 import allexamples.com.palantir.product.UnionWithUnknownString;
@@ -40,8 +41,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
+import sealedunions.com.palantir.product.SimpleUnion;
 
 class UnionTests {
 
@@ -51,8 +54,7 @@ class UnionTests {
     void testUnknownThrowingVariant() throws IOException {
         EmptyUnionTypeExample value =
                 MAPPER.readValue("{\"type\":\"foo\",\"foo\":\"bar\"}", EmptyUnionTypeExample.class);
-        EmptyUnionTypeExample.Visitor<?> visitor =
-                EmptyUnionTypeExample.Visitor.builder().throwOnUnknown().build();
+        Visitor<?> visitor = Visitor.builder().throwOnUnknown().build();
         assertThatLoggableExceptionThrownBy(() -> value.accept(visitor))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Unknown variant of the 'EmptyUnionTypeExample' union")
@@ -205,6 +207,46 @@ class UnionTests {
                         .throwOnUnknown()
                         .build());
         assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.put("test", "update"));
+    }
+
+    @Test
+    void testUnknownThrowingVariant_sealedUnion() throws IOException {
+        SimpleUnion value = MAPPER.readValue("{\"type\":\"abc\",\"abc\":\"123\"}", SimpleUnion.class);
+        assertThatLoggableExceptionThrownBy(value::throwOnUnknown)
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasLogMessage("Unknown variant of the 'SimpleUnion' union")
+                .hasExactlyArgs(SafeArg.of("unknownType", "abc"));
+    }
+
+    @Test
+    public void testCannotCreateUnknownTypeFromKnownType_sealedUnion() {
+        assertThatThrownBy(() -> SimpleUnion.unknown("foo", "value"));
+    }
+
+    @Test
+    void sealedUnionCanUseAllExistingPatterns() {
+        String expected = "foo";
+        SimpleUnion simpleUnion = SimpleUnion.foo(expected);
+        SimpleUnion unknown = SimpleUnion.unknown("test", expected);
+
+        String actual = simpleUnion.accept(SimpleUnion.Visitor.<String>builder()
+                .bar(String::valueOf)
+                .baz(String::valueOf)
+                .foo(Function.identity())
+                .throwOnUnknown()
+                .build());
+        assertThat(actual).isEqualTo(expected);
+
+        String unknownString = unknown.accept(SimpleUnion.Visitor.<String>builder()
+                .bar(String::valueOf)
+                .baz(String::valueOf)
+                .foo(_x -> "")
+                .unknown((_type, value) -> value.toString())
+                .build());
+        assertThat(unknownString).isEqualTo(expected);
+
+        assertThat(simpleUnion.equals(SimpleUnion.foo(expected))).isTrue();
+        assertThat(simpleUnion.toString()).contains(expected);
     }
 
     private Void failOnKnownType(String type, Object value) {

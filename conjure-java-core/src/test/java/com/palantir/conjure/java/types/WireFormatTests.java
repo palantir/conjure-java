@@ -85,6 +85,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import sealedunions.com.palantir.product.SimpleUnion;
+import sealedunions.com.palantir.product.UnionReservedNames;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class WireFormatTests {
@@ -857,6 +859,67 @@ public final class WireFormatTests {
                         defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion.class))
                 .isEqualTo(defensivenullablecollections.com.palantir.product.ExampleDefensiveCollectionMapsUnion.map(
                         expected));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize() throws JsonProcessingException {
+        SimpleUnion simpleUnion = SimpleUnion.foo("test");
+        assertThat(mapper.writeValueAsString(simpleUnion)).isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnion.class))
+                .isEqualTo(SimpleUnion.foo("test"));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize_unknownVariant() throws JsonProcessingException {
+        SimpleUnion simpleUnion = SimpleUnion.unknown("test", Map.of("foo", "bar"));
+        assertThat(mapper.writeValueAsString(simpleUnion)).isEqualTo("{\"type\":\"test\",\"test\":{\"foo\":\"bar\"}}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize_unknownVariant() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"type\":\"test\",\"test\":{\"foo\":\"bar\"}}", SimpleUnion.class))
+                .isEqualTo(SimpleUnion.unknown("test", Map.of("foo", "bar")));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize_unknown() throws JsonProcessingException {
+        UnionReservedNames unionReservedNames = UnionReservedNames.unknown_("test");
+        assertThat(mapper.writeValueAsString(unionReservedNames))
+                .isEqualTo("{\"type\":\"unknown\",\"unknown\":\"test\"}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize_unknown() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"type\":\"unknown\",\"unknown\":\"test\"}", UnionReservedNames.class))
+                .isEqualTo(UnionReservedNames.unknown_("test"));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize_known() throws JsonProcessingException {
+        UnionReservedNames unionReservedNames = UnionReservedNames.known("test");
+        assertThat(mapper.writeValueAsString(unionReservedNames)).isEqualTo("{\"type\":\"known\",\"known\":\"test\"}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize_known() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"type\":\"known\",\"known\":\"test\"}", UnionReservedNames.class))
+                .isEqualTo(UnionReservedNames.known("test"));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize_javaReserved() throws JsonProcessingException {
+        UnionReservedNames unionReservedNames = UnionReservedNames.void_("test");
+        assertThat(mapper.writeValueAsString(unionReservedNames)).isEqualTo("{\"type\":\"void\",\"void\":\"test\"}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize_javaReserved() throws JsonProcessingException {
+        assertThat(mapper.readValue("{\"type\":\"void\",\"void\":\"test\"}", UnionReservedNames.class))
+                .isEqualTo(UnionReservedNames.void_("test"));
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
