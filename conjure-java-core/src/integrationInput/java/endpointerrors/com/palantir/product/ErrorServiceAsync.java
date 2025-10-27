@@ -16,7 +16,6 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Boolean;
@@ -274,7 +273,7 @@ public interface ErrorServiceAsync {
             } else if (e instanceof ConjureErrors.ConflictingCauseSafeArgErrException ex) {
                 return new ConflictingCauseSafeArgErr(ex);
             } else {
-                throw new SafeIllegalArgumentException("Not an error associated with testBasicError", e);
+                return new Unknown(e);
             }
         }
 
@@ -282,6 +281,8 @@ public interface ErrorServiceAsync {
 
         final record ConflictingCauseSafeArgErr(ConjureErrors.ConflictingCauseSafeArgErrException e)
                 implements TestBasicErrorErrors {}
+
+        final record Unknown(RemoteException e) implements TestBasicErrorErrors {}
     }
 
     sealed interface TestImportedErrorErrors {
@@ -289,12 +290,14 @@ public interface ErrorServiceAsync {
             if (e instanceof EndpointSpecificErrors.EndpointErrorException ex) {
                 return new EndpointError(ex);
             } else {
-                throw new SafeIllegalArgumentException("Not an error associated with testImportedError", e);
+                return new Unknown(e);
             }
         }
 
         final record EndpointError(EndpointSpecificErrors.EndpointErrorException e)
                 implements TestImportedErrorErrors {}
+
+        final record Unknown(RemoteException e) implements TestImportedErrorErrors {}
     }
 
     sealed interface TestMultipleErrorsAndPackagesErrors {
@@ -312,7 +315,7 @@ public interface ErrorServiceAsync {
             } else if (e instanceof TestErrors.ComplicatedParametersException ex) {
                 return new ComplicatedParameters(ex);
             } else {
-                throw new SafeIllegalArgumentException("Not an error associated with testMultipleErrorsAndPackages", e);
+                return new Unknown(e);
             }
         }
 
@@ -330,6 +333,8 @@ public interface ErrorServiceAsync {
 
         final record ComplicatedParameters(TestErrors.ComplicatedParametersException e)
                 implements TestMultipleErrorsAndPackagesErrors {}
+
+        final record Unknown(RemoteException e) implements TestMultipleErrorsAndPackagesErrors {}
     }
 
     sealed interface TestEmptyBodyErrors {
@@ -337,11 +342,13 @@ public interface ErrorServiceAsync {
             if (e instanceof TestErrors.InvalidArgumentException ex) {
                 return new InvalidArgument(ex);
             } else {
-                throw new SafeIllegalArgumentException("Not an error associated with testEmptyBody", e);
+                return new Unknown(e);
             }
         }
 
         final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestEmptyBodyErrors {}
+
+        final record Unknown(RemoteException e) implements TestEmptyBodyErrors {}
     }
 
     sealed interface TestBinaryErrors {
@@ -349,11 +356,13 @@ public interface ErrorServiceAsync {
             if (e instanceof TestErrors.InvalidArgumentException ex) {
                 return new InvalidArgument(ex);
             } else {
-                throw new SafeIllegalArgumentException("Not an error associated with testBinary", e);
+                return new Unknown(e);
             }
         }
 
         final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBinaryErrors {}
+
+        final record Unknown(RemoteException e) implements TestBinaryErrors {}
     }
 
     sealed interface TestOptionalBinaryErrors {
@@ -361,10 +370,12 @@ public interface ErrorServiceAsync {
             if (e instanceof TestErrors.InvalidArgumentException ex) {
                 return new InvalidArgument(ex);
             } else {
-                throw new SafeIllegalArgumentException("Not an error associated with testOptionalBinary", e);
+                return new Unknown(e);
             }
         }
 
         final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestOptionalBinaryErrors {}
+
+        final record Unknown(RemoteException e) implements TestOptionalBinaryErrors {}
     }
 }

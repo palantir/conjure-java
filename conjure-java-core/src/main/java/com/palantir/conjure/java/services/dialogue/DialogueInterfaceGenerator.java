@@ -50,7 +50,6 @@ import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -107,11 +106,13 @@ public final class DialogueInterfaceGenerator {
 
         for (EndpointDefinition endpoint : def.getEndpoints()) {
             serviceBuilder.addMethod(apiMethod(endpoint, serviceCallType));
-            endpointErrorUtilityType(
-                            endpoint,
-                            Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
-                            className)
-                    .ifPresent(serviceBuilder::addType);
+            if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+                endpointErrorUtilityType(
+                                endpoint,
+                                Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
+                                className)
+                        .ifPresent(serviceBuilder::addType);
+            }
         }
 
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
@@ -229,16 +230,7 @@ public final class DialogueInterfaceGenerator {
                     Packages.getPrefixedPackage(errorPackage, options.packagePrefix()),
                     ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()),
                     ErrorGenerationUtils.errorExceptionClassName(errorName));
-            // exceptionClassNames.add(exceptionClassName);
-            // Construct the record
-            TypeSpec errorRecord = TypeSpec.recordBuilder(errorName)
-                    .recordConstructor(MethodSpec.constructorBuilder()
-                            .addParameter(ParameterSpec.builder(exceptionClassName, "e")
-                                    .build())
-                            .build())
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                    .addSuperinterface(utiltyClassName)
-                    .build();
+            TypeSpec errorRecord = createRecordForEndpointErrorUtility(errorName, exceptionClassName, utiltyClassName);
             // Not strictly required. Seems a bit cleaner to not have it.
             // builder.addPermittedSubclass(ClassName.get(errorPackage, errorName));
             builder.addType(errorRecord);
@@ -252,15 +244,25 @@ public final class DialogueInterfaceGenerator {
             }
             codeBlock.addStatement("return new $L(ex)", errorName);
         }
-        codeBlock
-                .nextControlFlow("else")
-                .addStatement(
-                        "throw new $T(\"Not an error associated with $L\", e)",
-                        SafeIllegalArgumentException.class,
-                        endpointDef.getEndpointName().get());
+        // Add the unknown case
+        TypeSpec unknownRecord =
+                createRecordForEndpointErrorUtility("Unknown", ClassName.get(RemoteException.class), utiltyClassName);
+        builder.addType(unknownRecord);
+        codeBlock.nextControlFlow("else").addStatement("return new $L(e)", unknownRecord.name());
         codeBlock.endControlFlow();
         fromBuilder.addCode(codeBlock.build());
         builder.addMethod(fromBuilder.build());
         return Optional.of(builder.build());
+    }
+
+    private static TypeSpec createRecordForEndpointErrorUtility(
+            String recordName, ClassName errorClassName, ClassName utiltyClassName) {
+        return TypeSpec.recordBuilder(recordName)
+                .recordConstructor(MethodSpec.constructorBuilder()
+                        .addParameter(ParameterSpec.builder(errorClassName, "e").build())
+                        .build())
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(utiltyClassName)
+                .build();
     }
 }
