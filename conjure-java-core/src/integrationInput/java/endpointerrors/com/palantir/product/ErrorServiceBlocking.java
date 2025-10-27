@@ -277,12 +277,12 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBasicErrorErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBasicErrorErrors {}
 
-        final record ConflictingCauseSafeArgErr(ConjureErrors.ConflictingCauseSafeArgErrException e)
+        record ConflictingCauseSafeArgErr(ConjureErrors.ConflictingCauseSafeArgErrException e)
                 implements TestBasicErrorErrors {}
 
-        final record Unknown(RemoteException e) implements TestBasicErrorErrors {}
+        record Unknown(RemoteException e) implements TestBasicErrorErrors {}
     }
 
     sealed interface TestImportedErrorErrors {
@@ -294,10 +294,9 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final record EndpointError(EndpointSpecificErrors.EndpointErrorException e)
-                implements TestImportedErrorErrors {}
+        record EndpointError(EndpointSpecificErrors.EndpointErrorException e) implements TestImportedErrorErrors {}
 
-        final record Unknown(RemoteException e) implements TestImportedErrorErrors {}
+        record Unknown(RemoteException e) implements TestImportedErrorErrors {}
     }
 
     sealed interface TestMultipleErrorsAndPackagesErrors {
@@ -319,22 +318,20 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final record InvalidArgument(TestErrors.InvalidArgumentException e)
+        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestMultipleErrorsAndPackagesErrors {}
+
+        record NotFound(TestErrors.NotFoundException e) implements TestMultipleErrorsAndPackagesErrors {}
+
+        record DifferentNamespace(EndpointSpecificTwoErrors.DifferentNamespaceException e)
                 implements TestMultipleErrorsAndPackagesErrors {}
 
-        final record NotFound(TestErrors.NotFoundException e) implements TestMultipleErrorsAndPackagesErrors {}
-
-        final record DifferentNamespace(EndpointSpecificTwoErrors.DifferentNamespaceException e)
+        record DifferentPackage(endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException e)
                 implements TestMultipleErrorsAndPackagesErrors {}
 
-        final record DifferentPackage(
-                endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException e)
+        record ComplicatedParameters(TestErrors.ComplicatedParametersException e)
                 implements TestMultipleErrorsAndPackagesErrors {}
 
-        final record ComplicatedParameters(TestErrors.ComplicatedParametersException e)
-                implements TestMultipleErrorsAndPackagesErrors {}
-
-        final record Unknown(RemoteException e) implements TestMultipleErrorsAndPackagesErrors {}
+        record Unknown(RemoteException e) implements TestMultipleErrorsAndPackagesErrors {}
     }
 
     sealed interface TestEmptyBodyErrors {
@@ -346,9 +343,9 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestEmptyBodyErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestEmptyBodyErrors {}
 
-        final record Unknown(RemoteException e) implements TestEmptyBodyErrors {}
+        record Unknown(RemoteException e) implements TestEmptyBodyErrors {}
     }
 
     sealed interface TestBinaryErrors {
@@ -360,9 +357,9 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBinaryErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBinaryErrors {}
 
-        final record Unknown(RemoteException e) implements TestBinaryErrors {}
+        record Unknown(RemoteException e) implements TestBinaryErrors {}
     }
 
     sealed interface TestOptionalBinaryErrors {
@@ -374,8 +371,8 @@ public interface ErrorServiceBlocking {
             }
         }
 
-        final record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestOptionalBinaryErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestOptionalBinaryErrors {}
 
-        final record Unknown(RemoteException e) implements TestOptionalBinaryErrors {}
+        record Unknown(RemoteException e) implements TestOptionalBinaryErrors {}
     }
 }

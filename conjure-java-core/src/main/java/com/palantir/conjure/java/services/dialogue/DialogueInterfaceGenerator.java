@@ -261,7 +261,7 @@ public final class DialogueInterfaceGenerator {
                 .recordConstructor(MethodSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder(errorClassName, "e").build())
                         .build())
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addSuperinterface(utiltyClassName)
                 .build();
     }
