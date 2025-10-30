@@ -83,6 +83,13 @@ public final class ConjureCollections {
 
     @SuppressWarnings("unchecked")
     public static <T> void addAllAndCheckNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
+        if (elementsToAdd instanceof ConjureIntegerList
+                || elementsToAdd instanceof ConjureDoubleList
+                || elementsToAdd instanceof ConjureSafeLongList) {
+            // Primitive lists will never have null elements.
+            addAll(addTo, elementsToAdd);
+            return;
+        }
         Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
         // If we know the number of elements we are adding and the addTo Collection is an ArrayList, we can eagerly
         // resize it to only do one grow() of the array.

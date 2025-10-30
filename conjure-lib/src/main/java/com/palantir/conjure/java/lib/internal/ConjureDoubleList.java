@@ -57,6 +57,11 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
 
     @Override
     public boolean addAll(int index, Collection<? extends Double> collection) {
+        if (collection instanceof ConjureDoubleList primitives) {
+            return index == size() - 1
+                    ? delegate.addAll(primitives.delegate)
+                    : delegate.addAllAtIndex(index, primitives.delegate);
+        }
         double[] target = new double[collection.size()];
         Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.doubleValue());
         return delegate.addAllAtIndex(index, target);

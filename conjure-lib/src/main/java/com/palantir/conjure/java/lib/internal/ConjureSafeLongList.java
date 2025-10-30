@@ -52,6 +52,11 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
 
     @Override
     public boolean addAll(int index, Collection<? extends SafeLong> collection) {
+        if (collection instanceof ConjureSafeLongList primitives) {
+            return index == size() - 1
+                    ? delegate.addAll(primitives.delegate)
+                    : delegate.addAllAtIndex(index, primitives.delegate);
+        }
         long[] target = new long[collection.size()];
         Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.longValue());
         return delegate.addAllAtIndex(index, target);
