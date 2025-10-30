@@ -94,7 +94,7 @@ public enum ConjureExceptions implements ExceptionHandler {
                     throwable);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
-            log(exception, throwable);
+            log(exception, throwable, false);
             writeResponse(
                     exchange,
                     Optional.of(ConjureError.fromServiceException(exception)),
@@ -138,7 +138,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         }
 
         // Use the appropriate serialization based on format
-        logWithSerializationFormat(exception, isJsonErrorParameterValueFormat);
+        log(exception, exception, isJsonErrorParameterValueFormat);
         ConjureError conjureError = isJsonErrorParameterValueFormat
                 ? ConjureError.fromServiceExceptionWithJsonSerializedParameterValues(exception)
                 : ConjureError.fromServiceException(exception);
@@ -190,7 +190,22 @@ public enum ConjureExceptions implements ExceptionHandler {
     // This means in particular that Conjure errors are defined only local to a given service and these
     // error types don't propagate through other services.
     private static void remoteException(HttpServerExchange exchange, RemoteException remoteException) {
-        if (remoteException.getStatus() == 401 || remoteException.getStatus() == 403) {
+        int status = remoteException.getStatus();
+        if (status == 401) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Encountered a remote exception",
+                        SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
+                        SafeArg.of("errorName", remoteException.getError().errorName()),
+                        SafeArg.of("statusCode", remoteException.getStatus()),
+                        remoteException);
+            }
+
+            writeResponse(
+                    exchange,
+                    Optional.of(ConjureError.fromRemoteException(remoteException)),
+                    remoteException.getStatus());
+        } else if (status == 403) {
             log.info(
                     "Encountered a remote exception",
                     SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
@@ -221,7 +236,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static void illegalArgumentException(HttpServerExchange exchange, Throwable throwable) {
         ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
-        log(exception, throwable);
+        log(exception, throwable, false);
         writeResponse(
                 exchange,
                 Optional.of(ConjureError.fromServiceException(exception)),
@@ -231,7 +246,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static void frameworkException(HttpServerExchange exchange, FrameworkException frameworkException) {
         int statusCode = frameworkException.getStatusCode();
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
-        log(exception, frameworkException);
+        log(exception, frameworkException, false);
         writeResponse(exchange, Optional.of(ConjureError.fromServiceException(exception)), statusCode);
     }
 
@@ -289,43 +304,50 @@ public enum ConjureExceptions implements ExceptionHandler {
         return false;
     }
 
-    private static void logWithSerializationFormat(
-            ServiceException serviceException, boolean isUsingJsonSerializationForParameters) {
-        if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+    private static void log(
+            ServiceException serviceException,
+            Throwable throwableToLog,
+            boolean isUsingJsonSerializationForParameters) {
+        int code = serviceException.getErrorType().httpErrorCode();
+        if (code == 401) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Error handling request",
+                        SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                        SafeArg.of("errorName", serviceException.getErrorType().name()),
+                        SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
+                        throwableToLog);
+            }
+        } else if (code / 100 == 4 /* client error */) {
             log.info(
                     "Error handling request",
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
                     SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
-                    serviceException);
+                    throwableToLog);
         } else {
             log.error(
                     "Error handling request",
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
                     SafeArg.of("isUsingJsonSerializationForParameters", isUsingJsonSerializationForParameters),
-                    serviceException);
-        }
-    }
-
-    private static void log(ServiceException serviceException, Throwable exceptionForLogging) {
-        if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
-            log.info(
-                    "Error handling request",
-                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
-                    SafeArg.of("errorName", serviceException.getErrorType().name()),
-                    exceptionForLogging);
-        } else {
-            log.error(
-                    "Error handling request",
-                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
-                    SafeArg.of("errorName", serviceException.getErrorType().name()),
-                    exceptionForLogging);
+                    throwableToLog);
         }
     }
 
     private static void log(CheckedServiceException checkedServiceException) {
-        if (checkedServiceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+        int code = checkedServiceException.getErrorType().httpErrorCode();
+        if (code == 401) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Error handling request",
+                        SafeArg.of("errorInstanceId", checkedServiceException.getErrorInstanceId()),
+                        SafeArg.of(
+                                "errorName",
+                                checkedServiceException.getErrorType().name()),
+                        checkedServiceException);
+            }
+        } else if (code / 100 == 4 /* client error */) {
             log.info(
                     "Error handling request",
                     SafeArg.of("errorInstanceId", checkedServiceException.getErrorInstanceId()),
@@ -343,7 +365,18 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     private static void log(EndpointServiceException endpointServiceException) {
-        if (endpointServiceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+        int code = endpointServiceException.getErrorType().httpErrorCode();
+        if (code == 401) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Error handling request",
+                        SafeArg.of("errorInstanceId", endpointServiceException.getErrorInstanceId()),
+                        SafeArg.of(
+                                "errorName",
+                                endpointServiceException.getErrorType().name()),
+                        endpointServiceException);
+            }
+        } else if (code / 100 == 4 /* client error */) {
             log.info(
                     "Error handling request",
                     SafeArg.of("errorInstanceId", endpointServiceException.getErrorInstanceId()),
