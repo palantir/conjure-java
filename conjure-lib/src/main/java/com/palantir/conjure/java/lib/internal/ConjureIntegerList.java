@@ -58,9 +58,7 @@ final class ConjureIntegerList extends AbstractList<Integer> implements RandomAc
     @Override
     public boolean addAll(int index, Collection<? extends Integer> collection) {
         if (collection instanceof ConjureIntegerList primitives) {
-            return index == size() - 1
-                    ? delegate.addAll(primitives.delegate)
-                    : delegate.addAllAtIndex(index, primitives.delegate);
+            return delegate.addAllAtIndex(index, primitives.delegate);
         }
         int[] target = new int[collection.size()];
         Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.intValue());
