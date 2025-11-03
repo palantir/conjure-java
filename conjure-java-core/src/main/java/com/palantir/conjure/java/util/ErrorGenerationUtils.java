@@ -63,6 +63,10 @@ public final class ErrorGenerationUtils {
         return namespace.get() + "Errors";
     }
 
+    public static String errorInstanceCheckMethodName(String errorName) {
+        return "is" + errorName;
+    }
+
     public static String serializableErrorClassName(String errorName) {
         return errorName + "SerializableError";
     }

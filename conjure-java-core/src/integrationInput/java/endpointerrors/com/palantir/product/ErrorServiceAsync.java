@@ -266,113 +266,126 @@ public interface ErrorServiceAsync {
         }
     }
 
-    sealed interface TestBasicErrorErrors {
+    sealed interface TestBasicErrorErrors
+            permits TestBasicErrorErrors.InvalidArgument,
+                    TestBasicErrorErrors.ConflictingCauseSafeArgErr,
+                    TestBasicErrorErrors.Unknown {
         static TestBasicErrorErrors from(RemoteException e) {
-            if (e instanceof TestErrors.InvalidArgumentException ex) {
-                return new InvalidArgument(ex);
-            } else if (e instanceof ConjureErrors.ConflictingCauseSafeArgErrException ex) {
-                return new ConflictingCauseSafeArgErr(ex);
+            if (TestErrors.isInvalidArgument(e)) {
+                return new InvalidArgument((TestErrors.InvalidArgumentException) e);
+            } else if (ConjureErrors.isConflictingCauseSafeArgErr(e)) {
+                return new ConflictingCauseSafeArgErr((ConjureErrors.ConflictingCauseSafeArgErrException) e);
             } else {
                 return new Unknown(e);
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBasicErrorErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestBasicErrorErrors {}
 
-        record ConflictingCauseSafeArgErr(ConjureErrors.ConflictingCauseSafeArgErrException e)
+        record ConflictingCauseSafeArgErr(ConjureErrors.ConflictingCauseSafeArgErrException exception)
                 implements TestBasicErrorErrors {}
 
-        record Unknown(RemoteException e) implements TestBasicErrorErrors {}
+        record Unknown(RemoteException exception) implements TestBasicErrorErrors {}
     }
 
-    sealed interface TestImportedErrorErrors {
+    sealed interface TestImportedErrorErrors
+            permits TestImportedErrorErrors.EndpointError, TestImportedErrorErrors.Unknown {
         static TestImportedErrorErrors from(RemoteException e) {
-            if (e instanceof EndpointSpecificErrors.EndpointErrorException ex) {
-                return new EndpointError(ex);
+            if (EndpointSpecificErrors.isEndpointError(e)) {
+                return new EndpointError((EndpointSpecificErrors.EndpointErrorException) e);
             } else {
                 return new Unknown(e);
             }
         }
 
-        record EndpointError(EndpointSpecificErrors.EndpointErrorException e) implements TestImportedErrorErrors {}
+        record EndpointError(EndpointSpecificErrors.EndpointErrorException exception)
+                implements TestImportedErrorErrors {}
 
-        record Unknown(RemoteException e) implements TestImportedErrorErrors {}
+        record Unknown(RemoteException exception) implements TestImportedErrorErrors {}
     }
 
-    sealed interface TestMultipleErrorsAndPackagesErrors {
+    sealed interface TestMultipleErrorsAndPackagesErrors
+            permits TestMultipleErrorsAndPackagesErrors.InvalidArgument,
+                    TestMultipleErrorsAndPackagesErrors.NotFound,
+                    TestMultipleErrorsAndPackagesErrors.DifferentNamespace,
+                    TestMultipleErrorsAndPackagesErrors.DifferentPackage,
+                    TestMultipleErrorsAndPackagesErrors.ComplicatedParameters,
+                    TestMultipleErrorsAndPackagesErrors.Unknown {
         static TestMultipleErrorsAndPackagesErrors from(RemoteException e) {
-            if (e instanceof TestErrors.InvalidArgumentException ex) {
-                return new InvalidArgument(ex);
-            } else if (e instanceof TestErrors.NotFoundException ex) {
-                return new NotFound(ex);
-            } else if (e instanceof EndpointSpecificTwoErrors.DifferentNamespaceException ex) {
-                return new DifferentNamespace(ex);
-            } else if (e
-                    instanceof
-                    endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException ex) {
-                return new DifferentPackage(ex);
-            } else if (e instanceof TestErrors.ComplicatedParametersException ex) {
-                return new ComplicatedParameters(ex);
+            if (TestErrors.isInvalidArgument(e)) {
+                return new InvalidArgument((TestErrors.InvalidArgumentException) e);
+            } else if (TestErrors.isNotFound(e)) {
+                return new NotFound((TestErrors.NotFoundException) e);
+            } else if (EndpointSpecificTwoErrors.isDifferentNamespace(e)) {
+                return new DifferentNamespace((EndpointSpecificTwoErrors.DifferentNamespaceException) e);
+            } else if (endpointerrors.com.palantir.another.EndpointSpecificErrors.isDifferentPackage(e)) {
+                return new DifferentPackage(
+                        (endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException) e);
+            } else if (TestErrors.isComplicatedParameters(e)) {
+                return new ComplicatedParameters((TestErrors.ComplicatedParametersException) e);
             } else {
                 return new Unknown(e);
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestMultipleErrorsAndPackagesErrors {}
-
-        record NotFound(TestErrors.NotFoundException e) implements TestMultipleErrorsAndPackagesErrors {}
-
-        record DifferentNamespace(EndpointSpecificTwoErrors.DifferentNamespaceException e)
+        record InvalidArgument(TestErrors.InvalidArgumentException exception)
                 implements TestMultipleErrorsAndPackagesErrors {}
 
-        record DifferentPackage(endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException e)
+        record NotFound(TestErrors.NotFoundException exception) implements TestMultipleErrorsAndPackagesErrors {}
+
+        record DifferentNamespace(EndpointSpecificTwoErrors.DifferentNamespaceException exception)
                 implements TestMultipleErrorsAndPackagesErrors {}
 
-        record ComplicatedParameters(TestErrors.ComplicatedParametersException e)
+        record DifferentPackage(
+                endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException exception)
                 implements TestMultipleErrorsAndPackagesErrors {}
 
-        record Unknown(RemoteException e) implements TestMultipleErrorsAndPackagesErrors {}
+        record ComplicatedParameters(TestErrors.ComplicatedParametersException exception)
+                implements TestMultipleErrorsAndPackagesErrors {}
+
+        record Unknown(RemoteException exception) implements TestMultipleErrorsAndPackagesErrors {}
     }
 
-    sealed interface TestEmptyBodyErrors {
+    sealed interface TestEmptyBodyErrors permits TestEmptyBodyErrors.InvalidArgument, TestEmptyBodyErrors.Unknown {
         static TestEmptyBodyErrors from(RemoteException e) {
-            if (e instanceof TestErrors.InvalidArgumentException ex) {
-                return new InvalidArgument(ex);
+            if (TestErrors.isInvalidArgument(e)) {
+                return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else {
                 return new Unknown(e);
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestEmptyBodyErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestEmptyBodyErrors {}
 
-        record Unknown(RemoteException e) implements TestEmptyBodyErrors {}
+        record Unknown(RemoteException exception) implements TestEmptyBodyErrors {}
     }
 
-    sealed interface TestBinaryErrors {
+    sealed interface TestBinaryErrors permits TestBinaryErrors.InvalidArgument, TestBinaryErrors.Unknown {
         static TestBinaryErrors from(RemoteException e) {
-            if (e instanceof TestErrors.InvalidArgumentException ex) {
-                return new InvalidArgument(ex);
+            if (TestErrors.isInvalidArgument(e)) {
+                return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else {
                 return new Unknown(e);
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestBinaryErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestBinaryErrors {}
 
-        record Unknown(RemoteException e) implements TestBinaryErrors {}
+        record Unknown(RemoteException exception) implements TestBinaryErrors {}
     }
 
-    sealed interface TestOptionalBinaryErrors {
+    sealed interface TestOptionalBinaryErrors
+            permits TestOptionalBinaryErrors.InvalidArgument, TestOptionalBinaryErrors.Unknown {
         static TestOptionalBinaryErrors from(RemoteException e) {
-            if (e instanceof TestErrors.InvalidArgumentException ex) {
-                return new InvalidArgument(ex);
+            if (TestErrors.isInvalidArgument(e)) {
+                return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else {
                 return new Unknown(e);
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException e) implements TestOptionalBinaryErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestOptionalBinaryErrors {}
 
-        record Unknown(RemoteException e) implements TestOptionalBinaryErrors {}
+        record Unknown(RemoteException exception) implements TestOptionalBinaryErrors {}
     }
 }

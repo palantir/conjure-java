@@ -83,8 +83,10 @@ public final class UndertowServiceEteTest extends TestBase {
         } catch (RemoteException e) {
             TestBasicErrorErrors error = ErrorServiceBlocking.TestBasicErrorErrors.from(e);
             assertThat(error).isInstanceOfSatisfying(TestBasicErrorErrors.InvalidArgument.class, invalidArgument -> {
-                assertThat(invalidArgument.e().error().parameters().field()).isEqualTo("field");
-                assertThat(invalidArgument.e().error().parameters().value()).isEqualTo("value");
+                assertThat(invalidArgument.exception().error().parameters().field())
+                        .isEqualTo("field");
+                assertThat(invalidArgument.exception().error().parameters().value())
+                        .isEqualTo("value");
             });
         }
     }

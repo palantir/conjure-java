@@ -205,21 +205,18 @@ public final class DialogueInterfaceGenerator {
 
     private Optional<TypeSpec> endpointErrorUtilityType(
             EndpointDefinition endpointDef, String packageName, ClassName className) {
-        ClassName utiltyClassName = ClassName.get(
-                packageName,
-                className.simpleName(),
-                CaseFormat.LOWER_CAMEL.to(
-                                CaseFormat.UPPER_CAMEL,
-                                endpointDef.getEndpointName().get()) + "Errors");
+        ClassName utilityClassName = className.nestedClass(CaseFormat.LOWER_CAMEL.to(
+                        CaseFormat.UPPER_CAMEL, endpointDef.getEndpointName().get())
+                + "Errors");
         if (endpointDef.getErrors().isEmpty()) {
             return Optional.empty();
         }
-        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(utiltyClassName)
+        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(utilityClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SEALED);
         MethodSpec.Builder fromBuilder = MethodSpec.methodBuilder("from")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(RemoteException.class, "e")
-                .returns(utiltyClassName);
+                .returns(utilityClassName);
 
         boolean first = true;
         CodeBlock.Builder codeBlock = CodeBlock.builder();
@@ -230,24 +227,34 @@ public final class DialogueInterfaceGenerator {
                     Packages.getPrefixedPackage(errorPackage, options.packagePrefix()),
                     ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()),
                     ErrorGenerationUtils.errorExceptionClassName(errorName));
-            TypeSpec errorRecord = createRecordForEndpointErrorUtility(errorName, exceptionClassName, utiltyClassName);
-            // Not strictly required. Seems a bit cleaner to not have it.
-            // builder.addPermittedSubclass(ClassName.get(errorPackage, errorName));
+            TypeSpec errorRecord = createRecordForEndpointErrorUtility(errorName, exceptionClassName, utilityClassName);
+            builder.addPermittedSubclass(utilityClassName.nestedClass(errorName));
             builder.addType(errorRecord);
+
+            ClassName errorTypesClass = ClassName.get(
+                    Packages.getPrefixedPackage(error.getError().getPackage(), options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()));
 
             // Add to the `from` method
             if (first) {
                 first = false;
-                codeBlock.beginControlFlow("if (e instanceof $T ex)", exceptionClassName);
+                codeBlock.beginControlFlow(
+                        "if ($T.$N(e))", errorTypesClass, ErrorGenerationUtils.errorInstanceCheckMethodName(errorName));
+                // codeBlock.beginControlFlow("if (e instanceof $T ex)", exceptionClassName);
             } else {
-                codeBlock.nextControlFlow("else if (e instanceof $T ex)", exceptionClassName);
+                // codeBlock.nextControlFlow("else if (e instanceof $T ex)", exceptionClassName);
+                codeBlock.nextControlFlow(
+                        "else if ($T.$N(e))",
+                        errorTypesClass,
+                        ErrorGenerationUtils.errorInstanceCheckMethodName(errorName));
             }
-            codeBlock.addStatement("return new $L(ex)", errorName);
+            codeBlock.addStatement("return new $N(($T) e)", errorName, exceptionClassName);
         }
         // Add the unknown case
         TypeSpec unknownRecord =
-                createRecordForEndpointErrorUtility("Unknown", ClassName.get(RemoteException.class), utiltyClassName);
+                createRecordForEndpointErrorUtility("Unknown", ClassName.get(RemoteException.class), utilityClassName);
         builder.addType(unknownRecord);
+        builder.addPermittedSubclass(utilityClassName.nestedClass("Unknown"));
         codeBlock.nextControlFlow("else").addStatement("return new $L(e)", unknownRecord.name());
         codeBlock.endControlFlow();
         fromBuilder.addCode(codeBlock.build());
@@ -259,7 +266,8 @@ public final class DialogueInterfaceGenerator {
             String recordName, ClassName errorClassName, ClassName utiltyClassName) {
         return TypeSpec.recordBuilder(recordName)
                 .recordConstructor(MethodSpec.constructorBuilder()
-                        .addParameter(ParameterSpec.builder(errorClassName, "e").build())
+                        .addParameter(ParameterSpec.builder(errorClassName, "exception")
+                                .build())
                         .build())
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addSuperinterface(utiltyClassName)
