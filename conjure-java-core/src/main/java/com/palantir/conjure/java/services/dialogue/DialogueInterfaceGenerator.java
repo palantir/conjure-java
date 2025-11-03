@@ -207,7 +207,7 @@ public final class DialogueInterfaceGenerator {
             EndpointDefinition endpointDef, String packageName, ClassName className) {
         ClassName utilityClassName = className.nestedClass(CaseFormat.LOWER_CAMEL.to(
                         CaseFormat.UPPER_CAMEL, endpointDef.getEndpointName().get())
-                + "Errors");
+                + "Error");
         if (endpointDef.getErrors().isEmpty()) {
             return Optional.empty();
         }

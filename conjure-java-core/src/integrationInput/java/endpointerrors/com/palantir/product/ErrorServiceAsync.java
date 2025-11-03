@@ -266,11 +266,11 @@ public interface ErrorServiceAsync {
         }
     }
 
-    sealed interface TestBasicErrorErrors
-            permits TestBasicErrorErrors.InvalidArgument,
-                    TestBasicErrorErrors.ConflictingCauseSafeArgErr,
-                    TestBasicErrorErrors.Unknown {
-        static TestBasicErrorErrors from(RemoteException e) {
+    sealed interface TestBasicErrorError
+            permits TestBasicErrorError.InvalidArgument,
+                    TestBasicErrorError.ConflictingCauseSafeArgErr,
+                    TestBasicErrorError.Unknown {
+        static TestBasicErrorError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else if (ConjureErrors.isConflictingCauseSafeArgErr(e)) {
@@ -280,17 +280,17 @@ public interface ErrorServiceAsync {
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestBasicErrorErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestBasicErrorError {}
 
         record ConflictingCauseSafeArgErr(ConjureErrors.ConflictingCauseSafeArgErrException exception)
-                implements TestBasicErrorErrors {}
+                implements TestBasicErrorError {}
 
-        record Unknown(RemoteException exception) implements TestBasicErrorErrors {}
+        record Unknown(RemoteException exception) implements TestBasicErrorError {}
     }
 
-    sealed interface TestImportedErrorErrors
-            permits TestImportedErrorErrors.EndpointError, TestImportedErrorErrors.Unknown {
-        static TestImportedErrorErrors from(RemoteException e) {
+    sealed interface TestImportedErrorError
+            permits TestImportedErrorError.EndpointError, TestImportedErrorError.Unknown {
+        static TestImportedErrorError from(RemoteException e) {
             if (EndpointSpecificErrors.isEndpointError(e)) {
                 return new EndpointError((EndpointSpecificErrors.EndpointErrorException) e);
             } else {
@@ -299,19 +299,19 @@ public interface ErrorServiceAsync {
         }
 
         record EndpointError(EndpointSpecificErrors.EndpointErrorException exception)
-                implements TestImportedErrorErrors {}
+                implements TestImportedErrorError {}
 
-        record Unknown(RemoteException exception) implements TestImportedErrorErrors {}
+        record Unknown(RemoteException exception) implements TestImportedErrorError {}
     }
 
-    sealed interface TestMultipleErrorsAndPackagesErrors
-            permits TestMultipleErrorsAndPackagesErrors.InvalidArgument,
-                    TestMultipleErrorsAndPackagesErrors.NotFound,
-                    TestMultipleErrorsAndPackagesErrors.DifferentNamespace,
-                    TestMultipleErrorsAndPackagesErrors.DifferentPackage,
-                    TestMultipleErrorsAndPackagesErrors.ComplicatedParameters,
-                    TestMultipleErrorsAndPackagesErrors.Unknown {
-        static TestMultipleErrorsAndPackagesErrors from(RemoteException e) {
+    sealed interface TestMultipleErrorsAndPackagesError
+            permits TestMultipleErrorsAndPackagesError.InvalidArgument,
+                    TestMultipleErrorsAndPackagesError.NotFound,
+                    TestMultipleErrorsAndPackagesError.DifferentNamespace,
+                    TestMultipleErrorsAndPackagesError.DifferentPackage,
+                    TestMultipleErrorsAndPackagesError.ComplicatedParameters,
+                    TestMultipleErrorsAndPackagesError.Unknown {
+        static TestMultipleErrorsAndPackagesError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else if (TestErrors.isNotFound(e)) {
@@ -329,25 +329,25 @@ public interface ErrorServiceAsync {
         }
 
         record InvalidArgument(TestErrors.InvalidArgumentException exception)
-                implements TestMultipleErrorsAndPackagesErrors {}
+                implements TestMultipleErrorsAndPackagesError {}
 
-        record NotFound(TestErrors.NotFoundException exception) implements TestMultipleErrorsAndPackagesErrors {}
+        record NotFound(TestErrors.NotFoundException exception) implements TestMultipleErrorsAndPackagesError {}
 
         record DifferentNamespace(EndpointSpecificTwoErrors.DifferentNamespaceException exception)
-                implements TestMultipleErrorsAndPackagesErrors {}
+                implements TestMultipleErrorsAndPackagesError {}
 
         record DifferentPackage(
                 endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException exception)
-                implements TestMultipleErrorsAndPackagesErrors {}
+                implements TestMultipleErrorsAndPackagesError {}
 
         record ComplicatedParameters(TestErrors.ComplicatedParametersException exception)
-                implements TestMultipleErrorsAndPackagesErrors {}
+                implements TestMultipleErrorsAndPackagesError {}
 
-        record Unknown(RemoteException exception) implements TestMultipleErrorsAndPackagesErrors {}
+        record Unknown(RemoteException exception) implements TestMultipleErrorsAndPackagesError {}
     }
 
-    sealed interface TestEmptyBodyErrors permits TestEmptyBodyErrors.InvalidArgument, TestEmptyBodyErrors.Unknown {
-        static TestEmptyBodyErrors from(RemoteException e) {
+    sealed interface TestEmptyBodyError permits TestEmptyBodyError.InvalidArgument, TestEmptyBodyError.Unknown {
+        static TestEmptyBodyError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else {
@@ -355,13 +355,13 @@ public interface ErrorServiceAsync {
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestEmptyBodyErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestEmptyBodyError {}
 
-        record Unknown(RemoteException exception) implements TestEmptyBodyErrors {}
+        record Unknown(RemoteException exception) implements TestEmptyBodyError {}
     }
 
-    sealed interface TestBinaryErrors permits TestBinaryErrors.InvalidArgument, TestBinaryErrors.Unknown {
-        static TestBinaryErrors from(RemoteException e) {
+    sealed interface TestBinaryError permits TestBinaryError.InvalidArgument, TestBinaryError.Unknown {
+        static TestBinaryError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else {
@@ -369,14 +369,14 @@ public interface ErrorServiceAsync {
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestBinaryErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestBinaryError {}
 
-        record Unknown(RemoteException exception) implements TestBinaryErrors {}
+        record Unknown(RemoteException exception) implements TestBinaryError {}
     }
 
-    sealed interface TestOptionalBinaryErrors
-            permits TestOptionalBinaryErrors.InvalidArgument, TestOptionalBinaryErrors.Unknown {
-        static TestOptionalBinaryErrors from(RemoteException e) {
+    sealed interface TestOptionalBinaryError
+            permits TestOptionalBinaryError.InvalidArgument, TestOptionalBinaryError.Unknown {
+        static TestOptionalBinaryError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
             } else {
@@ -384,8 +384,8 @@ public interface ErrorServiceAsync {
             }
         }
 
-        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestOptionalBinaryErrors {}
+        record InvalidArgument(TestErrors.InvalidArgumentException exception) implements TestOptionalBinaryError {}
 
-        record Unknown(RemoteException exception) implements TestOptionalBinaryErrors {}
+        record Unknown(RemoteException exception) implements TestOptionalBinaryError {}
     }
 }
