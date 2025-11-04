@@ -26,7 +26,7 @@ import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.tokens.auth.AuthHeader;
 import endpointerrors.com.palantir.product.ErrorServiceBlocking;
-import endpointerrors.com.palantir.product.ErrorServiceBlocking.TestBasicErrorErrors;
+import endpointerrors.com.palantir.product.ErrorServiceBlocking.TestBasicErrorError;
 import endpointerrors.com.palantir.product.ErrorServiceEndpoints;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -81,8 +81,8 @@ public final class UndertowServiceEteTest extends TestBase {
         try {
             errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("invalidArgument"));
         } catch (RemoteException e) {
-            TestBasicErrorErrors error = ErrorServiceBlocking.TestBasicErrorErrors.from(e);
-            assertThat(error).isInstanceOfSatisfying(TestBasicErrorErrors.InvalidArgument.class, invalidArgument -> {
+            TestBasicErrorError error = ErrorServiceBlocking.TestBasicErrorError.from(e);
+            assertThat(error).isInstanceOfSatisfying(TestBasicErrorError.InvalidArgument.class, invalidArgument -> {
                 assertThat(invalidArgument.exception().error().parameters().field())
                         .isEqualTo("field");
                 assertThat(invalidArgument.exception().error().parameters().value())
