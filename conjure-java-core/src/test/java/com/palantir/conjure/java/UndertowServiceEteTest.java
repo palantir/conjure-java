@@ -93,20 +93,19 @@ public final class UndertowServiceEteTest extends TestBase {
     private static Undertow server;
 
     private final EteServiceBlocking client;
-    private final exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking exceptionThrowingClient;
     private final EteServiceAsync asyncClient;
-
     private final EteBinaryServiceBlocking binaryClient;
+    private final exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking exceptionThrowingClient;
 
     private static int port;
 
     public UndertowServiceEteTest() {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(port));
+        this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
+        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
         this.exceptionThrowingClient = DialogueClients.create(
                 exceptionthrowingdialogueinterfaces.com.palantir.product.EteServiceBlocking.class,
                 clientConfiguration(port));
-        this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(port));
-        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(port));
     }
 
     @BeforeAll

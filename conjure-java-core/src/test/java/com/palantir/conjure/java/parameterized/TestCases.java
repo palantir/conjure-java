@@ -360,6 +360,25 @@ public final class TestCases {
                             .build())
                     .generatorTypes(GeneratorType.OBJECT)
                     .build())
+            .add(ParameterizedTestCase.builder()
+                    .name("endpoint-errors")
+                    .docs("Generate service objects for endpoint associated errors.")
+                    .files(Path.of("example-endpoint-errors.yml"))
+                    .options(Options.builder()
+                            .undertowServicePrefix(true)
+                            .nonNullCollections(true)
+                            .excludeEmptyOptionals(true)
+                            .jetbrainsContractAnnotations(true)
+                            .dangerousDoNotUseEnableEndpointAssociatedErrors(true)
+                            .generateErrorParameterFormatRespectingDialogueInterfaces(true)
+                            .build())
+                    .generatorTypes(List.of(
+                            GeneratorType.OBJECT,
+                            GeneratorType.ERROR,
+                            GeneratorType.ENDPOINT_ERROR,
+                            GeneratorType.DIALOGUE,
+                            GeneratorType.UNDERTOW))
+                    .build())
             .build();
 
     public static List<ParameterizedTestCase> get() {

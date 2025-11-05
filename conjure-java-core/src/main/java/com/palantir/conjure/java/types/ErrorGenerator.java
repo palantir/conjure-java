@@ -144,7 +144,8 @@ public final class ErrorGenerator implements Generator {
                 .map(entry -> {
                     String typeName = CaseFormat.UPPER_CAMEL.to(
                             CaseFormat.UPPER_UNDERSCORE, entry.getErrorName().getName());
-                    String methodName = "is" + entry.getErrorName().getName();
+                    String methodName = ErrorGenerationUtils.errorInstanceCheckMethodName(
+                            entry.getErrorName().getName());
 
                     return MethodSpec.methodBuilder(methodName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

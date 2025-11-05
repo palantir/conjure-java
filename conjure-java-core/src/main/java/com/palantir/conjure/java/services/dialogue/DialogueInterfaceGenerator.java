@@ -16,18 +16,20 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
-import static java.util.stream.Collectors.toList;
-
+import com.google.common.base.CaseFormat;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDoc;
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
 import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointError;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
@@ -42,12 +44,14 @@ import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import java.io.InputStream;
+import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -100,9 +104,16 @@ public final class DialogueInterfaceGenerator {
 
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
-        serviceBuilder.addMethods(def.getEndpoints().stream()
-                .map(endpoint -> apiMethod(endpoint, serviceCallType))
-                .collect(toList()));
+        for (EndpointDefinition endpoint : def.getEndpoints()) {
+            serviceBuilder.addMethod(apiMethod(endpoint, serviceCallType));
+            if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+                endpointErrorUtilityType(
+                                endpoint,
+                                Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
+                                className)
+                        .ifPresent(serviceBuilder::addType);
+            }
+        }
 
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
@@ -190,5 +201,74 @@ public final class DialogueInterfaceGenerator {
         }
 
         return methodBuilder.build();
+    }
+
+    private Optional<TypeSpec> endpointErrorUtilityType(
+            EndpointDefinition endpointDef, String packageName, ClassName className) {
+        ClassName utilityClassName = className.nestedClass(CaseFormat.LOWER_CAMEL.to(
+                        CaseFormat.UPPER_CAMEL, endpointDef.getEndpointName().get())
+                + "Error");
+        if (endpointDef.getErrors().isEmpty()) {
+            return Optional.empty();
+        }
+        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(utilityClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.SEALED);
+        MethodSpec.Builder fromBuilder = MethodSpec.methodBuilder("from")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(RemoteException.class, "e")
+                .returns(utilityClassName);
+
+        boolean first = true;
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        for (EndpointError error : endpointDef.getErrors()) {
+            String errorName = error.getError().getName();
+            String errorPackage = error.getError().getPackage();
+            ClassName exceptionClassName = ClassName.get(
+                    Packages.getPrefixedPackage(errorPackage, options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()),
+                    ErrorGenerationUtils.errorExceptionClassName(errorName));
+            TypeSpec errorRecord = createRecordForEndpointErrorUtility(errorName, exceptionClassName, utilityClassName);
+            builder.addPermittedSubclass(utilityClassName.nestedClass(errorName));
+            builder.addType(errorRecord);
+
+            ClassName errorTypesClass = ClassName.get(
+                    Packages.getPrefixedPackage(error.getError().getPackage(), options.packagePrefix()),
+                    ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()));
+
+            // Add to the `from` method
+            if (first) {
+                first = false;
+                codeBlock.beginControlFlow(
+                        "if ($T.$N(e))", errorTypesClass, ErrorGenerationUtils.errorInstanceCheckMethodName(errorName));
+            } else {
+                codeBlock.nextControlFlow(
+                        "else if ($T.$N(e))",
+                        errorTypesClass,
+                        ErrorGenerationUtils.errorInstanceCheckMethodName(errorName));
+            }
+            codeBlock.addStatement("return new $N(($T) e)", errorName, exceptionClassName);
+        }
+        // Add the unknown case
+        TypeSpec unknownRecord =
+                createRecordForEndpointErrorUtility("Unknown", ClassName.get(RemoteException.class), utilityClassName);
+        builder.addType(unknownRecord);
+        builder.addPermittedSubclass(utilityClassName.nestedClass("Unknown"));
+        codeBlock.nextControlFlow("else").addStatement("return new $L(e)", unknownRecord.name());
+        codeBlock.endControlFlow();
+        fromBuilder.addCode(codeBlock.build());
+        builder.addMethod(fromBuilder.build());
+        return Optional.of(builder.build());
+    }
+
+    private static TypeSpec createRecordForEndpointErrorUtility(
+            String recordName, ClassName errorClassName, ClassName utiltyClassName) {
+        return TypeSpec.recordBuilder(recordName)
+                .recordConstructor(MethodSpec.constructorBuilder()
+                        .addParameter(ParameterSpec.builder(errorClassName, "exception")
+                                .build())
+                        .build())
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addSuperinterface(utiltyClassName)
+                .build();
     }
 }
