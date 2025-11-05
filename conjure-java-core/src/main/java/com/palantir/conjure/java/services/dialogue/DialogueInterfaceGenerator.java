@@ -240,9 +240,7 @@ public final class DialogueInterfaceGenerator {
                 first = false;
                 codeBlock.beginControlFlow(
                         "if ($T.$N(e))", errorTypesClass, ErrorGenerationUtils.errorInstanceCheckMethodName(errorName));
-                // codeBlock.beginControlFlow("if (e instanceof $T ex)", exceptionClassName);
             } else {
-                // codeBlock.nextControlFlow("else if (e instanceof $T ex)", exceptionClassName);
                 codeBlock.nextControlFlow(
                         "else if ($T.$N(e))",
                         errorTypesClass,
