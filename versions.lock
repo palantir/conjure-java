@@ -28,7 +28,7 @@ com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
 
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 10110b88)
 
-com.google.errorprone:error_prone_annotations:2.7.1 (31 constraints: ac02d4b2)
+com.google.errorprone:error_prone_annotations:2.7.1 (31 constraints: ba03da27)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -60,19 +60,19 @@ com.palantir.conjure.java.runtime:keystores:8.25.0 (3 constraints: 1a2a6a5e)
 
 com.palantir.deadlines:deadlines:0.16.0 (2 constraints: a11437ac)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.12.0 (2 constraints: 482914e0)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.14.0 (2 constraints: 4a291ae0)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.12.0 (2 constraints: d1239bb2)
+com.palantir.dialogue:dialogue-blocking-channels:6.14.0 (2 constraints: d52303b3)
 
-com.palantir.dialogue:dialogue-clients:6.12.0 (1 constraints: 3b054d3b)
+com.palantir.dialogue:dialogue-clients:6.14.0 (1 constraints: 3d05533b)
 
-com.palantir.dialogue:dialogue-core:6.12.0 (3 constraints: 443d0cb4)
+com.palantir.dialogue:dialogue-core:6.14.0 (3 constraints: 483d78b4)
 
-com.palantir.dialogue:dialogue-futures:6.12.0 (3 constraints: c233c1bb)
+com.palantir.dialogue:dialogue-futures:6.14.0 (3 constraints: c833e5bc)
 
-com.palantir.dialogue:dialogue-serde:6.12.0 (3 constraints: 822ed679)
+com.palantir.dialogue:dialogue-serde:6.14.0 (3 constraints: 862eca7a)
 
-com.palantir.dialogue:dialogue-target:6.12.0 (7 constraints: db78a693)
+com.palantir.dialogue:dialogue-target:6.14.0 (7 constraints: e778049a)
 
 com.palantir.goethe:goethe:0.17.0 (1 constraints: 3a05383b)
 
@@ -100,7 +100,7 @@ com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints
 
 com.palantir.syntactic-paths:syntactic-paths:0.9.0 (2 constraints: 9d137b61)
 
-com.palantir.tokens:auth-tokens:3.20.0 (5 constraints: 6f54cfa2)
+com.palantir.tokens:auth-tokens:3.20.0 (5 constraints: 5f5429a1)
 
 com.palantir.tracing:tracing:6.28.0 (8 constraints: 917e6626)
 
@@ -118,7 +118,7 @@ com.palantir.tritium:tritium-ids:0.104.0 (1 constraints: f80f86a6)
 
 com.palantir.tritium:tritium-metrics:0.111.0 (6 constraints: 6c68761f)
 
-com.palantir.tritium:tritium-registry:0.111.0 (12 constraints: 39ef652a)
+com.palantir.tritium:tritium-registry:0.111.0 (11 constraints: 3bdf40a6)
 
 com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
@@ -152,7 +152,7 @@ joda-time:joda-time:2.14.0 (2 constraints: 671b9a70)
 
 org.apache.commons:commons-lang3:3.19.0 (3 constraints: ff217afa)
 
-org.apache.httpcomponents.client5:httpclient5:5.4.3 (3 constraints: f43937e8)
+org.apache.httpcomponents.client5:httpclient5:5.4.4 (3 constraints: f839e5e9)
 
 org.apache.httpcomponents.core5:httpcore5:5.3.6 (4 constraints: 05488da8)
 
