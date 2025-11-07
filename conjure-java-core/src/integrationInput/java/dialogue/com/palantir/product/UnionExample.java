@@ -33,11 +33,11 @@ import javax.annotation.processing.Generated;
         visible = true,
         defaultImpl = UnionExample.Unknown.class)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = UnionExample.StringVariant.class, name = "stringvariant"),
-    @JsonSubTypes.Type(value = UnionExample.IntVariant.class, name = "intvariant"),
-    @JsonSubTypes.Type(value = UnionExample.ObjectVariant.class, name = "objectvariant"),
-    @JsonSubTypes.Type(value = UnionExample.CollectionVariant.class, name = "collectionvariant"),
-    @JsonSubTypes.Type(value = UnionExample.OptionalVariant.class, name = "optionalvariant")
+    @JsonSubTypes.Type(value = UnionExample.StringVariant.class, name = "stringVariant"),
+    @JsonSubTypes.Type(value = UnionExample.IntVariant.class, name = "intVariant"),
+    @JsonSubTypes.Type(value = UnionExample.ObjectVariant.class, name = "objectVariant"),
+    @JsonSubTypes.Type(value = UnionExample.CollectionVariant.class, name = "collectionVariant"),
+    @JsonSubTypes.Type(value = UnionExample.OptionalVariant.class, name = "optionalVariant")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class UnionExample

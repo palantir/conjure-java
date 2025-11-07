@@ -26,3 +26,6 @@ types:
           unionReservedNames: string
       EmptyUnion:
         union: {}
+      CamelCaseUnion:
+        union:
+          camelCasedField: string

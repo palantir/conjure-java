@@ -85,6 +85,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import sealedunions.com.palantir.product.CamelCaseUnion;
 import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.UnionReservedNames;
 
@@ -920,6 +921,20 @@ public final class WireFormatTests {
     void testSealedInterfaceUnionType_deserialize_javaReserved() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"void\",\"void\":\"test\"}", UnionReservedNames.class))
                 .isEqualTo(UnionReservedNames.void_("test"));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_serialize_CamelCase() throws JsonProcessingException {
+        CamelCaseUnion simpleUnion = CamelCaseUnion.camelCasedField("test");
+        assertThat(mapper.writeValueAsString(simpleUnion))
+                .isEqualTo("{\"type\":\"camelCasedField\",\"camelCasedField\":\"test\"}");
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_deserialize_CamelCase() throws JsonProcessingException {
+        assertThat(mapper.readValue(
+                        "{\"type\":\"camelCasedField\",\"camelCasedField\":\"test\"}", CamelCaseUnion.class))
+                .isEqualTo(CamelCaseUnion.camelCasedField("test"));
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
