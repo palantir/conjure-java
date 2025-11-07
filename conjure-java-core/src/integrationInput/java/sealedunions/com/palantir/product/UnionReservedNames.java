@@ -44,7 +44,7 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = UnionReservedNames.Final.class, name = "final"),
     @JsonSubTypes.Type(value = UnionReservedNames.Throws.class, name = "throws"),
     @JsonSubTypes.Type(value = UnionReservedNames.Static.class, name = "static"),
-    @JsonSubTypes.Type(value = UnionReservedNames.UnionReservedNames_.class, name = "unionreservednames")
+    @JsonSubTypes.Type(value = UnionReservedNames.UnionReservedNames_.class, name = "unionReservedNames")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class UnionReservedNames

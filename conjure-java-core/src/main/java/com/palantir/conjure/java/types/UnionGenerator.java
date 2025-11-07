@@ -231,8 +231,7 @@ public final class UnionGenerator {
                                 "name",
                                 "$S",
                                 // "unknown" is valid here since UnknownVariant is only used as a default
-                                StringUtils.lowerCase(
-                                        memberTypeDef.getFieldName().get())) // non-capitalized
+                                memberTypeDef.getFieldName().get())
                         .build())
                 .toList();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);

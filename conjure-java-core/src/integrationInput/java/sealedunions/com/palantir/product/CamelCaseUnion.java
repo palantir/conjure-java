@@ -29,7 +29,7 @@ import javax.annotation.processing.Generated;
         property = "type",
         visible = true,
         defaultImpl = CamelCaseUnion.Unknown.class)
-@JsonSubTypes(@JsonSubTypes.Type(value = CamelCaseUnion.CamelCasedField.class, name = "camelcasedfield"))
+@JsonSubTypes(@JsonSubTypes.Type(value = CamelCaseUnion.CamelCasedField.class, name = "camelCasedField"))
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedField, CamelCaseUnion.Unknown {
     public static CamelCaseUnion camelCasedField(String value) {
