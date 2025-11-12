@@ -52,10 +52,6 @@ public final class ConjureAnnotations {
 
     /**
      * Returns a {@link ConjureGenerated} annotation with CLASS retention for the given generator class.
-     * This annotation is retained in bytecode and can be used by static analysis tools and error-prone checks.
-     *
-     * <p>Previously returned {@code @Generated} with SOURCE retention. The new annotation uses CLASS retention
-     * to remain visible to tools that analyze compiled bytecode across compilation boundaries.
      */
     public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
         return AnnotationSpec.builder(ConjureGenerated.class)
