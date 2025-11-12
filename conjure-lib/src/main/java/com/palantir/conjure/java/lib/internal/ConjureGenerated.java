@@ -35,5 +35,5 @@ public @interface ConjureGenerated {
      * The fully qualified name of the code generator that produced the annotated type.
      * For example: {@code "com.palantir.conjure.java.types.UnionGenerator"}.
      */
-    String value() default "";
+    String value();
 }
