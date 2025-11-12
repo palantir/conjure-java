@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -11,10 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = BooleanExample.DefaultBuilder.class)
-@Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BooleanExample {
     private final boolean coin;
 
@@ -73,7 +73,7 @@ public final class BooleanExample {
         BooleanExample build();
     }
 
-    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 

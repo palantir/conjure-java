@@ -1,6 +1,7 @@
 package jersey.test.api;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.tokens.auth.BearerToken;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -9,12 +10,11 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import javax.annotation.processing.Generated;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
-@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface CookieService {
     @GET
     @Path("cookies")

@@ -2,10 +2,10 @@ package undertow.com.palantir.another;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificErrors {
     /** An error in a different package. */
     public static final ErrorType DIFFERENT_PACKAGE =

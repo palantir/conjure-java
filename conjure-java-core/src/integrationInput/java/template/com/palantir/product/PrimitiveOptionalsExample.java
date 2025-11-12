@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -24,11 +25,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
 @DoNotLog
 @JsonDeserialize(builder = PrimitiveOptionalsExample.DefaultBuilder.class)
-@Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
 public final class PrimitiveOptionalsExample {
     private final OptionalDouble num;
 
@@ -552,7 +552,7 @@ public final class PrimitiveOptionalsExample {
         Builder aliasMap(@Nonnull MapAliasExample aliasMap);
     }
 
-    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 

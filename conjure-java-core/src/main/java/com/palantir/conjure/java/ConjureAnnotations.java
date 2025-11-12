@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -49,8 +50,15 @@ public final class ConjureAnnotations {
             .addMember("mode", "$T.PROPERTIES", JsonCreator.Mode.class)
             .build();
 
+    /**
+     * Returns a {@link ConjureGenerated} annotation with CLASS retention for the given generator class.
+     * This annotation is retained in bytecode and can be used by static analysis tools and error-prone checks.
+     *
+     * <p>Previously returned {@code @Generated} with SOURCE retention. The new annotation uses CLASS retention
+     * to remain visible to tools that analyze compiled bytecode across compilation boundaries.
+     */
     public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
-        return AnnotationSpec.builder(ClassName.get("javax.annotation.processing", "Generated"))
+        return AnnotationSpec.builder(ConjureGenerated.class)
                 .addMember("value", "$S", clazz.getCanonicalName())
                 .build();
     }

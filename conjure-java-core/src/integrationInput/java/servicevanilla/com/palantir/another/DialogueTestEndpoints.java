@@ -2,6 +2,7 @@ package servicevanilla.com.palantir.another;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
@@ -10,9 +11,8 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueTestEndpoints implements Endpoint {
     /** Returns a mapping from file system id to backing file system configuration. */
     getFileSystems {

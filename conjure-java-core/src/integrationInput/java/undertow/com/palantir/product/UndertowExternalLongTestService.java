@@ -1,11 +1,11 @@
 package undertow.com.palantir.product;
 
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
 import com.palantir.tokens.auth.AuthHeader;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowExternalLongTestService {
     /** @apiNote {@code POST /external-long/testDangerousLong} */
     void testDangerousLong(AuthHeader authHeader, @DoNotLog long dangerousLong);

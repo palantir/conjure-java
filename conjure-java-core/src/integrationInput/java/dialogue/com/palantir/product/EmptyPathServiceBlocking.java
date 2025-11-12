@@ -1,6 +1,7 @@
 package dialogue.com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -15,9 +16,8 @@ import com.palantir.dialogue.TypeMarker;
 import java.lang.Boolean;
 import java.lang.Override;
 import java.lang.String;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceBlocking.Factory.class)
 public interface EmptyPathServiceBlocking {
     /** @apiNote {@code GET /} */

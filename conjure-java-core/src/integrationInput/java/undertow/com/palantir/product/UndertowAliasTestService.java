@@ -1,10 +1,10 @@
 package undertow.com.palantir.product;
 
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.tokens.auth.AuthHeader;
 import java.util.Optional;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowAliasTestService {
     /** @apiNote {@code GET /alias/test} */
     void testOptionalAliasQueryParams(

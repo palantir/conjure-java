@@ -2,6 +2,7 @@ package dialogue.com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -17,9 +18,8 @@ import java.io.InputStream;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Optional;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteBinaryServiceBlocking.Factory.class)
 public interface EteBinaryServiceBlocking {
     /** @apiNote {@code POST /binary} */

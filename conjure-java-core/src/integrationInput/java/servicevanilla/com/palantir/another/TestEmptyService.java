@@ -1,7 +1,7 @@
 package servicevanilla.com.palantir.another;
 
-import javax.annotation.processing.Generated;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 
 /** This service has no endpoints. */
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface TestEmptyService {}

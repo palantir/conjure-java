@@ -1,6 +1,7 @@
 package undertowbinary.test.api;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -11,9 +12,8 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
 import java.util.List;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class TestServiceEndpoints implements UndertowService {
     private final TestService delegate;
 

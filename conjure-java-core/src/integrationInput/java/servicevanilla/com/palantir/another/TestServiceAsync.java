@@ -2,6 +2,7 @@ package servicevanilla.com.palantir.another;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
@@ -34,14 +35,13 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import javax.annotation.processing.Generated;
 import servicevanilla.com.palantir.product.AliasedString;
 import servicevanilla.com.palantir.product.CreateDatasetRequest;
 import servicevanilla.com.palantir.product.datasets.BackingFileSystem;
 import servicevanilla.com.palantir.product.datasets.Dataset;
 
 /** A Markdown description of the service. */
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(TestServiceAsync.Factory.class)
 public interface TestServiceAsync {
     /**

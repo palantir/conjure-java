@@ -1,9 +1,9 @@
 package undertowasync.test.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import javax.annotation.processing.Generated;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface AsyncMarkers {
     /** @apiNote {@code GET /async/marker} */
     ListenableFuture<String> asyncMarker();

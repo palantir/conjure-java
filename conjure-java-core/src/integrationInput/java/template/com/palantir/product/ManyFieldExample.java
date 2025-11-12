@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -19,10 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = ManyFieldExample.DefaultBuilder.class)
-@Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
 public final class ManyFieldExample {
     private final String string;
 
@@ -356,7 +356,7 @@ public final class ManyFieldExample {
         Builder map(String key, String value);
     }
 
-    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 

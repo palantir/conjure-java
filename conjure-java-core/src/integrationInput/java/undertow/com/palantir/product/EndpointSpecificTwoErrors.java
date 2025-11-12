@@ -2,10 +2,10 @@ package undertow.com.palantir.product;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificTwoErrors {
     /** An error in a different namespace. */
     public static final ErrorType DIFFERENT_NAMESPACE =

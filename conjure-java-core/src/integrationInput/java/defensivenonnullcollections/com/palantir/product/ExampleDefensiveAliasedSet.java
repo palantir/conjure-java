@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.AliasGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
 public final class ExampleDefensiveAliasedSet {
     private static final ExampleDefensiveAliasedSet EMPTY = new ExampleDefensiveAliasedSet();
 

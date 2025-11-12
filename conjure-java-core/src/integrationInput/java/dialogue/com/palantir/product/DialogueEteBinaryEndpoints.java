@@ -1,15 +1,15 @@
 package dialogue.com.palantir.product;
 
 import com.google.common.collect.ListMultimap;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueEteBinaryEndpoints implements Endpoint {
     postBinary {
         private final PathTemplate pathTemplate =

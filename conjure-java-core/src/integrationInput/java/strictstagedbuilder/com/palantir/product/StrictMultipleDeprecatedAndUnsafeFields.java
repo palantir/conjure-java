@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -24,11 +25,10 @@ import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
 @DoNotLog
 @JsonDeserialize(builder = StrictMultipleDeprecatedAndUnsafeFields.DefaultBuilder.class)
-@Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
 public final class StrictMultipleDeprecatedAndUnsafeFields {
     private final List<String> myList;
 
@@ -272,7 +272,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         StrictMultipleDeprecatedAndUnsafeFields build();
     }
 
-    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;

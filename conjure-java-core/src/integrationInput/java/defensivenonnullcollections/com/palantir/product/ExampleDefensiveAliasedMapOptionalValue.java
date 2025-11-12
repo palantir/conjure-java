@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -11,9 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.AliasGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
 public final class ExampleDefensiveAliasedMapOptionalValue {
     private static final ExampleDefensiveAliasedMapOptionalValue EMPTY = new ExampleDefensiveAliasedMapOptionalValue();
 

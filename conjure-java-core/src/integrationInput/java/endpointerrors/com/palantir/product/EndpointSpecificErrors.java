@@ -7,13 +7,13 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
 import java.util.Objects;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificErrors {
     /** Docs for an endpoint error. */
     public static final ErrorType ENDPOINT_ERROR =

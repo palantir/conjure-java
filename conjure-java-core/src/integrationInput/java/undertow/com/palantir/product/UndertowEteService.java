@@ -1,6 +1,7 @@
 package undertow.com.palantir.product;
 
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -9,9 +10,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowEteService {
     /**
      * foo bar baz.

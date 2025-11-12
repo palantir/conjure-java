@@ -1,6 +1,7 @@
 package exceptionthrowingdialogueinterfaces.test.api;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -19,9 +20,8 @@ import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureJavaError
 import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceBlocking.Factory.class)
 public interface CookieServiceBlocking {
     /** @apiNote {@code GET /cookies} */

@@ -1,11 +1,11 @@
 package undertownamecollisions.com.palantir.product;
 
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Safe;
 import com.palantir.tokens.auth.AuthHeader;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowNameCollisionService {
     /** @apiNote {@code POST /{runtime}} */
     String int_(

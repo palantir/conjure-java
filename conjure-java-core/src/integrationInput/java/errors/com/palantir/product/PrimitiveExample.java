@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -17,10 +18,9 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = PrimitiveExample.Builder.class)
-@Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
 public final class PrimitiveExample {
     private final String stringVal;
 
@@ -193,7 +193,7 @@ public final class PrimitiveExample {
         return new Builder();
     }
 
-    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;

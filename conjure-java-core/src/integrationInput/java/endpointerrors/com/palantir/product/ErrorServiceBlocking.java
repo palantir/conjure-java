@@ -3,6 +3,7 @@ package endpointerrors.com.palantir.product;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -23,9 +24,8 @@ import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
 import java.util.Optional;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ErrorServiceBlocking.Factory.class)
 public interface ErrorServiceBlocking {
     /** @apiNote {@code POST /errors/basic} */

@@ -1,8 +1,8 @@
 package undertow.com.palantir.product;
 
-import javax.annotation.processing.Generated;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowEmptyPathService {
     /** @apiNote {@code GET /} */
     boolean emptyPath();

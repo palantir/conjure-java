@@ -3,11 +3,11 @@ package dialogue.com.palantir.another;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Nullable;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
     /** Different package. */
     public static final ErrorType DIFFERENT_PACKAGE_ERROR =

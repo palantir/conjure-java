@@ -2,6 +2,7 @@ package servicevanilla.com.palantir.another;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -29,13 +30,12 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
-import javax.annotation.processing.Generated;
 import servicevanilla.com.palantir.product.AliasedString;
 import servicevanilla.com.palantir.product.CreateDatasetRequest;
 import servicevanilla.com.palantir.product.datasets.BackingFileSystem;
 import servicevanilla.com.palantir.product.datasets.Dataset;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class TestServiceEndpoints implements UndertowService {
     private final TestService delegate;
 

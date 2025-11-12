@@ -1,12 +1,12 @@
 package asyncrequest.com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import java.util.Optional;
 import java.util.OptionalInt;
-import javax.annotation.processing.Generated;
 
-@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowAsyncRequestProcessingTestService {
     /** @apiNote {@code GET /async/delay} */
     ListenableFuture<String> delay(OptionalInt delayMillis);
