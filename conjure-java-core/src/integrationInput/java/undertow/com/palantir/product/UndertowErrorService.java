@@ -1,11 +1,11 @@
 package undertow.com.palantir.product;
 
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.tokens.auth.AuthHeader;
 import java.util.Optional;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowErrorService {
     /**
      * @apiNote {@code POST /errors/basic}

@@ -2,13 +2,13 @@ package defensivenullablecollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 /** This class should remain unchanged with the defensiveCollections flag. */
-@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class ExampleDefensiveAliasedString implements Comparable<ExampleDefensiveAliasedString> {
     private final String value;
 

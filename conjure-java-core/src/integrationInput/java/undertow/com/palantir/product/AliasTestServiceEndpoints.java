@@ -2,7 +2,6 @@ package undertow.com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
@@ -19,8 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class AliasTestServiceEndpoints implements UndertowService {
     private final UndertowAliasTestService delegate;
 

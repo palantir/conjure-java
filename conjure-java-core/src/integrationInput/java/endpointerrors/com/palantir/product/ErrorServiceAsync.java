@@ -3,7 +3,6 @@ package endpointerrors.com.palantir.product;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -24,8 +23,9 @@ import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
 import java.util.Optional;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ErrorServiceAsync.Factory.class)
 public interface ErrorServiceAsync {
     /** @apiNote {@code POST /errors/basic} */

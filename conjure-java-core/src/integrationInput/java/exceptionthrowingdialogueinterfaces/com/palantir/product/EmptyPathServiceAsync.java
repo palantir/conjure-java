@@ -2,7 +2,6 @@ package exceptionthrowingdialogueinterfaces.com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -18,8 +17,9 @@ import com.palantir.dialogue.TypeMarker;
 import java.lang.Boolean;
 import java.lang.Override;
 import java.lang.String;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceAsync.Factory.class)
 public interface EmptyPathServiceAsync {
     /** @apiNote {@code GET /} */

@@ -3,7 +3,6 @@ package template.com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.errorprone.annotations.Immutable;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import java.util.Arrays;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 /**
  * This class is used instead of a native enum to support unknown values. Rather than throw an exception, the
@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
  *
  * <p>There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
-@ConjureGenerated("com.palantir.conjure.java.types.EnumGenerator")
+@Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
 @Immutable
 public final class LargeEnumExample {
@@ -693,7 +693,7 @@ public final class LargeEnumExample {
         return values;
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.EnumGenerator")
+    @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public enum Value {
         E0,
 
@@ -900,7 +900,7 @@ public final class LargeEnumExample {
         UNKNOWN
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.EnumGenerator")
+    @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public interface Visitor<T> {
         T visitE0();
 

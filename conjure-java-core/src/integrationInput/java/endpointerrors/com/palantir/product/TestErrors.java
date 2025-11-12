@@ -7,14 +7,14 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
+@Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class TestErrors {
     public static final ErrorType COMPLICATED_PARAMETERS =
             ErrorType.create(ErrorType.Code.INTERNAL, "Test:ComplicatedParameters");

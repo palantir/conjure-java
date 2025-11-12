@@ -30,9 +30,11 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Unsafe
+@Generated("com.palantir.conjure.java.types.UnionGenerator")
 @ConjureGenerated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
     private final Base value;

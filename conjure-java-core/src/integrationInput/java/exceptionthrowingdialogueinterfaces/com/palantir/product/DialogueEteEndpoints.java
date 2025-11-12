@@ -2,7 +2,6 @@ package exceptionthrowingdialogueinterfaces.com.palantir.product;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
@@ -10,8 +9,9 @@ import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Set;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueEteEndpoints implements Endpoint {
     /**
      * foo bar baz.

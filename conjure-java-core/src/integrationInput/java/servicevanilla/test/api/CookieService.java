@@ -1,9 +1,9 @@
 package servicevanilla.test.api;
 
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.tokens.auth.BearerToken;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface CookieService {
     /** @apiNote {@code GET /cookies} */
     void eatCookies(BearerToken token);

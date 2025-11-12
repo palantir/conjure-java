@@ -22,8 +22,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
+@Generated("com.palantir.conjure.java.types.UnionGenerator")
 @ConjureGenerated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionWithExternal {
     private final Base value;

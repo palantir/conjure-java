@@ -26,7 +26,9 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
+@Generated("com.palantir.conjure.java.types.UnionGenerator")
 @ConjureGenerated("com.palantir.conjure.java.types.UnionGenerator")
 public final class ExampleDefensiveCollectionSetsUnion {
     private final Base value;

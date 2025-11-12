@@ -3,7 +3,6 @@ package exceptionthrowingdialogueinterfaces.com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.errorprone.annotations.Immutable;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -16,6 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 /**
  * This class is used instead of a native enum to support unknown values. Rather than throw an exception, the
@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
  *
  * <p>There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
-@ConjureGenerated("com.palantir.conjure.java.types.EnumGenerator")
+@Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
 @Immutable
 public final class SimpleEnum {
@@ -92,14 +92,14 @@ public final class SimpleEnum {
         return values;
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.EnumGenerator")
+    @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public enum Value {
         VALUE,
 
         UNKNOWN
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.EnumGenerator")
+    @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public interface Visitor<T> {
         T visitValue();
 

@@ -2,14 +2,14 @@ package template.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class OptionalSetAliasExample {
     private static final OptionalSetAliasExample EMPTY = new OptionalSetAliasExample();
 

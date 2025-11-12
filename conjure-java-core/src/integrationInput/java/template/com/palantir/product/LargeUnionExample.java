@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
+@Generated("com.palantir.conjure.java.types.UnionGenerator")
 @ConjureGenerated("com.palantir.conjure.java.types.UnionGenerator")
 public final class LargeUnionExample {
     private final Base value;

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -20,10 +19,11 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 @Safe
 @JsonDeserialize(builder = SafeExternalLongExample.DefaultBuilder.class)
-@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
+@Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class SafeExternalLongExample {
     private final long safeExternalLongValue;
 
@@ -203,7 +203,7 @@ public final class SafeExternalLongExample {
         Builder safeExternalLongSet(@Safe long safeExternalLongSet);
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 

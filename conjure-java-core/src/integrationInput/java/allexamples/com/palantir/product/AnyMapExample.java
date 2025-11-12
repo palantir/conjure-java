@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -16,9 +15,10 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = AnyMapExample.Builder.class)
-@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
+@Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class AnyMapExample {
     private final Map<String, Object> items;
 
@@ -91,7 +91,7 @@ public final class AnyMapExample {
         return new Builder();
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
         boolean _buildInvoked;
 

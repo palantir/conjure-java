@@ -1,7 +1,6 @@
 package asyncrequest.com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -11,11 +10,12 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.util.Optional;
 import java.util.OptionalInt;
+import javax.annotation.processing.Generated;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
-@ConjureGenerated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface AsyncRequestProcessingTestService {
     @GET
     @Path("async/delay")

@@ -1,15 +1,15 @@
 package endpointerrors.com.palantir.product;
 
 import com.palantir.conjure.java.api.errors.EndpointServiceException;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
-@ConjureGenerated("com.palantir.conjure.java.types.EndpointErrorGenerator")
+@Generated("com.palantir.conjure.java.types.EndpointErrorGenerator")
 public final class EndpointSpecificServerErrors {
     private EndpointSpecificServerErrors() {}
 

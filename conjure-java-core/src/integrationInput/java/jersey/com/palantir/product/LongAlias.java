@@ -2,10 +2,10 @@ package jersey.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class LongAlias {
     private final long value;
 

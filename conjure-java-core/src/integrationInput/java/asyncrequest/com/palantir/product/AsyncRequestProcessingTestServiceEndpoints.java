@@ -3,7 +3,6 @@ package asyncrequest.com.palantir.product;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
@@ -24,8 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class AsyncRequestProcessingTestServiceEndpoints implements UndertowService {
     private final UndertowAsyncRequestProcessingTestService delegate;
 

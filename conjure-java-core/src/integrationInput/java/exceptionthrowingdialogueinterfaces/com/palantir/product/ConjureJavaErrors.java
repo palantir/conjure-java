@@ -8,12 +8,12 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
+@Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureJavaErrors {
     /** Failed to compile Conjure definition to Java code. */
     public static final ErrorType JAVA_COMPILATION_FAILED =

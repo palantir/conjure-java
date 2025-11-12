@@ -2,14 +2,14 @@ package excludeemptycollections.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class CollectionsTestAliasMap {
     private static final CollectionsTestAliasMap EMPTY = new CollectionsTestAliasMap();
 

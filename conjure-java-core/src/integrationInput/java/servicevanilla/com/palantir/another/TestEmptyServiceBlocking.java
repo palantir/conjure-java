@@ -1,6 +1,5 @@
 package servicevanilla.com.palantir.another;
 
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.DialogueService;
@@ -11,9 +10,10 @@ import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import java.lang.Override;
 import java.lang.String;
+import javax.annotation.processing.Generated;
 
 /** This service has no endpoints. */
-@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(TestEmptyServiceBlocking.Factory.class)
 public interface TestEmptyServiceBlocking {
     /** Creates a synchronous/blocking client for a TestEmptyService service. */

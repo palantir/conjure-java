@@ -3,16 +3,16 @@ package errors.com.palantir.product;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
-@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
+@Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
     /** Cause argument conflicts with reserved Throwable cause parameter. */
     public static final ErrorType CONFLICTING_CAUSE_SAFE_ARG =

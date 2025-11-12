@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -17,10 +16,11 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 @DoNotLog
 @JsonDeserialize(builder = AliasAsMapKeyExample.Builder.class)
-@ConjureGenerated("com.palantir.conjure.java.types.BeanGenerator")
+@Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class AliasAsMapKeyExample {
     private final Map<StringAliasExample, ManyFieldExample> strings;
 
@@ -174,7 +174,7 @@ public final class AliasAsMapKeyExample {
         return new Builder();
     }
 
-    @ConjureGenerated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
         boolean _buildInvoked;
 

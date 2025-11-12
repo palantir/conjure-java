@@ -1,7 +1,6 @@
 package jakartaservice.com.palantir.another;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.logsafe.Safe;
 import com.palantir.ri.ResourceIdentifier;
@@ -28,12 +27,13 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 /** A Markdown description of the service. */
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
-@ConjureGenerated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface TestService {
     /** Returns a mapping from file system id to backing file system configuration. */
     @GET

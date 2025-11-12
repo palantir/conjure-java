@@ -50,10 +50,16 @@ public final class ConjureAnnotations {
             .addMember("mode", "$T.PROPERTIES", JsonCreator.Mode.class)
             .build();
 
+    public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
+        return AnnotationSpec.builder(ClassName.get("javax.annotation.processing", "Generated"))
+                .addMember("value", "$S", clazz.getCanonicalName())
+                .build();
+    }
+
     /**
      * Returns a {@link ConjureGenerated} annotation with CLASS retention for the given generator class.
      */
-    public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
+    public static AnnotationSpec getConjureGeneratedBytecodeAnnotation(Class<?> clazz) {
         return AnnotationSpec.builder(ConjureGenerated.class)
                 .addMember("value", "$S", clazz.getCanonicalName())
                 .build();

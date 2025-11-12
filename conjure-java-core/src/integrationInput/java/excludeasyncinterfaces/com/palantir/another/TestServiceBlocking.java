@@ -2,7 +2,6 @@ package excludeasyncinterfaces.com.palantir.another;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
@@ -39,9 +38,10 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 /** A Markdown description of the service. */
-@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(TestServiceBlocking.Factory.class)
 public interface TestServiceBlocking {
     /**

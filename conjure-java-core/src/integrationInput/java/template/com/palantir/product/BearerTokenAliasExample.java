@@ -2,15 +2,15 @@ package template.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.processing.Generated;
 
 @DoNotLog
-@ConjureGenerated("com.palantir.conjure.java.types.AliasGenerator")
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class BearerTokenAliasExample {
     private final BearerToken value;
 

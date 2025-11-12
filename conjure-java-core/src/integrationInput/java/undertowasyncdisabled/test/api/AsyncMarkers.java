@@ -1,9 +1,9 @@
 package undertowasyncdisabled.test.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface AsyncMarkers {
     /** @apiNote {@code GET /async/marker} */
     String asyncMarker();

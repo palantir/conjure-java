@@ -1,7 +1,6 @@
 package externalfallbacktypes.com.palantir.product.external;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -19,8 +18,9 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ServiceUsingExternalTypesBlocking.Factory.class)
 public interface ServiceUsingExternalTypesBlocking {
     /** @apiNote {@code PUT /external/{path}} */

@@ -2,7 +2,6 @@ package undertownamecollisions.com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
@@ -24,8 +23,9 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class NameCollisionServiceEndpoints implements UndertowService {
     private final UndertowNameCollisionService delegate;
 

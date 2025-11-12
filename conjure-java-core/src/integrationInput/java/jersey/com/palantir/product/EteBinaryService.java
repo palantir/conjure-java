@@ -1,7 +1,6 @@
 package jersey.com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.tokens.auth.AuthHeader;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -15,11 +14,12 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 import java.util.Optional;
+import javax.annotation.processing.Generated;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
-@ConjureGenerated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface EteBinaryService {
     @POST
     @Path("binary")

@@ -7,11 +7,11 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
-import com.palantir.conjure.java.lib.internal.ConjureGenerated;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import javax.annotation.processing.Generated;
 
-@ConjureGenerated("com.palantir.conjure.java.types.ErrorGenerator")
+@Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class EndpointSpecificTwoErrors {
     /** An error in a different namespace. */
     public static final ErrorType DIFFERENT_NAMESPACE =
