@@ -60,4 +60,22 @@ public final class EndpointSpecificTwoErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class DifferentNamespaceTestUtility {
+        public static DifferentNamespaceSerializableError createSerializableError(
+                String errorInstanceId, DifferentNamespaceParameters parameters) {
+            return new DifferentNamespaceSerializableError(
+                    DIFFERENT_NAMESPACE.code().name(), DIFFERENT_NAMESPACE.name(), errorInstanceId, parameters);
+        }
+
+        public static DifferentNamespaceException createException(
+                String errorInstanceId, DifferentNamespaceParameters parameters) {
+            return new DifferentNamespaceException(
+                    createSerializableError(errorInstanceId, parameters), DIFFERENT_NAMESPACE.httpErrorCode());
+        }
+    }
 }

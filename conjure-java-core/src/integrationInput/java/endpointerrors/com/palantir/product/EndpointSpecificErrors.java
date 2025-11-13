@@ -66,4 +66,22 @@ public final class EndpointSpecificErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class EndpointErrorTestUtility {
+        public static EndpointErrorSerializableError createSerializableError(
+                String errorInstanceId, EndpointErrorParameters parameters) {
+            return new EndpointErrorSerializableError(
+                    ENDPOINT_ERROR.code().name(), ENDPOINT_ERROR.name(), errorInstanceId, parameters);
+        }
+
+        public static EndpointErrorException createException(
+                String errorInstanceId, EndpointErrorParameters parameters) {
+            return new EndpointErrorException(
+                    createSerializableError(errorInstanceId, parameters), ENDPOINT_ERROR.httpErrorCode());
+        }
+    }
 }

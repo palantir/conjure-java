@@ -160,4 +160,57 @@ public final class TestErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class ComplicatedParametersTestUtility {
+        public static ComplicatedParametersSerializableError createSerializableError(
+                String errorInstanceId, ComplicatedParametersParameters parameters) {
+            return new ComplicatedParametersSerializableError(
+                    COMPLICATED_PARAMETERS.code().name(), COMPLICATED_PARAMETERS.name(), errorInstanceId, parameters);
+        }
+
+        public static ComplicatedParametersException createException(
+                String errorInstanceId, ComplicatedParametersParameters parameters) {
+            return new ComplicatedParametersException(
+                    createSerializableError(errorInstanceId, parameters), COMPLICATED_PARAMETERS.httpErrorCode());
+        }
+    }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class InvalidArgumentTestUtility {
+        public static InvalidArgumentSerializableError createSerializableError(
+                String errorInstanceId, InvalidArgumentParameters parameters) {
+            return new InvalidArgumentSerializableError(
+                    INVALID_ARGUMENT.code().name(), INVALID_ARGUMENT.name(), errorInstanceId, parameters);
+        }
+
+        public static InvalidArgumentException createException(
+                String errorInstanceId, InvalidArgumentParameters parameters) {
+            return new InvalidArgumentException(
+                    createSerializableError(errorInstanceId, parameters), INVALID_ARGUMENT.httpErrorCode());
+        }
+    }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class NotFoundTestUtility {
+        public static NotFoundSerializableError createSerializableError(
+                String errorInstanceId, NotFoundParameters parameters) {
+            return new NotFoundSerializableError(
+                    NOT_FOUND.code().name(), NOT_FOUND.name(), errorInstanceId, parameters);
+        }
+
+        public static NotFoundException createException(String errorInstanceId, NotFoundParameters parameters) {
+            return new NotFoundException(
+                    createSerializableError(errorInstanceId, parameters), NOT_FOUND.httpErrorCode());
+        }
+    }
 }
