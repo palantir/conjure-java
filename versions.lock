@@ -78,7 +78,7 @@ com.palantir.goethe:goethe:0.17.0 (1 constraints: 3a05383b)
 
 com.palantir.human-readable-types:human-readable-types:1.7.0 (1 constraints: 0a050536)
 
-com.palantir.javapoet:javapoet:0.7.0 (2 constraints: cf109cd1)
+com.palantir.javapoet:javapoet:0.8.0 (2 constraints: d010c2d1)
 
 com.palantir.nylon:nylon-threads:0.4.0 (1 constraints: 0c10fa91)
 
