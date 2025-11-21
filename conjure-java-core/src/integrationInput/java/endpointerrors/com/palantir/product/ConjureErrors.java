@@ -67,4 +67,26 @@ public final class ConjureErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class ConflictingCauseSafeArgErrTestUtility {
+        public static ConflictingCauseSafeArgErrSerializableError createSerializableError(
+                String errorInstanceId, ConflictingCauseSafeArgErrParameters parameters) {
+            return new ConflictingCauseSafeArgErrSerializableError(
+                    CONFLICTING_CAUSE_SAFE_ARG_ERR.code().name(),
+                    CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
+                    errorInstanceId,
+                    parameters);
+        }
+
+        public static ConflictingCauseSafeArgErrException createException(
+                String errorInstanceId, ConflictingCauseSafeArgErrParameters parameters) {
+            return new ConflictingCauseSafeArgErrException(
+                    createSerializableError(errorInstanceId, parameters),
+                    CONFLICTING_CAUSE_SAFE_ARG_ERR.httpErrorCode());
+        }
+    }
 }

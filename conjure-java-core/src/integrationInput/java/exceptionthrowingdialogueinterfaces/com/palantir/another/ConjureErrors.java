@@ -81,4 +81,22 @@ public final class ConjureErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class DifferentPackageErrorTestUtility {
+        public static DifferentPackageErrorSerializableError createSerializableError(
+                String errorInstanceId, DifferentPackageErrorParameters parameters) {
+            return new DifferentPackageErrorSerializableError(
+                    DIFFERENT_PACKAGE_ERROR.code().name(), DIFFERENT_PACKAGE_ERROR.name(), errorInstanceId, parameters);
+        }
+
+        public static DifferentPackageErrorException createException(
+                String errorInstanceId, DifferentPackageErrorParameters parameters) {
+            return new DifferentPackageErrorException(
+                    createSerializableError(errorInstanceId, parameters), DIFFERENT_PACKAGE_ERROR.httpErrorCode());
+        }
+    }
 }

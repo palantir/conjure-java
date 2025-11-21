@@ -573,4 +573,103 @@ public final class ConjureErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class ConflictingCauseSafeArgTestUtility {
+        public static ConflictingCauseSafeArgSerializableError createSerializableError(
+                String errorInstanceId, ConflictingCauseSafeArgParameters parameters) {
+            return new ConflictingCauseSafeArgSerializableError(
+                    CONFLICTING_CAUSE_SAFE_ARG.code().name(),
+                    CONFLICTING_CAUSE_SAFE_ARG.name(),
+                    errorInstanceId,
+                    parameters);
+        }
+
+        public static ConflictingCauseSafeArgException createException(
+                String errorInstanceId, ConflictingCauseSafeArgParameters parameters) {
+            return new ConflictingCauseSafeArgException(
+                    createSerializableError(errorInstanceId, parameters), CONFLICTING_CAUSE_SAFE_ARG.httpErrorCode());
+        }
+    }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class ConflictingCauseUnsafeArgTestUtility {
+        public static ConflictingCauseUnsafeArgSerializableError createSerializableError(
+                String errorInstanceId, ConflictingCauseUnsafeArgParameters parameters) {
+            return new ConflictingCauseUnsafeArgSerializableError(
+                    CONFLICTING_CAUSE_UNSAFE_ARG.code().name(),
+                    CONFLICTING_CAUSE_UNSAFE_ARG.name(),
+                    errorInstanceId,
+                    parameters);
+        }
+
+        public static ConflictingCauseUnsafeArgException createException(
+                String errorInstanceId, ConflictingCauseUnsafeArgParameters parameters) {
+            return new ConflictingCauseUnsafeArgException(
+                    createSerializableError(errorInstanceId, parameters), CONFLICTING_CAUSE_UNSAFE_ARG.httpErrorCode());
+        }
+    }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class ErrorWithComplexArgsTestUtility {
+        public static ErrorWithComplexArgsSerializableError createSerializableError(
+                String errorInstanceId, ErrorWithComplexArgsParameters parameters) {
+            return new ErrorWithComplexArgsSerializableError(
+                    ERROR_WITH_COMPLEX_ARGS.code().name(), ERROR_WITH_COMPLEX_ARGS.name(), errorInstanceId, parameters);
+        }
+
+        public static ErrorWithComplexArgsException createException(
+                String errorInstanceId, ErrorWithComplexArgsParameters parameters) {
+            return new ErrorWithComplexArgsException(
+                    createSerializableError(errorInstanceId, parameters), ERROR_WITH_COMPLEX_ARGS.httpErrorCode());
+        }
+    }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class InvalidServiceDefinitionTestUtility {
+        public static InvalidServiceDefinitionSerializableError createSerializableError(
+                String errorInstanceId, InvalidServiceDefinitionParameters parameters) {
+            return new InvalidServiceDefinitionSerializableError(
+                    INVALID_SERVICE_DEFINITION.code().name(),
+                    INVALID_SERVICE_DEFINITION.name(),
+                    errorInstanceId,
+                    parameters);
+        }
+
+        public static InvalidServiceDefinitionException createException(
+                String errorInstanceId, InvalidServiceDefinitionParameters parameters) {
+            return new InvalidServiceDefinitionException(
+                    createSerializableError(errorInstanceId, parameters), INVALID_SERVICE_DEFINITION.httpErrorCode());
+        }
+    }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class InvalidTypeDefinitionTestUtility {
+        public static InvalidTypeDefinitionSerializableError createSerializableError(
+                String errorInstanceId, InvalidTypeDefinitionParameters parameters) {
+            return new InvalidTypeDefinitionSerializableError(
+                    INVALID_TYPE_DEFINITION.code().name(), INVALID_TYPE_DEFINITION.name(), errorInstanceId, parameters);
+        }
+
+        public static InvalidTypeDefinitionException createException(
+                String errorInstanceId, InvalidTypeDefinitionParameters parameters) {
+            return new InvalidTypeDefinitionException(
+                    createSerializableError(errorInstanceId, parameters), INVALID_TYPE_DEFINITION.httpErrorCode());
+        }
+    }
 }

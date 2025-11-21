@@ -179,7 +179,8 @@ public final class ErrorGenerator implements Generator {
             typeBuilder
                     .addTypes(generateErrorParameterRecords(errorTypeDefinitions, typeMapper))
                     .addTypes(generateSerializableErrors(errorTypeDefinitions))
-                    .addTypes(generateRemoteExceptionTypes(errorsClassName, errorTypeDefinitions));
+                    .addTypes(generateRemoteExceptionTypes(errorsClassName, errorTypeDefinitions))
+                    .addTypes(generateErrorTestUtilities(errorsClassName, errorTypeDefinitions));
         }
 
         return JavaFile.builder(conjurePackage, typeBuilder.build())
@@ -320,6 +321,70 @@ public final class ErrorGenerator implements Generator {
                     typeMapper, fieldDef, false));
         }
         return parametersRecordBuilder.recordConstructor(ctorBuilder.build()).build();
+    }
+
+    private static List<TypeSpec> generateErrorTestUtilities(
+            ClassName errorsClassName, List<ErrorDefinition> errorDefinitions) {
+        return errorDefinitions.stream()
+                .map(def -> ErrorGenerator.generateErrorTestUtility(errorsClassName, def))
+                .toList();
+    }
+
+    private static TypeSpec generateErrorTestUtility(ClassName errorsClassName, ErrorDefinition errorDefinition) {
+        String testUtilityClassName = errorDefinition.getErrorName().getName() + "TestUtility";
+        ClassName serializableErrorClass =
+                errorsClassName.nestedClass(errorDefinition.getErrorName().getName() + "SerializableError");
+        ClassName exceptionErrorClass =
+                errorsClassName.nestedClass(errorDefinition.getErrorName().getName() + "Exception");
+        String errorTypeName = CaseFormat.UPPER_CAMEL.to(
+                CaseFormat.UPPER_UNDERSCORE, errorDefinition.getErrorName().getName());
+        MethodSpec createSerializableError = MethodSpec.methodBuilder("createSerializableError")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(serializableErrorClass)
+                .addParameter(
+                        ParameterSpec.builder(String.class, "errorInstanceId").build())
+                .addParameter(ParameterSpec.builder(
+                                errorsClassName.nestedClass(
+                                        ErrorGenerationUtils.errorParametersClassName(errorDefinition)),
+                                "parameters")
+                        .build())
+                .addCode(CodeBlock.builder()
+                        .addStatement(
+                                "return new $T($L.code().name(), $L.name(), $L, $L)",
+                                serializableErrorClass,
+                                errorTypeName,
+                                errorTypeName,
+                                "errorInstanceId",
+                                "parameters")
+                        .build())
+                .build();
+        MethodSpec createException = MethodSpec.methodBuilder("createException")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(exceptionErrorClass)
+                .addParameter(
+                        ParameterSpec.builder(String.class, "errorInstanceId").build())
+                .addParameter(ParameterSpec.builder(
+                                errorsClassName.nestedClass(
+                                        ErrorGenerationUtils.errorParametersClassName(errorDefinition)),
+                                "parameters")
+                        .build())
+                .addCode(CodeBlock.builder()
+                        .addStatement(
+                                "return new $T(createSerializableError($L, $L), $L.httpErrorCode())",
+                                exceptionErrorClass,
+                                "errorInstanceId",
+                                "parameters",
+                                errorTypeName)
+                        .build())
+                .build();
+        return TypeSpec.classBuilder(testUtilityClassName)
+                .addJavadoc(
+                        "This utility class is provided to make creating error-specific exceptions easier for tests."
+                                + " It should not be used outside of tests!")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addMethod(createSerializableError)
+                .addMethod(createException)
+                .build();
     }
 
     private static MethodSpec generateExceptionFactory(

@@ -60,4 +60,22 @@ public final class EndpointSpecificErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class DifferentPackageTestUtility {
+        public static DifferentPackageSerializableError createSerializableError(
+                String errorInstanceId, DifferentPackageParameters parameters) {
+            return new DifferentPackageSerializableError(
+                    DIFFERENT_PACKAGE.code().name(), DIFFERENT_PACKAGE.name(), errorInstanceId, parameters);
+        }
+
+        public static DifferentPackageException createException(
+                String errorInstanceId, DifferentPackageParameters parameters) {
+            return new DifferentPackageException(
+                    createSerializableError(errorInstanceId, parameters), DIFFERENT_PACKAGE.httpErrorCode());
+        }
+    }
 }

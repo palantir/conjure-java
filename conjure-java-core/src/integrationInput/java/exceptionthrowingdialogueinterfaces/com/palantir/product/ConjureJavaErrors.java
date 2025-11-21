@@ -81,4 +81,22 @@ public final class ConjureJavaErrors {
             return error;
         }
     }
+
+    /**
+     * This utility class is provided to make creating error-specific exceptions easier for tests. It should not be used
+     * outside of tests!
+     */
+    public static final class JavaCompilationFailedTestUtility {
+        public static JavaCompilationFailedSerializableError createSerializableError(
+                String errorInstanceId, JavaCompilationFailedParameters parameters) {
+            return new JavaCompilationFailedSerializableError(
+                    JAVA_COMPILATION_FAILED.code().name(), JAVA_COMPILATION_FAILED.name(), errorInstanceId, parameters);
+        }
+
+        public static JavaCompilationFailedException createException(
+                String errorInstanceId, JavaCompilationFailedParameters parameters) {
+            return new JavaCompilationFailedException(
+                    createSerializableError(errorInstanceId, parameters), JAVA_COMPILATION_FAILED.httpErrorCode());
+        }
+    }
 }
