@@ -57,8 +57,7 @@ public final class ParameterizedConjureGenerationTest {
     @MethodSource("getTestCases")
     @Order(1)
     void testGeneratedCode(ParameterizedTestCase testCase) throws IOException {
-        @SuppressWarnings("for-rollout:deprecation")
-        ConjureDefinition def =
+                ConjureDefinition def =
                 Conjure.parse(testCase.files().stream().map(Path::toFile).toList());
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(), testCase.generators(), testCase.options())

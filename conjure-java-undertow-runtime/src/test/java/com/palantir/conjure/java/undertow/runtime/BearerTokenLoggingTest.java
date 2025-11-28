@@ -101,7 +101,6 @@ public class BearerTokenLoggingTest {
         runTest(SESSION_TOKEN, USER_ID, SESSION_ID, null);
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testCookieAuth() throws Exception {
         handler = new LoggingContextHandler(httpServerExchange -> {

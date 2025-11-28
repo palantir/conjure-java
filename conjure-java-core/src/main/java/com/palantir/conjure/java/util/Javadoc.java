@@ -57,8 +57,7 @@ public final class Javadoc {
             })
             .build();
 
-    @SuppressWarnings("for-rollout:deprecation")
-    public static String render(Documentation documentation) {
+        public static String render(Documentation documentation) {
         String rawDocumentation = StringUtils.stripToEmpty(documentation.get());
         if (StringUtils.isBlank(rawDocumentation)) {
             return "";
