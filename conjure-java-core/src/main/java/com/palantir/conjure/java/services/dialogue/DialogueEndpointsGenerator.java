@@ -160,11 +160,16 @@ final class DialogueEndpointsGenerator {
 
     // TODO(rfink): Integrate/consolidate with checking code in PathDefinition class
     private static CodeBlock pathTemplateInitializer(HttpPath path) {
+
+        // We want to get all the different segments in the path template, separating variables from fixed segments.
+        // In some legacy cases, the template might contain more complex variables e.g. {var:.*},
+        //   so we can't simply check for { and } in the raw templates
+        // Instead, we parse the URI, and interpolate it back with the variable names wrapped in ( and )
+        // We use ( and ) to denote variables to avoid clashing with valid path characters,
+        //   as well as avoiding URI encoding of e.g. { and }
         UriTemplate uriTemplate = new UriTemplate(path.get());
         Splitter splitter = Splitter.on('/');
 
-        // Using ( and ) to denote variables to avoid clashing with valid path characters,
-        //   as well as avoiding URI encoding of e.g. { and }
         String normalizedTemplate = uriTemplate.createURI(uriTemplate.getTemplateVariables().stream()
                 .collect(Collectors.toMap(var -> var, var -> "(" + var + ")")));
         Iterable<String> rawSegments = splitter.split(normalizedTemplate);
