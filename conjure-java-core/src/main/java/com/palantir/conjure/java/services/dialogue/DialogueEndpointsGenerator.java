@@ -167,6 +167,10 @@ final class DialogueEndpointsGenerator {
         // Instead, we parse the URI, and interpolate it back with the variable names wrapped in ( and )
         // We use ( and ) to denote variables to avoid clashing with valid path characters,
         //   as well as avoiding URI encoding of e.g. { and }
+        // We were previously relying on UriTemplateParser's normalizedTemplate, but that class is private
+        //   and normalizedTemplate doesn't fit our needs anymore as of https://github.com/eclipse-ee4j/jersey/pull/5379
+        //   as it now yields e.g. /foo/{{var}} for /foo/{var}/bar, or /foo/{{var:.}} for /foo/{var:.+},
+        //   which is probably a bug (but one that's internal to Jersey)
         UriTemplate uriTemplate = new UriTemplate(path.get());
         Splitter splitter = Splitter.on('/');
 
