@@ -165,8 +165,13 @@ final class DialogueEndpointsGenerator {
         // In some legacy cases, the template might contain more complex variables e.g. {var:.*},
         //   so we can't simply check for { and } in the raw templates
         // Instead, we parse the URI, and interpolate it back with the variable names wrapped in ( and )
+        //
         // We use ( and ) to denote variables to avoid clashing with valid path characters,
         //   as well as avoiding URI encoding of e.g. { and }
+        // While ( and ) are theoretically valid path characters, Conjure's spec forbids them, and
+        //   this is validated by com.palantir.conjure.defs.validator.HttpPathValidator
+        // See also https://github.com/palantir/conjure/blob/master/docs/spec/conjure_definitions.md#pathstring
+        //
         // We were previously relying on UriTemplateParser's normalizedTemplate, but that class is private
         //   and normalizedTemplate doesn't fit our needs anymore as of https://github.com/eclipse-ee4j/jersey/pull/5379
         //   as it now yields e.g. /foo/{{var}} for /foo/{var}/bar, or /foo/{{var:.}} for /foo/{var:.+},
