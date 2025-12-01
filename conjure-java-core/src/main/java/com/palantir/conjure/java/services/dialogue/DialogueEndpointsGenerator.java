@@ -41,8 +41,9 @@ import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
-import org.glassfish.jersey.uri.internal.UriTemplateParser;
+import org.glassfish.jersey.uri.UriTemplate;
 
 final class DialogueEndpointsGenerator {
     private final Options options;
@@ -159,9 +160,14 @@ final class DialogueEndpointsGenerator {
 
     // TODO(rfink): Integrate/consolidate with checking code in PathDefinition class
     private static CodeBlock pathTemplateInitializer(HttpPath path) {
-        UriTemplateParser uriTemplateParser = new UriTemplateParser(path.get());
+        UriTemplate uriTemplate = new UriTemplate(path.get());
         Splitter splitter = Splitter.on('/');
-        Iterable<String> rawSegments = splitter.split(uriTemplateParser.getNormalizedTemplate());
+
+        // Using ( and ) to denote variables to avoid clashing with valid path characters,
+        //   as well as avoiding URI encoding of e.g. { and }
+        String normalizedTemplate = uriTemplate.createURI(uriTemplate.getTemplateVariables().stream()
+                .collect(Collectors.toMap(var -> var, var -> "(" + var + ")")));
+        Iterable<String> rawSegments = splitter.split(normalizedTemplate);
 
         CodeBlock.Builder pathTemplateBuilder = CodeBlock.builder().add("$T.builder()", PathTemplate.class);
 
@@ -170,7 +176,7 @@ final class DialogueEndpointsGenerator {
                 continue; // avoid empty segments; typically the first segment is empty
             }
 
-            if (segment.startsWith("{") && segment.endsWith("}")) {
+            if (segment.startsWith("(") && segment.endsWith(")")) {
                 pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 1));
             } else {
                 pathTemplateBuilder.add(".fixed($S)", segment);
