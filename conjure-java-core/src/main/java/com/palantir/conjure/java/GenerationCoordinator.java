@@ -20,8 +20,11 @@ import com.palantir.common.streams.MoreStreams;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.goethe.Goethe;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -47,10 +50,41 @@ public class GenerationCoordinator {
      * the instance's service and type generators.
      */
     public List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
+        System.err.printf("[conjure-java] [%s] Command: %s", Instant.now(), System.getProperty("sun.java.command"));
+        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach(argument -> {
+            System.err.printf(" %s", argument);
+        });
+        System.err.println("\n");
+
+        Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+
+        // Iterate through each thread and its stack trace
+        for (Map.Entry<Thread, StackTraceElement[]> entry : allStackTraces.entrySet()) {
+            Thread thread = entry.getKey();
+            StackTraceElement[] stackTrace = entry.getValue();
+            System.err.println("[conjure-java] Thread: " + thread.getName() + " (ID: " + thread.getId() + ", State: "
+                    + thread.getState() + ")");
+            if (stackTrace.length == 0) {
+                System.err.println("\tNo stack trace available.");
+            } else {
+                for (StackTraceElement element : stackTrace) {
+                    System.err.println("\t" + element.toString());
+                }
+            }
+            System.err.println("----------------------------------------");
+        }
+
+        System.err.println("\n");
+
         ConjureDefinition definition = new ExternalImportFilter(options).filter(conjureDefinition);
         return MoreStreams.inCompletionOrder(
                         generators.stream().flatMap(generator -> generator.generate(definition)),
-                        f -> Goethe.formatAndEmit(f, outputDir.toPath()),
+                        f -> {
+                            System.err.printf(
+                                    "[conjure-java] [%s] Formatting: %s\n",
+                                    Instant.now(), f.typeSpec().name());
+                            return Goethe.formatAndEmit(f, outputDir.toPath());
+                        },
                         executor,
                         Runtime.getRuntime().availableProcessors())
                 .collect(Collectors.toList());
