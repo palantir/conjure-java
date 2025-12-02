@@ -39,13 +39,21 @@ import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 import javax.lang.model.element.Modifier;
-import org.glassfish.jersey.uri.UriTemplate;
 
 final class DialogueEndpointsGenerator {
+    // matches HttpPathValidator from conjure-core
+    private static final String PATTERN = "[a-z][a-z0-9]*([A-Z0-9][a-z0-9]+)*";
+    private static final Pattern SEGMENT_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9._-]*$");
+    private static final Pattern PARAM_SEGMENT_PATTERN = Pattern.compile("^\\{" + PATTERN + "}$");
+    private static final Pattern PARAM_REGEX_SEGMENT_PATTERN =
+            Pattern.compile("^\\{" + PATTERN + "(" + Pattern.quote(":.+") + "|" + Pattern.quote(":.*") + ")" + "}$");
+
     private final Options options;
 
     DialogueEndpointsGenerator(Options options) {
@@ -158,46 +166,30 @@ final class DialogueEndpointsGenerator {
         }
     }
 
-    // TODO(rfink): Integrate/consolidate with checking code in PathDefinition class
     private static CodeBlock pathTemplateInitializer(HttpPath path) {
-
-        // We want to get all the different segments in the path template, separating variables from fixed segments.
-        // In some legacy cases, the template might contain more complex variables e.g. {var:.*},
-        //   so we can't simply check for { and } in the raw templates
-        // Instead, we parse the URI, and interpolate it back with the variable names wrapped in ( and )
-        //
-        // We use ( and ) to denote variables to avoid clashing with valid path characters,
-        //   as well as avoiding URI encoding of e.g. { and }
-        // While ( and ) are theoretically valid path characters, Conjure's spec forbids them, and
-        //   this is validated by com.palantir.conjure.defs.validator.HttpPathValidator
-        // See also https://github.com/palantir/conjure/blob/master/docs/spec/conjure_definitions.md#pathstring
-        //
-        // We were previously relying on UriTemplateParser's normalizedTemplate, but that class is private
-        //   and normalizedTemplate doesn't fit our needs anymore as of https://github.com/eclipse-ee4j/jersey/pull/5379
-        //   as it now yields e.g. /foo/{{var}} for /foo/{var}/bar, or /foo/{{var:.}} for /foo/{var:.+},
-        //   which is probably a bug (but one that's internal to Jersey)
-        UriTemplate uriTemplate = new UriTemplate(path.get());
         Splitter splitter = Splitter.on('/');
-
-        String normalizedTemplate = uriTemplate.createURI(uriTemplate.getTemplateVariables().stream()
-                .collect(Collectors.toMap(var -> var, var -> "(" + var + ")")));
-        Iterable<String> rawSegments = splitter.split(normalizedTemplate);
-
         CodeBlock.Builder pathTemplateBuilder = CodeBlock.builder().add("$T.builder()", PathTemplate.class);
 
+        Iterable<String> rawSegments = splitter.split(path.get());
         for (String segment : rawSegments) {
             if (segment.isEmpty()) {
-                continue; // avoid empty segments; typically the first segment is empty
+                continue;
             }
-
-            if (segment.startsWith("(") && segment.endsWith(")")) {
-                pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 1));
-            } else {
+            if (SEGMENT_PATTERN.matcher(segment).matches()) {
+                // fixed
                 pathTemplateBuilder.add(".fixed($S)", segment);
+            } else if (PARAM_SEGMENT_PATTERN.matcher(segment).matches()) {
+                // variable
+                pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 1));
+            } else if (PARAM_REGEX_SEGMENT_PATTERN.matcher(segment).matches()) {
+                // variable
+                pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 4));
+            } else {
+                throw new SafeIllegalArgumentException(
+                        "Invalid path segment", SafeArg.of("segment", segment), SafeArg.of("path", path));
             }
         }
 
-        CodeBlock build = pathTemplateBuilder.add(".build()").build();
-        return build;
+        return pathTemplateBuilder.add(".build()").build();
     }
 }
