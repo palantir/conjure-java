@@ -39,12 +39,21 @@ import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.lang.model.element.Modifier;
-import org.glassfish.jersey.uri.internal.UriTemplateParser;
 
 final class DialogueEndpointsGenerator {
+    // matches HttpPathValidator from conjure-core
+    private static final String PATTERN = "[a-z][a-z0-9]*([A-Z0-9][a-z0-9]+)*";
+    private static final Pattern SEGMENT_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9._-]*$");
+    private static final Pattern PARAM_SEGMENT_PATTERN = Pattern.compile("^\\{" + PATTERN + "}$");
+    private static final Pattern PARAM_REGEX_SEGMENT_PATTERN =
+            Pattern.compile("^\\{" + PATTERN + "(" + Pattern.quote(":.+") + "|" + Pattern.quote(":.*") + ")" + "}$");
+
     private final Options options;
 
     DialogueEndpointsGenerator(Options options) {
@@ -157,27 +166,30 @@ final class DialogueEndpointsGenerator {
         }
     }
 
-    // TODO(rfink): Integrate/consolidate with checking code in PathDefinition class
     private static CodeBlock pathTemplateInitializer(HttpPath path) {
-        UriTemplateParser uriTemplateParser = new UriTemplateParser(path.get());
         Splitter splitter = Splitter.on('/');
-        Iterable<String> rawSegments = splitter.split(uriTemplateParser.getNormalizedTemplate());
-
         CodeBlock.Builder pathTemplateBuilder = CodeBlock.builder().add("$T.builder()", PathTemplate.class);
 
+        Iterable<String> rawSegments = splitter.split(path.get());
         for (String segment : rawSegments) {
             if (segment.isEmpty()) {
-                continue; // avoid empty segments; typically the first segment is empty
+                continue;
             }
-
-            if (segment.startsWith("{") && segment.endsWith("}")) {
-                pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 1));
-            } else {
+            if (SEGMENT_PATTERN.matcher(segment).matches()) {
+                // fixed
                 pathTemplateBuilder.add(".fixed($S)", segment);
+            } else if (PARAM_SEGMENT_PATTERN.matcher(segment).matches()) {
+                // variable
+                pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 1));
+            } else if (PARAM_REGEX_SEGMENT_PATTERN.matcher(segment).matches()) {
+                // variable
+                pathTemplateBuilder.add(".variable($S)", segment.substring(1, segment.length() - 4));
+            } else {
+                throw new SafeIllegalArgumentException(
+                        "Invalid path segment", SafeArg.of("segment", segment), SafeArg.of("path", path));
             }
         }
 
-        CodeBlock build = pathTemplateBuilder.add(".build()").build();
-        return build;
+        return pathTemplateBuilder.add(".build()").build();
     }
 }
