@@ -40,13 +40,7 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = UnionExample.OptionalVariant.class, name = "optionalVariant")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class UnionExample
-        permits UnionExample.StringVariant,
-                UnionExample.IntVariant,
-                UnionExample.ObjectVariant,
-                UnionExample.CollectionVariant,
-                UnionExample.OptionalVariant,
-                UnionExample.Unknown {
+public abstract sealed class UnionExample {
     public static UnionExample stringVariant(String value) {
         return new StringVariant(value);
     }
@@ -100,8 +94,7 @@ public abstract sealed class UnionExample
 
     public abstract <T> T accept(Visitor<T> visitor);
 
-    public sealed interface Known
-            permits StringVariant, IntVariant, ObjectVariant, CollectionVariant, OptionalVariant {}
+    public sealed interface Known {}
 
     @JsonTypeName("stringVariant")
     public static final class StringVariant extends UnionExample implements Known {

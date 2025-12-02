@@ -31,7 +31,7 @@ import javax.annotation.processing.Generated;
         defaultImpl = CamelCaseUnion.Unknown.class)
 @JsonSubTypes(@JsonSubTypes.Type(value = CamelCaseUnion.CamelCasedField.class, name = "camelCasedField"))
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedField, CamelCaseUnion.Unknown {
+public abstract sealed class CamelCaseUnion {
     public static CamelCaseUnion camelCasedField(String value) {
         return new CamelCasedField(value);
     }
@@ -58,7 +58,7 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
 
     public abstract <T> T accept(Visitor<T> visitor);
 
-    public sealed interface Known permits CamelCasedField {}
+    public sealed interface Known {}
 
     @JsonTypeName("camelCasedField")
     public static final class CamelCasedField extends CamelCaseUnion implements Known {

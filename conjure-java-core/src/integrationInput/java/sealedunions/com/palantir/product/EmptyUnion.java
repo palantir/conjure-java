@@ -29,7 +29,7 @@ import javax.annotation.processing.Generated;
         defaultImpl = EmptyUnion.Unknown.class)
 @JsonSubTypes({})
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
+public abstract sealed class EmptyUnion {
     public static EmptyUnion unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             default:

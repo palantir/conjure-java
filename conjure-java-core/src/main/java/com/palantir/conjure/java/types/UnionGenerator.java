@@ -130,10 +130,6 @@ public final class UnionGenerator {
                     .addAnnotation(generateJsonSubTypes(unionClass, typeDef.getUnion()))
                     .addAnnotation(ignoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT, Modifier.SEALED)
-                    .addPermittedSubclasses(typeDef.getUnion().stream()
-                            .map(memberTypeDef -> sealedVariantClass(unionClass, memberTypeDef.getFieldName()))
-                            .toList())
-                    .addPermittedSubclass(unknownVariant)
                     .addTypes(generateSealedKnownInterface(unionClass, typeDef.getUnion()))
                     .addMethods(generateStaticFactories(
                             typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator, options))
@@ -256,10 +252,6 @@ public final class UnionGenerator {
 
         return List.of(TypeSpec.interfaceBuilder(SEALED_KNOWN_INTERFACE)
                 .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
-                .addPermittedSubclasses(memberTypeDefs.stream()
-                        .map(FieldDefinition::getFieldName)
-                        .map(fieldName -> sealedVariantClass(unionClass, fieldName))
-                        .toList())
                 .build());
     }
 

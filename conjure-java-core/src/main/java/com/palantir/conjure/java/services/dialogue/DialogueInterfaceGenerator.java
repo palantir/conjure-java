@@ -228,7 +228,6 @@ public final class DialogueInterfaceGenerator {
                     ErrorGenerationUtils.errorTypesClassName(error.getError().getNamespace()),
                     ErrorGenerationUtils.errorExceptionClassName(errorName));
             TypeSpec errorRecord = createRecordForEndpointErrorUtility(errorName, exceptionClassName, utilityClassName);
-            builder.addPermittedSubclass(utilityClassName.nestedClass(errorName));
             builder.addType(errorRecord);
 
             ClassName errorTypesClass = ClassName.get(
@@ -252,7 +251,6 @@ public final class DialogueInterfaceGenerator {
         TypeSpec unknownRecord =
                 createRecordForEndpointErrorUtility("Unknown", ClassName.get(RemoteException.class), utilityClassName);
         builder.addType(unknownRecord);
-        builder.addPermittedSubclass(utilityClassName.nestedClass("Unknown"));
         codeBlock.nextControlFlow("else").addStatement("return new $L(e)", unknownRecord.name());
         codeBlock.endControlFlow();
         fromBuilder.addCode(codeBlock.build());
