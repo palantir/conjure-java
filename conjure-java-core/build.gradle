@@ -67,7 +67,6 @@ dependencies {
     implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'io.undertow:undertow-core'
-    implementation 'org.glassfish.jersey.core:jersey-common'
 
     testImplementation sourceSets.integrationInput.output
     testImplementation project(':conjure-java-undertow-runtime')

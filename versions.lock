@@ -144,8 +144,6 @@ io.undertow:undertow-core:2.2.38.Final (2 constraints: ea19a2fe)
 
 jakarta.annotation:jakarta.annotation-api:2.1.1 (6 constraints: cd5ca708)
 
-jakarta.inject:jakarta.inject-api:2.0.1 (9 constraints: 1fac8623)
-
 jakarta.ws.rs:jakarta.ws.rs-api:4.0.0 (16 constraints: 64221f06)
 
 joda-time:joda-time:2.14.0 (2 constraints: 671b9a70)
@@ -165,10 +163,6 @@ org.derive4j:derive4j-annotation:1.1.1 (1 constraints: 0505f435)
 org.eclipse.collections:eclipse-collections:13.0.0 (1 constraints: 3605363b)
 
 org.eclipse.collections:eclipse-collections-api:13.0.0 (2 constraints: 1418b976)
-
-org.glassfish.hk2:osgi-resource-locator:1.0.3 (2 constraints: 7d23b265)
-
-org.glassfish.jersey.core:jersey-common:3.1.11 (15 constraints: 4a123481)
 
 org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
@@ -306,6 +300,8 @@ jakarta.activation:jakarta.activation-api:2.1.3 (3 constraints: 9f3b3170)
 
 jakarta.el:jakarta.el-api:5.0.1 (2 constraints: ea1e9d9a)
 
+jakarta.inject:jakarta.inject-api:2.0.1 (9 constraints: 1fac8623)
+
 jakarta.servlet:jakarta.servlet-api:6.0.0 (10 constraints: c3a1df08)
 
 jakarta.validation:jakarta.validation-api:3.0.2 (14 constraints: e4d130d9)
@@ -354,6 +350,8 @@ org.glassfish.hk2:hk2-locator:3.0.6 (1 constraints: 4410d8ad)
 
 org.glassfish.hk2:hk2-utils:3.0.6 (2 constraints: 21172277)
 
+org.glassfish.hk2:osgi-resource-locator:1.0.3 (2 constraints: 7d23b265)
+
 org.glassfish.hk2.external:aopalliance-repackaged:3.0.6 (2 constraints: 21172277)
 
 org.glassfish.jersey.connectors:jersey-apache5-connector:3.1.11 (1 constraints: ca0edb5f)
@@ -363,6 +361,8 @@ org.glassfish.jersey.containers:jersey-container-servlet:3.1.11 (1 constraints: 
 org.glassfish.jersey.containers:jersey-container-servlet-core:3.1.11 (4 constraints: 7a4fe6e6)
 
 org.glassfish.jersey.core:jersey-client:3.1.11 (5 constraints: 99697dc0)
+
+org.glassfish.jersey.core:jersey-common:3.1.11 (14 constraints: 6e0d12e7)
 
 org.glassfish.jersey.core:jersey-server:3.1.11 (11 constraints: 2fe56274)
 
