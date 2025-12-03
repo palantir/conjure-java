@@ -53,7 +53,7 @@ import com.palantir.logsafe.SafeArg;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public final class DialogueInterfaceGenerator {
 
@@ -76,7 +76,6 @@ public final class DialogueInterfaceGenerator {
         return generate(def, Names.asyncClassName(def, options), StaticFactoryMethodType.ASYNC, methodGenerator);
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     private JavaFile generate(
             ServiceDefinition def,
             ClassName className,
@@ -102,7 +101,7 @@ public final class DialogueInterfaceGenerator {
                         .build())
                 .build());
 
-        def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Strings.CS.appendIfMissing(docs.get(), "\n")));
 
         for (EndpointDefinition endpoint : def.getEndpoints()) {
             serviceBuilder.addMethod(apiMethod(endpoint, serviceCallType));

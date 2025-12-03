@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public final class ErrorGenerationUtils {
     public static MethodSpec privateConstructor() {
@@ -177,7 +177,6 @@ public final class ErrorGenerationUtils {
         return parameterBuilder.build();
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     private static ParameterSpec.Builder buildParameterWithSafetyAnnotationInternal(
             TypeMapper typeMapper, FieldDefinition argDefinition, boolean isSafe, boolean sanitizeName) {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
@@ -190,7 +189,7 @@ public final class ErrorGenerationUtils {
         argDefinition
                 .getDocs()
                 .ifPresent(docs ->
-                        parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
+                        parameterBuilder.addJavadoc("$L", Strings.CS.appendIfMissing(Javadoc.render(docs), "\n")));
         return parameterBuilder;
     }
 
@@ -245,7 +244,6 @@ public final class ErrorGenerationUtils {
         return methodBuilder.endControlFlow();
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     private static List<ParameterSpec> createParametersForConditionalStaticFactory(
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, ErrorDefinition errorDefinition) {
         return Stream.concat(
@@ -276,7 +274,7 @@ public final class ErrorGenerationUtils {
                             .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
                             .addJavadoc(
                                     "$L",
-                                    StringUtils.appendIfMissing(
+                                    Strings.CS.appendIfMissing(
                                             arg.getDocs().map(Javadoc::render).orElse(""), "\n"))
                             .build();
                 })

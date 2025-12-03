@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.commonmark.node.Paragraph;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.Renderer;
@@ -57,14 +58,13 @@ public final class Javadoc {
             })
             .build();
 
-    @SuppressWarnings("for-rollout:deprecation")
     public static String render(Documentation documentation) {
         String rawDocumentation = StringUtils.stripToEmpty(documentation.get());
         if (StringUtils.isBlank(rawDocumentation)) {
             return "";
         }
         String renderedHtml = renderer.render(parser.parse(rawDocumentation));
-        return StringUtils.appendIfMissing(renderedHtml, "\n");
+        return Strings.CS.appendIfMissing(renderedHtml, "\n");
     }
 
     public static Optional<String> render(Optional<Documentation> documentation, Optional<Documentation> deprecation) {

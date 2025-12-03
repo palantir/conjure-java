@@ -17,14 +17,12 @@
 package com.palantir.conjure.java.cli;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.Options;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -122,49 +120,70 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
-        @SuppressWarnings("for-rollout:deprecation")
-        ConjureJavaCli.GenerateCommand cmd =
-                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+                .parseArgs(args)
+                .asCommandLineList()
+                .get(1)
+                .getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenTargetDoesNotExist() {
         String[] args = {"generate", "foo", "bar"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
-                .isInstanceOf(CommandLine.ExecutionException.class)
-                .hasMessageContaining("Target must exist and be a file");
+
+        StringWriter err = new StringWriter();
+
+        int exitCode = new CommandLine(new ConjureJavaCli())
+                .setErr(new PrintWriter(err))
+                .execute(args);
+
+        assertThat(exitCode).isEqualTo(1);
+        assertThat(err.toString()).contains("Target must exist and be a file");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenOutputDoesNotExist() {
         String[] args = {"generate", targetFile.getAbsolutePath(), "bar"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
-                .isInstanceOf(CommandLine.ExecutionException.class)
-                .hasMessageContaining("Output must exist and be a directory");
+
+        StringWriter err = new StringWriter();
+
+        int exitCode = new CommandLine(new ConjureJavaCli())
+                .setErr(new PrintWriter(err))
+                .execute(args);
+
+        assertThat(exitCode).isEqualTo(1);
+        assertThat(err.toString()).contains("Output must exist and be a directory");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenMissingGeneratorFlags() {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath()};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
-                .isInstanceOf(CommandLine.ExecutionException.class)
-                .hasMessageContaining("Must specify exactly one project to generate");
+
+        StringWriter err = new StringWriter();
+
+        int exitCode = new CommandLine(new ConjureJavaCli())
+                .setErr(new PrintWriter(err))
+                .execute(args);
+
+        assertThat(exitCode).isEqualTo(1);
+        assertThat(err.toString()).contains("Must specify exactly one project to generate");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenTooManyGeneratorFlags() {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--jersey"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
-                .isInstanceOf(CommandLine.ExecutionException.class)
-                .hasMessageContaining("Must specify exactly one project to generate");
+
+        StringWriter err = new StringWriter();
+
+        int exitCode = new CommandLine(new ConjureJavaCli())
+                .setErr(new PrintWriter(err))
+                .execute(args);
+
+        assertThat(exitCode).isEqualTo(1);
+        assertThat(err.toString()).contains("Must specify exactly one project to generate");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void generatesCode() throws Exception {
         String[] args = {
@@ -175,39 +194,45 @@ public final class ConjureJavaCliTest {
             "--useImmutableBytes"
         };
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream recordingStream = new PrintStream(baos);
+        StringWriter out = new StringWriter();
 
-        CommandLine.run(new ConjureJavaCli(), recordingStream, args);
+        int exitCode = new CommandLine(new ConjureJavaCli())
+                .setOut(new PrintWriter(out))
+                .execute(args);
+
+        assertThat(exitCode).isEqualTo(0);
         assertThat(new File(tempDir, "com/palantir/conjure/spec/ConjureDefinition.java").isFile())
                 .isTrue();
-        assertThat(baos.toString(StandardCharsets.UTF_8)).doesNotContain("[WARNING] Using deprecated ByteBuffer");
+        assertThat(out.toString()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void throwsWhenInvalidDefinition() throws Exception {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
-                .isInstanceOf(CommandLine.ExecutionException.class)
-                .hasMessageContaining("Error parsing definition");
+
+        StringWriter err = new StringWriter();
+
+        int exitCode = new CommandLine(new ConjureJavaCli())
+                .setErr(new PrintWriter(err))
+                .execute(args);
+
+        assertThat(exitCode).isEqualTo(1);
+        assertThat(err.toString()).contains("Error parsing definition");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     @Disabled("Unable to capture output")
     public void writesWarningWhenBytesIsDisabled() throws IOException {
         String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--objects"};
-        CommandLine.run(new ConjureJavaCli(), args);
+        new CommandLine(new ConjureJavaCli()).execute(args);
         // assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     @Disabled("Unable to capture output")
     public void doesNotWriteWarningWhenObjectsAreNotGenerated() throws IOException {
         String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--jersey"};
-        CommandLine.run(new ConjureJavaCli(), args);
+        new CommandLine(new ConjureJavaCli()).execute(args);
         // assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 }

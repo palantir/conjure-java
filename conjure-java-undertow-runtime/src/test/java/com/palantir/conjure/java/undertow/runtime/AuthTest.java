@@ -69,13 +69,12 @@ public final class AuthTest {
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testParseAuthCookie() {
         BearerToken expected = BearerToken.valueOf("token");
         String cookieName = "Auth-Token";
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, "token"));
+        exchange.setRequestCookie(new CookieImpl(cookieName, "token"));
         assertThat(CONTEXT.auth().cookie(exchange, cookieName)).isEqualTo(expected);
     }
 
@@ -86,12 +85,11 @@ public final class AuthTest {
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials"));
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testAuthCookieEmptyValue() {
         String cookieName = "Auth-Token";
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, ""));
+        exchange.setRequestCookie(new CookieImpl(cookieName, ""));
         assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().cookie(exchange, cookieName))
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
@@ -110,7 +108,6 @@ public final class AuthTest {
         assertThat(handler.fired).isTrue();
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testAuthCookieTriggersJsonWebTokenHandler() {
         TestJsonWebTokenHandler handler = new TestJsonWebTokenHandler();
@@ -120,7 +117,7 @@ public final class AuthTest {
         BearerToken expected = BearerToken.valueOf("token");
         String cookieName = "Auth-Token";
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, "token"));
+        exchange.setRequestCookie(new CookieImpl(cookieName, "token"));
 
         assertThat(runtime.auth().cookie(exchange, cookieName)).isEqualTo(expected);
         assertThat(handler.fired).isTrue();

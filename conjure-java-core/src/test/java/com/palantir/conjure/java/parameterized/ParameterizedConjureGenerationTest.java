@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.defs.ConjureArgs;
+import com.palantir.conjure.defs.SafetyDeclarationRequirements;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.parameterized.objects.ParameterizedTestCase;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -57,9 +59,10 @@ public final class ParameterizedConjureGenerationTest {
     @MethodSource("getTestCases")
     @Order(1)
     void testGeneratedCode(ParameterizedTestCase testCase) throws IOException {
-        @SuppressWarnings("for-rollout:deprecation")
-        ConjureDefinition def =
-                Conjure.parse(testCase.files().stream().map(Path::toFile).toList());
+        ConjureDefinition def = Conjure.parse(ConjureArgs.builder()
+                .definitions(testCase.files().stream().map(Path::toFile).toList())
+                .safetyDeclarations(SafetyDeclarationRequirements.ALLOWED)
+                .build());
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(), testCase.generators(), testCase.options())
                 .emit(def, tempDir);
