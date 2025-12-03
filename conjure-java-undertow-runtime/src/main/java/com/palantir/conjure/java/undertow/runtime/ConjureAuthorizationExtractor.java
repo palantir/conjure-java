@@ -77,8 +77,7 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
      */
     @Override
     public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
-        @SuppressWarnings("for-rollout:deprecation")
-        Cookie cookie = exchange.getRequestCookies().get(cookieName);
+        Cookie cookie = exchange.getRequestCookie(cookieName);
         if (cookie == null) {
             throw new ServiceException(MISSING_CREDENTIAL_ERROR_TYPE);
         }

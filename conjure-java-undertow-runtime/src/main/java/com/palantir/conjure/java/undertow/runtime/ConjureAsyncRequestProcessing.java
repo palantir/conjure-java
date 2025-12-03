@@ -193,11 +193,10 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
      * Returns the provided {@link Throwable} unless the task has been canceled,
      * in which case, additional information is provided.
      */
-    @SuppressWarnings("for-rollout:JavaDurationGetSecondsToToSeconds")
     private static Throwable getThrowable(HttpServerExchange exchange, Throwable failure, Duration timeout) {
         if (failure instanceof CancellationException && Boolean.TRUE.equals(exchange.getAttachment(TIMED_OUT))) {
             return new ServiceException(
-                    ASYNC_REQUEST_PROCESSING_TIMEOUT, failure, SafeArg.of("timeoutSeconds", timeout.getSeconds()));
+                    ASYNC_REQUEST_PROCESSING_TIMEOUT, failure, SafeArg.of("timeoutSeconds", timeout.toSeconds()));
         }
         return failure;
     }

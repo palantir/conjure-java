@@ -50,14 +50,13 @@ import picocli.CommandLine;
         subcommands = ConjureJavaCli.GenerateCommand.class)
 public final class ConjureJavaCli implements Runnable {
 
-    @SuppressWarnings("for-rollout:deprecation")
     public static void main(String[] args) {
-        CommandLine.run(new ConjureJavaCli(), args);
+        new CommandLine(new ConjureJavaCli()).execute(args);
     }
 
     @Override
     public void run() {
-        CommandLine.usage(this, System.out);
+        new CommandLine(this).usage(System.out);
     }
 
     @CommandLine.Command(

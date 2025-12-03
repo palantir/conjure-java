@@ -101,7 +101,6 @@ public class BearerTokenLoggingTest {
         runTest(SESSION_TOKEN, USER_ID, SESSION_ID, null);
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testCookieAuth() throws Exception {
         handler = new LoggingContextHandler(httpServerExchange -> {
@@ -110,7 +109,7 @@ public class BearerTokenLoggingTest {
             assertThat(MDC.get("sessionId")).isEqualTo(SESSION_ID);
             assertThat(MDC.get("tokenId")).isNull();
         });
-        exchange.getRequestCookies().put("PALANTIR_TOKEN", new CookieImpl("PALANTIR_TOKEN", SESSION_TOKEN));
+        exchange.setRequestCookie(new CookieImpl("PALANTIR_TOKEN", SESSION_TOKEN));
         handler.handleRequest(exchange);
         assertMdcUnset();
     }

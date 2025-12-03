@@ -18,10 +18,11 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.defs.ConjureArgs;
+import com.palantir.conjure.defs.SafetyDeclarationRequirements;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
@@ -45,11 +46,13 @@ public final class UndertowServiceGeneratorTests extends TestBase {
 
     @Test
     public void testConjureImports() throws IOException {
-        @SuppressWarnings("for-rollout:deprecation")
-        ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/example-conjure-imports.yml"),
-                new File("src/test/resources/example-types.yml"),
-                new File("src/test/resources/example-service.yml")));
+        ConjureDefinition conjure = Conjure.parse(ConjureArgs.builder()
+                .addDefinitions(
+                        new File("src/test/resources/example-conjure-imports.yml"),
+                        new File("src/test/resources/example-types.yml"),
+                        new File("src/test/resources/example-service.yml"))
+                .safetyDeclarations(SafetyDeclarationRequirements.ALLOWED)
+                .build());
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
 
         new GenerationCoordinator(
