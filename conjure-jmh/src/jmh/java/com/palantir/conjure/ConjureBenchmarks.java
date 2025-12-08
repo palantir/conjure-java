@@ -25,17 +25,10 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import java.io.IOException;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -49,16 +42,10 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.profile.GCProfiler;
-import org.openjdk.jmh.profile.InternalProfiler;
-import org.openjdk.jmh.results.AggregationPolicy;
-import org.openjdk.jmh.results.IterationResult;
-import org.openjdk.jmh.results.Result;
-import org.openjdk.jmh.results.ScalarResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -75,11 +62,37 @@ public class ConjureBenchmarks {
 
     private static final ObjectMapper mapper = ObjectMappers.newClientJsonMapper();
 
+    @Setup
+    public void before() {
+        // Ensure we have enough retained capacity to avoid measuring resizing costs.
+        // Each operation takes at least ~100-200ns, so 10 million ensures we have enough for all benchmark iterations.
+        MemoryProfiler.ensureRetainedCapacity(10_000_000);
+    }
+
     @SuppressWarnings("ImmutableEnumChecker")
     public enum RawJson {
-        EMPTY("{}"),
-        SINGLETON_MAP("{\"map\":{\"key1\":\"value1\"}}"),
-        NORMAL_MAP("{\"map\":{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}}");
+        NO_MAP("{}"),
+        EMPTY(generateMap(0)),
+        SINGLETON(generateMap(1)),
+        THREE(generateMap(3)),
+        SIX(generateMap(6)),
+        TEN(generateMap(10)),
+        HUNDRED(generateMap(100)),
+        THOUSAND(generateMap(1000)),
+        ;
+
+        private static String generateMap(int count) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\"map\":{");
+            for (int i = 1; i <= count; i++) {
+                sb.append("\"key").append(i).append("\":\"value").append(i).append("\"");
+                if (i < count) {
+                    sb.append(",");
+                }
+            }
+            sb.append("}}");
+            return sb.toString();
+        }
 
         private final byte[] json;
 
@@ -275,151 +288,10 @@ public class ConjureBenchmarks {
     public static void main(String[] _args) throws Exception {
         Options opt = new OptionsBuilder()
                 .include(ConjureBenchmarks.class.getSimpleName())
-                .addProfiler(GCProfiler.class, "churn=true")
+                .addProfiler(GCProfiler.class)
                 .addProfiler(MemoryProfiler.class)
-                .shouldDoGC(true)
                 .build();
 
         new Runner(opt).run();
-    }
-
-    public static final class MemoryProfiler implements InternalProfiler {
-        private static final List<Object> retained = new ArrayList<>(10_000_000);
-        private static final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-
-        private long beforeUsedMemory = 0L;
-
-        private static void addRetained(Object obj) {
-            retained.add(obj);
-        }
-
-        private static void clearRetained() {
-            retained.clear();
-        }
-
-        @Override
-        public void beforeIteration(BenchmarkParams _benchmarkParams, IterationParams _iterationParams) {
-            clearRetained();
-            runSystemGC();
-            beforeUsedMemory = getUsedMemory();
-        }
-
-        @Override
-        public Collection<? extends Result> afterIteration(
-                BenchmarkParams _benchmarkParams, IterationParams _iterationParams, IterationResult result) {
-            runSystemGC();
-            long afterUsedMemory = getUsedMemory();
-            long retainedMemory = afterUsedMemory - beforeUsedMemory;
-
-            List<ScalarResult> results = new ArrayList<>();
-            results.add(new ScalarResult(
-                    "mem.retained.total", retainedMemory / 1024.0 / 1024.0, "MB", AggregationPolicy.AVG));
-            results.add(new ScalarResult(
-                    "mem.retained.total.norm",
-                    (1.0 * retainedMemory) / result.getMetadata().getAllOps(),
-                    "B/op",
-                    AggregationPolicy.AVG));
-            results.add(new ScalarResult("mem.retained.count", retained.size(), "obj", AggregationPolicy.AVG));
-            results.add(new ScalarResult(
-                    "mem.retained.count.norm",
-                    (1.0 * retained.size()) / result.getMetadata().getAllOps(),
-                    "obj",
-                    AggregationPolicy.AVG));
-            return results;
-        }
-
-        @Override
-        public String getDescription() {
-            return "Measures retained memory after each iteration";
-        }
-
-        private static final int MAX_WAIT_MSEC = 20 * 1000;
-
-        @SuppressWarnings("checkstyle:CyclomaticComplexity")
-        // Same as BaseRunner#runSystemGC
-        private boolean runSystemGC() {
-            List<GarbageCollectorMXBean> enabledBeans = new ArrayList<>();
-
-            long beforeGcCount = 0;
-            for (GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
-                long count = bean.getCollectionCount();
-                if (count != -1) {
-                    enabledBeans.add(bean);
-                }
-            }
-
-            for (GarbageCollectorMXBean bean : enabledBeans) {
-                beforeGcCount += bean.getCollectionCount();
-            }
-
-            // Run the GC twice, and force finalization before each GCs.
-            System.runFinalization();
-            System.gc();
-            System.runFinalization();
-            System.gc();
-
-            // Now make sure GC actually happened. We have to wait for two things:
-            //   a) That at least two collections happened, indicating GC work.
-            //   b) That counter updates have not happened for a while, indicating GC work had ceased.
-            //
-            // Note there is an opportunity window for a concurrent GC to happen before the first
-            // System.gc() call, which would get counted towards our GCs. This race is unresolvable
-            // unless we have GC-specific information about the collection cycles, and verify those
-            // were indeed GCs triggered by us.
-
-            if (enabledBeans.isEmpty()) {
-                System.out.println(
-                        "WARNING: MXBeans can not report GC info. System.gc() invoked, pessimistically waiting "
-                                + MAX_WAIT_MSEC + " msecs");
-                try {
-                    TimeUnit.MILLISECONDS.sleep(MAX_WAIT_MSEC);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                return true;
-            }
-
-            boolean gcHappened = false;
-
-            long start = System.nanoTime();
-            while (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < MAX_WAIT_MSEC) {
-                try {
-                    TimeUnit.MILLISECONDS.sleep(200);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-                long afterGcCount = 0;
-                for (GarbageCollectorMXBean bean : enabledBeans) {
-                    afterGcCount += bean.getCollectionCount();
-                }
-
-                if (!gcHappened) {
-                    if (afterGcCount - beforeGcCount >= 2) {
-                        gcHappened = true;
-                    }
-                } else {
-                    if (afterGcCount == beforeGcCount) {
-                        // Stable!
-                        return true;
-                    }
-                    beforeGcCount = afterGcCount;
-                }
-            }
-
-            if (gcHappened) {
-                System.out.println("WARNING: System.gc() was invoked but unable to wait while GC stopped, is GC too"
-                        + " asynchronous?");
-            } else {
-                System.out.println("WARNING: System.gc() was invoked but couldn't detect a GC occurring, is System.gc()"
-                        + " disabled?");
-            }
-            return false;
-        }
-
-        private long getUsedMemory() {
-            MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
-            return heapUsage.getUsed();
-        }
     }
 }
