@@ -1,0 +1,21 @@
+apply plugin: 'me.champeau.jmh'
+apply plugin: 'org.revapi.revapi-gradle-plugin'
+
+jmh {
+    // Use profilers to collect additional data. Supported profilers:
+    // [cl, comp, gc, stack, perf, perfnorm, perfasm, xperf, xperfasm, hs_cl, hs_comp, hs_gc, hs_rt, hs_thr]
+    profilers = ['gc']
+}
+
+dependencies {
+    jmh 'org.openjdk.jmh:jmh-core'
+
+    jmh 'com.fasterxml.jackson.core:jackson-annotations'
+    jmh 'com.fasterxml.jackson.core:jackson-databind'
+    jmh 'com.google.code.findbugs:jsr305'
+    jmh 'com.google.guava:guava'
+    jmh 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    jmh 'com.palantir.safe-logging:preconditions'
+
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess'
+}

@@ -34,6 +34,7 @@ buildscript {
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.83.0'
         classpath 'com.palantir.suppressible-error-prone:gradle-suppressible-error-prone:2.26.0'
         classpath 'org.revapi:gradle-revapi:1.8.0'
+        classpath 'me.champeau.jmh:jmh-gradle-plugin:0.7.3'
     }
 }
 
@@ -97,6 +98,11 @@ afterEvaluate {
             builtBy project(':conjure-java').tasks.distTar
         }
     }
+}
+
+javaVersions {
+    libraryTarget = 17
+    runtime = 21
 }
 
 jdks {
