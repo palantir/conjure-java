@@ -25,15 +25,10 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -47,10 +42,9 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
@@ -66,40 +60,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 })
 public class ConjureBenchmarks {
 
-    private static final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-
     private static final ObjectMapper mapper = ObjectMappers.newClientJsonMapper();
-
-    // Field to retain objects and measure retained memory
-    private List<Object> retainedObjects;
-    private long baselineMemory;
-
-    @Setup
-    public void before() {
-        retainedObjects = new ArrayList<>();
-
-        // Force GC and get baseline memory before benchmark starts
-        forceGc();
-
-        baselineMemory = getUsedMemory();
-        System.out.println("Baseline memory: " + baselineMemory + " bytes");
-    }
-
-    @TearDown
-    public void after() {
-        // Force GC to see what's actually retained
-        forceGc();
-
-        long finalMemory = getUsedMemory();
-        long retainedMemory = finalMemory - baselineMemory;
-
-        System.out.println("\n=== Retained Memory Analysis ===");
-        System.out.println("Final memory: " + finalMemory + " bytes");
-        System.out.println(
-                "Retained memory: " + retainedMemory + " bytes (" + (retainedMemory / 1024.0 / 1024.0) + " MB)");
-        System.out.println("Objects retained: " + retainedObjects.size());
-        System.out.println("================================\n");
-    }
 
     @SuppressWarnings("ImmutableEnumChecker")
     public enum RawJson {
@@ -133,8 +94,8 @@ public class ConjureBenchmarks {
     public MapImplementation mapImpl;
 
     @Benchmark
-    public void testAllocatingBenchmark() throws IOException {
-        retainedObjects.add(mapper.readValue(json.json, mapImpl.clazz));
+    public void testAllocatingBenchmark(Blackhole bh) throws IOException {
+        bh.consume(mapper.readValue(json.json, mapImpl.clazz));
     }
 
     @JsonDeserialize(builder = NormalMap.Builder.class)
@@ -298,25 +259,10 @@ public class ConjureBenchmarks {
         }
     }
 
-    private void forceGc() {
-        System.gc();
-        System.gc();
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private long getUsedMemory() {
-        MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
-        return heapUsage.getUsed();
-    }
-
     public static void main(String[] _args) throws Exception {
         Options opt = new OptionsBuilder()
                 .include(ConjureBenchmarks.class.getSimpleName())
-                .addProfiler(GCProfiler.class) // Shows allocation rates
+                .addProfiler(GCProfiler.class, "churn=true")
                 .build();
 
         new Runner(opt).run();
