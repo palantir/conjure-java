@@ -49,7 +49,7 @@ apply plugin: 'com.palantir.jdks.latest'
 
 javaVersions {
     libraryTarget = 17
-    runtime = 25
+    runtime = 21
 }
 
 allprojects {
@@ -98,11 +98,6 @@ afterEvaluate {
             builtBy project(':conjure-java').tasks.distTar
         }
     }
-}
-
-javaVersions {
-    libraryTarget = 17
-    runtime = 21
 }
 
 jdks {
