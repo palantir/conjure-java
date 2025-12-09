@@ -55,6 +55,8 @@ public final class EndpointSpecificErrors {
 
     public static final class EndpointErrorException extends RemoteException
             implements SerializableErrorProvider<EndpointErrorParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private EndpointErrorSerializableError error;
 
         public EndpointErrorException(EndpointErrorSerializableError error, int status) {

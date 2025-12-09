@@ -70,6 +70,8 @@ public final class ConjureJavaErrors {
 
     public static final class JavaCompilationFailedException extends RemoteException
             implements SerializableErrorProvider<JavaCompilationFailedParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private JavaCompilationFailedSerializableError error;
 
         public JavaCompilationFailedException(JavaCompilationFailedSerializableError error, int status) {

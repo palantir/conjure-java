@@ -49,6 +49,8 @@ public final class EndpointSpecificErrors {
 
     public static final class DifferentPackageException extends RemoteException
             implements SerializableErrorProvider<DifferentPackageParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private DifferentPackageSerializableError error;
 
         public DifferentPackageException(DifferentPackageSerializableError error, int status) {

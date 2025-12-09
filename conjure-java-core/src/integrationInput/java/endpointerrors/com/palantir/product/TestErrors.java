@@ -121,6 +121,8 @@ public final class TestErrors {
 
     public static final class ComplicatedParametersException extends RemoteException
             implements SerializableErrorProvider<ComplicatedParametersParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private ComplicatedParametersSerializableError error;
 
         public ComplicatedParametersException(ComplicatedParametersSerializableError error, int status) {
@@ -135,6 +137,8 @@ public final class TestErrors {
 
     public static final class InvalidArgumentException extends RemoteException
             implements SerializableErrorProvider<InvalidArgumentParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private InvalidArgumentSerializableError error;
 
         public InvalidArgumentException(InvalidArgumentSerializableError error, int status) {
@@ -149,6 +153,8 @@ public final class TestErrors {
 
     public static final class NotFoundException extends RemoteException
             implements SerializableErrorProvider<NotFoundParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private NotFoundSerializableError error;
 
         public NotFoundException(NotFoundSerializableError error, int status) {

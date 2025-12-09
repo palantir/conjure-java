@@ -70,6 +70,8 @@ public final class ConjureErrors {
 
     public static final class DifferentPackageErrorException extends RemoteException
             implements SerializableErrorProvider<DifferentPackageErrorParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private DifferentPackageErrorSerializableError error;
 
         public DifferentPackageErrorException(DifferentPackageErrorSerializableError error, int status) {

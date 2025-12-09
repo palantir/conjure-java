@@ -56,6 +56,8 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseSafeArgErrException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseSafeArgErrParameters> {
+        private static final Long serialVersionUID = 1L;
+
         private ConflictingCauseSafeArgErrSerializableError error;
 
         public ConflictingCauseSafeArgErrException(ConflictingCauseSafeArgErrSerializableError error, int status) {
