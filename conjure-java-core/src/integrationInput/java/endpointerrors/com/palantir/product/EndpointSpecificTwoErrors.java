@@ -47,10 +47,9 @@ public final class EndpointSpecificTwoErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class DifferentNamespaceException extends RemoteException
             implements SerializableErrorProvider<DifferentNamespaceParameters> {
-        private static final Long serialVersionUID = 1L;
-
         private DifferentNamespaceSerializableError error;
 
         public DifferentNamespaceException(DifferentNamespaceSerializableError error, int status) {

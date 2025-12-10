@@ -204,15 +204,14 @@ public final class ErrorGenerator implements Generator {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(remoteExceptionClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(RemoteException.class)
+                .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "serial")
+                        .build())
                 .addSuperinterface(ParameterizedTypeName.get(
                         ClassName.get(SerializableErrorProvider.class),
                         errorsClassName.nestedClass(ErrorGenerationUtils.errorParametersClassName(errorDefinition))))
                 .addField(FieldSpec.builder(serializableErrorClassName, "error")
                         .addModifiers(Modifier.PRIVATE)
-                        .build())
-                .addField(FieldSpec.builder(Long.class, "serialVersionUID")
-                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                        .initializer("1L")
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)

@@ -504,10 +504,9 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ConflictingCauseSafeArgException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseSafeArgParameters> {
-        private static final Long serialVersionUID = 1L;
-
         private ConflictingCauseSafeArgSerializableError error;
 
         public ConflictingCauseSafeArgException(ConflictingCauseSafeArgSerializableError error, int status) {
@@ -520,10 +519,9 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ConflictingCauseUnsafeArgException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseUnsafeArgParameters> {
-        private static final Long serialVersionUID = 1L;
-
         private ConflictingCauseUnsafeArgSerializableError error;
 
         public ConflictingCauseUnsafeArgException(ConflictingCauseUnsafeArgSerializableError error, int status) {
@@ -536,10 +534,9 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ErrorWithComplexArgsException extends RemoteException
             implements SerializableErrorProvider<ErrorWithComplexArgsParameters> {
-        private static final Long serialVersionUID = 1L;
-
         private ErrorWithComplexArgsSerializableError error;
 
         public ErrorWithComplexArgsException(ErrorWithComplexArgsSerializableError error, int status) {
@@ -552,10 +549,9 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class InvalidServiceDefinitionException extends RemoteException
             implements SerializableErrorProvider<InvalidServiceDefinitionParameters> {
-        private static final Long serialVersionUID = 1L;
-
         private InvalidServiceDefinitionSerializableError error;
 
         public InvalidServiceDefinitionException(InvalidServiceDefinitionSerializableError error, int status) {
@@ -568,10 +564,9 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class InvalidTypeDefinitionException extends RemoteException
             implements SerializableErrorProvider<InvalidTypeDefinitionParameters> {
-        private static final Long serialVersionUID = 1L;
-
         private InvalidTypeDefinitionSerializableError error;
 
         public InvalidTypeDefinitionException(InvalidTypeDefinitionSerializableError error, int status) {
