@@ -54,6 +54,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ConflictingCauseSafeArgErrException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseSafeArgErrParameters> {
         private ConflictingCauseSafeArgErrSerializableError error;

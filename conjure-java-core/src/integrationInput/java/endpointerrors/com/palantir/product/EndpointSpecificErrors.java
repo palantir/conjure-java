@@ -53,6 +53,7 @@ public final class EndpointSpecificErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class EndpointErrorException extends RemoteException
             implements SerializableErrorProvider<EndpointErrorParameters> {
         private EndpointErrorSerializableError error;

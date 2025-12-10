@@ -68,6 +68,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class DifferentPackageErrorException extends RemoteException
             implements SerializableErrorProvider<DifferentPackageErrorParameters> {
         private DifferentPackageErrorSerializableError error;

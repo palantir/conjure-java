@@ -68,6 +68,7 @@ public final class ConjureJavaErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class JavaCompilationFailedException extends RemoteException
             implements SerializableErrorProvider<JavaCompilationFailedParameters> {
         private JavaCompilationFailedSerializableError error;

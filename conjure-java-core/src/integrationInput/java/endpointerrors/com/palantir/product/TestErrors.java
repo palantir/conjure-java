@@ -119,6 +119,7 @@ public final class TestErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ComplicatedParametersException extends RemoteException
             implements SerializableErrorProvider<ComplicatedParametersParameters> {
         private ComplicatedParametersSerializableError error;
@@ -133,6 +134,7 @@ public final class TestErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class InvalidArgumentException extends RemoteException
             implements SerializableErrorProvider<InvalidArgumentParameters> {
         private InvalidArgumentSerializableError error;
@@ -147,6 +149,7 @@ public final class TestErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class NotFoundException extends RemoteException
             implements SerializableErrorProvider<NotFoundParameters> {
         private NotFoundSerializableError error;

@@ -47,6 +47,7 @@ public final class EndpointSpecificErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class DifferentPackageException extends RemoteException
             implements SerializableErrorProvider<DifferentPackageParameters> {
         private DifferentPackageSerializableError error;

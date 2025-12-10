@@ -504,6 +504,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ConflictingCauseSafeArgException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseSafeArgParameters> {
         private ConflictingCauseSafeArgSerializableError error;
@@ -518,6 +519,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ConflictingCauseUnsafeArgException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseUnsafeArgParameters> {
         private ConflictingCauseUnsafeArgSerializableError error;
@@ -532,6 +534,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class ErrorWithComplexArgsException extends RemoteException
             implements SerializableErrorProvider<ErrorWithComplexArgsParameters> {
         private ErrorWithComplexArgsSerializableError error;
@@ -546,6 +549,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class InvalidServiceDefinitionException extends RemoteException
             implements SerializableErrorProvider<InvalidServiceDefinitionParameters> {
         private InvalidServiceDefinitionSerializableError error;
@@ -560,6 +564,7 @@ public final class ConjureErrors {
         }
     }
 
+    @SuppressWarnings("serial")
     public static final class InvalidTypeDefinitionException extends RemoteException
             implements SerializableErrorProvider<InvalidTypeDefinitionParameters> {
         private InvalidTypeDefinitionSerializableError error;
