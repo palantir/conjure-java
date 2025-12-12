@@ -249,6 +249,17 @@ class UnionTests {
         assertThat(simpleUnion.toString()).contains(expected);
     }
 
+    @Test
+    void sealedUnionsAreSerializedTheSameAsLegacyUnions() throws IOException {
+        String expected = "foo";
+        SimpleUnion simpleUnion = SimpleUnion.foo(expected);
+        undertow.com.palantir.product.SimpleUnion simpleLegacyUnion =
+                undertow.com.palantir.product.SimpleUnion.foo(expected);
+        String serialized = MAPPER.writeValueAsString(simpleUnion);
+        String serializedLegacy = MAPPER.writeValueAsString(simpleLegacyUnion);
+        assertThat(serialized).isEqualTo(serializedLegacy);
+    }
+
     private Void failOnKnownType(String type, Object value) {
         Fail.fail(
                 "Visited known type when expected unknown type",
