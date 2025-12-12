@@ -266,10 +266,7 @@ public interface ErrorServiceBlocking {
         }
     }
 
-    sealed interface TestBasicErrorError
-            permits TestBasicErrorError.InvalidArgument,
-                    TestBasicErrorError.ConflictingCauseSafeArgErr,
-                    TestBasicErrorError.Unknown {
+    sealed interface TestBasicErrorError {
         static TestBasicErrorError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
@@ -288,8 +285,7 @@ public interface ErrorServiceBlocking {
         record Unknown(RemoteException exception) implements TestBasicErrorError {}
     }
 
-    sealed interface TestImportedErrorError
-            permits TestImportedErrorError.EndpointError, TestImportedErrorError.Unknown {
+    sealed interface TestImportedErrorError {
         static TestImportedErrorError from(RemoteException e) {
             if (EndpointSpecificErrors.isEndpointError(e)) {
                 return new EndpointError((EndpointSpecificErrors.EndpointErrorException) e);
@@ -304,13 +300,7 @@ public interface ErrorServiceBlocking {
         record Unknown(RemoteException exception) implements TestImportedErrorError {}
     }
 
-    sealed interface TestMultipleErrorsAndPackagesError
-            permits TestMultipleErrorsAndPackagesError.InvalidArgument,
-                    TestMultipleErrorsAndPackagesError.NotFound,
-                    TestMultipleErrorsAndPackagesError.DifferentNamespace,
-                    TestMultipleErrorsAndPackagesError.DifferentPackage,
-                    TestMultipleErrorsAndPackagesError.ComplicatedParameters,
-                    TestMultipleErrorsAndPackagesError.Unknown {
+    sealed interface TestMultipleErrorsAndPackagesError {
         static TestMultipleErrorsAndPackagesError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
@@ -346,7 +336,7 @@ public interface ErrorServiceBlocking {
         record Unknown(RemoteException exception) implements TestMultipleErrorsAndPackagesError {}
     }
 
-    sealed interface TestEmptyBodyError permits TestEmptyBodyError.InvalidArgument, TestEmptyBodyError.Unknown {
+    sealed interface TestEmptyBodyError {
         static TestEmptyBodyError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
@@ -360,7 +350,7 @@ public interface ErrorServiceBlocking {
         record Unknown(RemoteException exception) implements TestEmptyBodyError {}
     }
 
-    sealed interface TestBinaryError permits TestBinaryError.InvalidArgument, TestBinaryError.Unknown {
+    sealed interface TestBinaryError {
         static TestBinaryError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);
@@ -374,8 +364,7 @@ public interface ErrorServiceBlocking {
         record Unknown(RemoteException exception) implements TestBinaryError {}
     }
 
-    sealed interface TestOptionalBinaryError
-            permits TestOptionalBinaryError.InvalidArgument, TestOptionalBinaryError.Unknown {
+    sealed interface TestOptionalBinaryError {
         static TestOptionalBinaryError from(RemoteException e) {
             if (TestErrors.isInvalidArgument(e)) {
                 return new InvalidArgument((TestErrors.InvalidArgumentException) e);

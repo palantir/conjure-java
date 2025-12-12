@@ -37,8 +37,7 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = SimpleUnion.Baz.class, name = "baz")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class SimpleUnion
-        permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
+public abstract sealed class SimpleUnion {
     public static SimpleUnion foo(String value) {
         return new Foo(value);
     }
@@ -78,7 +77,7 @@ public abstract sealed class SimpleUnion
 
     public abstract <T> T accept(Visitor<T> visitor);
 
-    public sealed interface Known permits Foo, Bar, Baz {}
+    public sealed interface Known {}
 
     @JsonTypeName("foo")
     public static final class Foo extends SimpleUnion implements Known {

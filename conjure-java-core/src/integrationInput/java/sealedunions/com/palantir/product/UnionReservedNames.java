@@ -47,23 +47,7 @@ import javax.annotation.processing.Generated;
     @JsonSubTypes.Type(value = UnionReservedNames.UnionReservedNames_.class, name = "unionReservedNames")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class UnionReservedNames
-        permits UnionReservedNames.Known_,
-                UnionReservedNames.Unknown_,
-                UnionReservedNames.If,
-                UnionReservedNames.New,
-                UnionReservedNames.Interface,
-                UnionReservedNames.Void,
-                UnionReservedNames.Return,
-                UnionReservedNames.Private,
-                UnionReservedNames.Public,
-                UnionReservedNames.Int,
-                UnionReservedNames.Import,
-                UnionReservedNames.Final,
-                UnionReservedNames.Throws,
-                UnionReservedNames.Static,
-                UnionReservedNames.UnionReservedNames_,
-                UnionReservedNames.Unknown {
+public abstract sealed class UnionReservedNames {
     public static UnionReservedNames known(String value) {
         return new Known_(value);
     }
@@ -188,22 +172,7 @@ public abstract sealed class UnionReservedNames
 
     public abstract <T> T accept(Visitor<T> visitor);
 
-    public sealed interface Known
-            permits Known_,
-                    Unknown_,
-                    If,
-                    New,
-                    Interface,
-                    Void,
-                    Return,
-                    Private,
-                    Public,
-                    Int,
-                    Import,
-                    Final,
-                    Throws,
-                    Static,
-                    UnionReservedNames_ {}
+    public sealed interface Known {}
 
     @JsonTypeName("known")
     public static final class Known_ extends UnionReservedNames implements Known {
