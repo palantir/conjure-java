@@ -101,7 +101,7 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
 
         @Override
         public String toString() {
-            return "CamelCaseUnion.CamelCasedField{value: " + value + '}';
+            return "CamelCaseUnion{value: CamelCasedFieldWrapper{value: " + value + "}}";
         }
     }
 

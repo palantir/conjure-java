@@ -165,9 +165,9 @@ public final class UnionGenerator {
 
         ClassName baseClass = unionClass.nestedClass("Base");
 
-        List<FieldSpec> fields =
-                ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
-                        .build());
+        FieldSpec valueField = FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                .build();
+        List<FieldSpec> valueFieldList = ImmutableList.of(valueField);
         List<AnnotationSpec> safety =
                 ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
 
@@ -176,7 +176,7 @@ public final class UnionGenerator {
                 .addAnnotations(safety)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addFields(fields)
+                .addFields(valueFieldList)
                 .addMethod(generateConstructor(baseClass))
                 .addMethod(generateGetValue(baseClass))
                 .addMethods(
@@ -194,11 +194,11 @@ public final class UnionGenerator {
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
                 .addMethod(MethodSpecs.createEquals(unionClass))
-                .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
-                .addMethod(MethodSpecs.createHashCode(fields))
+                .addMethod(MethodSpecs.createEqualTo(unionClass, valueFieldList))
+                .addMethod(MethodSpecs.createHashCode(valueFieldList))
                 .addMethod(MethodSpecs.createToString(
                                 unionClass.simpleName(),
-                                fields.stream()
+                                valueFieldList.stream()
                                         .map(fieldSpec -> FieldName.of(fieldSpec.name()))
                                         .collect(Collectors.toList()))
                         .toBuilder()
@@ -211,6 +211,36 @@ public final class UnionGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static MethodSpec createToString(
+            boolean sealedUnions, ClassName baseClassName, ClassName wrapperClassName) {
+        if (!sealedUnions) {
+            return MethodSpec.methodBuilder("toString")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(ClassName.get(String.class))
+                    .addCode(CodeBlock.builder()
+                            .add("return $S\n", wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
+                            .add(" + $N", VALUE_FIELD_NAME)
+                            .add(" + '}';")
+                            .build())
+                    .build();
+        } else {
+            return MethodSpec.methodBuilder("toString")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(ClassName.get(String.class))
+                    .addCode(CodeBlock.builder()
+                            .add(
+                                    "return $S\n",
+                                    baseClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": "
+                                            + wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
+                            .add(" + $N", VALUE_FIELD_NAME)
+                            .add(" + \"}}\";")
+                            .build())
+                    .build();
+        }
     }
 
     private static AnnotationSpec generateJsonTypeInfo(ClassName unknownVariant) {
@@ -957,13 +987,8 @@ public final class UnionGenerator {
                             .addMethod(MethodSpecs.createEquals(wrapperClass))
                             .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                             .addMethod(MethodSpecs.createHashCode(fields))
-                            .addMethod(MethodSpecs.createToString(
-                                    options.sealedUnions()
-                                            ? getQualifiedClassName(baseClass, wrapperClass)
-                                            : wrapperClass.simpleName(),
-                                    fields.stream()
-                                            .map(fieldSpec -> FieldName.of(fieldSpec.name()))
-                                            .collect(Collectors.toList())));
+                            .addMethod(createToString(
+                                    options.sealedUnions(), baseClass, peerWrapperClass(baseClass, memberName)));
 
                     return typeBuilder.build();
                 })
