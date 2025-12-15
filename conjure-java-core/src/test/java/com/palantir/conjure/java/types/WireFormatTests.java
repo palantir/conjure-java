@@ -937,6 +937,12 @@ public final class WireFormatTests {
                 .isEqualTo(CamelCaseUnion.camelCasedField("test"));
     }
 
+    @Test
+    void testSealedInterfaceUnionType_wireFormatBackCompatWithLegacyImpl() throws IOException {
+        assertThat(mapper.writeValueAsString(SimpleUnion.foo("foo")))
+                .isEqualTo(mapper.writeValueAsString(undertow.com.palantir.product.SimpleUnion.foo("foo")));
+    }
+
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
         @Override
         public Integer visitStringExample(StringExample stringExampleValue) {
