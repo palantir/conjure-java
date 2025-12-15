@@ -244,6 +244,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: KnownWrapper{value: " + value + "}}";
@@ -289,6 +293,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: Unknown_Wrapper{value: " + value + "}}";
@@ -334,6 +342,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: IfWrapper{value: " + value + "}}";
@@ -379,6 +391,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: NewWrapper{value: " + value + "}}";
@@ -424,6 +440,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: InterfaceWrapper{value: " + value + "}}";
@@ -469,6 +489,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: VoidWrapper{value: " + value + "}}";
@@ -514,6 +538,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: ReturnWrapper{value: " + value + "}}";
@@ -559,6 +587,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: PrivateWrapper{value: " + value + "}}";
@@ -604,6 +636,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: PublicWrapper{value: " + value + "}}";
@@ -649,6 +685,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: IntWrapper{value: " + value + "}}";
@@ -694,6 +734,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: ImportWrapper{value: " + value + "}}";
@@ -739,6 +783,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: FinalWrapper{value: " + value + "}}";
@@ -784,6 +832,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: ThrowsWrapper{value: " + value + "}}";
@@ -829,6 +881,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: StaticWrapper{value: " + value + "}}";
@@ -874,6 +930,10 @@ public abstract sealed class UnionReservedNames
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionReservedNames{value: UnionReservedNamesWrapper{value: " + value + "}}";

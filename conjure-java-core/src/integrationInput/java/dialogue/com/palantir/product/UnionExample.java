@@ -142,6 +142,10 @@ public abstract sealed class UnionExample
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionExample{value: StringVariantWrapper{value: " + value + "}}";
@@ -187,6 +191,10 @@ public abstract sealed class UnionExample
             return this.value;
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionExample{value: IntVariantWrapper{value: " + value + "}}";
@@ -232,6 +240,10 @@ public abstract sealed class UnionExample
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionExample{value: ObjectVariantWrapper{value: " + value + "}}";
@@ -278,6 +290,10 @@ public abstract sealed class UnionExample
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionExample{value: CollectionVariantWrapper{value: " + value + "}}";
@@ -324,6 +340,10 @@ public abstract sealed class UnionExample
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "UnionExample{value: OptionalVariantWrapper{value: " + value + "}}";

@@ -213,20 +213,16 @@ public final class UnionGenerator {
                 .build();
     }
 
+    /** Creates a backward compatible toString method. While in general, Conjure-Java does not provide any guarantees on
+     * the toString representation of generated objects, the toString method is currently used when serializing error
+     * parameters when JSON is not explicitly used. This is clunky because the sealedUnions implementation does not
+     * generate any classes suffixed with `Wrapper`, yet such classes show up in the `toString` implementation. In a
+     * future Conjure-Java change, we can update the toString method here to better represent the variant in the
+     * sealedUnions implementation.
+     */
     private static MethodSpec createToString(
             boolean sealedUnions, ClassName baseClassName, ClassName wrapperClassName) {
-        if (!sealedUnions) {
-            return MethodSpec.methodBuilder("toString")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(ClassName.get(String.class))
-                    .addCode(CodeBlock.builder()
-                            .add("return $S\n", wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
-                            .add(" + $N", VALUE_FIELD_NAME)
-                            .add(" + '}';")
-                            .build())
-                    .build();
-        } else {
+        if (sealedUnions) {
             return MethodSpec.methodBuilder("toString")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
@@ -238,6 +234,20 @@ public final class UnionGenerator {
                                             + wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
                             .add(" + $N", VALUE_FIELD_NAME)
                             .add(" + \"}}\";")
+                            .build())
+                    .addJavadoc(
+                            "This method is not part of Conjure API. Users should not rely on consistent generation of"
+                                    + " the toString method between versions of Conjure.")
+                    .build();
+        } else {
+            return MethodSpec.methodBuilder("toString")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(ClassName.get(String.class))
+                    .addCode(CodeBlock.builder()
+                            .add("return $S\n", wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
+                            .add(" + $N", VALUE_FIELD_NAME)
+                            .add(" + '}';")
                             .build())
                     .build();
         }

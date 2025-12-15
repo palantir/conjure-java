@@ -118,6 +118,10 @@ public abstract sealed class SimpleUnion
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "SimpleUnion{value: FooWrapper{value: " + value + "}}";
@@ -163,6 +167,10 @@ public abstract sealed class SimpleUnion
             return this.value;
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "SimpleUnion{value: BarWrapper{value: " + value + "}}";
@@ -208,6 +216,10 @@ public abstract sealed class SimpleUnion
             return this.value.hashCode();
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
             return "SimpleUnion{value: BazWrapper{value: " + value + "}}";
