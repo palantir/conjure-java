@@ -640,8 +640,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     void testSealedUnionParameter() {
-        assertThat(client.union(AuthHeader.valueOf("authHeader"), SimpleUnion.value("foo")))
-                .isEqualTo(SimpleUnion.value("foo"));
+        assertThat(client.union(AuthHeader.valueOf("authHeader"), SimpleUnion.foo("foo")))
+                .isEqualTo(SimpleUnion.foo("foo"));
     }
 
     private static Map<String, String> filterKeys(Map<String, String> map, List<String> keysToFilter) {

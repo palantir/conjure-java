@@ -86,8 +86,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import sealedunions.com.palantir.product.CamelCaseUnion;
-import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.UnionReservedNames;
+import undertow.com.palantir.product.SimpleUnion;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class WireFormatTests {
@@ -935,6 +935,16 @@ public final class WireFormatTests {
         assertThat(mapper.readValue(
                         "{\"type\":\"camelCasedField\",\"camelCasedField\":\"test\"}", CamelCaseUnion.class))
                 .isEqualTo(CamelCaseUnion.camelCasedField("test"));
+    }
+
+    @Test
+    void testSealedInterfaceUnionType_wireFormatBackCompatWithLegacyImpl() throws IOException {
+        sealedunions.com.palantir.product.SimpleUnion sealedUnionFoo =
+                sealedunions.com.palantir.product.SimpleUnion.foo("foo");
+        // Validate that we are using the implementation with sealed classes.
+        assertThat(sealedUnionFoo).isInstanceOf(sealedunions.com.palantir.product.SimpleUnion.Foo.class);
+        assertThat(mapper.writeValueAsString(SimpleUnion.foo("foo")))
+                .isEqualTo(mapper.writeValueAsString(sealedUnionFoo));
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
@@ -28,18 +30,37 @@ import javax.annotation.processing.Generated;
         property = "type",
         visible = true,
         defaultImpl = SimpleUnion.Unknown.class)
-@JsonSubTypes(@JsonSubTypes.Type(value = SimpleUnion.Value.class, name = "value"))
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = SimpleUnion.Foo.class, name = "foo"),
+    @JsonSubTypes.Type(value = SimpleUnion.Bar.class, name = "bar"),
+    @JsonSubTypes.Type(value = SimpleUnion.Baz.class, name = "baz")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.Unknown {
-    public static SimpleUnion value(@Safe String value) {
-        return new Value(value);
+public abstract sealed class SimpleUnion
+        permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
+    public static SimpleUnion foo(String value) {
+        return new Foo(value);
+    }
+
+    public static SimpleUnion bar(int value) {
+        return new Bar(value);
+    }
+
+    public static SimpleUnion baz(SafeLong value) {
+        return new Baz(value);
     }
 
     public static SimpleUnion unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
-            case "value":
+            case "foo":
                 throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: value");
+                        "Unknown type cannot be created as the provided type is known: foo");
+            case "bar":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: bar");
+            case "baz":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: baz");
             default:
                 return new Unknown(type, Collections.singletonMap(type, value));
         }
@@ -56,39 +77,39 @@ public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.
 
     public abstract <T> T accept(Visitor<T> visitor);
 
-    public sealed interface Known permits Value {}
+    public sealed interface Known permits Foo, Bar, Baz {}
 
-    @JsonTypeName("value")
-    public static final class Value extends SimpleUnion implements Known {
+    @JsonTypeName("foo")
+    public static final class Foo extends SimpleUnion implements Known {
         private final String value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Value(@JsonSetter("value") @Nonnull String value) {
-            Preconditions.checkNotNull(value, "value cannot be null");
+        private Foo(@JsonSetter("foo") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
 
         @JsonProperty(index = 0)
         private String type() {
-            return "value";
+            return "foo";
         }
 
-        @JsonProperty("value")
+        @JsonProperty("foo")
         public String value() {
             return value;
         }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitValue(value);
+            return visitor.visitFoo(value);
         }
 
         @Override
         public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof Value && equalTo((Value) other));
+            return this == other || (other instanceof Foo && equalTo((Foo) other));
         }
 
-        private boolean equalTo(Value other) {
+        private boolean equalTo(Foo other) {
             return this.value.equals(other.value);
         }
 
@@ -99,7 +120,97 @@ public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.
 
         @Override
         public String toString() {
-            return "SimpleUnion.Value{value: " + value + '}';
+            return "SimpleUnion.Foo{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("bar")
+    public static final class Bar extends SimpleUnion implements Known {
+        private final int value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private Bar(@JsonSetter("bar") @Nonnull int value) {
+            Preconditions.checkNotNull(value, "bar cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(index = 0)
+        private String type() {
+            return "bar";
+        }
+
+        @JsonProperty("bar")
+        public int value() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitBar(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Bar && equalTo((Bar) other));
+        }
+
+        private boolean equalTo(Bar other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return "SimpleUnion.Bar{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("baz")
+    public static final class Baz extends SimpleUnion implements Known {
+        private final SafeLong value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private Baz(@JsonSetter("baz") @Nonnull SafeLong value) {
+            Preconditions.checkNotNull(value, "baz cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(index = 0)
+        private String type() {
+            return "baz";
+        }
+
+        @JsonProperty("baz")
+        public SafeLong value() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitBaz(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof Baz && equalTo((Baz) other));
+        }
+
+        private boolean equalTo(Baz other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "SimpleUnion.Baz{value: " + value + '}';
         }
     }
 
@@ -164,25 +275,51 @@ public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.
     }
 
     public interface Visitor<T> {
-        T visitValue(@Safe String value);
+        T visitFoo(String value);
+
+        T visitBar(int value);
+
+        T visitBaz(SafeLong value);
 
         T visitUnknown(@Safe String unknownType);
 
-        static <T> ValueStageVisitorBuilder<T> builder() {
+        static <T> BarStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }
     }
 
     private static final class VisitorBuilder<T>
-            implements ValueStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
-        private Function<@Safe String, T> valueVisitor;
+            implements BarStageVisitorBuilder<T>,
+                    BazStageVisitorBuilder<T>,
+                    FooStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    Completed_StageVisitorBuilder<T> {
+        private IntFunction<T> barVisitor;
+
+        private Function<SafeLong, T> bazVisitor;
+
+        private Function<String, T> fooVisitor;
 
         private Function<String, T> unknownVisitor;
 
         @Override
-        public UnknownStageVisitorBuilder<T> value(@Nonnull Function<@Safe String, T> valueVisitor) {
-            Preconditions.checkNotNull(valueVisitor, "valueVisitor cannot be null");
-            this.valueVisitor = valueVisitor;
+        public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
+            Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
+            this.barVisitor = barVisitor;
+            return this;
+        }
+
+        @Override
+        public FooStageVisitorBuilder<T> baz(@Nonnull Function<SafeLong, T> bazVisitor) {
+            Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
+            this.bazVisitor = bazVisitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
+            this.fooVisitor = fooVisitor;
             return this;
         }
 
@@ -204,12 +341,24 @@ public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.
 
         @Override
         public Visitor<T> build() {
-            final Function<@Safe String, T> valueVisitor = this.valueVisitor;
+            final IntFunction<T> barVisitor = this.barVisitor;
+            final Function<SafeLong, T> bazVisitor = this.bazVisitor;
+            final Function<String, T> fooVisitor = this.fooVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
-                public T visitValue(@Safe String value) {
-                    return valueVisitor.apply(value);
+                public T visitBar(int value) {
+                    return barVisitor.apply(value);
+                }
+
+                @Override
+                public T visitBaz(SafeLong value) {
+                    return bazVisitor.apply(value);
+                }
+
+                @Override
+                public T visitFoo(String value) {
+                    return fooVisitor.apply(value);
                 }
 
                 @Override
@@ -220,8 +369,16 @@ public abstract sealed class SimpleUnion permits SimpleUnion.Value, SimpleUnion.
         }
     }
 
-    public interface ValueStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> value(@Nonnull Function<@Safe String, T> valueVisitor);
+    public interface BarStageVisitorBuilder<T> {
+        BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor);
+    }
+
+    public interface BazStageVisitorBuilder<T> {
+        FooStageVisitorBuilder<T> baz(@Nonnull Function<SafeLong, T> bazVisitor);
+    }
+
+    public interface FooStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {

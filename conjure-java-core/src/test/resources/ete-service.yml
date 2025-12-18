@@ -23,9 +23,9 @@ types:
         alias: Long
       SimpleUnion:
         union:
-          value:
-            type: string
-            safety: safe
+          foo: string
+          bar: integer
+          baz: safelong
 
 services:
   EmptyPathService:
