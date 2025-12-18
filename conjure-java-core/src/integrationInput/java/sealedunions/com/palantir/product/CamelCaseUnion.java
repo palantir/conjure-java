@@ -163,9 +163,13 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
             return hash;
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
-            return "CamelCaseUnion.Unknown{type: " + type + ", value: " + value + '}';
+            return "CamelCaseUnion{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 

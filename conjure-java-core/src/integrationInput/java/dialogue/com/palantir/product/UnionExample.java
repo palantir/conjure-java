@@ -404,9 +404,13 @@ public abstract sealed class UnionExample
             return hash;
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
-            return "UnionExample.Unknown{type: " + type + ", value: " + value + '}';
+            return "UnionExample{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 

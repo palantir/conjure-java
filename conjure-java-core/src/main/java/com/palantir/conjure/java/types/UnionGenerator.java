@@ -1120,13 +1120,15 @@ public final class UnionGenerator {
                 .addMethod(MethodSpecs.createEquals(wrapperClass))
                 .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
-                .addMethod(MethodSpecs.createToString(
+                .addMethod(
                         options.sealedUnions()
-                                ? getQualifiedClassName(baseClass, wrapperClass)
-                                : wrapperClass.simpleName(),
-                        fields.stream()
-                                .map(fieldSpec -> FieldName.of(fieldSpec.name()))
-                                .collect(Collectors.toList())));
+                                ? createLegacyToStringForSealedUnions(
+                                        baseClass, baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME))
+                                : MethodSpecs.createToString(
+                                        wrapperClass.simpleName(),
+                                        fields.stream()
+                                                .map(fieldSpec -> FieldName.of(fieldSpec.name()))
+                                                .toList()));
         return typeBuilder.build();
     }
 
@@ -1209,10 +1211,6 @@ public final class UnionGenerator {
                         || "known".equalsIgnoreCase(input)
                 ? input + '_'
                 : input;
-    }
-
-    private static String getQualifiedClassName(ClassName baseClass, ClassName subTypeClassName) {
-        return baseClass.simpleName() + "." + subTypeClassName.simpleName();
     }
 
     private UnionGenerator() {}

@@ -92,9 +92,13 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
             return hash;
         }
 
+        /**
+         * This method is not part of Conjure API. Users should not rely on consistent generation of the toString method
+         * between versions of Conjure.
+         */
         @Override
         public String toString() {
-            return "EmptyUnion.Unknown{type: " + type + ", value: " + value + '}';
+            return "EmptyUnion{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 
