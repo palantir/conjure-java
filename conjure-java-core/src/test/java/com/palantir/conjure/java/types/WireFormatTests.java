@@ -762,11 +762,6 @@ public final class WireFormatTests {
     }
 
     @Test
-    void name() throws JsonProcessingException {
-        System.out.println(mapper.writeValueAsString(ExampleDefensiveCollectionListsUnion.list(List.of("hi"))));
-    }
-
-    @Test
     void testNullContentCollectionDeserialization_listUnion() {
         assertThatThrownBy(() -> mapper.readValue(
                         "{\"type\":\"list\",\"list\":[null]}", ExampleDefensiveCollectionListsUnion.class))
