@@ -20,6 +20,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.palantir.tokens.auth.UnverifiedJsonWebToken;
@@ -77,7 +78,13 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
      */
     @Override
     public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
-        Cookie cookie = exchange.getRequestCookie(cookieName);
+        Cookie cookie;
+        try {
+            cookie = exchange.getRequestCookie(cookieName);
+        } catch (IllegalStateException e) {
+            // An IllegalStateException is thrown if the number of request cookies exceeds the configured maximum
+            throw new SafeIllegalArgumentException("Failed to parse request cookies", e);
+        }
         if (cookie == null) {
             throw new ServiceException(MISSING_CREDENTIAL_ERROR_TYPE);
         }

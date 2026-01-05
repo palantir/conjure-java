@@ -23,6 +23,7 @@ import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
@@ -82,7 +83,17 @@ final class ConjureContexts implements Contexts {
 
         @Override
         public Optional<String> cookie(String cookieName) {
-            return Optional.ofNullable(exchange.getRequestCookie(cookieName)).map(Cookie::getValue);
+            Cookie cookie;
+            try {
+                cookie = exchange.getRequestCookie(cookieName);
+            } catch (IllegalStateException e) {
+                // An IllegalStateException is thrown if the number of request cookies exceeds the configured maximum
+                throw new SafeIllegalArgumentException("Failed to parse request cookies", e);
+            }
+            if (cookie == null) {
+                return Optional.empty();
+            }
+            return Optional.of(cookie.getValue());
         }
 
         @Override
