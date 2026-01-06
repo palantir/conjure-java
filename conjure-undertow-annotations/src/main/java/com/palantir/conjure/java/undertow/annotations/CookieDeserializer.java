@@ -36,7 +36,13 @@ public final class CookieDeserializer<T> implements Deserializer<T> {
 
     @Override
     public T deserialize(HttpServerExchange exchange) throws IOException {
-        Cookie cookie = exchange.getRequestCookie(cookieName);
+        Cookie cookie;
+        try {
+            cookie = exchange.getRequestCookie(cookieName);
+        } catch (IllegalStateException e) {
+            // An IllegalStateException is thrown if the number of request cookies exceeds the configured maximum
+            throw new SafeIllegalArgumentException("Failed to parse request cookies", e);
+        }
         if (cookie == null) {
             return decoder.noValuePresent()
                     .orElseThrow(() -> new SafeIllegalArgumentException(
