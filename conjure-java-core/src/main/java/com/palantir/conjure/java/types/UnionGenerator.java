@@ -233,8 +233,6 @@ public final class UnionGenerator {
                         .add(" + $N", VALUE_FIELD_NAME)
                         .add(" + \"}}\";")
                         .build())
-                .addJavadoc("This method is not part of Conjure API. Users should not rely on consistent generation of"
-                        + " the toString method between versions of Conjure.")
                 .build();
     }
 
