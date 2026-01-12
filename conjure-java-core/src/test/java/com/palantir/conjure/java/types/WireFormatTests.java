@@ -941,6 +941,21 @@ public final class WireFormatTests {
                 .isEqualTo(mapper.writeValueAsString(sealedUnionFoo));
     }
 
+    /**
+     * The `toString` method on objects is used to serialize error parameters (when JSON error parameters are not
+     * enabled). Unfortunately, this makes changes to the `toString` implementation of objects a potential wire break.
+     * This will no longer be a source of wire breaks when all Conjure clients and servers have moved to using JSON
+     * error parameters, but during roll-out we should ensure backward compatible error parameter serialization.
+     */
+    @Test
+    void testSealedInterfaceUnionType_toStringBackCompatWithLegacyImpl() throws IOException {
+        sealedunions.com.palantir.product.SimpleUnion sealedUnionFoo =
+                sealedunions.com.palantir.product.SimpleUnion.foo("foo");
+        // Validate that we are using the implementation with sealed classes.
+        assertThat(sealedUnionFoo).isInstanceOf(sealedunions.com.palantir.product.SimpleUnion.Foo.class);
+        assertThat(SimpleUnion.foo("foo").toString()).isEqualTo(sealedUnionFoo.toString());
+    }
+
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
         @Override
         public Integer visitStringExample(StringExample stringExampleValue) {

@@ -144,7 +144,7 @@ public abstract sealed class UnionExample
 
         @Override
         public String toString() {
-            return "UnionExample.StringVariant{value: " + value + '}';
+            return "UnionExample{value: StringVariantWrapper{value: " + value + "}}";
         }
     }
 
@@ -189,7 +189,7 @@ public abstract sealed class UnionExample
 
         @Override
         public String toString() {
-            return "UnionExample.IntVariant{value: " + value + '}';
+            return "UnionExample{value: IntVariantWrapper{value: " + value + "}}";
         }
     }
 
@@ -234,7 +234,7 @@ public abstract sealed class UnionExample
 
         @Override
         public String toString() {
-            return "UnionExample.ObjectVariant{value: " + value + '}';
+            return "UnionExample{value: ObjectVariantWrapper{value: " + value + "}}";
         }
     }
 
@@ -280,7 +280,7 @@ public abstract sealed class UnionExample
 
         @Override
         public String toString() {
-            return "UnionExample.CollectionVariant{value: " + value + '}';
+            return "UnionExample{value: CollectionVariantWrapper{value: " + value + "}}";
         }
     }
 
@@ -326,7 +326,7 @@ public abstract sealed class UnionExample
 
         @Override
         public String toString() {
-            return "UnionExample.OptionalVariant{value: " + value + '}';
+            return "UnionExample{value: OptionalVariantWrapper{value: " + value + "}}";
         }
     }
 
@@ -386,7 +386,7 @@ public abstract sealed class UnionExample
 
         @Override
         public String toString() {
-            return "UnionExample.Unknown{type: " + type + ", value: " + value + '}';
+            return "UnionExample{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 

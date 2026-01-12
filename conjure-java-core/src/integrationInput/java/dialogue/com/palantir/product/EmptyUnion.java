@@ -94,7 +94,7 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
 
         @Override
         public String toString() {
-            return "EmptyUnion.Unknown{type: " + type + ", value: " + value + '}';
+            return "EmptyUnion{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 

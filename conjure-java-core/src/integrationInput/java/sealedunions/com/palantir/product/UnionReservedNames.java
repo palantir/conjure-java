@@ -246,7 +246,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Known_{value: " + value + '}';
+            return "UnionReservedNames{value: KnownWrapper{value: " + value + "}}";
         }
     }
 
@@ -291,7 +291,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Unknown_{value: " + value + '}';
+            return "UnionReservedNames{value: Unknown_Wrapper{value: " + value + "}}";
         }
     }
 
@@ -336,7 +336,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.If{value: " + value + '}';
+            return "UnionReservedNames{value: IfWrapper{value: " + value + "}}";
         }
     }
 
@@ -381,7 +381,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.New{value: " + value + '}';
+            return "UnionReservedNames{value: NewWrapper{value: " + value + "}}";
         }
     }
 
@@ -426,7 +426,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Interface{value: " + value + '}';
+            return "UnionReservedNames{value: InterfaceWrapper{value: " + value + "}}";
         }
     }
 
@@ -471,7 +471,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Void{value: " + value + '}';
+            return "UnionReservedNames{value: VoidWrapper{value: " + value + "}}";
         }
     }
 
@@ -516,7 +516,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Return{value: " + value + '}';
+            return "UnionReservedNames{value: ReturnWrapper{value: " + value + "}}";
         }
     }
 
@@ -561,7 +561,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Private{value: " + value + '}';
+            return "UnionReservedNames{value: PrivateWrapper{value: " + value + "}}";
         }
     }
 
@@ -606,7 +606,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Public{value: " + value + '}';
+            return "UnionReservedNames{value: PublicWrapper{value: " + value + "}}";
         }
     }
 
@@ -651,7 +651,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Int{value: " + value + '}';
+            return "UnionReservedNames{value: IntWrapper{value: " + value + "}}";
         }
     }
 
@@ -696,7 +696,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Import{value: " + value + '}';
+            return "UnionReservedNames{value: ImportWrapper{value: " + value + "}}";
         }
     }
 
@@ -741,7 +741,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Final{value: " + value + '}';
+            return "UnionReservedNames{value: FinalWrapper{value: " + value + "}}";
         }
     }
 
@@ -786,7 +786,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Throws{value: " + value + '}';
+            return "UnionReservedNames{value: ThrowsWrapper{value: " + value + "}}";
         }
     }
 
@@ -831,7 +831,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Static{value: " + value + '}';
+            return "UnionReservedNames{value: StaticWrapper{value: " + value + "}}";
         }
     }
 
@@ -876,7 +876,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.UnionReservedNames_{value: " + value + '}';
+            return "UnionReservedNames{value: UnionReservedNamesWrapper{value: " + value + "}}";
         }
     }
 
@@ -936,7 +936,7 @@ public abstract sealed class UnionReservedNames
 
         @Override
         public String toString() {
-            return "UnionReservedNames.Unknown{type: " + type + ", value: " + value + '}';
+            return "UnionReservedNames{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 

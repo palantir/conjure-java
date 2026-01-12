@@ -120,7 +120,7 @@ public abstract sealed class SimpleUnion
 
         @Override
         public String toString() {
-            return "SimpleUnion.Foo{value: " + value + '}';
+            return "SimpleUnion{value: FooWrapper{value: " + value + "}}";
         }
     }
 
@@ -165,7 +165,7 @@ public abstract sealed class SimpleUnion
 
         @Override
         public String toString() {
-            return "SimpleUnion.Bar{value: " + value + '}';
+            return "SimpleUnion{value: BarWrapper{value: " + value + "}}";
         }
     }
 
@@ -210,7 +210,7 @@ public abstract sealed class SimpleUnion
 
         @Override
         public String toString() {
-            return "SimpleUnion.Baz{value: " + value + '}';
+            return "SimpleUnion{value: BazWrapper{value: " + value + "}}";
         }
     }
 
@@ -270,7 +270,7 @@ public abstract sealed class SimpleUnion
 
         @Override
         public String toString() {
-            return "SimpleUnion.Unknown{type: " + type + ", value: " + value + '}';
+            return "SimpleUnion{value: UnknownWrapper{value: " + value + "}}";
         }
     }
 

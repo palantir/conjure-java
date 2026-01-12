@@ -213,6 +213,29 @@ public final class UnionGenerator {
                 .build();
     }
 
+    /** Creates a backward compatible toString method. While in general, Conjure-Java does not provide any guarantees on
+     * the toString representation of generated objects, the toString method is currently used when serializing error
+     * parameters when JSON is not explicitly used. This is clunky because the sealedUnions implementation does not
+     * generate any classes suffixed with `Wrapper`, yet such classes show up in the `toString` implementation. In a
+     * future Conjure-Java change, we can update the toString method here to better represent the variant in the
+     * sealedUnions implementation.
+     */
+    private static MethodSpec createLegacyToStringForSealedUnions(ClassName baseClassName, ClassName wrapperClassName) {
+        return MethodSpec.methodBuilder("toString")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ClassName.get(String.class))
+                .addCode(CodeBlock.builder()
+                        .add(
+                                "return $S\n",
+                                baseClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": "
+                                        + wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
+                        .add(" + $N", VALUE_FIELD_NAME)
+                        .add(" + \"}}\";")
+                        .build())
+                .build();
+    }
+
     private static AnnotationSpec generateJsonTypeInfo(ClassName unknownVariant) {
         return AnnotationSpec.builder(JsonTypeInfo.class)
                 .addMember("use", "JsonTypeInfo.Id.NAME")
@@ -957,14 +980,15 @@ public final class UnionGenerator {
                             .addMethod(MethodSpecs.createEquals(wrapperClass))
                             .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                             .addMethod(MethodSpecs.createHashCode(fields))
-                            .addMethod(MethodSpecs.createToString(
+                            .addMethod(
                                     options.sealedUnions()
-                                            ? getQualifiedClassName(baseClass, wrapperClass)
-                                            : wrapperClass.simpleName(),
-                                    fields.stream()
-                                            .map(fieldSpec -> FieldName.of(fieldSpec.name()))
-                                            .collect(Collectors.toList())));
-
+                                            ? createLegacyToStringForSealedUnions(
+                                                    baseClass, peerWrapperClass(baseClass, memberName))
+                                            : MethodSpecs.createToString(
+                                                    wrapperClass.simpleName(),
+                                                    fields.stream()
+                                                            .map(fieldSpec -> FieldName.of(fieldSpec.name()))
+                                                            .toList()));
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
@@ -1094,13 +1118,15 @@ public final class UnionGenerator {
                 .addMethod(MethodSpecs.createEquals(wrapperClass))
                 .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
-                .addMethod(MethodSpecs.createToString(
+                .addMethod(
                         options.sealedUnions()
-                                ? getQualifiedClassName(baseClass, wrapperClass)
-                                : wrapperClass.simpleName(),
-                        fields.stream()
-                                .map(fieldSpec -> FieldName.of(fieldSpec.name()))
-                                .collect(Collectors.toList())));
+                                ? createLegacyToStringForSealedUnions(
+                                        baseClass, baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME))
+                                : MethodSpecs.createToString(
+                                        wrapperClass.simpleName(),
+                                        fields.stream()
+                                                .map(fieldSpec -> FieldName.of(fieldSpec.name()))
+                                                .toList()));
         return typeBuilder.build();
     }
 
@@ -1183,10 +1209,6 @@ public final class UnionGenerator {
                         || "known".equalsIgnoreCase(input)
                 ? input + '_'
                 : input;
-    }
-
-    private static String getQualifiedClassName(ClassName baseClass, ClassName subTypeClassName) {
-        return baseClass.simpleName() + "." + subTypeClassName.simpleName();
     }
 
     private UnionGenerator() {}
