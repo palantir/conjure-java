@@ -3,5 +3,4 @@ acceptedBreaks:
     com.palantir.conjure.java:conjure-undertow-lib:
     - code: "java.method.addedToInterface"
       new: "method <T> java.util.Optional<T> com.palantir.conjure.java.undertow.lib.RequestContext::attachment(io.undertow.util.AttachmentKey<T>)"
-      justification: "Add attachment() method to RequestContext, following the pattern\
-        \ of cookie(). RequestContext is only implemented by conjure-java-undertow-runtime."
+      justification: "Add attachment() method to RequestContext, following the pattern of cookie(). RequestContext is only implemented by conjure-java-undertow-runtime."
