@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Unsafe;
+import io.undertow.util.AttachmentKey;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,12 @@ public interface RequestContext {
      * An {@link Optional#empty()} is returned if no such header exists.
      */
     Optional<String> firstHeader(String headerName);
+
+    /**
+     * Returns the attachment associated with the given {@code key}.
+     * An {@link Optional#empty()} is returned if no such attachment exists.
+     */
+    <T> Optional<T> attachment(AttachmentKey<T> key);
 
     /**
      * Returns the value of the cookie named {@code cookieName}.
