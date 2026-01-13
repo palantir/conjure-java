@@ -949,11 +949,11 @@ public final class WireFormatTests {
      */
     @Test
     void testSealedInterfaceUnionType_toStringBackCompatWithLegacyImpl() throws IOException {
-        sealedunions.com.palantir.product.SimpleUnion sealedUnionFoo =
-                sealedunions.com.palantir.product.SimpleUnion.foo("foo");
+        SimpleUnion sealedUnionFoo = SimpleUnion.foo("foo");
         // Validate that we are using the implementation with sealed classes.
-        assertThat(sealedUnionFoo).isInstanceOf(sealedunions.com.palantir.product.SimpleUnion.Foo.class);
-        assertThat(SimpleUnion.foo("foo").toString()).isEqualTo(sealedUnionFoo.toString());
+        assertThat(sealedUnionFoo).isInstanceOf(SimpleUnion.Foo.class);
+        assertThat(undertow.com.palantir.product.SimpleUnion.foo("foo").toString())
+                .isEqualTo(sealedUnionFoo.toString());
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
