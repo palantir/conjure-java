@@ -952,7 +952,8 @@ public final class WireFormatTests {
         SimpleUnion sealedUnionFoo = SimpleUnion.foo("foo");
         // Validate that we are using the implementation with sealed classes.
         assertThat(sealedUnionFoo).isInstanceOf(SimpleUnion.Foo.class);
-        assertThat(SimpleUnion.foo("foo").toString()).isEqualTo(sealedUnionFoo.toString());
+        assertThat(undertow.com.palantir.product.SimpleUnion.foo("foo").toString())
+                .isEqualTo(sealedUnionFoo.toString());
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
