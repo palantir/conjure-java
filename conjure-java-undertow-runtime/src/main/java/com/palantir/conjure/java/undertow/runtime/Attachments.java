@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.util.AttachmentKey;
 import java.util.Optional;
+import java.util.function.LongSupplier;
 
 public final class Attachments {
 
@@ -26,6 +27,8 @@ public final class Attachments {
             AttachmentKey.create(Optional.class);
 
     public static final AttachmentKey<Throwable> FAILURE = AttachmentKey.create(Throwable.class);
+
+    static final AttachmentKey<LongSupplier> BYTES_READ = AttachmentKey.create(LongSupplier.class);
 
     private Attachments() {}
 }

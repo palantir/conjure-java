@@ -61,6 +61,13 @@ final class ConjureContexts implements Contexts {
         ConjureServerRequestContext(HttpServerExchange exchange, RequestArgHandler requestArgHandler) {
             this.exchange = exchange;
             this.requestArgHandler = requestArgHandler;
+
+            exchange.addRequestWrapper(BytesReadTracker.REQUEST_WRAPPER);
+        }
+
+        @Override
+        public long bytesRead() {
+            return BytesReadTracker.getBytesRead(exchange);
         }
 
         @Override
