@@ -44,7 +44,7 @@ public abstract sealed class SimpleUnion
     public abstract String type();
 
     @JsonAnyGetter
-    public abstract Map<String, Object> jsonProperties();
+    abstract Map<String, Object> jsonProperties();
 
     public static SimpleUnion foo(String value) {
         return new Foo(value);
@@ -103,14 +103,14 @@ public abstract sealed class SimpleUnion
         }
 
         @Override
-        public Map<String, Object> jsonProperties() {
+        Map<String, Object> jsonProperties() {
             return Map.of("foo", value);
         }
 
-        //        @JsonProperty("foo")
-        //        public String value() {
-        //            return value;
-        //        }
+        //                @JsonProperty("foo")
+        public String value() {
+            return value;
+        }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
@@ -153,14 +153,14 @@ public abstract sealed class SimpleUnion
         }
 
         @Override
-        public Map<String, Object> jsonProperties() {
+        Map<String, Object> jsonProperties() {
             return Map.of("bar", value);
         }
 
         //        @JsonProperty("bar")
-        //        public int value() {
-        //            return value;
-        //        }
+        public int value() {
+            return value;
+        }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
@@ -203,14 +203,14 @@ public abstract sealed class SimpleUnion
         }
 
         @Override
-        public Map<String, Object> jsonProperties() {
+        Map<String, Object> jsonProperties() {
             return Map.of("baz", value);
         }
 
         //        @JsonProperty("baz")
-        //        public SafeLong value() {
-        //            return value;
-        //        }
+        public SafeLong value() {
+            return value;
+        }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
@@ -260,14 +260,14 @@ public abstract sealed class SimpleUnion
         }
 
         @Override
-        public Map<String, Object> jsonProperties() {
+        Map<String, Object> jsonProperties() {
             return Map.of("unknown", value);
         }
 
         //        @JsonAnyGetter
-        //        public Map<String, Object> value() {
-        //            return value;
-        //        }
+        public Map<String, Object> value() {
+            return value;
+        }
 
         @JsonAnySetter
         private void put(String key, Object val) {
