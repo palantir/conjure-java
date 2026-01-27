@@ -41,7 +41,7 @@ public abstract sealed class SimpleUnion
         permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
 
     @JsonProperty(value = "type", index = 0)
-    public abstract String type();
+    abstract String type();
 
     @JsonAnyGetter
     abstract Map<String, Object> jsonProperties();
@@ -97,7 +97,10 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
-        @JsonProperty(index = 0)
+        // @JsonProperty(index = 0)
+
+        // TODO(): can this be package-private now? this prob shouldn't be used.
+        @Override
         public String type() {
             return "foo";
         }
@@ -147,7 +150,8 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
-        @JsonProperty(index = 0)
+        // @JsonProperty(index = 0)
+        @Override
         public String type() {
             return "bar";
         }
@@ -197,7 +201,8 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
-        @JsonProperty(index = 0)
+        // @JsonProperty(index = 0)
+        @Override
         public String type() {
             return "baz";
         }
@@ -254,7 +259,8 @@ public abstract sealed class SimpleUnion
             this.value = value;
         }
 
-        @JsonProperty
+        // @JsonProperty
+        @Override
         public String type() {
             return type;
         }
