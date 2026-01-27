@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import sealedunions.com.palantir.product.SimpleUnion;
@@ -48,6 +50,17 @@ final class SealedUnionOptionalSerializationTest {
         ObjectWriter writer = mapper.writerFor(new TypeReference<Optional<SimpleUnion>>() {});
         String json = writer.writeValueAsString(optional);
         assertThat(json).isEqualTo("{\"type\":\"foo\",\"foo\":\"test-value\"}");
+    }
+
+    @Test
+    void writerForWithList_fails() throws IOException {
+        SimpleUnion union = SimpleUnion.foo("test-value");
+        List<SimpleUnion> list = new ArrayList<>();
+        list.add(union);
+
+        ObjectWriter writer = mapper.writerFor(new TypeReference<List<SimpleUnion>>() {});
+        String json = writer.writeValueAsString(list);
+        assertThat(json).isEqualTo("[{\"type\":\"foo\",\"foo\":\"test-value\"}]");
     }
 
     @Test

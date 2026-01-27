@@ -39,6 +39,13 @@ import javax.annotation.processing.Generated;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class SimpleUnion
         permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
+
+    @JsonProperty(value = "type", index = 0)
+    public abstract String type();
+
+    @JsonAnyGetter
+    public abstract Map<String, Object> jsonProperties();
+
     public static SimpleUnion foo(String value) {
         return new Foo(value);
     }
@@ -91,14 +98,19 @@ public abstract sealed class SimpleUnion
         }
 
         @JsonProperty(index = 0)
-        private String type() {
+        public String type() {
             return "foo";
         }
 
-        @JsonProperty("foo")
-        public String value() {
-            return value;
+        @Override
+        public Map<String, Object> jsonProperties() {
+            return Map.of("foo", value);
         }
+
+        //        @JsonProperty("foo")
+        //        public String value() {
+        //            return value;
+        //        }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
@@ -136,14 +148,19 @@ public abstract sealed class SimpleUnion
         }
 
         @JsonProperty(index = 0)
-        private String type() {
+        public String type() {
             return "bar";
         }
 
-        @JsonProperty("bar")
-        public int value() {
-            return value;
+        @Override
+        public Map<String, Object> jsonProperties() {
+            return Map.of("bar", value);
         }
+
+        //        @JsonProperty("bar")
+        //        public int value() {
+        //            return value;
+        //        }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
@@ -181,14 +198,19 @@ public abstract sealed class SimpleUnion
         }
 
         @JsonProperty(index = 0)
-        private String type() {
+        public String type() {
             return "baz";
         }
 
-        @JsonProperty("baz")
-        public SafeLong value() {
-            return value;
+        @Override
+        public Map<String, Object> jsonProperties() {
+            return Map.of("baz", value);
         }
+
+        //        @JsonProperty("baz")
+        //        public SafeLong value() {
+        //            return value;
+        //        }
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
@@ -237,10 +259,15 @@ public abstract sealed class SimpleUnion
             return type;
         }
 
-        @JsonAnyGetter
-        public Map<String, Object> value() {
-            return value;
+        @Override
+        public Map<String, Object> jsonProperties() {
+            return Map.of("unknown", value);
         }
+
+        //        @JsonAnyGetter
+        //        public Map<String, Object> value() {
+        //            return value;
+        //        }
 
         @JsonAnySetter
         private void put(String key, Object val) {
