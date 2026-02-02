@@ -38,7 +38,7 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 c
 
 com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
-com.palantir.common:streams:2.5.0 (1 constraints: 09050436)
+com.palantir.common:streams:2.6.0 (1 constraints: 0a050736)
 
 com.palantir.conjure:conjure-api-objects:4.50.0 (3 constraints: 9327531f)
 
@@ -180,7 +180,7 @@ org.jboss.xnio:xnio-nio:3.8.16.Final (1 constraints: f80dc53d)
 
 org.jetbrains:annotations:26.0.2 (4 constraints: 0a3aa099)
 
-org.jspecify:jspecify:1.0.0 (23 constraints: f671676f)
+org.jspecify:jspecify:1.0.0 (24 constraints: 467e4422)
 
 org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir:1.1.3 (1 constraints: 0d10f991)
 
