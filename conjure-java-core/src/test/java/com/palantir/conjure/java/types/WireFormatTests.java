@@ -86,6 +86,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import sealedunions.com.palantir.product.CamelCaseUnion;
+import sealedunions.com.palantir.product.EmptyObject;
+import sealedunions.com.palantir.product.NestedEmptyUnion;
 import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.UnionReservedNames;
 
@@ -864,6 +866,13 @@ public final class WireFormatTests {
     }
 
     @Test
+    void testSealedUnionType_serialize_usingWriterFor() throws JsonProcessingException {
+        SimpleUnion simpleUnion = SimpleUnion.foo("test");
+        assertThat(mapper.writerFor(new TypeReference<SimpleUnion>() {}).writeValueAsString(simpleUnion))
+                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+    }
+
+    @Test
     void testSealedUnionType_deserialize() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnion.class))
                 .isEqualTo(SimpleUnion.foo("test"));
@@ -873,6 +882,13 @@ public final class WireFormatTests {
     void testSealedUnionType_serialize_unknownVariant() throws JsonProcessingException {
         SimpleUnion simpleUnion = SimpleUnion.unknown("test", Map.of("foo", "bar"));
         assertThat(mapper.writeValueAsString(simpleUnion)).isEqualTo("{\"type\":\"test\",\"test\":{\"foo\":\"bar\"}}");
+    }
+
+    @Test
+    void testSealedUnionType_serialize_unknownVariant_usingWriterFor() throws JsonProcessingException {
+        SimpleUnion simpleUnion = SimpleUnion.unknown("test", Map.of("foo", "bar"));
+        assertThat(mapper.writerFor(new TypeReference<SimpleUnion>() {}).writeValueAsString(simpleUnion))
+                .isEqualTo("{\"type\":\"test\",\"test\":{\"foo\":\"bar\"}}");
     }
 
     @Test
@@ -889,6 +905,13 @@ public final class WireFormatTests {
     }
 
     @Test
+    void testSealedUnionType_serialize_unknown_usingWriterFor() throws JsonProcessingException {
+        UnionReservedNames unionReservedNames = UnionReservedNames.unknown_("test");
+        assertThat(mapper.writerFor(new TypeReference<UnionReservedNames>() {}).writeValueAsString(unionReservedNames))
+                .isEqualTo("{\"type\":\"unknown\",\"unknown\":\"test\"}");
+    }
+
+    @Test
     void testSealedUnionType_deserialize_unknown() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"unknown\",\"unknown\":\"test\"}", UnionReservedNames.class))
                 .isEqualTo(UnionReservedNames.unknown_("test"));
@@ -898,6 +921,13 @@ public final class WireFormatTests {
     void testSealedUnionType_serialize_known() throws JsonProcessingException {
         UnionReservedNames unionReservedNames = UnionReservedNames.known("test");
         assertThat(mapper.writeValueAsString(unionReservedNames)).isEqualTo("{\"type\":\"known\",\"known\":\"test\"}");
+    }
+
+    @Test
+    void testSealedUnionType_serialize_known_usingWriterFor() throws JsonProcessingException {
+        UnionReservedNames unionReservedNames = UnionReservedNames.known("test");
+        assertThat(mapper.writerFor(new TypeReference<UnionReservedNames>() {}).writeValueAsString(unionReservedNames))
+                .isEqualTo("{\"type\":\"known\",\"known\":\"test\"}");
     }
 
     @Test
@@ -913,6 +943,13 @@ public final class WireFormatTests {
     }
 
     @Test
+    void testSealedUnionType_serialize_javaReserved_usingWriterFor() throws JsonProcessingException {
+        UnionReservedNames unionReservedNames = UnionReservedNames.void_("test");
+        assertThat(mapper.writerFor(new TypeReference<UnionReservedNames>() {}).writeValueAsString(unionReservedNames))
+                .isEqualTo("{\"type\":\"void\",\"void\":\"test\"}");
+    }
+
+    @Test
     void testSealedUnionType_deserialize_javaReserved() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"void\",\"void\":\"test\"}", UnionReservedNames.class))
                 .isEqualTo(UnionReservedNames.void_("test"));
@@ -922,6 +959,13 @@ public final class WireFormatTests {
     void testSealedUnionType_serialize_CamelCase() throws JsonProcessingException {
         CamelCaseUnion simpleUnion = CamelCaseUnion.camelCasedField("test");
         assertThat(mapper.writeValueAsString(simpleUnion))
+                .isEqualTo("{\"type\":\"camelCasedField\",\"camelCasedField\":\"test\"}");
+    }
+
+    @Test
+    void testSealedUnionType_serialize_CamelCase_usingWriterFor() throws JsonProcessingException {
+        CamelCaseUnion simpleUnion = CamelCaseUnion.camelCasedField("test");
+        assertThat(mapper.writerFor(new TypeReference<CamelCaseUnion>() {}).writeValueAsString(simpleUnion))
                 .isEqualTo("{\"type\":\"camelCasedField\",\"camelCasedField\":\"test\"}");
     }
 
@@ -939,6 +983,31 @@ public final class WireFormatTests {
         assertThat(sealedUnionFoo).isInstanceOf(SimpleUnion.Foo.class);
         assertThat(mapper.writeValueAsString(undertow.com.palantir.product.SimpleUnion.foo("foo")))
                 .isEqualTo(mapper.writeValueAsString(sealedUnionFoo));
+    }
+
+    @Test
+    void testSealedUnionType_serializeUnionOfEmptyObject_usingWriterFor() throws JsonProcessingException {
+        NestedEmptyUnion nestedEmptyUnion = NestedEmptyUnion.empty(EmptyObject.of());
+        System.out.println(
+                mapper.writerFor(new TypeReference<NestedEmptyUnion>() {}).writeValueAsString(nestedEmptyUnion));
+    }
+
+    /**
+     * This test does not pass at the moment due to the Jackson serialization
+     * <a href="https://github.com/FasterXML/jackson-databind/issues/5616">issue</a>, and is fixed in 2.21.1.
+     */
+    //    @Test
+    //    void testSealedUnionType_serializeOptionalSimpleUnion_usingWriterFor() throws JsonProcessingException {
+    //        Optional<SimpleUnion> optionalUnion = Optional.of(SimpleUnion.foo("test"));
+    //        assertThat(mapper.writerFor(new TypeReference<Optional<SimpleUnion>>() {})
+    //                        .writeValueAsString(optionalUnion))
+    //                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+    //    }
+
+    @Test
+    void testSealedUnionType_serializeEmptyOptional() throws JsonProcessingException {
+        Optional<SimpleUnion> optionalUnion = Optional.empty();
+        assertThat(mapper.writeValueAsString(optionalUnion)).isEqualTo("null");
     }
 
     /**
