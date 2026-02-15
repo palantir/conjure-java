@@ -388,19 +388,19 @@ org.hibernate.validator:hibernate-validator:8.0.2.Final (3 constraints: 3f38e3dc
 
 org.javassist:javassist:3.30.2-GA (3 constraints: 242662eb)
 
-org.junit.jupiter:junit-jupiter:6.0.2 (3 constraints: 30459eee)
+org.junit.jupiter:junit-jupiter:6.0.3 (3 constraints: 314547ef)
 
-org.junit.jupiter:junit-jupiter-api:6.0.2 (5 constraints: 614301eb)
+org.junit.jupiter:junit-jupiter-api:6.0.3 (5 constraints: 6543c4ec)
 
-org.junit.jupiter:junit-jupiter-engine:6.0.2 (1 constraints: 050ecc3b)
+org.junit.jupiter:junit-jupiter-engine:6.0.3 (1 constraints: 060ecd3b)
 
-org.junit.jupiter:junit-jupiter-params:6.0.2 (2 constraints: 0e134e3b)
+org.junit.jupiter:junit-jupiter-params:6.0.3 (2 constraints: 1013783b)
 
-org.junit.platform:junit-platform-commons:6.0.2 (2 constraints: d7207a4a)
+org.junit.platform:junit-platform-commons:6.0.3 (2 constraints: d920ad4a)
 
-org.junit.platform:junit-platform-engine:6.0.2 (2 constraints: ef221108)
+org.junit.platform:junit-platform-engine:6.0.3 (2 constraints: f1224608)
 
-org.junit.platform:junit-platform-launcher:6.0.2 (1 constraints: 0a050b36)
+org.junit.platform:junit-platform-launcher:6.0.3 (1 constraints: 0b050c36)
 
 org.jvnet:animal-sniffer-annotation:1.0 (1 constraints: f20b95eb)
 
