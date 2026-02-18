@@ -178,7 +178,7 @@ org.jboss.xnio:xnio-api:3.8.16.Final (2 constraints: d71a2474)
 
 org.jboss.xnio:xnio-nio:3.8.16.Final (1 constraints: f80dc53d)
 
-org.jetbrains:annotations:26.0.2 (4 constraints: 0a3aa099)
+org.jetbrains:annotations:26.1.0 (4 constraints: 093a0f99)
 
 org.jspecify:jspecify:1.0.0 (24 constraints: 467e4422)
 
