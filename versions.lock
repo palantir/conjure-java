@@ -86,15 +86,15 @@ com.palantir.refreshable:refreshable:2.9.0 (3 constraints: ae338173)
 
 com.palantir.ri:resource-identifier:2.13.0 (3 constraints: 4e25b84b)
 
-com.palantir.safe-logging:logger:3.11.0 (24 constraints: 13a9f66f)
+com.palantir.safe-logging:logger:3.12.0 (24 constraints: 14a9a574)
 
-com.palantir.safe-logging:logger-slf4j:3.11.0 (1 constraints: 300e8a50)
+com.palantir.safe-logging:logger-slf4j:3.12.0 (1 constraints: 310e8d50)
 
-com.palantir.safe-logging:logger-spi:3.11.0 (2 constraints: 6f1e0ab0)
+com.palantir.safe-logging:logger-spi:3.12.0 (2 constraints: 711e40b0)
 
-com.palantir.safe-logging:preconditions:3.11.0 (31 constraints: 5e1f1da5)
+com.palantir.safe-logging:preconditions:3.12.0 (31 constraints: 601fb7ac)
 
-com.palantir.safe-logging:safe-logging:3.11.0 (28 constraints: 3ff29ff9)
+com.palantir.safe-logging:safe-logging:3.12.0 (28 constraints: 44f2c104)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.5.0 (1 constraints: 370fb076)
 
@@ -178,7 +178,7 @@ org.jboss.xnio:xnio-api:3.8.16.Final (2 constraints: d71a2474)
 
 org.jboss.xnio:xnio-nio:3.8.16.Final (1 constraints: f80dc53d)
 
-org.jetbrains:annotations:26.1.0 (4 constraints: 093a0f99)
+org.jetbrains:annotations:26.1.0 (4 constraints: 083a1099)
 
 org.jspecify:jspecify:1.0.0 (24 constraints: 467e4422)
 
@@ -246,7 +246,7 @@ com.palantir.conjure.java.runtime:conjure-java-legacy-clients:8.31.0 (2 constrai
 
 com.palantir.conjure.java.runtime:refresh-utils:8.31.0 (1 constraints: c218839e)
 
-com.palantir.safe-logging:preconditions-assertj:3.11.0 (1 constraints: 3705383b)
+com.palantir.safe-logging:preconditions-assertj:3.12.0 (1 constraints: 38053b3b)
 
 com.palantir.tracing:tracing-jersey-jakarta:6.31.0 (1 constraints: 4d1c90a1)
 
@@ -322,7 +322,7 @@ org.apache.commons:commons-text:1.13.0 (1 constraints: 3e1153ce)
 
 org.apiguardian:apiguardian-api:1.1.2 (6 constraints: 5366ce6e)
 
-org.assertj:assertj-core:3.27.7 (3 constraints: 012b91a5)
+org.assertj:assertj-core:3.27.7 (3 constraints: 022b92a5)
 
 org.eclipse.jetty:jetty-http:11.0.25 (5 constraints: 4f4d83e8)
 
