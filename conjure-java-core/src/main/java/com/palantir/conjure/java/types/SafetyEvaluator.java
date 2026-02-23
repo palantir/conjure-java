@@ -65,6 +65,9 @@ public final class SafetyEvaluator {
     public static final Optional<LogSafety> UNKNOWN_UNION_VARINT_SAFETY = Optional.empty();
 
     private final Map<TypeName, TypeDefinition> definitionMap;
+
+    // Memoization cache shared across all evaluate() calls on this instance. Avoids redundant recursive
+    // traversals of the type graph, which otherwise dominate generation time for large definitions.
     private final Map<TypeName, Optional<LogSafety>> cache = new HashMap<>();
 
     public SafetyEvaluator(ConjureDefinition definition) {
@@ -129,6 +132,9 @@ public final class SafetyEvaluator {
         private final Map<TypeName, Optional<LogSafety>> cache;
         private final Set<TypeName> inProgress;
         private final Type.Visitor<Optional<LogSafety>> fieldVisitor;
+
+        // Tracks whether cycle-breaking (the SAFE fallback for back-edges) was used anywhere
+        // in the current evaluation subtree. Used to decide whether a result is safe to cache.
         private boolean encounteredCycle;
 
         private TypeDefinitionSafetyVisitor(
