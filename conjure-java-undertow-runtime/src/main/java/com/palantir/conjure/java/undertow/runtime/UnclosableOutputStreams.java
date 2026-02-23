@@ -111,6 +111,7 @@ final class UnclosableOutputStreams {
             bufferWritable.write(byteBuffer);
         }
 
+        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public void transferFrom(FileChannel source) throws IOException {
             assertOpen();
