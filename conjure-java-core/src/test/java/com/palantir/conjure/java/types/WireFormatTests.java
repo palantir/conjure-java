@@ -992,17 +992,13 @@ public final class WireFormatTests {
                 mapper.writerFor(new TypeReference<NestedEmptyUnion>() {}).writeValueAsString(nestedEmptyUnion));
     }
 
-    /**
-     * This test does not pass at the moment due to the Jackson serialization
-     * <a href="https://github.com/FasterXML/jackson-databind/issues/5616">issue</a>, and is fixed in 2.21.1.
-     */
-    //    @Test
-    //    void testSealedUnionType_serializeOptionalSimpleUnion_usingWriterFor() throws JsonProcessingException {
-    //        Optional<SimpleUnion> optionalUnion = Optional.of(SimpleUnion.foo("test"));
-    //        assertThat(mapper.writerFor(new TypeReference<Optional<SimpleUnion>>() {})
-    //                        .writeValueAsString(optionalUnion))
-    //                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
-    //    }
+    @Test
+    void testSealedUnionType_serializeOptionalSimpleUnion_usingWriterFor() throws JsonProcessingException {
+        Optional<SimpleUnion> optionalUnion = Optional.of(SimpleUnion.foo("test"));
+        assertThat(mapper.writerFor(new TypeReference<Optional<SimpleUnion>>() {})
+                        .writeValueAsString(optionalUnion))
+                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+    }
 
     @Test
     void testSealedUnionType_serializeEmptyOptional() throws JsonProcessingException {
