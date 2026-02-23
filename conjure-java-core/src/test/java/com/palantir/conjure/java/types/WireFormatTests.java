@@ -1006,6 +1006,14 @@ public final class WireFormatTests {
         assertThat(mapper.writeValueAsString(optionalUnion)).isEqualTo("null");
     }
 
+    @Test
+    void testSealedUnionType_serializeEmptyOptional_usingWriterFor() throws JsonProcessingException {
+        Optional<SimpleUnion> optionalUnion = Optional.empty();
+        assertThat(mapper.writerFor(new TypeReference<Optional<SimpleUnion>>() {})
+                        .writeValueAsString(optionalUnion))
+                .isEqualTo("null");
+    }
+
     /**
      * The `toString` method on objects is used to serialize error parameters (when JSON error parameters are not
      * enabled). Unfortunately, this makes changes to the `toString` implementation of objects a potential wire break.
