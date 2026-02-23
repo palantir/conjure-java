@@ -184,26 +184,39 @@ public final class SafetyEvaluator {
         }
 
         private Optional<LogSafety> with(TypeName typeName, Supplier<Optional<LogSafety>> task) {
+            // Return memoized result if this type has already been fully evaluated.
+            // Note: cache values are Optional<LogSafety> which may be Optional.empty(),
+            // so we check for null (absent key) rather than emptiness.
             Optional<LogSafety> cached = cache.get(typeName);
             if (cached != null) {
                 return cached;
             }
             if (!inProgress.add(typeName)) {
                 // Given recursive evaluation, we return the least restrictive type: SAFE.
+                // Mark that this subtree's result depends on cycle-breaking.
                 encounteredCycle = true;
                 return OPTIONAL_OF_SAFE;
             }
+
+            // Save and reset cycle state so we can detect cycles within this type's subtree only.
             boolean previousCycleState = encounteredCycle;
             encounteredCycle = false;
+
             Optional<LogSafety> result = task.get();
+
             boolean subtreeHadCycle = encounteredCycle;
+            // Propagate cycle detection upward: if this subtree had a cycle, callers should know.
             encounteredCycle = previousCycleState || subtreeHadCycle;
+
             if (!inProgress.remove(typeName)) {
                 throw new IllegalStateException(
                         "Failed to remove " + typeName + " from in-progress, something is very wrong!");
             }
-            // Only cache results where no cycle was encountered in the subtree,
-            // since cycle-breaking may produce different results depending on evaluation order.
+
+            // Only cache results where no cycle was encountered in the subtree.
+            // When a cycle is broken with the SAFE heuristic, the result depends on which type
+            // was the entry point, so caching it would produce incorrect results if the same
+            // type is later evaluated from a different starting point.
             if (!subtreeHadCycle) {
                 cache.put(typeName, result);
             }
