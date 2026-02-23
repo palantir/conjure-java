@@ -38,6 +38,7 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.logsafe.Preconditions;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ public final class SafetyEvaluator {
     public static final Optional<LogSafety> UNKNOWN_UNION_VARINT_SAFETY = Optional.empty();
 
     private final Map<TypeName, TypeDefinition> definitionMap;
+    private final Map<TypeName, Optional<LogSafety>> cache = new HashMap<>();
 
     public SafetyEvaluator(ConjureDefinition definition) {
         this(TypeFunctions.toTypesMap(definition));
@@ -75,12 +77,12 @@ public final class SafetyEvaluator {
 
     public Optional<LogSafety> evaluate(TypeDefinition def) {
         return Preconditions.checkNotNull(def, "TypeDefinition is required")
-                .accept(new TypeDefinitionSafetyVisitor(definitionMap, new HashSet<>()));
+                .accept(new TypeDefinitionSafetyVisitor(definitionMap, cache, new HashSet<>()));
     }
 
     public Optional<LogSafety> evaluate(Type type) {
         return Preconditions.checkNotNull(type, "TypeDefinition is required")
-                .accept(new TypeDefinitionSafetyVisitor(definitionMap, new HashSet<>()).fieldVisitor);
+                .accept(new TypeDefinitionSafetyVisitor(definitionMap, cache, new HashSet<>()).fieldVisitor);
     }
 
     public Optional<LogSafety> evaluate(Type type, Optional<LogSafety> declaredSafety) {
@@ -124,10 +126,16 @@ public final class SafetyEvaluator {
     }
 
     private static final class TypeDefinitionSafetyVisitor implements TypeDefinition.Visitor<Optional<LogSafety>> {
+        private final Map<TypeName, Optional<LogSafety>> cache;
         private final Set<TypeName> inProgress;
         private final Type.Visitor<Optional<LogSafety>> fieldVisitor;
+        private boolean encounteredCycle;
 
-        private TypeDefinitionSafetyVisitor(Map<TypeName, TypeDefinition> definitionMap, Set<TypeName> inProgress) {
+        private TypeDefinitionSafetyVisitor(
+                Map<TypeName, TypeDefinition> definitionMap,
+                Map<TypeName, Optional<LogSafety>> cache,
+                Set<TypeName> inProgress) {
+            this.cache = cache;
             this.inProgress = inProgress;
             this.fieldVisitor = new FieldSafetyVisitor(definitionMap, this);
         }
@@ -170,14 +178,28 @@ public final class SafetyEvaluator {
         }
 
         private Optional<LogSafety> with(TypeName typeName, Supplier<Optional<LogSafety>> task) {
+            Optional<LogSafety> cached = cache.get(typeName);
+            if (cached != null) {
+                return cached;
+            }
             if (!inProgress.add(typeName)) {
                 // Given recursive evaluation, we return the least restrictive type: SAFE.
+                encounteredCycle = true;
                 return OPTIONAL_OF_SAFE;
             }
+            boolean previousCycleState = encounteredCycle;
+            encounteredCycle = false;
             Optional<LogSafety> result = task.get();
+            boolean subtreeHadCycle = encounteredCycle;
+            encounteredCycle = previousCycleState || subtreeHadCycle;
             if (!inProgress.remove(typeName)) {
                 throw new IllegalStateException(
                         "Failed to remove " + typeName + " from in-progress, something is very wrong!");
+            }
+            // Only cache results where no cycle was encountered in the subtree,
+            // since cycle-breaking may produce different results depending on evaluation order.
+            if (!subtreeHadCycle) {
+                cache.put(typeName, result);
             }
             return result;
         }
