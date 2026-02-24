@@ -73,9 +73,10 @@ public class NonNullCollectionsTest {
                         clientMapper.writeValueAsString(covariantListExample), CovariantListExample.class));
 
         // Similarly, setting a null in the builder also breaks
-        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> CovariantListExample.builder()
-                .addAllItems(Collections.singleton(null))
-                .build());
+        assertThatExceptionOfType(NullPointerException.class)
+                .isThrownBy(() -> CovariantListExample.builder()
+                        .addAllItems(Collections.singleton(null))
+                        .build());
     }
 
     @Test

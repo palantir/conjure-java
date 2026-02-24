@@ -139,10 +139,11 @@ public final class ArgumentTypesResolver {
                     .build());
         }
 
-        return context.getGenericInnerType(Optional.class, typeName).map(innerType -> ImmutableOptionalType.builder()
-                .isPresentMethodName("isPresent")
-                .valueGetMethodName("get")
-                .underlyingType(getArgumentTypeImpl(paramContext, innerType))
-                .build());
+        return context.getGenericInnerType(Optional.class, typeName)
+                .map(innerType -> ImmutableOptionalType.builder()
+                        .isPresentMethodName("isPresent")
+                        .valueGetMethodName("get")
+                        .underlyingType(getArgumentTypeImpl(paramContext, innerType))
+                        .build());
     }
 }

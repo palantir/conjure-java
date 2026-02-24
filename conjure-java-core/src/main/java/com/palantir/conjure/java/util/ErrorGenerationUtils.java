@@ -247,14 +247,16 @@ public final class ErrorGenerationUtils {
     private static List<ParameterSpec> createParametersForConditionalStaticFactory(
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, ErrorDefinition errorDefinition) {
         return Stream.concat(
-                        errorDefinition.getSafeArgs().stream().map(field -> FieldDefinition.builder()
-                                .from(field)
-                                .safety(LogSafety.SAFE)
-                                .build()),
-                        errorDefinition.getUnsafeArgs().stream().map(field -> FieldDefinition.builder()
-                                .from(field)
-                                .safety(LogSafety.UNSAFE)
-                                .build()))
+                        errorDefinition.getSafeArgs().stream()
+                                .map(field -> FieldDefinition.builder()
+                                        .from(field)
+                                        .safety(LogSafety.SAFE)
+                                        .build()),
+                        errorDefinition.getUnsafeArgs().stream()
+                                .map(field -> FieldDefinition.builder()
+                                        .from(field)
+                                        .safety(LogSafety.UNSAFE)
+                                        .build()))
                 .map(arg -> {
                     TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
                     Optional<LogSafety> underlyingTypeSafety = safetyEvaluator.getUsageTimeSafety(arg);

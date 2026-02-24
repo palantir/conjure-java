@@ -112,9 +112,11 @@ public final class AliasGenerator {
                     .addMethod(MethodSpecs.createHashCode(fields));
         }
 
-        typeDef.getAlias().accept(new ComparableVisitor(thisClass)).ifPresent(compareTo -> spec.addSuperinterface(
-                        ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
-                .addMethod(compareTo));
+        typeDef.getAlias()
+                .accept(new ComparableVisitor(thisClass))
+                .ifPresent(compareTo -> spec.addSuperinterface(
+                                ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
+                        .addMethod(compareTo));
 
         Optional<CodeBlock> maybeValueOfFactoryMethod =
                 valueOfFactoryMethod(typeDef.getAlias(), aliasTypeName, typeMapper, options);
@@ -560,16 +562,20 @@ public final class AliasGenerator {
 
         @Override
         public Optional<MethodSpec> visitInteger() {
-            return Optional.of(createCompareTo(aliasName, (thisValue, otherValue) -> CodeBlock.builder()
-                    .add("$T.compare($L, $L)", Integer.class, thisValue, otherValue)
-                    .build()));
+            return Optional.of(createCompareTo(
+                    aliasName,
+                    (thisValue, otherValue) -> CodeBlock.builder()
+                            .add("$T.compare($L, $L)", Integer.class, thisValue, otherValue)
+                            .build()));
         }
 
         @Override
         public Optional<MethodSpec> visitDouble() {
-            return Optional.of(createCompareTo(aliasName, (thisValue, otherValue) -> CodeBlock.builder()
-                    .add("$T.compare($L, $L)", Double.class, thisValue, otherValue)
-                    .build()));
+            return Optional.of(createCompareTo(
+                    aliasName,
+                    (thisValue, otherValue) -> CodeBlock.builder()
+                            .add("$T.compare($L, $L)", Double.class, thisValue, otherValue)
+                            .build()));
         }
 
         @Override
@@ -614,9 +620,11 @@ public final class AliasGenerator {
     }
 
     private static MethodSpec createCompareTo(TypeName aliasType) {
-        return createCompareTo(aliasType, (thisValue, otherValue) -> CodeBlock.builder()
-                .add("$L.compareTo($L)", thisValue, otherValue)
-                .build());
+        return createCompareTo(
+                aliasType,
+                (thisValue, otherValue) -> CodeBlock.builder()
+                        .add("$L.compareTo($L)", thisValue, otherValue)
+                        .build());
     }
 
     private static MethodSpec createCompareTo(

@@ -62,23 +62,38 @@ public class SingleParamServicesTest {
 
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
-                    .forEach(i -> arguments.add(Arguments.of(
-                            "singleHeaderService", serviceIndex, endpointName, i, singleHeaderTestCases.get(i)))));
+            IntStream.range(0, 2)
+                    .forEach(serviceIndex -> IntStream.range(0, size)
+                            .forEach(i -> arguments.add(Arguments.of(
+                                    "singleHeaderService",
+                                    serviceIndex,
+                                    endpointName,
+                                    i,
+                                    singleHeaderTestCases.get(i)))));
         });
 
         Cases.TEST_CASES.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
-                    .forEach(i -> arguments.add(Arguments.of(
-                            "singlePathParamService", serviceIndex, endpointName, i, singleHeaderTestCases.get(i)))));
+            IntStream.range(0, 2)
+                    .forEach(serviceIndex -> IntStream.range(0, size)
+                            .forEach(i -> arguments.add(Arguments.of(
+                                    "singlePathParamService",
+                                    serviceIndex,
+                                    endpointName,
+                                    i,
+                                    singleHeaderTestCases.get(i)))));
         });
 
         Cases.TEST_CASES.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
             int size = singleQueryTestCases.size();
-            IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
-                    .forEach(i -> arguments.add(Arguments.of(
-                            "singleQueryParamService", serviceIndex, endpointName, i, singleQueryTestCases.get(i)))));
+            IntStream.range(0, 2)
+                    .forEach(serviceIndex -> IntStream.range(0, size)
+                            .forEach(i -> arguments.add(Arguments.of(
+                                    "singleQueryParamService",
+                                    serviceIndex,
+                                    endpointName,
+                                    i,
+                                    singleQueryTestCases.get(i)))));
         });
 
         return arguments;
