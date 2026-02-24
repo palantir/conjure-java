@@ -388,7 +388,7 @@ public final class SafetyEvaluator {
         return left.ordinal() * SAFETY_VALUE_COUNT + right.ordinal();
     }
 
-    // TODO: remove this
+    // TODO(aldexis): remove this
     public static Optional<LogSafety> combine(Optional<LogSafety> one, Optional<LogSafety> two) {
         LogSafety.Value combined = combine(value(one), value(two));
 
