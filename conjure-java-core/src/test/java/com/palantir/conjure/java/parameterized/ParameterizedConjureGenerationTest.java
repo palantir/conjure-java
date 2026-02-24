@@ -98,9 +98,12 @@ public final class ParameterizedConjureGenerationTest {
             Path testCaseDirectory = Paths.get(REFERENCE_FILES_FOLDER, testCase.packagePrefix());
             if (Files.exists(testCaseDirectory)) {
                 try (Stream<Path> filePaths = Files.walk(testCaseDirectory)) {
-                    filePaths.filter(Files::isRegularFile).map(Path::toFile).forEach(file -> assertThat(file.delete())
-                            .describedAs("File was not deleted successfully: " + file.getName())
-                            .isTrue());
+                    filePaths
+                            .filter(Files::isRegularFile)
+                            .map(Path::toFile)
+                            .forEach(file -> assertThat(file.delete())
+                                    .describedAs("File was not deleted successfully: " + file.getName())
+                                    .isTrue());
                 }
             }
         }

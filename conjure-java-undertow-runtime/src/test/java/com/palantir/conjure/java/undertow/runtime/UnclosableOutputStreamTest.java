@@ -59,9 +59,10 @@ class UnclosableOutputStreamTest {
         Mockito.verify(delegate, Mockito.never()).close();
         // Writes to the wrapper must fail because that "view" is closed
         assertThat(stream)
-                .isInstanceOfSatisfying(BufferWritableOutputStream.class, bufferWritable -> assertThatThrownBy(
-                                () -> bufferWritable.write(ByteBuffer.wrap(new byte[1])))
-                        .isInstanceOf(IOException.class));
+                .isInstanceOfSatisfying(
+                        BufferWritableOutputStream.class,
+                        bufferWritable -> assertThatThrownBy(() -> bufferWritable.write(ByteBuffer.wrap(new byte[1])))
+                                .isInstanceOf(IOException.class));
 
         // Flush may still be passed through
         stream.flush();

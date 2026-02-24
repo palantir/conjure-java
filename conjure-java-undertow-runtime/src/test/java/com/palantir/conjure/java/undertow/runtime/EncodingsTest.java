@@ -178,10 +178,12 @@ final class EncodingsTest {
             }
         };
         assertThatThrownBy(() -> deserialize(jsonStringStream, new TypeMarker<String>() {}))
-                .isInstanceOfSatisfying(FrameworkException.class, frameworkException -> assertThat(frameworkException)
-                        .hasMessageContaining("Stream constraint violation")
-                        .extracting(FrameworkException::getStatusCode)
-                        .isEqualTo(422));
+                .isInstanceOfSatisfying(
+                        FrameworkException.class,
+                        frameworkException -> assertThat(frameworkException)
+                                .hasMessageContaining("Stream constraint violation")
+                                .extracting(FrameworkException::getStatusCode)
+                                .isEqualTo(422));
     }
 
     @Test
