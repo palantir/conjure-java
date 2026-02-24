@@ -384,11 +384,8 @@ class SafetyEvaluatorTest {
                         .type(Type.reference(FOO))
                         .build())
                 .build());
-        ConjureDefinition conjureDef = ConjureDefinition.builder()
-                .version(1)
-                .types(foo)
-                .types(bar)
-                .build();
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(foo).types(bar).build();
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         // Evaluation order should not matter for the result
         assertThat(evaluator.evaluate(foo)).hasValue(LogSafety.SAFE);
@@ -418,11 +415,8 @@ class SafetyEvaluatorTest {
                         .safety(LogSafety.UNSAFE)
                         .build())
                 .build());
-        ConjureDefinition conjureDef = ConjureDefinition.builder()
-                .version(1)
-                .types(foo)
-                .types(bar)
-                .build();
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(foo).types(bar).build();
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(bar)).hasValue(LogSafety.UNSAFE);
         assertThat(evaluator.evaluate(foo)).hasValue(LogSafety.UNSAFE);
@@ -451,11 +445,8 @@ class SafetyEvaluatorTest {
                         .type(Type.reference(FOO))
                         .build())
                 .build());
-        ConjureDefinition conjureDef = ConjureDefinition.builder()
-                .version(1)
-                .types(foo)
-                .types(bar)
-                .build();
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(foo).types(bar).build();
 
         // Evaluate foo first, then bar
         SafetyEvaluator evaluator1 = new SafetyEvaluator(conjureDef);
@@ -482,10 +473,8 @@ class SafetyEvaluatorTest {
                         .type(Type.reference(FOO))
                         .build())
                 .build());
-        ConjureDefinition conjureDef = ConjureDefinition.builder()
-                .version(1)
-                .types(node)
-                .build();
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(node).build();
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(node)).hasValue(LogSafety.SAFE);
     }
