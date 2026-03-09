@@ -82,6 +82,13 @@ Conjure-java supports feature flags to enable additional opt-in features. To ena
 flag, simply supply the feature flag as an additional parameter when executing conjure-java. Available feature flags
 can be found in the [Options](./conjure-java-core/src/main/java/com/palantir/conjure/java/Options.java) class.
 
+### Performance
+
+When using gradle-conjure, ensure the following JVM packages are exported in your project's `gradle.properties`. Without these exports, the Java code formatter will fall back to a slower mode:
+```properties
+org.gradle.jvmargs=--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+```
+
 ## Example generated objects
 
 Conjure-java objects are always immutable and thread-safe.  Fields are never null; instead, Java 8 Optionals are used. JSON serialization is handled using [Jackson](https://github.com/FasterXML/jackson) annotations.
