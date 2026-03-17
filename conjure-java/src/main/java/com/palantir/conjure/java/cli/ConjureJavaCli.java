@@ -51,7 +51,7 @@ import picocli.CommandLine;
 public final class ConjureJavaCli implements Runnable {
 
     public static void main(String[] args) {
-        new CommandLine(new ConjureJavaCli()).execute(args);
+        System.exit(new CommandLine(new ConjureJavaCli()).execute(args));
     }
 
     @Override
