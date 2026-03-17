@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -234,5 +235,33 @@ public final class ConjureJavaCliTest {
         String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--jersey"};
         new CommandLine(new ConjureJavaCli()).execute(args);
         // assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
+    }
+
+    @Test
+    public void mainExitsWithNonZeroOnGenerationFailure() throws Exception {
+        String classpath = System.getProperty("java.class.path");
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+
+        Process process = new ProcessBuilder(
+                        javaBin,
+                        "-cp",
+                        classpath,
+                        "com.palantir.conjure.java.cli.ConjureJavaCli",
+                        "generate",
+                        "src/test/resources/do-not-log-unsafe-error.json",
+                        tempDir.getAbsolutePath(),
+                        "--objects",
+                        "--useImmutableBytes")
+                .redirectErrorStream(true)
+                .start();
+
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        int exitCode = process.waitFor();
+
+        assertThat(exitCode)
+                .as("Expected non-zero exit code. Output:\n%s", output)
+                .isNotEqualTo(0);
+        assertThat(output).contains("Cannot use DO_NOT_LOG type");
     }
 }
