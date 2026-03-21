@@ -100,7 +100,7 @@ com.palantir.safethreadlocalrandom:safe-thread-local-random:0.6.0 (1 constraints
 
 com.palantir.syntactic-paths:syntactic-paths:0.14.0 (2 constraints: c913dc6d)
 
-com.palantir.tokens:auth-tokens:4.0.0 (5 constraints: c15355ca)
+com.palantir.tokens:auth-tokens:4.2.0 (5 constraints: c35319cc)
 
 com.palantir.tracing:tracing:6.32.0 (8 constraints: 687e9f09)
 
