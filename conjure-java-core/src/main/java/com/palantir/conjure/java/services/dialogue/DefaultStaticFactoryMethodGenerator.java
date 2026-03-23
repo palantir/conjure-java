@@ -148,6 +148,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 name);
     }
 
+    private ClassName getTypeMarkersClass(ErrorDefinition errorDef) {
+        return ClassName.get(
+                Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()) + "TypeMarkers");
+    }
+
     private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
         TypeVariableName typeVariableT = TypeVariableName.get("T");
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createExceptionDeserializerArgs")
@@ -164,15 +170,16 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             String errorName = errorDef.getErrorName().getName();
             ClassName errorClass = getClassNameInErrorsPackage(
                     errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
-            ClassName serializableErrorClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
-            ClassName exceptionClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
+            ClassName typeMarkersClass = getTypeMarkersClass(errorDef);
+            String serializableErrorFieldName = ErrorGenerationUtils.serializableErrorClassName(errorName);
+            String exceptionFieldName = ErrorGenerationUtils.errorExceptionClassName(errorName);
             exceptions.add(
-                    ".exception($T.name(), $T.TYPE_MARKER, $T.TYPE_MARKER)",
+                    ".exception($T.name(), $T.$N, $T.$N)",
                     errorClass,
-                    serializableErrorClass,
-                    exceptionClass);
+                    typeMarkersClass,
+                    serializableErrorFieldName,
+                    typeMarkersClass,
+                    exceptionFieldName);
         }
         exceptions.add(".build();");
         return methodBuilder.addCode(exceptions.build()).build();

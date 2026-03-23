@@ -7,7 +7,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import javax.annotation.processing.Generated;
@@ -30,9 +29,6 @@ public final class EndpointSpecificTwoErrors {
 
     public static final class DifferentNamespaceSerializableError
             extends AbstractSerializableError<DifferentNamespaceParameters> {
-        public static final TypeMarker<DifferentNamespaceSerializableError> TYPE_MARKER =
-                new TypeMarker<DifferentNamespaceSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         DifferentNamespaceSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -54,9 +50,6 @@ public final class EndpointSpecificTwoErrors {
     @SuppressWarnings("serial")
     public static final class DifferentNamespaceException extends RemoteException
             implements SerializableErrorProvider<DifferentNamespaceParameters> {
-        public static final TypeMarker<DifferentNamespaceException> TYPE_MARKER =
-                new TypeMarker<DifferentNamespaceException>() {};
-
         private DifferentNamespaceSerializableError error;
 
         public DifferentNamespaceException(DifferentNamespaceSerializableError error, int status) {

@@ -8,7 +8,6 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -372,9 +371,6 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseSafeArgSerializableError
             extends AbstractSerializableError<ConflictingCauseSafeArgParameters> {
-        public static final TypeMarker<ConflictingCauseSafeArgSerializableError> TYPE_MARKER =
-                new TypeMarker<ConflictingCauseSafeArgSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ConflictingCauseSafeArgSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -397,9 +393,6 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseUnsafeArgSerializableError
             extends AbstractSerializableError<ConflictingCauseUnsafeArgParameters> {
-        public static final TypeMarker<ConflictingCauseUnsafeArgSerializableError> TYPE_MARKER =
-                new TypeMarker<ConflictingCauseUnsafeArgSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ConflictingCauseUnsafeArgSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -422,9 +415,6 @@ public final class ConjureErrors {
 
     public static final class ErrorWithComplexArgsSerializableError
             extends AbstractSerializableError<ErrorWithComplexArgsParameters> {
-        public static final TypeMarker<ErrorWithComplexArgsSerializableError> TYPE_MARKER =
-                new TypeMarker<ErrorWithComplexArgsSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ErrorWithComplexArgsSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -472,9 +462,6 @@ public final class ConjureErrors {
 
     public static final class InvalidServiceDefinitionSerializableError
             extends AbstractSerializableError<InvalidServiceDefinitionParameters> {
-        public static final TypeMarker<InvalidServiceDefinitionSerializableError> TYPE_MARKER =
-                new TypeMarker<InvalidServiceDefinitionSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         InvalidServiceDefinitionSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -497,9 +484,6 @@ public final class ConjureErrors {
 
     public static final class InvalidTypeDefinitionSerializableError
             extends AbstractSerializableError<InvalidTypeDefinitionParameters> {
-        public static final TypeMarker<InvalidTypeDefinitionSerializableError> TYPE_MARKER =
-                new TypeMarker<InvalidTypeDefinitionSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         InvalidTypeDefinitionSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -523,9 +507,6 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class ConflictingCauseSafeArgException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseSafeArgParameters> {
-        public static final TypeMarker<ConflictingCauseSafeArgException> TYPE_MARKER =
-                new TypeMarker<ConflictingCauseSafeArgException>() {};
-
         private ConflictingCauseSafeArgSerializableError error;
 
         public ConflictingCauseSafeArgException(ConflictingCauseSafeArgSerializableError error, int status) {
@@ -541,9 +522,6 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class ConflictingCauseUnsafeArgException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseUnsafeArgParameters> {
-        public static final TypeMarker<ConflictingCauseUnsafeArgException> TYPE_MARKER =
-                new TypeMarker<ConflictingCauseUnsafeArgException>() {};
-
         private ConflictingCauseUnsafeArgSerializableError error;
 
         public ConflictingCauseUnsafeArgException(ConflictingCauseUnsafeArgSerializableError error, int status) {
@@ -559,9 +537,6 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class ErrorWithComplexArgsException extends RemoteException
             implements SerializableErrorProvider<ErrorWithComplexArgsParameters> {
-        public static final TypeMarker<ErrorWithComplexArgsException> TYPE_MARKER =
-                new TypeMarker<ErrorWithComplexArgsException>() {};
-
         private ErrorWithComplexArgsSerializableError error;
 
         public ErrorWithComplexArgsException(ErrorWithComplexArgsSerializableError error, int status) {
@@ -577,9 +552,6 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class InvalidServiceDefinitionException extends RemoteException
             implements SerializableErrorProvider<InvalidServiceDefinitionParameters> {
-        public static final TypeMarker<InvalidServiceDefinitionException> TYPE_MARKER =
-                new TypeMarker<InvalidServiceDefinitionException>() {};
-
         private InvalidServiceDefinitionSerializableError error;
 
         public InvalidServiceDefinitionException(InvalidServiceDefinitionSerializableError error, int status) {
@@ -595,9 +567,6 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class InvalidTypeDefinitionException extends RemoteException
             implements SerializableErrorProvider<InvalidTypeDefinitionParameters> {
-        public static final TypeMarker<InvalidTypeDefinitionException> TYPE_MARKER =
-                new TypeMarker<InvalidTypeDefinitionException>() {};
-
         private InvalidTypeDefinitionSerializableError error;
 
         public InvalidTypeDefinitionException(InvalidTypeDefinitionSerializableError error, int status) {

@@ -44,34 +44,34 @@ public interface EmptyPathServiceAsync {
                                 exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
                                         .DIFFERENT_PACKAGE_ERROR
                                         .name(),
-                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                        .DifferentPackageErrorSerializableError.TYPE_MARKER,
-                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                        .DifferentPackageErrorException.TYPE_MARKER)
+                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
+                                        .DifferentPackageErrorSerializableError,
+                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
+                                        .DifferentPackageErrorException)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                ConjureErrors.ConflictingCauseSafeArgSerializableError.TYPE_MARKER,
-                                ConjureErrors.ConflictingCauseSafeArgException.TYPE_MARKER)
+                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgSerializableError,
+                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgException)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                ConjureErrors.ConflictingCauseUnsafeArgSerializableError.TYPE_MARKER,
-                                ConjureErrors.ConflictingCauseUnsafeArgException.TYPE_MARKER)
+                                ConjureErrorsTypeMarkers.ConflictingCauseUnsafeArgSerializableError,
+                                ConjureErrorsTypeMarkers.ConflictingCauseUnsafeArgException)
                         .exception(
                                 ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                ConjureErrors.ErrorWithComplexArgsSerializableError.TYPE_MARKER,
-                                ConjureErrors.ErrorWithComplexArgsException.TYPE_MARKER)
+                                ConjureErrorsTypeMarkers.ErrorWithComplexArgsSerializableError,
+                                ConjureErrorsTypeMarkers.ErrorWithComplexArgsException)
                         .exception(
                                 ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                ConjureErrors.InvalidServiceDefinitionSerializableError.TYPE_MARKER,
-                                ConjureErrors.InvalidServiceDefinitionException.TYPE_MARKER)
+                                ConjureErrorsTypeMarkers.InvalidServiceDefinitionSerializableError,
+                                ConjureErrorsTypeMarkers.InvalidServiceDefinitionException)
                         .exception(
                                 ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                ConjureErrors.InvalidTypeDefinitionSerializableError.TYPE_MARKER,
-                                ConjureErrors.InvalidTypeDefinitionException.TYPE_MARKER)
+                                ConjureErrorsTypeMarkers.InvalidTypeDefinitionSerializableError,
+                                ConjureErrorsTypeMarkers.InvalidTypeDefinitionException)
                         .exception(
                                 ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                ConjureJavaErrors.JavaCompilationFailedSerializableError.TYPE_MARKER,
-                                ConjureJavaErrors.JavaCompilationFailedException.TYPE_MARKER)
+                                ConjureJavaErrorsTypeMarkers.JavaCompilationFailedSerializableError,
+                                ConjureJavaErrorsTypeMarkers.JavaCompilationFailedException)
                         .build();
             }
 

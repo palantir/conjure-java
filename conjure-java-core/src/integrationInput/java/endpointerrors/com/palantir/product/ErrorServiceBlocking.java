@@ -118,34 +118,34 @@ public interface ErrorServiceBlocking {
                         .returnType(returnType)
                         .exception(
                                 endpointerrors.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
-                                endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                        .DifferentPackageSerializableError.TYPE_MARKER,
-                                endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException
-                                        .TYPE_MARKER)
+                                endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
+                                        .DifferentPackageSerializableError,
+                                endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
+                                        .DifferentPackageException)
                         .exception(
                                 TestErrors.COMPLICATED_PARAMETERS.name(),
-                                TestErrors.ComplicatedParametersSerializableError.TYPE_MARKER,
-                                TestErrors.ComplicatedParametersException.TYPE_MARKER)
+                                TestErrorsTypeMarkers.ComplicatedParametersSerializableError,
+                                TestErrorsTypeMarkers.ComplicatedParametersException)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
-                                ConjureErrors.ConflictingCauseSafeArgErrSerializableError.TYPE_MARKER,
-                                ConjureErrors.ConflictingCauseSafeArgErrException.TYPE_MARKER)
+                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgErrSerializableError,
+                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgErrException)
                         .exception(
                                 EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
-                                EndpointSpecificTwoErrors.DifferentNamespaceSerializableError.TYPE_MARKER,
-                                EndpointSpecificTwoErrors.DifferentNamespaceException.TYPE_MARKER)
+                                EndpointSpecificTwoErrorsTypeMarkers.DifferentNamespaceSerializableError,
+                                EndpointSpecificTwoErrorsTypeMarkers.DifferentNamespaceException)
                         .exception(
                                 EndpointSpecificErrors.ENDPOINT_ERROR.name(),
-                                EndpointSpecificErrors.EndpointErrorSerializableError.TYPE_MARKER,
-                                EndpointSpecificErrors.EndpointErrorException.TYPE_MARKER)
+                                EndpointSpecificErrorsTypeMarkers.EndpointErrorSerializableError,
+                                EndpointSpecificErrorsTypeMarkers.EndpointErrorException)
                         .exception(
                                 TestErrors.INVALID_ARGUMENT.name(),
-                                TestErrors.InvalidArgumentSerializableError.TYPE_MARKER,
-                                TestErrors.InvalidArgumentException.TYPE_MARKER)
+                                TestErrorsTypeMarkers.InvalidArgumentSerializableError,
+                                TestErrorsTypeMarkers.InvalidArgumentException)
                         .exception(
                                 TestErrors.NOT_FOUND.name(),
-                                TestErrors.NotFoundSerializableError.TYPE_MARKER,
-                                TestErrors.NotFoundException.TYPE_MARKER)
+                                TestErrorsTypeMarkers.NotFoundSerializableError,
+                                TestErrorsTypeMarkers.NotFoundException)
                         .build();
             }
 
