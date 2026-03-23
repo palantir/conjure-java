@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2024 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2026 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.palantir.conjure.java.services.dialogue;
 
+import com.google.common.base.CaseFormat;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
@@ -25,6 +26,7 @@ import com.palantir.dialogue.TypeMarker;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeSpec;
 import java.util.List;
@@ -57,18 +59,24 @@ final class ErrorTypeMarkersGenerator {
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(typeMarkersClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorTypeMarkersGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorTypeMarkersGenerator.class))
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PRIVATE)
+                        .build());
 
         for (ErrorDefinition errorDef : namespacedErrors.errors()) {
             String errorName = errorDef.getErrorName().getName();
 
-            String serializableErrorName = ErrorGenerationUtils.serializableErrorClassName(errorName);
-            ClassName serializableErrorClass = errorsClass.nestedClass(serializableErrorName);
-            classBuilder.addField(typeMarkerField(serializableErrorName, serializableErrorClass));
+            String serializableErrorClassName = ErrorGenerationUtils.serializableErrorClassName(errorName);
+            ClassName serializableErrorClass = errorsClass.nestedClass(serializableErrorClassName);
+            classBuilder.addField(typeMarkerField(
+                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, serializableErrorClassName),
+                    serializableErrorClass));
 
-            String exceptionName = ErrorGenerationUtils.errorExceptionClassName(errorName);
-            ClassName exceptionClass = errorsClass.nestedClass(exceptionName);
-            classBuilder.addField(typeMarkerField(exceptionName, exceptionClass));
+            String exceptionClassName = ErrorGenerationUtils.errorExceptionClassName(errorName);
+            ClassName exceptionClass = errorsClass.nestedClass(exceptionClassName);
+            classBuilder.addField(typeMarkerField(
+                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, exceptionClassName), exceptionClass));
         }
 
         return JavaFile.builder(conjurePackage, classBuilder.build())
