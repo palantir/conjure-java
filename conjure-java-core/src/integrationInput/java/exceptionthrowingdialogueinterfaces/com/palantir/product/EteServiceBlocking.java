@@ -459,33 +459,33 @@ public interface EteServiceBlocking {
                                         .DIFFERENT_PACKAGE_ERROR
                                         .name(),
                                 exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
-                                        .DifferentPackageErrorSerializableError,
+                                        .DIFFERENT_PACKAGE_ERROR_SERIALIZABLE_ERROR,
                                 exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
-                                        .DifferentPackageErrorException)
+                                        .DIFFERENT_PACKAGE_ERROR_EXCEPTION)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgSerializableError,
-                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgException)
+                                ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                ConjureErrorsTypeMarkers.ConflictingCauseUnsafeArgSerializableError,
-                                ConjureErrorsTypeMarkers.ConflictingCauseUnsafeArgException)
+                                ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_UNSAFE_ARG_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_UNSAFE_ARG_EXCEPTION)
                         .exception(
                                 ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                ConjureErrorsTypeMarkers.ErrorWithComplexArgsSerializableError,
-                                ConjureErrorsTypeMarkers.ErrorWithComplexArgsException)
+                                ConjureErrorsTypeMarkers.ERROR_WITH_COMPLEX_ARGS_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.ERROR_WITH_COMPLEX_ARGS_EXCEPTION)
                         .exception(
                                 ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                ConjureErrorsTypeMarkers.InvalidServiceDefinitionSerializableError,
-                                ConjureErrorsTypeMarkers.InvalidServiceDefinitionException)
+                                ConjureErrorsTypeMarkers.INVALID_SERVICE_DEFINITION_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.INVALID_SERVICE_DEFINITION_EXCEPTION)
                         .exception(
                                 ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                ConjureErrorsTypeMarkers.InvalidTypeDefinitionSerializableError,
-                                ConjureErrorsTypeMarkers.InvalidTypeDefinitionException)
+                                ConjureErrorsTypeMarkers.INVALID_TYPE_DEFINITION_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.INVALID_TYPE_DEFINITION_EXCEPTION)
                         .exception(
                                 ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                ConjureJavaErrorsTypeMarkers.JavaCompilationFailedSerializableError,
-                                ConjureJavaErrorsTypeMarkers.JavaCompilationFailedException)
+                                ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_SERIALIZABLE_ERROR,
+                                ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_EXCEPTION)
                         .build();
             }
 

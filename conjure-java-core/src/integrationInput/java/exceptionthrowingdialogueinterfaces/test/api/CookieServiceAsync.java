@@ -47,52 +47,52 @@ public interface CookieServiceAsync {
                         .returnType(returnType)
                         .exception(
                                 ConjureErrors.DIFFERENT_PACKAGE_ERROR.name(),
-                                ConjureErrorsTypeMarkers.DifferentPackageErrorSerializableError,
-                                ConjureErrorsTypeMarkers.DifferentPackageErrorException)
+                                ConjureErrorsTypeMarkers.DIFFERENT_PACKAGE_ERROR_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.DIFFERENT_PACKAGE_ERROR_EXCEPTION)
                         .exception(
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                         .CONFLICTING_CAUSE_SAFE_ARG
                                         .name(),
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .ConflictingCauseSafeArgSerializableError,
+                                        .CONFLICTING_CAUSE_SAFE_ARG_SERIALIZABLE_ERROR,
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .ConflictingCauseSafeArgException)
+                                        .CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION)
                         .exception(
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                         .CONFLICTING_CAUSE_UNSAFE_ARG
                                         .name(),
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .ConflictingCauseUnsafeArgSerializableError,
+                                        .CONFLICTING_CAUSE_UNSAFE_ARG_SERIALIZABLE_ERROR,
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .ConflictingCauseUnsafeArgException)
+                                        .CONFLICTING_CAUSE_UNSAFE_ARG_EXCEPTION)
                         .exception(
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                         .ERROR_WITH_COMPLEX_ARGS
                                         .name(),
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .ErrorWithComplexArgsSerializableError,
+                                        .ERROR_WITH_COMPLEX_ARGS_SERIALIZABLE_ERROR,
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .ErrorWithComplexArgsException)
+                                        .ERROR_WITH_COMPLEX_ARGS_EXCEPTION)
                         .exception(
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                         .INVALID_SERVICE_DEFINITION
                                         .name(),
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .InvalidServiceDefinitionSerializableError,
+                                        .INVALID_SERVICE_DEFINITION_SERIALIZABLE_ERROR,
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .InvalidServiceDefinitionException)
+                                        .INVALID_SERVICE_DEFINITION_EXCEPTION)
                         .exception(
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                         .INVALID_TYPE_DEFINITION
                                         .name(),
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .InvalidTypeDefinitionSerializableError,
+                                        .INVALID_TYPE_DEFINITION_SERIALIZABLE_ERROR,
                                 exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
-                                        .InvalidTypeDefinitionException)
+                                        .INVALID_TYPE_DEFINITION_EXCEPTION)
                         .exception(
                                 ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                ConjureJavaErrorsTypeMarkers.JavaCompilationFailedSerializableError,
-                                ConjureJavaErrorsTypeMarkers.JavaCompilationFailedException)
+                                ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_SERIALIZABLE_ERROR,
+                                ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_EXCEPTION)
                         .build();
             }
 

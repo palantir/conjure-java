@@ -171,8 +171,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             ClassName errorClass = getClassNameInErrorsPackage(
                     errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
             ClassName typeMarkersClass = getTypeMarkersClass(errorDef);
-            String serializableErrorFieldName = ErrorGenerationUtils.serializableErrorClassName(errorName);
-            String exceptionFieldName = ErrorGenerationUtils.errorExceptionClassName(errorName);
+            String serializableErrorFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.serializableErrorClassName(errorName));
+            String exceptionFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.errorExceptionClassName(errorName));
             exceptions.add(
                     ".exception($T.name(), $T.$N, $T.$N)",
                     errorClass,

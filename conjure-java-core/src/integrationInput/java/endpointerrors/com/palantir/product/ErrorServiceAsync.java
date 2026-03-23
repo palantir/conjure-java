@@ -118,33 +118,33 @@ public interface ErrorServiceAsync {
                         .exception(
                                 endpointerrors.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
                                 endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
-                                        .DifferentPackageSerializableError,
+                                        .DIFFERENT_PACKAGE_SERIALIZABLE_ERROR,
                                 endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
-                                        .DifferentPackageException)
+                                        .DIFFERENT_PACKAGE_EXCEPTION)
                         .exception(
                                 TestErrors.COMPLICATED_PARAMETERS.name(),
-                                TestErrorsTypeMarkers.ComplicatedParametersSerializableError,
-                                TestErrorsTypeMarkers.ComplicatedParametersException)
+                                TestErrorsTypeMarkers.COMPLICATED_PARAMETERS_SERIALIZABLE_ERROR,
+                                TestErrorsTypeMarkers.COMPLICATED_PARAMETERS_EXCEPTION)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
-                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgErrSerializableError,
-                                ConjureErrorsTypeMarkers.ConflictingCauseSafeArgErrException)
+                                ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_ERR_SERIALIZABLE_ERROR,
+                                ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_ERR_EXCEPTION)
                         .exception(
                                 EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
-                                EndpointSpecificTwoErrorsTypeMarkers.DifferentNamespaceSerializableError,
-                                EndpointSpecificTwoErrorsTypeMarkers.DifferentNamespaceException)
+                                EndpointSpecificTwoErrorsTypeMarkers.DIFFERENT_NAMESPACE_SERIALIZABLE_ERROR,
+                                EndpointSpecificTwoErrorsTypeMarkers.DIFFERENT_NAMESPACE_EXCEPTION)
                         .exception(
                                 EndpointSpecificErrors.ENDPOINT_ERROR.name(),
-                                EndpointSpecificErrorsTypeMarkers.EndpointErrorSerializableError,
-                                EndpointSpecificErrorsTypeMarkers.EndpointErrorException)
+                                EndpointSpecificErrorsTypeMarkers.ENDPOINT_ERROR_SERIALIZABLE_ERROR,
+                                EndpointSpecificErrorsTypeMarkers.ENDPOINT_ERROR_EXCEPTION)
                         .exception(
                                 TestErrors.INVALID_ARGUMENT.name(),
-                                TestErrorsTypeMarkers.InvalidArgumentSerializableError,
-                                TestErrorsTypeMarkers.InvalidArgumentException)
+                                TestErrorsTypeMarkers.INVALID_ARGUMENT_SERIALIZABLE_ERROR,
+                                TestErrorsTypeMarkers.INVALID_ARGUMENT_EXCEPTION)
                         .exception(
                                 TestErrors.NOT_FOUND.name(),
-                                TestErrorsTypeMarkers.NotFoundSerializableError,
-                                TestErrorsTypeMarkers.NotFoundException)
+                                TestErrorsTypeMarkers.NOT_FOUND_SERIALIZABLE_ERROR,
+                                TestErrorsTypeMarkers.NOT_FOUND_EXCEPTION)
                         .build();
             }
 

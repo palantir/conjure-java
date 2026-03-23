@@ -6,8 +6,11 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.ErrorTypeMarkersGenerator")
 public final class EndpointSpecificErrorsTypeMarkers {
     public static final TypeMarker<EndpointSpecificErrors.EndpointErrorSerializableError>
-            EndpointErrorSerializableError = new TypeMarker<EndpointSpecificErrors.EndpointErrorSerializableError>() {};
+            ENDPOINT_ERROR_SERIALIZABLE_ERROR =
+                    new TypeMarker<EndpointSpecificErrors.EndpointErrorSerializableError>() {};
 
-    public static final TypeMarker<EndpointSpecificErrors.EndpointErrorException> EndpointErrorException =
+    public static final TypeMarker<EndpointSpecificErrors.EndpointErrorException> ENDPOINT_ERROR_EXCEPTION =
             new TypeMarker<EndpointSpecificErrors.EndpointErrorException>() {};
+
+    private EndpointSpecificErrorsTypeMarkers() {}
 }
