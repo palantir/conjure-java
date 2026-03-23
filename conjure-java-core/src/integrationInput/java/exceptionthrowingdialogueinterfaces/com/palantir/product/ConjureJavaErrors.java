@@ -8,6 +8,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import javax.annotation.Nullable;
@@ -50,6 +51,9 @@ public final class ConjureJavaErrors {
 
     public static final class JavaCompilationFailedSerializableError
             extends AbstractSerializableError<JavaCompilationFailedParameters> {
+        public static final TypeMarker<JavaCompilationFailedSerializableError> TYPE_MARKER =
+                new TypeMarker<JavaCompilationFailedSerializableError>() {};
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         JavaCompilationFailedSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -71,6 +75,9 @@ public final class ConjureJavaErrors {
     @SuppressWarnings("serial")
     public static final class JavaCompilationFailedException extends RemoteException
             implements SerializableErrorProvider<JavaCompilationFailedParameters> {
+        public static final TypeMarker<JavaCompilationFailedException> TYPE_MARKER =
+                new TypeMarker<JavaCompilationFailedException>() {};
+
         private JavaCompilationFailedSerializableError error;
 
         public JavaCompilationFailedException(JavaCompilationFailedSerializableError error, int status) {
