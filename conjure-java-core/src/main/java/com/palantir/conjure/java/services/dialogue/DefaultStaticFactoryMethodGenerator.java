@@ -169,11 +169,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             ClassName exceptionClass =
                     getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
             exceptions.add(
-                    ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
+                    ".exception($T.name(), $T.TYPE_MARKER, $T.TYPE_MARKER)",
                     errorClass,
-                    TypeMarker.class,
                     serializableErrorClass,
-                    TypeMarker.class,
                     exceptionClass);
         }
         exceptions.add(".build();");

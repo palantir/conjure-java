@@ -118,36 +118,34 @@ public interface ErrorServiceBlocking {
                         .returnType(returnType)
                         .exception(
                                 endpointerrors.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
-                                new TypeMarker<
-                                        endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                                .DifferentPackageSerializableError>() {},
-                                new TypeMarker<
-                                        endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                                .DifferentPackageException>() {})
+                                endpointerrors.com.palantir.another.EndpointSpecificErrors
+                                        .DifferentPackageSerializableError.TYPE_MARKER,
+                                endpointerrors.com.palantir.another.EndpointSpecificErrors.DifferentPackageException
+                                        .TYPE_MARKER)
                         .exception(
                                 TestErrors.COMPLICATED_PARAMETERS.name(),
-                                new TypeMarker<TestErrors.ComplicatedParametersSerializableError>() {},
-                                new TypeMarker<TestErrors.ComplicatedParametersException>() {})
+                                TestErrors.ComplicatedParametersSerializableError.TYPE_MARKER,
+                                TestErrors.ComplicatedParametersException.TYPE_MARKER)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrException>() {})
+                                ConjureErrors.ConflictingCauseSafeArgErrSerializableError.TYPE_MARKER,
+                                ConjureErrors.ConflictingCauseSafeArgErrException.TYPE_MARKER)
                         .exception(
                                 EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
-                                new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceSerializableError>() {},
-                                new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceException>() {})
+                                EndpointSpecificTwoErrors.DifferentNamespaceSerializableError.TYPE_MARKER,
+                                EndpointSpecificTwoErrors.DifferentNamespaceException.TYPE_MARKER)
                         .exception(
                                 EndpointSpecificErrors.ENDPOINT_ERROR.name(),
-                                new TypeMarker<EndpointSpecificErrors.EndpointErrorSerializableError>() {},
-                                new TypeMarker<EndpointSpecificErrors.EndpointErrorException>() {})
+                                EndpointSpecificErrors.EndpointErrorSerializableError.TYPE_MARKER,
+                                EndpointSpecificErrors.EndpointErrorException.TYPE_MARKER)
                         .exception(
                                 TestErrors.INVALID_ARGUMENT.name(),
-                                new TypeMarker<TestErrors.InvalidArgumentSerializableError>() {},
-                                new TypeMarker<TestErrors.InvalidArgumentException>() {})
+                                TestErrors.InvalidArgumentSerializableError.TYPE_MARKER,
+                                TestErrors.InvalidArgumentException.TYPE_MARKER)
                         .exception(
                                 TestErrors.NOT_FOUND.name(),
-                                new TypeMarker<TestErrors.NotFoundSerializableError>() {},
-                                new TypeMarker<TestErrors.NotFoundException>() {})
+                                TestErrors.NotFoundSerializableError.TYPE_MARKER,
+                                TestErrors.NotFoundException.TYPE_MARKER)
                         .build();
             }
 

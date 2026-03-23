@@ -8,6 +8,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import javax.annotation.Nullable;
@@ -50,6 +51,9 @@ public final class ConjureErrors {
 
     public static final class DifferentPackageErrorSerializableError
             extends AbstractSerializableError<DifferentPackageErrorParameters> {
+        public static final TypeMarker<DifferentPackageErrorSerializableError> TYPE_MARKER =
+                new TypeMarker<DifferentPackageErrorSerializableError>() {};
+
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         DifferentPackageErrorSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -71,6 +75,9 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class DifferentPackageErrorException extends RemoteException
             implements SerializableErrorProvider<DifferentPackageErrorParameters> {
+        public static final TypeMarker<DifferentPackageErrorException> TYPE_MARKER =
+                new TypeMarker<DifferentPackageErrorException>() {};
+
         private DifferentPackageErrorSerializableError error;
 
         public DifferentPackageErrorException(DifferentPackageErrorSerializableError error, int status) {

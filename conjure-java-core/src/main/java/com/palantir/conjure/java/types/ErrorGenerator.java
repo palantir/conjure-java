@@ -38,6 +38,7 @@ import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.dialogue.TypeMarker;
 import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
@@ -201,6 +202,7 @@ public final class ErrorGenerator implements Generator {
         ClassName serializableErrorClassName =
                 errorsClassName.nestedClass(errorDefinition.getErrorName().getName() + "SerializableError");
 
+        ClassName selfClassName = ClassName.get("", remoteExceptionClassName);
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(remoteExceptionClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(RemoteException.class)
@@ -210,6 +212,14 @@ public final class ErrorGenerator implements Generator {
                 .addSuperinterface(ParameterizedTypeName.get(
                         ClassName.get(SerializableErrorProvider.class),
                         errorsClassName.nestedClass(ErrorGenerationUtils.errorParametersClassName(errorDefinition))))
+                .addField(FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(TypeMarker.class), selfClassName),
+                                "TYPE_MARKER",
+                                Modifier.PUBLIC,
+                                Modifier.STATIC,
+                                Modifier.FINAL)
+                        .initializer("new $T<$L>() {}", TypeMarker.class, remoteExceptionClassName)
+                        .build())
                 .addField(FieldSpec.builder(serializableErrorClassName, "error")
                         .addModifiers(Modifier.PRIVATE)
                         .build())
@@ -293,10 +303,19 @@ public final class ErrorGenerator implements Generator {
         toSerializableErrorBuilder.addCode(builder.build());
 
         // Create the class
+        ClassName selfClassName = ClassName.get("", serializableErrorClassName);
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(serializableErrorClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(
                         ParameterizedTypeName.get(ClassName.get(AbstractSerializableError.class), parametersClassName))
+                .addField(FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(TypeMarker.class), selfClassName),
+                                "TYPE_MARKER",
+                                Modifier.PUBLIC,
+                                Modifier.STATIC,
+                                Modifier.FINAL)
+                        .initializer("new $T<$L>() {}", TypeMarker.class, serializableErrorClassName)
+                        .build())
                 .addMethod(constructor)
                 .addMethod(toSerializableErrorBuilder.build());
 

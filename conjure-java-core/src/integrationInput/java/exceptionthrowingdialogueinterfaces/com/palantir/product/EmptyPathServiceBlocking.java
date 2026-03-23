@@ -43,36 +43,34 @@ public interface EmptyPathServiceBlocking {
                                 exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
                                         .DIFFERENT_PACKAGE_ERROR
                                         .name(),
-                                new TypeMarker<
-                                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                                .DifferentPackageErrorSerializableError>() {},
-                                new TypeMarker<
-                                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                                .DifferentPackageErrorException>() {})
+                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
+                                        .DifferentPackageErrorSerializableError.TYPE_MARKER,
+                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
+                                        .DifferentPackageErrorException.TYPE_MARKER)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
+                                ConjureErrors.ConflictingCauseSafeArgSerializableError.TYPE_MARKER,
+                                ConjureErrors.ConflictingCauseSafeArgException.TYPE_MARKER)
                         .exception(
                                 ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
+                                ConjureErrors.ConflictingCauseUnsafeArgSerializableError.TYPE_MARKER,
+                                ConjureErrors.ConflictingCauseUnsafeArgException.TYPE_MARKER)
                         .exception(
                                 ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
+                                ConjureErrors.ErrorWithComplexArgsSerializableError.TYPE_MARKER,
+                                ConjureErrors.ErrorWithComplexArgsException.TYPE_MARKER)
                         .exception(
                                 ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
+                                ConjureErrors.InvalidServiceDefinitionSerializableError.TYPE_MARKER,
+                                ConjureErrors.InvalidServiceDefinitionException.TYPE_MARKER)
                         .exception(
                                 ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
+                                ConjureErrors.InvalidTypeDefinitionSerializableError.TYPE_MARKER,
+                                ConjureErrors.InvalidTypeDefinitionException.TYPE_MARKER)
                         .exception(
                                 ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
+                                ConjureJavaErrors.JavaCompilationFailedSerializableError.TYPE_MARKER,
+                                ConjureJavaErrors.JavaCompilationFailedException.TYPE_MARKER)
                         .build();
             }
 
