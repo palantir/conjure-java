@@ -86,7 +86,7 @@ public final class DialogueServiceGenerator implements Generator {
                 StaticFactoryMethodType.BLOCKING,
                 conjureDefinition.getErrors());
 
-        return conjureDefinition.getServices().stream()
+        Stream<JavaFile> serviceFiles = conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateFilesForService(
                         options.excludeDialogueAsyncInterfaces(),
                         serviceDef,
@@ -94,6 +94,14 @@ public final class DialogueServiceGenerator implements Generator {
                         interfaceGenerator,
                         blockingGenerator,
                         asyncGenerator));
+
+        if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+            Stream<JavaFile> typeMarkerFiles =
+                    new ErrorTypeMarkersGenerator(options).generate(conjureDefinition.getErrors());
+            return Stream.concat(serviceFiles, typeMarkerFiles);
+        }
+
+        return serviceFiles;
     }
 
     private static Stream<JavaFile> generateFilesForService(

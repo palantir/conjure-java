@@ -7,7 +7,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
@@ -57,9 +56,6 @@ public final class TestErrors {
 
     public static final class ComplicatedParametersSerializableError
             extends AbstractSerializableError<ComplicatedParametersParameters> {
-        public static final TypeMarker<ComplicatedParametersSerializableError> TYPE_MARKER =
-                new TypeMarker<ComplicatedParametersSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ComplicatedParametersSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -83,9 +79,6 @@ public final class TestErrors {
 
     public static final class InvalidArgumentSerializableError
             extends AbstractSerializableError<InvalidArgumentParameters> {
-        public static final TypeMarker<InvalidArgumentSerializableError> TYPE_MARKER =
-                new TypeMarker<InvalidArgumentSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         InvalidArgumentSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -107,9 +100,6 @@ public final class TestErrors {
     }
 
     public static final class NotFoundSerializableError extends AbstractSerializableError<NotFoundParameters> {
-        public static final TypeMarker<NotFoundSerializableError> TYPE_MARKER =
-                new TypeMarker<NotFoundSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         NotFoundSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -132,9 +122,6 @@ public final class TestErrors {
     @SuppressWarnings("serial")
     public static final class ComplicatedParametersException extends RemoteException
             implements SerializableErrorProvider<ComplicatedParametersParameters> {
-        public static final TypeMarker<ComplicatedParametersException> TYPE_MARKER =
-                new TypeMarker<ComplicatedParametersException>() {};
-
         private ComplicatedParametersSerializableError error;
 
         public ComplicatedParametersException(ComplicatedParametersSerializableError error, int status) {
@@ -150,9 +137,6 @@ public final class TestErrors {
     @SuppressWarnings("serial")
     public static final class InvalidArgumentException extends RemoteException
             implements SerializableErrorProvider<InvalidArgumentParameters> {
-        public static final TypeMarker<InvalidArgumentException> TYPE_MARKER =
-                new TypeMarker<InvalidArgumentException>() {};
-
         private InvalidArgumentSerializableError error;
 
         public InvalidArgumentException(InvalidArgumentSerializableError error, int status) {
@@ -168,8 +152,6 @@ public final class TestErrors {
     @SuppressWarnings("serial")
     public static final class NotFoundException extends RemoteException
             implements SerializableErrorProvider<NotFoundParameters> {
-        public static final TypeMarker<NotFoundException> TYPE_MARKER = new TypeMarker<NotFoundException>() {};
-
         private NotFoundSerializableError error;
 
         public NotFoundException(NotFoundSerializableError error, int status) {

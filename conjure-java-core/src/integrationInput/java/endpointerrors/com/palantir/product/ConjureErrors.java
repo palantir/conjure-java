@@ -7,7 +7,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import java.util.Objects;
@@ -35,9 +34,6 @@ public final class ConjureErrors {
 
     public static final class ConflictingCauseSafeArgErrSerializableError
             extends AbstractSerializableError<ConflictingCauseSafeArgErrParameters> {
-        public static final TypeMarker<ConflictingCauseSafeArgErrSerializableError> TYPE_MARKER =
-                new TypeMarker<ConflictingCauseSafeArgErrSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ConflictingCauseSafeArgErrSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -61,9 +57,6 @@ public final class ConjureErrors {
     @SuppressWarnings("serial")
     public static final class ConflictingCauseSafeArgErrException extends RemoteException
             implements SerializableErrorProvider<ConflictingCauseSafeArgErrParameters> {
-        public static final TypeMarker<ConflictingCauseSafeArgErrException> TYPE_MARKER =
-                new TypeMarker<ConflictingCauseSafeArgErrException>() {};
-
         private ConflictingCauseSafeArgErrSerializableError error;
 
         public ConflictingCauseSafeArgErrException(ConflictingCauseSafeArgErrSerializableError error, int status) {

@@ -7,7 +7,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
@@ -34,9 +33,6 @@ public final class EndpointSpecificErrors {
 
     public static final class EndpointErrorSerializableError
             extends AbstractSerializableError<EndpointErrorParameters> {
-        public static final TypeMarker<EndpointErrorSerializableError> TYPE_MARKER =
-                new TypeMarker<EndpointErrorSerializableError>() {};
-
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         EndpointErrorSerializableError(
                 @JsonProperty("errorCode") @Safe String errorCode,
@@ -60,9 +56,6 @@ public final class EndpointSpecificErrors {
     @SuppressWarnings("serial")
     public static final class EndpointErrorException extends RemoteException
             implements SerializableErrorProvider<EndpointErrorParameters> {
-        public static final TypeMarker<EndpointErrorException> TYPE_MARKER =
-                new TypeMarker<EndpointErrorException>() {};
-
         private EndpointErrorSerializableError error;
 
         public EndpointErrorException(EndpointErrorSerializableError error, int status) {
