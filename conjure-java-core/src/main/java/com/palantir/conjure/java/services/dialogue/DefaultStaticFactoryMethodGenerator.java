@@ -148,18 +148,26 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 name);
     }
 
+    /**
+     * This method intentionally generates code where each call to the builder is not chained but a separate method call
+     * and assignment. Having many chained method calls causes the Java compiler stack to overflow.
+     */
     private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
         TypeVariableName typeVariableT = TypeVariableName.get("T");
+        ParameterizedTypeName builderType =
+                ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.Builder.class), typeVariableT);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createExceptionDeserializerArgs")
                 .addTypeVariable(typeVariableT)
-                .addModifiers(Modifier.PRIVATE)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .returns(ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.class), typeVariableT))
                 .addParameter(ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeVariableT), "returnType");
 
-        CodeBlock.Builder exceptions = CodeBlock.builder()
-                .add("return $T.<$T>builder()", ExceptionDeserializerArgs.class, typeVariableT)
-                .add(".returnType(returnType)");
-        // Add exceptions from error definitions
+        CodeBlock.Builder code = CodeBlock.builder()
+                .addStatement(
+                        "$T builder = $T.<$T>builder().returnType(returnType)",
+                        builderType,
+                        ExceptionDeserializerArgs.class,
+                        typeVariableT);
         for (ErrorDefinition errorDef : errorDefinitions) {
             String errorName = errorDef.getErrorName().getName();
             ClassName errorClass = getClassNameInErrorsPackage(
@@ -168,16 +176,16 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
             ClassName exceptionClass =
                     getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
-            exceptions.add(
-                    ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
+            code.addStatement(
+                    "builder.exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
                     errorClass,
                     TypeMarker.class,
                     serializableErrorClass,
                     TypeMarker.class,
                     exceptionClass);
         }
-        exceptions.add(".build();");
-        return methodBuilder.addCode(exceptions.build()).build();
+        code.addStatement("return builder.build()");
+        return methodBuilder.addCode(code.build()).build();
     }
 
     private ClassName getClassName(ServiceDefinition def) {
