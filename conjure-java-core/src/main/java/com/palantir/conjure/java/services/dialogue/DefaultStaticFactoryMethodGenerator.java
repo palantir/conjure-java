@@ -148,6 +148,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 name);
     }
 
+    /**
+     * This method intentionally generates code where each call to the builder is not chained but a separate method call
+     * and assignment. Having many chained method calls causes the Java compiler stack to overflow.
+     */
     private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
         TypeVariableName typeVariableT = TypeVariableName.get("T");
         ParameterizedTypeName builderType =
