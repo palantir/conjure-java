@@ -52,7 +52,7 @@ public interface RequestContext {
 
     /**
      * Returns the number of bytes read from the request.
-     * Returns 0 if byte tracking has not been initialized.
+     * Returns 0 if no bytes have been read yet.
      */
     long bytesRead();
 

@@ -18,11 +18,13 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import io.undertow.Undertow;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterEach;
@@ -30,11 +32,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class BytesReadTrackerTest {
-    private static final int PORT = 12345;
     private static final String HOST = "localhost";
 
     private CompletableFuture<Long> bytesRead = new CompletableFuture<>();
     private Undertow server;
+    private int port;
     private ConjureContexts contexts;
 
     @BeforeEach
@@ -42,15 +44,19 @@ public final class BytesReadTrackerTest {
         bytesRead = new CompletableFuture<>();
         contexts = new ConjureContexts(DefaultRequestArgHandler.INSTANCE);
         server = Undertow.builder()
-                .addHttpListener(PORT, HOST)
+                .addHttpListener(0, HOST)
                 .setHandler(exchange -> {
                     RequestContext context = contexts.createContext(exchange, null);
-                    exchange.getRequestReceiver().receiveFullBytes((_e, _b) -> {
+                    exchange.getRequestReceiver().receiveFullBytes((_exch, _bytes) -> {
                         bytesRead.complete(context.bytesRead());
                     });
                 })
                 .build();
         server.start();
+
+        port = ((InetSocketAddress)
+                        Iterables.getOnlyElement(server.getListenerInfo()).getAddress())
+                .getPort();
     }
 
     @AfterEach
@@ -82,7 +88,7 @@ public final class BytesReadTrackerTest {
 
     private void sendRequest(int bodySize) throws IOException {
         HttpURLConnection connection = (HttpURLConnection)
-                URI.create("http://" + HOST + ":" + PORT).toURL().openConnection();
+                URI.create("http://" + HOST + ":" + port).toURL().openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
 
@@ -93,7 +99,7 @@ public final class BytesReadTrackerTest {
             }
         }
 
-        connection.getResponseCode(); // trigger request
+        connection.getResponseCode();
         connection.disconnect();
     }
 }

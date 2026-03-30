@@ -27,10 +27,10 @@ import org.xnio.conduits.StreamSourceConduit;
 /** Tracks the number of bytes read from HTTP requests. */
 final class BytesReadTracker {
     static final ConduitWrapper<StreamSourceConduit> REQUEST_WRAPPER = (factory, exchange) -> {
-        BytesReadAccumulator accumulator = new BytesReadAccumulator();
+        ReadDataAccumulator accumulator = new ReadDataAccumulator();
         Preconditions.checkState(
                 exchange.putAttachment(Attachments.BYTES_READ, accumulator) == null,
-                "Bytes read tracker has already been registered");
+                "BytesReadTracker already registered on this exchange");
         return new BytesReceivedStreamSourceConduit(factory.create(), accumulator);
     };
 
@@ -39,9 +39,11 @@ final class BytesReadTracker {
         return longSupplier == null ? 0L : longSupplier.getAsLong();
     }
 
-    /** Accumulates bytes read from the request and is attached to the exchange for retrieval. */
-    private static final class BytesReadAccumulator implements ByteActivityCallback, LongSupplier {
+    /** Accumulates bytes read from the request and is attached to the request context for retrieval. */
+    private static final class ReadDataAccumulator implements ByteActivityCallback, LongSupplier {
         private long bytesRead = 0;
+
+        private ReadDataAccumulator() {}
 
         @Override
         public void activity(long bytes) {
