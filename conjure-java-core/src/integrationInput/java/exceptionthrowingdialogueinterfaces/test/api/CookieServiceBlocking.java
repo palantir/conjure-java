@@ -15,7 +15,9 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.BearerToken;
 import exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors;
+import exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers;
 import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureJavaErrors;
+import exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureJavaErrorsTypeMarkers;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
@@ -44,60 +46,50 @@ public interface CookieServiceBlocking {
                         ExceptionDeserializerArgs.<T>builder().returnType(returnType);
                 builder.exception(
                         ConjureErrors.DIFFERENT_PACKAGE_ERROR.name(),
-                        new TypeMarker<ConjureErrors.DifferentPackageErrorSerializableError>() {},
-                        new TypeMarker<ConjureErrors.DifferentPackageErrorException>() {});
+                        ConjureErrorsTypeMarkers.DIFFERENT_PACKAGE_ERROR_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.DIFFERENT_PACKAGE_ERROR_EXCEPTION);
                 builder.exception(
                         exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                 .CONFLICTING_CAUSE_SAFE_ARG
                                 .name(),
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .ConflictingCauseSafeArgSerializableError>() {},
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .ConflictingCauseSafeArgException>() {});
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .CONFLICTING_CAUSE_SAFE_ARG_SERIALIZABLE_ERROR,
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION);
                 builder.exception(
                         exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                 .CONFLICTING_CAUSE_UNSAFE_ARG
                                 .name(),
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .ConflictingCauseUnsafeArgSerializableError>() {},
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .ConflictingCauseUnsafeArgException>() {});
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .CONFLICTING_CAUSE_UNSAFE_ARG_SERIALIZABLE_ERROR,
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .CONFLICTING_CAUSE_UNSAFE_ARG_EXCEPTION);
                 builder.exception(
                         exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.ERROR_WITH_COMPLEX_ARGS
                                 .name(),
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .ErrorWithComplexArgsSerializableError>() {},
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .ErrorWithComplexArgsException>() {});
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .ERROR_WITH_COMPLEX_ARGS_SERIALIZABLE_ERROR,
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .ERROR_WITH_COMPLEX_ARGS_EXCEPTION);
                 builder.exception(
                         exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
                                 .INVALID_SERVICE_DEFINITION
                                 .name(),
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .InvalidServiceDefinitionSerializableError>() {},
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .InvalidServiceDefinitionException>() {});
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .INVALID_SERVICE_DEFINITION_SERIALIZABLE_ERROR,
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .INVALID_SERVICE_DEFINITION_EXCEPTION);
                 builder.exception(
                         exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors.INVALID_TYPE_DEFINITION
                                 .name(),
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .InvalidTypeDefinitionSerializableError>() {},
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrors
-                                        .InvalidTypeDefinitionException>() {});
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .INVALID_TYPE_DEFINITION_SERIALIZABLE_ERROR,
+                        exceptionthrowingdialogueinterfaces.com.palantir.product.ConjureErrorsTypeMarkers
+                                .INVALID_TYPE_DEFINITION_EXCEPTION);
                 builder.exception(
                         ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                        new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                        new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {});
+                        ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_SERIALIZABLE_ERROR,
+                        ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_EXCEPTION);
                 return builder.build();
             }
 

@@ -59,6 +59,8 @@ final class ErrorTypeMarkersGenerator {
 
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(typeMarkersClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addJavadoc(
+                        "Internal utility class used by generated Dialogue interfaces. Not intended for external use.")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorTypeMarkersGenerator.class))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)

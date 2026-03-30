@@ -148,6 +148,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 name);
     }
 
+    private ClassName getTypeMarkersClass(ErrorDefinition errorDef) {
+        return ClassName.get(
+                Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
+                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()) + "TypeMarkers");
+    }
+
     /**
      * This method intentionally generates code where each call to the builder is not chained but a separate method call
      * and assignment. Having many chained method calls causes the Java compiler stack to overflow.
@@ -172,17 +178,18 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             String errorName = errorDef.getErrorName().getName();
             ClassName errorClass = getClassNameInErrorsPackage(
                     errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
-            ClassName serializableErrorClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
-            ClassName exceptionClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
+            ClassName typeMarkersClass = getTypeMarkersClass(errorDef);
+            String serializableErrorFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.serializableErrorClassName(errorName));
+            String exceptionFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.errorExceptionClassName(errorName));
             code.addStatement(
-                    "builder.exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
+                    "builder.exception($T.name(), $T.$N, $T.$N)",
                     errorClass,
-                    TypeMarker.class,
-                    serializableErrorClass,
-                    TypeMarker.class,
-                    exceptionClass);
+                    typeMarkersClass,
+                    serializableErrorFieldName,
+                    typeMarkersClass,
+                    exceptionFieldName);
         }
         code.addStatement("return builder.build()");
         return methodBuilder.addCode(code.build()).build();

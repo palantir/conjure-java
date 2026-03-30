@@ -3,6 +3,7 @@ package endpointerrors.com.palantir.product;
 import com.palantir.dialogue.TypeMarker;
 import javax.annotation.processing.Generated;
 
+/** Internal utility class used by generated Dialogue interfaces. Not intended for external use. */
 @Generated("com.palantir.conjure.java.services.dialogue.ErrorTypeMarkersGenerator")
 public final class EndpointSpecificTwoErrorsTypeMarkers {
     public static final TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceSerializableError>

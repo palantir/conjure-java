@@ -104,36 +104,34 @@ public interface EteBinaryServiceAsync {
                 builder.exception(
                         exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors.DIFFERENT_PACKAGE_ERROR
                                 .name(),
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                        .DifferentPackageErrorSerializableError>() {},
-                        new TypeMarker<
-                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                        .DifferentPackageErrorException>() {});
+                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
+                                .DIFFERENT_PACKAGE_ERROR_SERIALIZABLE_ERROR,
+                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
+                                .DIFFERENT_PACKAGE_ERROR_EXCEPTION);
                 builder.exception(
                         ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                        new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                        new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {});
+                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION);
                 builder.exception(
                         ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                        new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                        new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {});
+                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_UNSAFE_ARG_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_UNSAFE_ARG_EXCEPTION);
                 builder.exception(
                         ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                        new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                        new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {});
+                        ConjureErrorsTypeMarkers.ERROR_WITH_COMPLEX_ARGS_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.ERROR_WITH_COMPLEX_ARGS_EXCEPTION);
                 builder.exception(
                         ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                        new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                        new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {});
+                        ConjureErrorsTypeMarkers.INVALID_SERVICE_DEFINITION_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.INVALID_SERVICE_DEFINITION_EXCEPTION);
                 builder.exception(
                         ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                        new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                        new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {});
+                        ConjureErrorsTypeMarkers.INVALID_TYPE_DEFINITION_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.INVALID_TYPE_DEFINITION_EXCEPTION);
                 builder.exception(
                         ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                        new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                        new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {});
+                        ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_SERIALIZABLE_ERROR,
+                        ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_EXCEPTION);
                 return builder.build();
             }
 

@@ -117,36 +117,34 @@ public interface ErrorServiceAsync {
                         ExceptionDeserializerArgs.<T>builder().returnType(returnType);
                 builder.exception(
                         endpointerrors.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
-                        new TypeMarker<
-                                endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                        .DifferentPackageSerializableError>() {},
-                        new TypeMarker<
-                                endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                        .DifferentPackageException>() {});
+                        endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
+                                .DIFFERENT_PACKAGE_SERIALIZABLE_ERROR,
+                        endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
+                                .DIFFERENT_PACKAGE_EXCEPTION);
                 builder.exception(
                         TestErrors.COMPLICATED_PARAMETERS.name(),
-                        new TypeMarker<TestErrors.ComplicatedParametersSerializableError>() {},
-                        new TypeMarker<TestErrors.ComplicatedParametersException>() {});
+                        TestErrorsTypeMarkers.COMPLICATED_PARAMETERS_SERIALIZABLE_ERROR,
+                        TestErrorsTypeMarkers.COMPLICATED_PARAMETERS_EXCEPTION);
                 builder.exception(
                         ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
-                        new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrSerializableError>() {},
-                        new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrException>() {});
+                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_ERR_SERIALIZABLE_ERROR,
+                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_ERR_EXCEPTION);
                 builder.exception(
                         EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
-                        new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceSerializableError>() {},
-                        new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceException>() {});
+                        EndpointSpecificTwoErrorsTypeMarkers.DIFFERENT_NAMESPACE_SERIALIZABLE_ERROR,
+                        EndpointSpecificTwoErrorsTypeMarkers.DIFFERENT_NAMESPACE_EXCEPTION);
                 builder.exception(
                         EndpointSpecificErrors.ENDPOINT_ERROR.name(),
-                        new TypeMarker<EndpointSpecificErrors.EndpointErrorSerializableError>() {},
-                        new TypeMarker<EndpointSpecificErrors.EndpointErrorException>() {});
+                        EndpointSpecificErrorsTypeMarkers.ENDPOINT_ERROR_SERIALIZABLE_ERROR,
+                        EndpointSpecificErrorsTypeMarkers.ENDPOINT_ERROR_EXCEPTION);
                 builder.exception(
                         TestErrors.INVALID_ARGUMENT.name(),
-                        new TypeMarker<TestErrors.InvalidArgumentSerializableError>() {},
-                        new TypeMarker<TestErrors.InvalidArgumentException>() {});
+                        TestErrorsTypeMarkers.INVALID_ARGUMENT_SERIALIZABLE_ERROR,
+                        TestErrorsTypeMarkers.INVALID_ARGUMENT_EXCEPTION);
                 builder.exception(
                         TestErrors.NOT_FOUND.name(),
-                        new TypeMarker<TestErrors.NotFoundSerializableError>() {},
-                        new TypeMarker<TestErrors.NotFoundException>() {});
+                        TestErrorsTypeMarkers.NOT_FOUND_SERIALIZABLE_ERROR,
+                        TestErrorsTypeMarkers.NOT_FOUND_EXCEPTION);
                 return builder.build();
             }
 
