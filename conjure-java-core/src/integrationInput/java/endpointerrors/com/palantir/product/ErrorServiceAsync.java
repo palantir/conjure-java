@@ -115,36 +115,11 @@ public interface ErrorServiceAsync {
             private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 ExceptionDeserializerArgs.Builder<T> builder =
                         ExceptionDeserializerArgs.<T>builder().returnType(returnType);
-                builder.exception(
-                        endpointerrors.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
-                        endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
-                                .DIFFERENT_PACKAGE_SERIALIZABLE_ERROR,
-                        endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers
-                                .DIFFERENT_PACKAGE_EXCEPTION);
-                builder.exception(
-                        TestErrors.COMPLICATED_PARAMETERS.name(),
-                        TestErrorsTypeMarkers.COMPLICATED_PARAMETERS_SERIALIZABLE_ERROR,
-                        TestErrorsTypeMarkers.COMPLICATED_PARAMETERS_EXCEPTION);
-                builder.exception(
-                        ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
-                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_ERR_SERIALIZABLE_ERROR,
-                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_ERR_EXCEPTION);
-                builder.exception(
-                        EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
-                        EndpointSpecificTwoErrorsTypeMarkers.DIFFERENT_NAMESPACE_SERIALIZABLE_ERROR,
-                        EndpointSpecificTwoErrorsTypeMarkers.DIFFERENT_NAMESPACE_EXCEPTION);
-                builder.exception(
-                        EndpointSpecificErrors.ENDPOINT_ERROR.name(),
-                        EndpointSpecificErrorsTypeMarkers.ENDPOINT_ERROR_SERIALIZABLE_ERROR,
-                        EndpointSpecificErrorsTypeMarkers.ENDPOINT_ERROR_EXCEPTION);
-                builder.exception(
-                        TestErrors.INVALID_ARGUMENT.name(),
-                        TestErrorsTypeMarkers.INVALID_ARGUMENT_SERIALIZABLE_ERROR,
-                        TestErrorsTypeMarkers.INVALID_ARGUMENT_EXCEPTION);
-                builder.exception(
-                        TestErrors.NOT_FOUND.name(),
-                        TestErrorsTypeMarkers.NOT_FOUND_SERIALIZABLE_ERROR,
-                        TestErrorsTypeMarkers.NOT_FOUND_EXCEPTION);
+                endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers.registerExceptions(builder);
+                ConjureErrorsTypeMarkers.registerExceptions(builder);
+                EndpointSpecificErrorsTypeMarkers.registerExceptions(builder);
+                EndpointSpecificTwoErrorsTypeMarkers.registerExceptions(builder);
+                TestErrorsTypeMarkers.registerExceptions(builder);
                 return builder.build();
             }
 

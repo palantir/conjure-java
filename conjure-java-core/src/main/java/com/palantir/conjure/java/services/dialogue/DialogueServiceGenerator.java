@@ -96,6 +96,9 @@ public final class DialogueServiceGenerator implements Generator {
                         asyncGenerator));
 
         if (options.generateErrorParameterFormatRespectingDialogueInterfaces()) {
+            // I would've preferred to generate these TypeMarker anonymous classes in each of the generated
+            // <Error>SerializableError and <Error>Exception classes, but the TypeMarker is defined in dialogue-target
+            // and I did not want to force all consumers of -objects JARs to require a new API dep on dialogue-target.
             Stream<JavaFile> typeMarkerFiles =
                     new ErrorTypeMarkersGenerator(options).generate(conjureDefinition.getErrors());
             return Stream.concat(serviceFiles, typeMarkerFiles);

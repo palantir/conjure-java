@@ -22,13 +22,16 @@ import com.palantir.conjure.java.util.ErrorGenerationUtils;
 import com.palantir.conjure.java.util.ErrorGenerationUtils.NamespacedErrors;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.ErrorDefinition;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeSpec;
+import com.palantir.javapoet.TypeVariableName;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
@@ -66,20 +69,41 @@ final class ErrorTypeMarkersGenerator {
                         .addModifiers(Modifier.PRIVATE)
                         .build());
 
+        CodeBlock.Builder registerBody = CodeBlock.builder();
         for (ErrorDefinition errorDef : namespacedErrors.errors()) {
             String errorName = errorDef.getErrorName().getName();
 
-            String serializableErrorClassName = ErrorGenerationUtils.serializableErrorClassName(errorName);
-            ClassName serializableErrorClass = errorsClass.nestedClass(serializableErrorClassName);
-            classBuilder.addField(typeMarkerField(
-                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, serializableErrorClassName),
-                    serializableErrorClass));
+            String serializableErrorFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.serializableErrorClassName(errorName));
+            ClassName serializableErrorClass =
+                    errorsClass.nestedClass(ErrorGenerationUtils.serializableErrorClassName(errorName));
+            classBuilder.addField(typeMarkerField(serializableErrorFieldName, serializableErrorClass));
 
-            String exceptionClassName = ErrorGenerationUtils.errorExceptionClassName(errorName);
-            ClassName exceptionClass = errorsClass.nestedClass(exceptionClassName);
-            classBuilder.addField(typeMarkerField(
-                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, exceptionClassName), exceptionClass));
+            String exceptionFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.errorExceptionClassName(errorName));
+            ClassName exceptionClass =
+                    errorsClass.nestedClass(ErrorGenerationUtils.errorExceptionClassName(errorName));
+            classBuilder.addField(typeMarkerField(exceptionFieldName, exceptionClass));
+
+            String errorConstantName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName);
+            registerBody.addStatement(
+                    "builder.exception($T.$N.name(), $N, $N)",
+                    errorsClass,
+                    errorConstantName,
+                    serializableErrorFieldName,
+                    exceptionFieldName);
         }
+
+        TypeVariableName typeVarT = TypeVariableName.get("T");
+        classBuilder.addMethod(MethodSpec.methodBuilder("registerExceptions")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addTypeVariable(typeVarT)
+                .addParameter(
+                        ParameterizedTypeName.get(
+                                ClassName.get(ExceptionDeserializerArgs.Builder.class), typeVarT),
+                        "builder")
+                .addCode(registerBody.build())
+                .build());
 
         return JavaFile.builder(conjurePackage, classBuilder.build())
                 .skipJavaLangImports(true)
@@ -91,7 +115,7 @@ final class ErrorTypeMarkersGenerator {
         return FieldSpec.builder(
                         ParameterizedTypeName.get(ClassName.get(TypeMarker.class), type),
                         name,
-                        Modifier.PUBLIC,
+                        Modifier.PRIVATE,
                         Modifier.STATIC,
                         Modifier.FINAL)
                 .initializer("new $T<$T>() {}", TypeMarker.class, type)

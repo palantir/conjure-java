@@ -455,37 +455,10 @@ public interface EteServiceAsync {
             private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 ExceptionDeserializerArgs.Builder<T> builder =
                         ExceptionDeserializerArgs.<T>builder().returnType(returnType);
-                builder.exception(
-                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors.DIFFERENT_PACKAGE_ERROR
-                                .name(),
-                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
-                                .DIFFERENT_PACKAGE_ERROR_SERIALIZABLE_ERROR,
-                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers
-                                .DIFFERENT_PACKAGE_ERROR_EXCEPTION);
-                builder.exception(
-                        ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_SERIALIZABLE_ERROR,
-                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION);
-                builder.exception(
-                        ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_UNSAFE_ARG_SERIALIZABLE_ERROR,
-                        ConjureErrorsTypeMarkers.CONFLICTING_CAUSE_UNSAFE_ARG_EXCEPTION);
-                builder.exception(
-                        ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                        ConjureErrorsTypeMarkers.ERROR_WITH_COMPLEX_ARGS_SERIALIZABLE_ERROR,
-                        ConjureErrorsTypeMarkers.ERROR_WITH_COMPLEX_ARGS_EXCEPTION);
-                builder.exception(
-                        ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                        ConjureErrorsTypeMarkers.INVALID_SERVICE_DEFINITION_SERIALIZABLE_ERROR,
-                        ConjureErrorsTypeMarkers.INVALID_SERVICE_DEFINITION_EXCEPTION);
-                builder.exception(
-                        ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                        ConjureErrorsTypeMarkers.INVALID_TYPE_DEFINITION_SERIALIZABLE_ERROR,
-                        ConjureErrorsTypeMarkers.INVALID_TYPE_DEFINITION_EXCEPTION);
-                builder.exception(
-                        ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                        ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_SERIALIZABLE_ERROR,
-                        ConjureJavaErrorsTypeMarkers.JAVA_COMPILATION_FAILED_EXCEPTION);
+                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers.registerExceptions(
+                        builder);
+                ConjureErrorsTypeMarkers.registerExceptions(builder);
+                ConjureJavaErrorsTypeMarkers.registerExceptions(builder);
                 return builder.build();
             }
 

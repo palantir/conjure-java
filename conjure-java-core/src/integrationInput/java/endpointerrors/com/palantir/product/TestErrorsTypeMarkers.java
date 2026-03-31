@@ -1,29 +1,40 @@
 package endpointerrors.com.palantir.product;
 
+import com.palantir.dialogue.ExceptionDeserializerArgs;
 import com.palantir.dialogue.TypeMarker;
 import javax.annotation.processing.Generated;
 
 /** Internal utility class used by generated Dialogue interfaces. Not intended for external use. */
 @Generated("com.palantir.conjure.java.services.dialogue.ErrorTypeMarkersGenerator")
 public final class TestErrorsTypeMarkers {
-    public static final TypeMarker<TestErrors.ComplicatedParametersSerializableError>
+    private static final TypeMarker<TestErrors.ComplicatedParametersSerializableError>
             COMPLICATED_PARAMETERS_SERIALIZABLE_ERROR =
                     new TypeMarker<TestErrors.ComplicatedParametersSerializableError>() {};
 
-    public static final TypeMarker<TestErrors.ComplicatedParametersException> COMPLICATED_PARAMETERS_EXCEPTION =
+    private static final TypeMarker<TestErrors.ComplicatedParametersException> COMPLICATED_PARAMETERS_EXCEPTION =
             new TypeMarker<TestErrors.ComplicatedParametersException>() {};
 
-    public static final TypeMarker<TestErrors.InvalidArgumentSerializableError> INVALID_ARGUMENT_SERIALIZABLE_ERROR =
+    private static final TypeMarker<TestErrors.InvalidArgumentSerializableError> INVALID_ARGUMENT_SERIALIZABLE_ERROR =
             new TypeMarker<TestErrors.InvalidArgumentSerializableError>() {};
 
-    public static final TypeMarker<TestErrors.InvalidArgumentException> INVALID_ARGUMENT_EXCEPTION =
+    private static final TypeMarker<TestErrors.InvalidArgumentException> INVALID_ARGUMENT_EXCEPTION =
             new TypeMarker<TestErrors.InvalidArgumentException>() {};
 
-    public static final TypeMarker<TestErrors.NotFoundSerializableError> NOT_FOUND_SERIALIZABLE_ERROR =
+    private static final TypeMarker<TestErrors.NotFoundSerializableError> NOT_FOUND_SERIALIZABLE_ERROR =
             new TypeMarker<TestErrors.NotFoundSerializableError>() {};
 
-    public static final TypeMarker<TestErrors.NotFoundException> NOT_FOUND_EXCEPTION =
+    private static final TypeMarker<TestErrors.NotFoundException> NOT_FOUND_EXCEPTION =
             new TypeMarker<TestErrors.NotFoundException>() {};
 
     private TestErrorsTypeMarkers() {}
+
+    public static <T> void registerExceptions(ExceptionDeserializerArgs.Builder<T> builder) {
+        builder.exception(
+                TestErrors.COMPLICATED_PARAMETERS.name(),
+                COMPLICATED_PARAMETERS_SERIALIZABLE_ERROR,
+                COMPLICATED_PARAMETERS_EXCEPTION);
+        builder.exception(
+                TestErrors.INVALID_ARGUMENT.name(), INVALID_ARGUMENT_SERIALIZABLE_ERROR, INVALID_ARGUMENT_EXCEPTION);
+        builder.exception(TestErrors.NOT_FOUND.name(), NOT_FOUND_SERIALIZABLE_ERROR, NOT_FOUND_EXCEPTION);
+    }
 }
