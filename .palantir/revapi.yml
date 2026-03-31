@@ -1,7 +1,0 @@
-acceptedBreaks:
-  "8.69.0":
-    com.palantir.conjure.java:conjure-undertow-lib:
-    - code: "java.method.addedToInterface"
-      new: "method long com.palantir.conjure.java.undertow.lib.RequestContext::bytesRead()"
-      justification: "Add bytesRead() method to RequestContext. RequestContext is\
-        \ only implemented by conjure-java-undertow-runtime per its documented contract."

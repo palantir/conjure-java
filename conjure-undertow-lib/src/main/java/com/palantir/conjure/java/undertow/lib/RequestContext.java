@@ -51,10 +51,11 @@ public interface RequestContext {
     Optional<String> firstHeader(String headerName);
 
     /**
-     * Returns the number of bytes read from the request.
-     * Returns 0 if no bytes have been read yet.
+     * Returns the number of bytes read from the request, or zero if byte tracking is unavailable.
      */
-    long bytesRead();
+    default long bytesRead() {
+        return 0L;
+    }
 
     /**
      * Returns the value of the cookie named {@code cookieName}.
