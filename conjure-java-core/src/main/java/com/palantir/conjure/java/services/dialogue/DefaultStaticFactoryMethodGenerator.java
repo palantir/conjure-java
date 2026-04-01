@@ -169,8 +169,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .map(this::getTypeMarkersClass)
                 .distinct()
                 .sorted(Comparator.comparing(ClassName::toString))
-                .forEach(typeMarkersClass ->
-                        code.addStatement("$T.registerExceptions(builder)", typeMarkersClass));
+                .forEach(typeMarkersClass -> code.addStatement("$T.registerExceptions(builder)", typeMarkersClass));
 
         code.addStatement("return builder.build()");
         return methodBuilder.addCode(code.build()).build();

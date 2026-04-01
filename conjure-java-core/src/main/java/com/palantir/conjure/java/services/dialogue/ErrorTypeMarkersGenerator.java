@@ -63,7 +63,9 @@ final class ErrorTypeMarkersGenerator {
         TypeSpec.Builder classBuilder = TypeSpec.classBuilder(typeMarkersClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addJavadoc(
-                        "Internal utility class used by generated Dialogue interfaces. Not intended for external use.")
+                        "Internal utility class used by generated Dialogue interfaces. Not intended for external use."
+                            + " This class needs to be public because errors from a certain namespace can be used in"
+                            + " Dialogue interfaces defined in any namespace.")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorTypeMarkersGenerator.class))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
@@ -81,8 +83,7 @@ final class ErrorTypeMarkersGenerator {
 
             String exceptionFieldName = CaseFormat.UPPER_CAMEL.to(
                     CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.errorExceptionClassName(errorName));
-            ClassName exceptionClass =
-                    errorsClass.nestedClass(ErrorGenerationUtils.errorExceptionClassName(errorName));
+            ClassName exceptionClass = errorsClass.nestedClass(ErrorGenerationUtils.errorExceptionClassName(errorName));
             classBuilder.addField(typeMarkerField(exceptionFieldName, exceptionClass));
 
             String errorConstantName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName);
@@ -99,8 +100,7 @@ final class ErrorTypeMarkersGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addTypeVariable(typeVarT)
                 .addParameter(
-                        ParameterizedTypeName.get(
-                                ClassName.get(ExceptionDeserializerArgs.Builder.class), typeVarT),
+                        ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.Builder.class), typeVarT),
                         "builder")
                 .addCode(registerBody.build())
                 .build());
