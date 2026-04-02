@@ -111,6 +111,7 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
         return unwrapOptional(marker.getType()) != null;
     }
 
+    @SuppressWarnings("for-rollout:LogsafeArrayArg")
     private static Type unwrapOptional(Type type) {
         if (type instanceof ParameterizedType parameterizedType) {
 
