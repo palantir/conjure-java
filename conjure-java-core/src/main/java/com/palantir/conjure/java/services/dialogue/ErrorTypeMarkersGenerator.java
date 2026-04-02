@@ -1,0 +1,124 @@
+/*
+ * (c) Copyright 2026 Palantir Technologies Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.palantir.conjure.java.services.dialogue;
+
+import com.google.common.base.CaseFormat;
+import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.util.ErrorGenerationUtils;
+import com.palantir.conjure.java.util.ErrorGenerationUtils.NamespacedErrors;
+import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.spec.ErrorDefinition;
+import com.palantir.dialogue.ExceptionDeserializerArgs;
+import com.palantir.dialogue.TypeMarker;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
+import com.palantir.javapoet.FieldSpec;
+import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.ParameterizedTypeName;
+import com.palantir.javapoet.TypeSpec;
+import com.palantir.javapoet.TypeVariableName;
+import java.util.List;
+import java.util.stream.Stream;
+import javax.lang.model.element.Modifier;
+
+/**
+ * Generates a {@code TypeMarker} holder class per error namespace in the dialogue output,
+ * so that dialogue service interfaces can reference static {@code TypeMarker} fields
+ * instead of creating anonymous classes at each usage site.
+ */
+final class ErrorTypeMarkersGenerator {
+
+    private final Options options;
+
+    ErrorTypeMarkersGenerator(Options options) {
+        this.options = options;
+    }
+
+    Stream<JavaFile> generate(List<ErrorDefinition> errorDefinitions) {
+        return ErrorGenerationUtils.getNamespacedErrorsFromDefinitions(errorDefinitions).stream()
+                .map(this::generateTypeMarkersClass);
+    }
+
+    private JavaFile generateTypeMarkersClass(NamespacedErrors namespacedErrors) {
+        String conjurePackage = Packages.getPrefixedPackage(namespacedErrors.javaPackage(), options.packagePrefix());
+        String errorsClassName = ErrorGenerationUtils.errorTypesClassName(namespacedErrors.namespace());
+        String typeMarkersClassName = errorsClassName + "TypeMarkers";
+        ClassName errorsClass = ClassName.get(conjurePackage, errorsClassName);
+
+        TypeSpec.Builder classBuilder = TypeSpec.classBuilder(typeMarkersClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addJavadoc(
+                        "Internal utility class used by generated Dialogue interfaces. Not intended for external use."
+                            + " This class needs to be public because errors from a certain namespace can be used in"
+                            + " Dialogue interfaces defined in any namespace.")
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorTypeMarkersGenerator.class))
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PRIVATE)
+                        .build());
+
+        CodeBlock.Builder registerBody = CodeBlock.builder();
+        for (ErrorDefinition errorDef : namespacedErrors.errors()) {
+            String errorName = errorDef.getErrorName().getName();
+
+            String serializableErrorFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.serializableErrorClassName(errorName));
+            ClassName serializableErrorClass =
+                    errorsClass.nestedClass(ErrorGenerationUtils.serializableErrorClassName(errorName));
+            classBuilder.addField(typeMarkerField(serializableErrorFieldName, serializableErrorClass));
+
+            String exceptionFieldName = CaseFormat.UPPER_CAMEL.to(
+                    CaseFormat.UPPER_UNDERSCORE, ErrorGenerationUtils.errorExceptionClassName(errorName));
+            ClassName exceptionClass = errorsClass.nestedClass(ErrorGenerationUtils.errorExceptionClassName(errorName));
+            classBuilder.addField(typeMarkerField(exceptionFieldName, exceptionClass));
+
+            String errorConstantName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName);
+            registerBody.addStatement(
+                    "builder.exception($T.$N.name(), $N, $N)",
+                    errorsClass,
+                    errorConstantName,
+                    serializableErrorFieldName,
+                    exceptionFieldName);
+        }
+
+        TypeVariableName typeVarT = TypeVariableName.get("T");
+        classBuilder.addMethod(MethodSpec.methodBuilder("registerExceptions")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addTypeVariable(typeVarT)
+                .addParameter(
+                        ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.Builder.class), typeVarT),
+                        "builder")
+                .addCode(registerBody.build())
+                .build());
+
+        return JavaFile.builder(conjurePackage, classBuilder.build())
+                .skipJavaLangImports(true)
+                .indent("    ")
+                .build();
+    }
+
+    private static FieldSpec typeMarkerField(String name, ClassName type) {
+        return FieldSpec.builder(
+                        ParameterizedTypeName.get(ClassName.get(TypeMarker.class), type),
+                        name,
+                        Modifier.PRIVATE,
+                        Modifier.STATIC,
+                        Modifier.FINAL)
+                .initializer("new $T<$T>() {}", TypeMarker.class, type)
+                .build();
+    }
+}

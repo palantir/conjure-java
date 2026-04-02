@@ -15,7 +15,6 @@
  */
 package com.palantir.conjure.java.services.dialogue;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
@@ -68,6 +67,7 @@ import com.palantir.javapoet.TypeSpec;
 import com.palantir.javapoet.TypeVariableName;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -141,17 +141,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return method;
     }
 
-    private ClassName getClassNameInErrorsPackage(ErrorDefinition errorDef, String name) {
+    private ClassName getTypeMarkersClass(ErrorDefinition errorDef) {
         return ClassName.get(
                 Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
-                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
-                name);
+                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()) + "TypeMarkers");
     }
 
-    /**
-     * This method intentionally generates code where each call to the builder is not chained but a separate method call
-     * and assignment. Having many chained method calls causes the Java compiler stack to overflow.
-     */
     private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
         TypeVariableName typeVariableT = TypeVariableName.get("T");
         ParameterizedTypeName builderType =
@@ -168,22 +163,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         builderType,
                         ExceptionDeserializerArgs.class,
                         typeVariableT);
-        for (ErrorDefinition errorDef : errorDefinitions) {
-            String errorName = errorDef.getErrorName().getName();
-            ClassName errorClass = getClassNameInErrorsPackage(
-                    errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
-            ClassName serializableErrorClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
-            ClassName exceptionClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
-            code.addStatement(
-                    "builder.exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
-                    errorClass,
-                    TypeMarker.class,
-                    serializableErrorClass,
-                    TypeMarker.class,
-                    exceptionClass);
-        }
+
+        // Deduplicate by TypeMarkers class (one per error namespace)
+        errorDefinitions.stream()
+                .map(this::getTypeMarkersClass)
+                .distinct()
+                .sorted(Comparator.comparing(ClassName::toString))
+                .forEach(typeMarkersClass -> code.addStatement("$T.registerExceptions(builder)", typeMarkersClass));
+
         code.addStatement("return builder.build()");
         return methodBuilder.addCode(code.build()).build();
     }
