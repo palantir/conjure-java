@@ -82,6 +82,7 @@ public final class SerializableErrorTest {
 
     @Test
     public void serialization_arrayArgs() throws IOException {
+        @SuppressWarnings("for-rollout:LogsafeArrayArg")
         SerializableError error = SerializableError.forException(new ServiceException(
                 ErrorType.INVALID_ARGUMENT,
                 SafeArg.of("safe-array", new long[] {1L, 2L, 3L}),
