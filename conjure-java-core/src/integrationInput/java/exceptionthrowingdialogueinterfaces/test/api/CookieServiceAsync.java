@@ -32,13 +32,18 @@ public interface CookieServiceAsync {
     /** Creates an asynchronous/non-blocking client for a CookieService service. */
     static CookieServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
+            private static final TypeMarker<Void> voidTypeMarker = new TypeMarker<Void>() {};
+
+            private static final ExceptionDeserializerArgs<Void> voidExceptionArgs =
+                    createExceptionDeserializerArgs(voidTypeMarker);
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Deserializer<Void> voidDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer(voidExceptionArgs);
 
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
-
-            private final Deserializer<Void> eatCookiesDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 ExceptionDeserializerArgs.Builder<T> builder =
@@ -59,7 +64,7 @@ public interface CookieServiceAsync {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().call(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
+                return _runtime.clients().call(eatCookiesChannel, _request.build(), voidDeserializer);
             }
 
             @Override

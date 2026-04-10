@@ -218,87 +218,239 @@ public interface EteServiceBlocking {
     /** Creates a synchronous/blocking client for a EteService service. */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceBlocking() {
+            private static final TypeMarker<String> stringTypeMarker = new TypeMarker<String>() {};
+
+            private static final TypeMarker<Integer> integerTypeMarker = new TypeMarker<Integer>() {};
+
+            private static final TypeMarker<Double> doubleTypeMarker = new TypeMarker<Double>() {};
+
+            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+
+            private static final TypeMarker<SafeLong> safeLongTypeMarker = new TypeMarker<SafeLong>() {};
+
+            private static final TypeMarker<ResourceIdentifier> resourceIdentifierTypeMarker =
+                    new TypeMarker<ResourceIdentifier>() {};
+
+            private static final TypeMarker<BearerToken> bearerTokenTypeMarker = new TypeMarker<BearerToken>() {};
+
+            private static final TypeMarker<Optional<String>> optionalStringTypeMarker =
+                    new TypeMarker<Optional<String>>() {};
+
+            private static final TypeMarker<OffsetDateTime> offsetDateTimeTypeMarker =
+                    new TypeMarker<OffsetDateTime>() {};
+
+            private static final TypeMarker<InputStream> inputStreamTypeMarker = new TypeMarker<InputStream>() {};
+
+            private static final TypeMarker<Long> longTypeMarker = new TypeMarker<Long>() {};
+
+            private static final TypeMarker<Optional<Long>> optionalLongTypeMarker =
+                    new TypeMarker<Optional<Long>>() {};
+
+            private static final TypeMarker<StringAliasExample> stringAliasExampleTypeMarker =
+                    new TypeMarker<StringAliasExample>() {};
+
+            private static final TypeMarker<NestedStringAliasExample> nestedStringAliasExampleTypeMarker =
+                    new TypeMarker<NestedStringAliasExample>() {};
+
+            private static final TypeMarker<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample2TypeMarker =
+                            new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {};
+
+            private static final TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleTypeMarker =
+                            new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {};
+
+            private static final TypeMarker<Void> voidTypeMarker = new TypeMarker<Void>() {};
+
+            private static final TypeMarker<SimpleEnum> simpleEnumTypeMarker = new TypeMarker<SimpleEnum>() {};
+
+            private static final TypeMarker<List<SimpleEnum>> listSimpleEnumTypeMarker =
+                    new TypeMarker<List<SimpleEnum>>() {};
+
+            private static final TypeMarker<Optional<SimpleEnum>> optionalSimpleEnumTypeMarker =
+                    new TypeMarker<Optional<SimpleEnum>>() {};
+
+            private static final TypeMarker<Optional<LongAlias>> optionalLongAliasTypeMarker =
+                    new TypeMarker<Optional<LongAlias>>() {};
+
+            private static final TypeMarker<SimpleUnion> simpleUnionTypeMarker = new TypeMarker<SimpleUnion>() {};
+
+            private static final ExceptionDeserializerArgs<String> stringExceptionArgs =
+                    createExceptionDeserializerArgs(stringTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Integer> integerExceptionArgs =
+                    createExceptionDeserializerArgs(integerTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Double> doubleExceptionArgs =
+                    createExceptionDeserializerArgs(doubleTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Boolean> booleanExceptionArgs =
+                    createExceptionDeserializerArgs(booleanTypeMarker);
+
+            private static final ExceptionDeserializerArgs<SafeLong> safeLongExceptionArgs =
+                    createExceptionDeserializerArgs(safeLongTypeMarker);
+
+            private static final ExceptionDeserializerArgs<ResourceIdentifier> resourceIdentifierExceptionArgs =
+                    createExceptionDeserializerArgs(resourceIdentifierTypeMarker);
+
+            private static final ExceptionDeserializerArgs<BearerToken> bearerTokenExceptionArgs =
+                    createExceptionDeserializerArgs(bearerTokenTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Optional<String>> optionalStringExceptionArgs =
+                    createExceptionDeserializerArgs(optionalStringTypeMarker);
+
+            private static final ExceptionDeserializerArgs<OffsetDateTime> offsetDateTimeExceptionArgs =
+                    createExceptionDeserializerArgs(offsetDateTimeTypeMarker);
+
+            private static final ExceptionDeserializerArgs<InputStream> inputStreamExceptionArgs =
+                    createExceptionDeserializerArgs(inputStreamTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Long> longExceptionArgs =
+                    createExceptionDeserializerArgs(longTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Optional<Long>> optionalLongExceptionArgs =
+                    createExceptionDeserializerArgs(optionalLongTypeMarker);
+
+            private static final ExceptionDeserializerArgs<StringAliasExample> stringAliasExampleExceptionArgs =
+                    createExceptionDeserializerArgs(stringAliasExampleTypeMarker);
+
+            private static final ExceptionDeserializerArgs<NestedStringAliasExample>
+                    nestedStringAliasExampleExceptionArgs =
+                            createExceptionDeserializerArgs(nestedStringAliasExampleTypeMarker);
+
+            private static final ExceptionDeserializerArgs<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample2ExceptionArgs = createExceptionDeserializerArgs(stringAliasExample2TypeMarker);
+
+            private static final ExceptionDeserializerArgs<
+                            Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleExceptionArgs =
+                            createExceptionDeserializerArgs(optionalStringAliasExampleTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Void> voidExceptionArgs =
+                    createExceptionDeserializerArgs(voidTypeMarker);
+
+            private static final ExceptionDeserializerArgs<SimpleEnum> simpleEnumExceptionArgs =
+                    createExceptionDeserializerArgs(simpleEnumTypeMarker);
+
+            private static final ExceptionDeserializerArgs<List<SimpleEnum>> listSimpleEnumExceptionArgs =
+                    createExceptionDeserializerArgs(listSimpleEnumTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Optional<SimpleEnum>> optionalSimpleEnumExceptionArgs =
+                    createExceptionDeserializerArgs(optionalSimpleEnumTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Optional<LongAlias>> optionalLongAliasExceptionArgs =
+                    createExceptionDeserializerArgs(optionalLongAliasTypeMarker);
+
+            private static final ExceptionDeserializerArgs<SimpleUnion> simpleUnionExceptionArgs =
+                    createExceptionDeserializerArgs(simpleUnionTypeMarker);
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
-
             private final Deserializer<String> stringDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
+                    _runtime.bodySerDe().deserializer(stringExceptionArgs);
+
+            private final Deserializer<Integer> integerDeserializer =
+                    _runtime.bodySerDe().deserializer(integerExceptionArgs);
+
+            private final Deserializer<Double> doubleDeserializer =
+                    _runtime.bodySerDe().deserializer(doubleExceptionArgs);
+
+            private final Deserializer<Boolean> booleanDeserializer =
+                    _runtime.bodySerDe().deserializer(booleanExceptionArgs);
+
+            private final Deserializer<SafeLong> safeLongDeserializer =
+                    _runtime.bodySerDe().deserializer(safeLongExceptionArgs);
+
+            private final Deserializer<ResourceIdentifier> resourceIdentifierDeserializer =
+                    _runtime.bodySerDe().deserializer(resourceIdentifierExceptionArgs);
+
+            private final Deserializer<BearerToken> bearerTokenDeserializer =
+                    _runtime.bodySerDe().deserializer(bearerTokenExceptionArgs);
+
+            private final Deserializer<Optional<String>> optionalStringDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalStringExceptionArgs);
+
+            private final Deserializer<OffsetDateTime> offsetDateTimeDeserializer =
+                    _runtime.bodySerDe().deserializer(offsetDateTimeExceptionArgs);
+
+            private final Deserializer<InputStream> inputStreamDeserializer =
+                    _runtime.bodySerDe().inputStreamDeserializer(inputStreamExceptionArgs);
+
+            private final Deserializer<Long> longDeserializer =
+                    _runtime.bodySerDe().deserializer(longExceptionArgs);
+
+            private final Deserializer<Optional<Long>> optionalLongDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalLongExceptionArgs);
+
+            private final Deserializer<StringAliasExample> stringAliasExampleDeserializer =
+                    _runtime.bodySerDe().deserializer(stringAliasExampleExceptionArgs);
+
+            private final Deserializer<NestedStringAliasExample> nestedStringAliasExampleDeserializer =
+                    _runtime.bodySerDe().deserializer(nestedStringAliasExampleExceptionArgs);
+
+            private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample2Deserializer =
+                            _runtime.bodySerDe().deserializer(stringAliasExample2ExceptionArgs);
+
+            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleDeserializer =
+                            _runtime.bodySerDe().deserializer(optionalStringAliasExampleExceptionArgs);
+
+            private final Deserializer<Void> voidDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer(voidExceptionArgs);
+
+            private final Deserializer<SimpleEnum> simpleEnumDeserializer =
+                    _runtime.bodySerDe().deserializer(simpleEnumExceptionArgs);
+
+            private final Deserializer<List<SimpleEnum>> listSimpleEnumDeserializer =
+                    _runtime.bodySerDe().deserializer(listSimpleEnumExceptionArgs);
+
+            private final Deserializer<Optional<SimpleEnum>> optionalSimpleEnumDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalSimpleEnumExceptionArgs);
+
+            private final Deserializer<Optional<LongAlias>> optionalLongAliasDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalLongAliasExceptionArgs);
+
+            private final Deserializer<SimpleUnion> simpleUnionDeserializer =
+                    _runtime.bodySerDe().deserializer(simpleUnionExceptionArgs);
+
+            private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
             private final EndpointChannel integerChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.integer);
 
-            private final Deserializer<Integer> integerDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Integer>() {}));
-
             private final EndpointChannel double_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.double_);
-
-            private final Deserializer<Double> double_Deserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Double>() {}));
 
             private final EndpointChannel boolean_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.boolean_);
 
-            private final Deserializer<Boolean> boolean_Deserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Boolean>() {}));
-
             private final EndpointChannel safelongChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.safelong);
 
-            private final Deserializer<SafeLong> safelongDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SafeLong>() {}));
-
             private final EndpointChannel ridChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.rid);
-
-            private final Deserializer<ResourceIdentifier> ridDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<ResourceIdentifier>() {}));
 
             private final EndpointChannel bearertokenChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.bearertoken);
 
-            private final Deserializer<BearerToken> bearertokenDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<BearerToken>() {}));
-
             private final EndpointChannel optionalStringChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalString);
-
-            private final Deserializer<Optional<String>> optionalStringDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<String>>() {}));
 
             private final EndpointChannel optionalEmptyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEmpty);
 
-            private final Deserializer<Optional<String>> optionalEmptyDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<String>>() {}));
-
             private final EndpointChannel datetimeChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.datetime);
 
-            private final Deserializer<OffsetDateTime> datetimeDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<OffsetDateTime>() {}));
-
             private final EndpointChannel binaryChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.binary);
 
-            private final Deserializer<InputStream> binaryDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
-
             private final EndpointChannel pathChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.path);
-
-            private final Deserializer<String> pathDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
 
             private final EndpointChannel externalLongPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.externalLongPath);
 
-            private final Deserializer<Long> externalLongPathDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<Long>() {}));
-
             private final EndpointChannel optionalExternalLongQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
-
-            private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<Long>>() {}));
 
             private final Serializer<StringAliasExample> notNullBodySerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
@@ -306,26 +458,14 @@ public interface EteServiceBlocking {
             private final EndpointChannel notNullBodyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBody);
 
-            private final Deserializer<StringAliasExample> notNullBodyDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
-
             private final EndpointChannel aliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasOne);
-
-            private final Deserializer<StringAliasExample> aliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
 
             private final EndpointChannel optionalAliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalAliasOne);
 
-            private final Deserializer<StringAliasExample> optionalAliasOneDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<StringAliasExample>() {}));
-
             private final EndpointChannel aliasTwoChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasTwo);
-
-            private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<NestedStringAliasExample>() {}));
 
             private final Serializer<allexamples.com.palantir.product.StringAliasExample>
                     notNullBodyExternalImportSerializer = _runtime.bodySerDe()
@@ -333,11 +473,6 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel notNullBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBodyExternalImport);
-
-            private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
-                    notNullBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(createExceptionDeserializerArgs(
-                                    new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {}));
 
             private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalBodyExternalImportSerializer = _runtime.bodySerDe()
@@ -347,74 +482,35 @@ public interface EteServiceBlocking {
             private final EndpointChannel optionalBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalBodyExternalImport);
 
-            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
-                    optionalBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(createExceptionDeserializerArgs(
-                                    new TypeMarker<
-                                            Optional<allexamples.com.palantir.product.StringAliasExample>>() {}));
-
             private final EndpointChannel optionalQueryExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalQueryExternalImport);
-
-            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
-                    optionalQueryExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(createExceptionDeserializerArgs(
-                                    new TypeMarker<
-                                            Optional<allexamples.com.palantir.product.StringAliasExample>>() {}));
 
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
-            private final Deserializer<Void> noReturnDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
-
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
-
-            private final Deserializer<SimpleEnum> enumQueryDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleEnum>() {}));
 
             private final EndpointChannel enumListQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumListQuery);
 
-            private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<List<SimpleEnum>>() {}));
-
             private final EndpointChannel optionalEnumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEnumQuery);
-
-            private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<SimpleEnum>>() {}));
 
             private final EndpointChannel enumHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumHeader);
 
-            private final Deserializer<SimpleEnum> enumHeaderDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleEnum>() {}));
-
             private final EndpointChannel jsonErrorsHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
-
-            private final Deserializer<String> jsonErrorsHeaderDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
 
-            private final Deserializer<String> errorParameterSerializationDeserializer =
-                    _runtime.bodySerDe().deserializer(createExceptionDeserializerArgs(new TypeMarker<String>() {}));
-
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
 
-            private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<Optional<LongAlias>>() {}));
-
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
-
-            private final Deserializer<Void> complexQueryParametersDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
@@ -422,17 +518,11 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
 
-            private final Deserializer<Void> receiveListOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
-
             private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
 
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
-
-            private final Deserializer<Void> receiveSetOfOptionalsDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private final Serializer<List<String>> receiveListOfStringsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
@@ -440,16 +530,10 @@ public interface EteServiceBlocking {
             private final EndpointChannel receiveListOfStringsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
-            private final Deserializer<Void> receiveListOfStringsDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
-
             private final Serializer<SimpleUnion> unionSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<SimpleUnion>() {});
 
             private final EndpointChannel unionChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.union);
-
-            private final Deserializer<SimpleUnion> unionDeserializer = _runtime.bodySerDe()
-                    .deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleUnion>() {}));
 
             private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 ExceptionDeserializerArgs.Builder<T> builder =
@@ -494,7 +578,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(double_Channel, _request.build(), double_Deserializer);
+                return _runtime.clients().callBlocking(double_Channel, _request.build(), doubleDeserializer);
             }
 
             @Override
@@ -506,7 +590,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(boolean_Channel, _request.build(), boolean_Deserializer);
+                return _runtime.clients().callBlocking(boolean_Channel, _request.build(), booleanDeserializer);
             }
 
             @Override
@@ -518,7 +602,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(safelongChannel, _request.build(), safelongDeserializer);
+                return _runtime.clients().callBlocking(safelongChannel, _request.build(), safeLongDeserializer);
             }
 
             @Override
@@ -530,7 +614,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(ridChannel, _request.build(), ridDeserializer);
+                return _runtime.clients().callBlocking(ridChannel, _request.build(), resourceIdentifierDeserializer);
             }
 
             @Override
@@ -542,7 +626,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(bearertokenChannel, _request.build(), bearertokenDeserializer);
+                return _runtime.clients().callBlocking(bearertokenChannel, _request.build(), bearerTokenDeserializer);
             }
 
             @Override
@@ -568,7 +652,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(optionalEmptyChannel, _request.build(), optionalEmptyDeserializer);
+                        .callBlocking(optionalEmptyChannel, _request.build(), optionalStringDeserializer);
             }
 
             @Override
@@ -580,7 +664,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(datetimeChannel, _request.build(), datetimeDeserializer);
+                return _runtime.clients().callBlocking(datetimeChannel, _request.build(), offsetDateTimeDeserializer);
             }
 
             @Override
@@ -592,7 +676,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(binaryChannel, _request.build(), binaryDeserializer);
+                return _runtime.clients().callBlocking(binaryChannel, _request.build(), inputStreamDeserializer);
             }
 
             @Override
@@ -605,7 +689,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(pathChannel, _request.build(), pathDeserializer);
+                return _runtime.clients().callBlocking(pathChannel, _request.build(), stringDeserializer);
             }
 
             @Override
@@ -618,8 +702,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients()
-                        .callBlocking(externalLongPathChannel, _request.build(), externalLongPathDeserializer);
+                return _runtime.clients().callBlocking(externalLongPathChannel, _request.build(), longDeserializer);
             }
 
             @Override
@@ -635,10 +718,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(
-                                optionalExternalLongQueryChannel,
-                                _request.build(),
-                                optionalExternalLongQueryDeserializer);
+                        .callBlocking(optionalExternalLongQueryChannel, _request.build(), optionalLongDeserializer);
             }
 
             @Override
@@ -651,7 +731,8 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(notNullBodyChannel, _request.build(), notNullBodyDeserializer);
+                return _runtime.clients()
+                        .callBlocking(notNullBodyChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
             @Override
@@ -664,7 +745,8 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(aliasOneChannel, _request.build(), aliasOneDeserializer);
+                return _runtime.clients()
+                        .callBlocking(aliasOneChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
             @Override
@@ -683,7 +765,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(optionalAliasOneChannel, _request.build(), optionalAliasOneDeserializer);
+                        .callBlocking(optionalAliasOneChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
             @Override
@@ -698,7 +780,8 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(aliasTwoChannel, _request.build(), aliasTwoDeserializer);
+                return _runtime.clients()
+                        .callBlocking(aliasTwoChannel, _request.build(), nestedStringAliasExampleDeserializer);
             }
 
             @Override
@@ -714,9 +797,7 @@ public interface EteServiceBlocking {
                 }
                 return _runtime.clients()
                         .callBlocking(
-                                notNullBodyExternalImportChannel,
-                                _request.build(),
-                                notNullBodyExternalImportDeserializer);
+                                notNullBodyExternalImportChannel, _request.build(), stringAliasExample2Deserializer);
             }
 
             @Override
@@ -734,7 +815,7 @@ public interface EteServiceBlocking {
                         .callBlocking(
                                 optionalBodyExternalImportChannel,
                                 _request.build(),
-                                optionalBodyExternalImportDeserializer);
+                                optionalStringAliasExampleDeserializer);
             }
 
             @Override
@@ -754,7 +835,7 @@ public interface EteServiceBlocking {
                         .callBlocking(
                                 optionalQueryExternalImportChannel,
                                 _request.build(),
-                                optionalQueryExternalImportDeserializer);
+                                optionalStringAliasExampleDeserializer);
             }
 
             @Override
@@ -766,7 +847,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                _runtime.clients().callBlocking(noReturnChannel, _request.build(), noReturnDeserializer);
+                _runtime.clients().callBlocking(noReturnChannel, _request.build(), voidDeserializer);
             }
 
             @Override
@@ -779,7 +860,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(enumQueryChannel, _request.build(), enumQueryDeserializer);
+                return _runtime.clients().callBlocking(enumQueryChannel, _request.build(), simpleEnumDeserializer);
             }
 
             @Override
@@ -795,7 +876,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(enumListQueryChannel, _request.build(), enumListQueryDeserializer);
+                        .callBlocking(enumListQueryChannel, _request.build(), listSimpleEnumDeserializer);
             }
 
             @Override
@@ -811,7 +892,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(optionalEnumQueryChannel, _request.build(), optionalEnumQueryDeserializer);
+                        .callBlocking(optionalEnumQueryChannel, _request.build(), optionalSimpleEnumDeserializer);
             }
 
             @Override
@@ -824,7 +905,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(enumHeaderChannel, _request.build(), enumHeaderDeserializer);
+                return _runtime.clients().callBlocking(enumHeaderChannel, _request.build(), simpleEnumDeserializer);
             }
 
             @Override
@@ -838,8 +919,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients()
-                        .callBlocking(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
+                return _runtime.clients().callBlocking(jsonErrorsHeaderChannel, _request.build(), stringDeserializer);
             }
 
             @Override
@@ -854,10 +934,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(
-                                errorParameterSerializationChannel,
-                                _request.build(),
-                                errorParameterSerializationDeserializer);
+                        .callBlocking(errorParameterSerializationChannel, _request.build(), stringDeserializer);
             }
 
             @Override
@@ -874,7 +951,7 @@ public interface EteServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .callBlocking(aliasLongEndpointChannel, _request.build(), aliasLongEndpointDeserializer);
+                        .callBlocking(aliasLongEndpointChannel, _request.build(), optionalLongAliasDeserializer);
             }
 
             @Override
@@ -901,9 +978,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                _runtime.clients()
-                        .callBlocking(
-                                complexQueryParametersChannel, _request.build(), complexQueryParametersDeserializer);
+                _runtime.clients().callBlocking(complexQueryParametersChannel, _request.build(), voidDeserializer);
             }
 
             @Override
@@ -916,9 +991,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                _runtime.clients()
-                        .callBlocking(
-                                receiveListOfOptionalsChannel, _request.build(), receiveListOfOptionalsDeserializer);
+                _runtime.clients().callBlocking(receiveListOfOptionalsChannel, _request.build(), voidDeserializer);
             }
 
             @Override
@@ -931,9 +1004,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                _runtime.clients()
-                        .callBlocking(
-                                receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
+                _runtime.clients().callBlocking(receiveSetOfOptionalsChannel, _request.build(), voidDeserializer);
             }
 
             @Override
@@ -946,8 +1017,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                _runtime.clients()
-                        .callBlocking(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
+                _runtime.clients().callBlocking(receiveListOfStringsChannel, _request.build(), voidDeserializer);
             }
 
             @Override
@@ -960,7 +1030,7 @@ public interface EteServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().callBlocking(unionChannel, _request.build(), unionDeserializer);
+                return _runtime.clients().callBlocking(unionChannel, _request.build(), simpleUnionDeserializer);
             }
 
             @Override

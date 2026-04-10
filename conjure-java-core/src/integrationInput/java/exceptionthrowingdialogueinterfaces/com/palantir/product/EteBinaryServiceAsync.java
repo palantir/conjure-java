@@ -56,47 +56,42 @@ public interface EteBinaryServiceAsync {
     /** Creates an asynchronous/non-blocking client for a EteBinaryService service. */
     static EteBinaryServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
+            private static final TypeMarker<InputStream> inputStreamTypeMarker = new TypeMarker<InputStream>() {};
+
+            private static final TypeMarker<Optional<InputStream>> optionalInputStreamTypeMarker =
+                    new TypeMarker<Optional<InputStream>>() {};
+
+            private static final ExceptionDeserializerArgs<InputStream> inputStreamExceptionArgs =
+                    createExceptionDeserializerArgs(inputStreamTypeMarker);
+
+            private static final ExceptionDeserializerArgs<Optional<InputStream>> optionalInputStreamExceptionArgs =
+                    createExceptionDeserializerArgs(optionalInputStreamTypeMarker);
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Deserializer<InputStream> inputStreamDeserializer =
+                    _runtime.bodySerDe().inputStreamDeserializer(inputStreamExceptionArgs);
+
+            private final Deserializer<Optional<InputStream>> optionalInputStreamDeserializer =
+                    _runtime.bodySerDe().optionalInputStreamDeserializer(optionalInputStreamExceptionArgs);
 
             private final EndpointChannel postBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
-            private final Deserializer<InputStream> postBinaryDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
-
             private final EndpointChannel postBinaryThrowsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinaryThrows);
-
-            private final Deserializer<InputStream> postBinaryThrowsDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
 
             private final EndpointChannel getOptionalBinaryPresentChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
 
-            private final Deserializer<Optional<InputStream>> getOptionalBinaryPresentDeserializer =
-                    _runtime.bodySerDe()
-                            .optionalInputStreamDeserializer(
-                                    createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
-
             private final EndpointChannel getOptionalBinaryEmptyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
-
-            private final Deserializer<Optional<InputStream>> getOptionalBinaryEmptyDeserializer = _runtime.bodySerDe()
-                    .optionalInputStreamDeserializer(
-                            createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
 
             private final EndpointChannel getBinaryFailureChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
 
-            private final Deserializer<InputStream> getBinaryFailureDeserializer = _runtime.bodySerDe()
-                    .inputStreamDeserializer(createExceptionDeserializerArgs(new TypeMarker<InputStream>() {}));
-
             private final EndpointChannel getAliasedChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
-
-            private final Deserializer<Optional<InputStream>> getAliasedDeserializer = _runtime.bodySerDe()
-                    .optionalInputStreamDeserializer(
-                            createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
 
             private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 ExceptionDeserializerArgs.Builder<T> builder =
@@ -118,7 +113,7 @@ public interface EteBinaryServiceAsync {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().call(postBinaryChannel, _request.build(), postBinaryDeserializer);
+                return _runtime.clients().call(postBinaryChannel, _request.build(), inputStreamDeserializer);
             }
 
             @Override
@@ -133,7 +128,7 @@ public interface EteBinaryServiceAsync {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().call(postBinaryThrowsChannel, _request.build(), postBinaryThrowsDeserializer);
+                return _runtime.clients().call(postBinaryThrowsChannel, _request.build(), inputStreamDeserializer);
             }
 
             @Override
@@ -146,7 +141,7 @@ public interface EteBinaryServiceAsync {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .call(getOptionalBinaryPresentChannel, _request.build(), getOptionalBinaryPresentDeserializer);
+                        .call(getOptionalBinaryPresentChannel, _request.build(), optionalInputStreamDeserializer);
             }
 
             @Override
@@ -159,7 +154,7 @@ public interface EteBinaryServiceAsync {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .call(getOptionalBinaryEmptyChannel, _request.build(), getOptionalBinaryEmptyDeserializer);
+                        .call(getOptionalBinaryEmptyChannel, _request.build(), optionalInputStreamDeserializer);
             }
 
             @Override
@@ -174,7 +169,7 @@ public interface EteBinaryServiceAsync {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().call(getBinaryFailureChannel, _request.build(), getBinaryFailureDeserializer);
+                return _runtime.clients().call(getBinaryFailureChannel, _request.build(), inputStreamDeserializer);
             }
 
             @Override
@@ -186,7 +181,7 @@ public interface EteBinaryServiceAsync {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                return _runtime.clients().call(getAliasedChannel, _request.build(), getAliasedDeserializer);
+                return _runtime.clients().call(getAliasedChannel, _request.build(), optionalInputStreamDeserializer);
             }
 
             @Override

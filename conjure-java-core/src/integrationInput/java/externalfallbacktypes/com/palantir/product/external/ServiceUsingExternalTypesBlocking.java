@@ -31,7 +31,13 @@ public interface ServiceUsingExternalTypesBlocking {
     static ServiceUsingExternalTypesBlocking of(
             EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ServiceUsingExternalTypesBlocking() {
+            private static final TypeMarker<Map<String, String>> mapStringStringTypeMarker =
+                    new TypeMarker<Map<String, String>>() {};
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Deserializer<Map<String, String>> mapStringStringDeserializer =
+                    _runtime.bodySerDe().deserializer(mapStringStringTypeMarker);
 
             private final Serializer<List<String>> externalSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
@@ -39,15 +45,12 @@ public interface ServiceUsingExternalTypesBlocking {
             private final EndpointChannel externalChannel =
                     _endpointChannelFactory.endpoint(DialogueServiceUsingExternalTypesEndpoints.external);
 
-            private final Deserializer<Map<String, String>> externalDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, String>>() {});
-
             @Override
             public Map<String, String> external(String path, List<String> body) {
                 Request.Builder _request = Request.builder();
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
                 _request.body(externalSerializer.serialize(body));
-                return _runtime.clients().callBlocking(externalChannel, _request.build(), externalDeserializer);
+                return _runtime.clients().callBlocking(externalChannel, _request.build(), mapStringStringDeserializer);
             }
 
             @Override
