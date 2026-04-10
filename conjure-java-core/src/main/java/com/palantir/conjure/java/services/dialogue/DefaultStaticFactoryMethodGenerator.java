@@ -120,8 +120,29 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             impl.addMethod(createHelperToConstructExceptionDeserializerArgs());
         }
 
-        // Collect distinct return types across all endpoints to generate shared TypeMarker,
-        // ExceptionDeserializerArgs, and Deserializer fields rather than per-endpoint duplicates.
+        ReturnTypeFieldsContext context = collectReturnTypeFields(def, isErrorRespecting);
+        generateTypeMarkerFields(impl, context, isErrorRespecting);
+        generateExceptionArgsFields(impl, context);
+        generateDeserializerFields(impl, context, isErrorRespecting);
+        generateEndpointImplementations(impl, def, context.endpointToDeserializerField);
+
+        impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
+
+        String javadoc = methodType.switchBy(
+                "Creates a synchronous/blocking client for a $L service.",
+                "Creates an " + "asynchronous/non-blocking client for a $L service.");
+        MethodSpec method = MethodSpec.methodBuilder("of")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addJavadoc(javadoc, def.getServiceName().getName())
+                .returns(className)
+                .addParameter(EndpointChannelFactory.class, StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
+                .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
+                .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
+                .build();
+        return method;
+    }
+
+    private ReturnTypeFieldsContext collectReturnTypeFields(ServiceDefinition def, boolean isErrorRespecting) {
         Map<TypeName, String> typeMarkerFields = new LinkedHashMap<>();
         Map<TypeName, String> exceptionArgsFields = new LinkedHashMap<>();
         Map<TypeName, String> deserializerFieldNames = new LinkedHashMap<>();
@@ -154,9 +175,18 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     endpoint.getEndpointName().get(), deserializerFieldNames.get(returnClassName));
         }
 
-        // Generate shared static TypeMarker fields (one per distinct return type)
-        typeMarkerFields.forEach((typeName, fieldName) -> {
-            DeserializerType deserType = deserializerTypes.get(typeName);
+        return new ReturnTypeFieldsContext(
+                typeMarkerFields,
+                exceptionArgsFields,
+                deserializerFieldNames,
+                deserializerTypes,
+                endpointToDeserializerField);
+    }
+
+    private void generateTypeMarkerFields(
+            TypeSpec.Builder impl, ReturnTypeFieldsContext context, boolean isErrorRespecting) {
+        context.typeMarkerFields.forEach((typeName, fieldName) -> {
+            DeserializerType deserType = context.deserializerTypes.get(typeName);
             if (!isErrorRespecting && deserType == DeserializerType.EMPTY_BODY) {
                 // Non-error empty body deserializer does not need a TypeMarker
                 return;
@@ -167,64 +197,72 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                             .initializer("new $T<$T>() {}", TypeMarker.class, typeName)
                             .build());
         });
+    }
 
-        // Generate shared static ExceptionDeserializerArgs fields (error-respecting path only)
-        exceptionArgsFields.forEach((typeName, fieldName) -> {
+    private void generateExceptionArgsFields(TypeSpec.Builder impl, ReturnTypeFieldsContext context) {
+        context.exceptionArgsFields.forEach((typeName, fieldName) -> {
             impl.addField(FieldSpec.builder(
                             ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.class), typeName),
                             fieldName)
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                    .initializer("createExceptionDeserializerArgs($L)", typeMarkerFields.get(typeName))
+                    .initializer("createExceptionDeserializerArgs($L)", context.typeMarkerFields.get(typeName))
                     .build());
         });
+    }
 
-        // Generate shared Deserializer instance fields (one per distinct return type)
-        deserializerFieldNames.forEach((typeName, fieldName) -> {
+    private void generateDeserializerFields(
+            TypeSpec.Builder impl, ReturnTypeFieldsContext context, boolean isErrorRespecting) {
+        context.deserializerFieldNames.forEach((typeName, fieldName) -> {
             ParameterizedTypeName deserializerType =
                     ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
-            DeserializerType deserType = deserializerTypes.get(typeName);
-            CodeBlock initializer;
-            if (isErrorRespecting) {
-                String argsField = exceptionArgsFields.get(typeName);
-                initializer = switch (deserType) {
-                    case STANDARD ->
-                        CodeBlock.of(
-                                "$L.bodySerDe().deserializer($L)", StaticFactoryMethodGenerator.RUNTIME, argsField);
-                    case EMPTY_BODY ->
-                        CodeBlock.of(
-                                "$L.bodySerDe().emptyBodyDeserializer($L)",
-                                StaticFactoryMethodGenerator.RUNTIME,
-                                argsField);
-                    case BINARY ->
-                        CodeBlock.of(
-                                "$L.bodySerDe().inputStreamDeserializer($L)",
-                                StaticFactoryMethodGenerator.RUNTIME,
-                                argsField);
-                    case OPTIONAL_BINARY ->
-                        CodeBlock.of(
-                                "$L.bodySerDe().optionalInputStreamDeserializer($L)",
-                                StaticFactoryMethodGenerator.RUNTIME,
-                                argsField);
-                };
-            } else {
-                String tmField = typeMarkerFields.get(typeName);
-                initializer = switch (deserType) {
-                    case STANDARD ->
-                        CodeBlock.of("$L.bodySerDe().deserializer($L)", StaticFactoryMethodGenerator.RUNTIME, tmField);
-                    case EMPTY_BODY ->
-                        CodeBlock.of("$L.bodySerDe().emptyBodyDeserializer()", StaticFactoryMethodGenerator.RUNTIME);
-                    default ->
-                        throw new SafeIllegalStateException(
-                                "Unexpected deserializer type in non-error path", SafeArg.of("type", deserType));
-                };
-            }
+            DeserializerType deserType = context.deserializerTypes.get(typeName);
+            CodeBlock initializer = createDeserializerInitializer(deserType, typeName, context, isErrorRespecting);
             impl.addField(FieldSpec.builder(deserializerType, fieldName)
                     .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                     .initializer(initializer)
                     .build());
         });
+    }
 
-        // Generate per-endpoint code: serializers, endpoint channels, and method implementations
+    private CodeBlock createDeserializerInitializer(
+            DeserializerType deserType, TypeName typeName, ReturnTypeFieldsContext context, boolean isErrorRespecting) {
+        if (isErrorRespecting) {
+            String argsField = context.exceptionArgsFields.get(typeName);
+            return switch (deserType) {
+                case STANDARD ->
+                    CodeBlock.of("$L.bodySerDe().deserializer($L)", StaticFactoryMethodGenerator.RUNTIME, argsField);
+                case EMPTY_BODY ->
+                    CodeBlock.of(
+                            "$L.bodySerDe().emptyBodyDeserializer($L)",
+                            StaticFactoryMethodGenerator.RUNTIME,
+                            argsField);
+                case BINARY ->
+                    CodeBlock.of(
+                            "$L.bodySerDe().inputStreamDeserializer($L)",
+                            StaticFactoryMethodGenerator.RUNTIME,
+                            argsField);
+                case OPTIONAL_BINARY ->
+                    CodeBlock.of(
+                            "$L.bodySerDe().optionalInputStreamDeserializer($L)",
+                            StaticFactoryMethodGenerator.RUNTIME,
+                            argsField);
+            };
+        } else {
+            String tmField = context.typeMarkerFields.get(typeName);
+            return switch (deserType) {
+                case STANDARD ->
+                    CodeBlock.of("$L.bodySerDe().deserializer($L)", StaticFactoryMethodGenerator.RUNTIME, tmField);
+                case EMPTY_BODY ->
+                    CodeBlock.of("$L.bodySerDe().emptyBodyDeserializer()", StaticFactoryMethodGenerator.RUNTIME);
+                default ->
+                    throw new SafeIllegalStateException(
+                            "Unexpected deserializer type in non-error path", SafeArg.of("type", deserType));
+            };
+        }
+    }
+
+    private void generateEndpointImplementations(
+            TypeSpec.Builder impl, ServiceDefinition def, Map<String, String> endpointToDeserializerField) {
         def.getEndpoints().forEach(endpoint -> {
             endpoint.getArgs().stream()
                     .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
@@ -235,21 +273,6 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             impl.addField(bindEndpointChannel(def, endpoint));
             impl.addMethod(clientImpl(endpoint, endpointToDeserializerField));
         });
-
-        impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
-
-        String javadoc = methodType.switchBy(
-                "Creates a synchronous/blocking client for a $L service.",
-                "Creates an " + "asynchronous/non-blocking client for a $L service.");
-        MethodSpec method = MethodSpec.methodBuilder("of")
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addJavadoc(javadoc, def.getServiceName().getName())
-                .returns(className)
-                .addParameter(EndpointChannelFactory.class, StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
-                .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
-                .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
-                .build();
-        return method;
     }
 
     private ClassName getTypeMarkersClass(ErrorDefinition errorDef) {
@@ -647,6 +670,27 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         EMPTY_BODY,
         BINARY,
         OPTIONAL_BINARY;
+    }
+
+    private static final class ReturnTypeFieldsContext {
+        private final Map<TypeName, String> typeMarkerFields;
+        private final Map<TypeName, String> exceptionArgsFields;
+        private final Map<TypeName, String> deserializerFieldNames;
+        private final Map<TypeName, DeserializerType> deserializerTypes;
+        private final Map<String, String> endpointToDeserializerField;
+
+        ReturnTypeFieldsContext(
+                Map<TypeName, String> typeMarkerFields,
+                Map<TypeName, String> exceptionArgsFields,
+                Map<TypeName, String> deserializerFieldNames,
+                Map<TypeName, DeserializerType> deserializerTypes,
+                Map<String, String> endpointToDeserializerField) {
+            this.typeMarkerFields = typeMarkerFields;
+            this.exceptionArgsFields = exceptionArgsFields;
+            this.deserializerFieldNames = deserializerFieldNames;
+            this.deserializerTypes = deserializerTypes;
+            this.endpointToDeserializerField = endpointToDeserializerField;
+        }
     }
 
     private DeserializerType getDeserializerType(Optional<Type> type, TypeName className) {
