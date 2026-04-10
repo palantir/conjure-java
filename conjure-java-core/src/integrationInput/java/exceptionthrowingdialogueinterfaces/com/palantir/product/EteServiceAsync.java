@@ -254,7 +254,7 @@ public interface EteServiceAsync {
                     new TypeMarker<NestedStringAliasExample>() {};
 
             private static final TypeMarker<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample2TypeMarker =
+                    stringAliasExample1pxrnbvTypeMarker =
                             new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {};
 
             private static final TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>
@@ -320,7 +320,8 @@ public interface EteServiceAsync {
                             createExceptionDeserializerArgs(nestedStringAliasExampleTypeMarker);
 
             private static final ExceptionDeserializerArgs<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample2ExceptionArgs = createExceptionDeserializerArgs(stringAliasExample2TypeMarker);
+                    stringAliasExample1pxrnbvExceptionArgs =
+                            createExceptionDeserializerArgs(stringAliasExample1pxrnbvTypeMarker);
 
             private static final ExceptionDeserializerArgs<
                             Optional<allexamples.com.palantir.product.StringAliasExample>>
@@ -390,8 +391,8 @@ public interface EteServiceAsync {
                     _runtime.bodySerDe().deserializer(nestedStringAliasExampleExceptionArgs);
 
             private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample2Deserializer =
-                            _runtime.bodySerDe().deserializer(stringAliasExample2ExceptionArgs);
+                    stringAliasExample1pxrnbvDeserializer =
+                            _runtime.bodySerDe().deserializer(stringAliasExample1pxrnbvExceptionArgs);
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalStringAliasExampleDeserializer =
@@ -796,7 +797,10 @@ public interface EteServiceAsync {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .call(notNullBodyExternalImportChannel, _request.build(), stringAliasExample2Deserializer);
+                        .call(
+                                notNullBodyExternalImportChannel,
+                                _request.build(),
+                                stringAliasExample1pxrnbvDeserializer);
             }
 
             @Override

@@ -250,7 +250,7 @@ public interface EteServiceBlocking {
                     new TypeMarker<NestedStringAliasExample>() {};
 
             private static final TypeMarker<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample2TypeMarker =
+                    stringAliasExample1pxrnbvTypeMarker =
                             new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {};
 
             private static final TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>
@@ -312,7 +312,8 @@ public interface EteServiceBlocking {
                     _runtime.bodySerDe().deserializer(nestedStringAliasExampleTypeMarker);
 
             private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample2Deserializer = _runtime.bodySerDe().deserializer(stringAliasExample2TypeMarker);
+                    stringAliasExample1pxrnbvDeserializer =
+                            _runtime.bodySerDe().deserializer(stringAliasExample1pxrnbvTypeMarker);
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalStringAliasExampleDeserializer =
@@ -618,7 +619,9 @@ public interface EteServiceBlocking {
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
                 return _runtime.clients()
                         .callBlocking(
-                                notNullBodyExternalImportChannel, _request.build(), stringAliasExample2Deserializer);
+                                notNullBodyExternalImportChannel,
+                                _request.build(),
+                                stringAliasExample1pxrnbvDeserializer);
             }
 
             @Override
