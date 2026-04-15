@@ -119,6 +119,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
+                .setServerOption(UndertowOptions.MAX_ENTITY_SIZE, -1L)
                 .addHttpListener(0, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
