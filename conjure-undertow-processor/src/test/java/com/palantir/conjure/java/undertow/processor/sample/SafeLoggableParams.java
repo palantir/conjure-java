@@ -63,6 +63,6 @@ public interface SafeLoggableParams {
             @Safe @Handle.QueryParam("context") String context,
             RequestContext requestContext);
 
-    @Handle(method = HttpMethod.GET, path = "/safeLoggingBody")
+    @Handle(method = HttpMethod.POST, path = "/safeLoggingBody")
     String bodyParam(@Safe @Handle.Body String body);
 }
