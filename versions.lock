@@ -28,11 +28,11 @@ com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
 
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 10110b88)
 
-com.google.errorprone:error_prone_annotations:2.43.0 (31 constraints: 1f04d038)
+com.google.errorprone:error_prone_annotations:2.47.0 (31 constraints: 25045259)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.5.0-jre (37 constraints: 4bbd3132)
+com.google.guava:guava:33.6.0-jre (37 constraints: 4cbded39)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
