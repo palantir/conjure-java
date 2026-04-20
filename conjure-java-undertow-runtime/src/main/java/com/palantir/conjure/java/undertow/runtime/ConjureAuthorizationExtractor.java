@@ -90,11 +90,13 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
         if (cookie == null) {
             throw new ServiceException(MISSING_CREDENTIAL_ERROR_TYPE);
         }
+        BearerToken token;
         try {
-            return setState(exchange, plainSerDe.deserializeBearerToken(cookie.getValue()));
+            token = plainSerDe.deserializeBearerToken(cookie.getValue());
         } catch (RuntimeException e) {
             throw new ServiceException(MALFORMED_CREDENTIAL_ERROR_TYPE, e);
         }
+        return setState(exchange, token);
     }
 
     @Override
