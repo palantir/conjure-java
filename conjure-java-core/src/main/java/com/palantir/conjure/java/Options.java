@@ -243,6 +243,15 @@ public interface Options {
         return true;
     }
 
+    /**
+     * If enabled, {@code toString} methods render {@code @DoNotLog}-annotated fields as "REDACTED" instead of including
+     * the actual value. A separate {@code dangerousToString} method (itself annotated {@code @DoNotLog}) is generated.
+     */
+    @Value.Default
+    default boolean redactToStringDoNotLog() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
