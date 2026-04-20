@@ -140,6 +140,23 @@ public final class AuthTest {
                 .hasType(error);
     }
 
+    @Test
+    public void testJsonWebHandlerThrowsWhenAuthCookieSet() {
+        ErrorType error = ErrorType.create(ErrorType.Code.INTERNAL, "Foo:Bar");
+        UndertowRuntime runtime = ConjureUndertowRuntime.builder()
+                .jsonWebTokenHandler((_exchange, _token) -> {
+                    throw new ServiceException(error);
+                })
+                .build();
+
+        String cookieName = "Auth-Token";
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.setRequestCookie(new CookieImpl(cookieName, "token"));
+
+        assertThatServiceExceptionThrownBy(() -> runtime.auth().cookie(exchange, cookieName))
+                .hasType(error);
+    }
+
     private static final class TestJsonWebTokenHandler implements JsonWebTokenHandler {
         private boolean fired = false;
 
