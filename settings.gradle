@@ -22,3 +22,5 @@ include 'conjure-undertow-annotations'
 include 'conjure-undertow-lib'
 include 'conjure-undertow-processor'
 include 'conjure-undertow-processor-example'
+
+throw new RuntimeException('''The excavator failed to run properly:\n\n''' + file('gradle/exception').text)
