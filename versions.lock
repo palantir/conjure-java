@@ -28,11 +28,11 @@ com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
 
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 10110b88)
 
-com.google.errorprone:error_prone_annotations:2.47.0 (31 constraints: 520493e8)
+com.google.errorprone:error_prone_annotations:2.47.0 (31 constraints: 6204cffb)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.6.0-jre (37 constraints: 5cbd927e)
+com.google.guava:guava:33.6.0-jre (37 constraints: 5fbd1181)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -58,7 +58,7 @@ com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.34.0 (4 c
 
 com.palantir.conjure.java.runtime:keystores:8.34.0 (3 constraints: 192a6a5e)
 
-com.palantir.deadlines:deadlines:0.20.0 (2 constraints: 97143aab)
+com.palantir.deadlines:deadlines:0.21.0 (2 constraints: 98146aab)
 
 com.palantir.dialogue:dialogue-apache-hc5-client:6.26.0 (2 constraints: 7c29c001)
 
@@ -80,21 +80,21 @@ com.palantir.human-readable-types:human-readable-types:1.11.0 (1 constraints: 35
 
 com.palantir.javapoet:javapoet:0.14.0 (2 constraints: 2b1138ee)
 
-com.palantir.nylon:nylon-threads:0.8.0 (1 constraints: 10100692)
+com.palantir.nylon:nylon-threads:0.9.0 (1 constraints: 11100992)
 
 com.palantir.refreshable:refreshable:2.11.0 (3 constraints: 2934e7f5)
 
 com.palantir.ri:resource-identifier:2.15.0 (3 constraints: 5425e24c)
 
-com.palantir.safe-logging:logger:3.14.0 (24 constraints: 78a95b63)
+com.palantir.safe-logging:logger:3.14.0 (24 constraints: 7ca9d467)
 
 com.palantir.safe-logging:logger-slf4j:3.14.0 (1 constraints: 330e9350)
 
 com.palantir.safe-logging:logger-spi:3.14.0 (2 constraints: 751eacb0)
 
-com.palantir.safe-logging:preconditions:3.14.0 (32 constraints: 582c6c31)
+com.palantir.safe-logging:preconditions:3.14.0 (32 constraints: 5d2c4b38)
 
-com.palantir.safe-logging:safe-logging:3.14.0 (29 constraints: 36ffb8e3)
+com.palantir.safe-logging:safe-logging:3.14.0 (29 constraints: 3bffafe9)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.7.0 (1 constraints: 390fb676)
 
@@ -102,23 +102,23 @@ com.palantir.syntactic-paths:syntactic-paths:0.15.0 (2 constraints: f613f181)
 
 com.palantir.tokens:auth-tokens:4.3.0 (5 constraints: 69538550)
 
-com.palantir.tracing:tracing:6.33.0 (8 constraints: 707e240f)
+com.palantir.tracing:tracing:6.33.0 (8 constraints: 717e5a10)
 
 com.palantir.tracing:tracing-api:6.33.0 (6 constraints: 92580425)
 
 com.palantir.tracing:tracing-undertow:6.33.0 (1 constraints: 3e05583b)
 
-com.palantir.tritium:tritium-api:0.126.0 (2 constraints: 931f4ef4)
+com.palantir.tritium:tritium-api:0.127.0 (2 constraints: 951f83f4)
 
 com.palantir.tritium:tritium-caffeine:0.126.0 (1 constraints: e41012cf)
 
-com.palantir.tritium:tritium-core:0.126.0 (1 constraints: 7110b1b2)
+com.palantir.tritium:tritium-core:0.127.0 (1 constraints: 7210b4b2)
 
 com.palantir.tritium:tritium-ids:0.126.0 (1 constraints: fc0f94a6)
 
-com.palantir.tritium:tritium-metrics:0.126.0 (6 constraints: 8968392a)
+com.palantir.tritium:tritium-metrics:0.127.0 (6 constraints: 8a68412b)
 
-com.palantir.tritium:tritium-registry:0.126.0 (11 constraints: 5adf21af)
+com.palantir.tritium:tritium-registry:0.127.0 (11 constraints: 5cdf5bb0)
 
 com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
