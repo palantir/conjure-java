@@ -28,11 +28,11 @@ com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
 
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 10110b88)
 
-com.google.errorprone:error_prone_annotations:2.47.0 (31 constraints: 6204cffb)
+com.google.errorprone:error_prone_annotations:2.47.0 (31 constraints: 6604ca0f)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.6.0-jre (37 constraints: 62bd1d8e)
+com.google.guava:guava:33.6.0-jre (37 constraints: 64bd169b)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -40,9 +40,9 @@ com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
 com.palantir.common:streams:2.9.0 (1 constraints: 0d051036)
 
-com.palantir.conjure:conjure-api-objects:4.56.0 (3 constraints: a5271f23)
+com.palantir.conjure:conjure-api-objects:4.57.0 (3 constraints: a827c123)
 
-com.palantir.conjure:conjure-generator-common:4.56.0 (2 constraints: 0914cd83)
+com.palantir.conjure:conjure-generator-common:4.57.0 (2 constraints: 0b14fe83)
 
 com.palantir.conjure.java.api:errors:2.72.0 (10 constraints: 6db9e663)
 
@@ -98,7 +98,7 @@ com.palantir.safe-logging:safe-logging:3.14.0 (29 constraints: 3efffff4)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.7.0 (1 constraints: 390fb676)
 
-com.palantir.syntactic-paths:syntactic-paths:0.16.0 (2 constraints: f7131f82)
+com.palantir.syntactic-paths:syntactic-paths:0.16.0 (2 constraints: f8132282)
 
 com.palantir.tokens:auth-tokens:4.3.0 (5 constraints: 6a533051)
 
@@ -232,7 +232,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 96266a97)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: c718909e)
 
-com.palantir.conjure:conjure-core:4.56.0 (1 constraints: 41055d3b)
+com.palantir.conjure:conjure-core:4.57.0 (1 constraints: 4205603b)
 
 com.palantir.conjure.java.api:test-utils:2.72.0 (1 constraints: 3d054d3b)
 
