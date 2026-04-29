@@ -148,7 +148,7 @@ jakarta.annotation:jakarta.annotation-api:2.1.1 (6 constraints: cd5ca708)
 
 jakarta.ws.rs:jakarta.ws.rs-api:4.0.0 (16 constraints: 64222106)
 
-joda-time:joda-time:2.14.1 (2 constraints: 681bd970)
+joda-time:joda-time:2.14.2 (2 constraints: 691b1871)
 
 org.apache.commons:commons-lang3:3.20.0 (3 constraints: f121bcf6)
 
