@@ -26,11 +26,6 @@ spotless {
     }
 }
 
-idea {
-    module {
-        sourceDirs += sourceSets.integrationInput.java.srcDirs
-    }
-}
 
 tasks.checkstyleIntegrationInput.enabled = false
 
