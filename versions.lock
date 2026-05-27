@@ -44,11 +44,11 @@ com.palantir.conjure:conjure-api-objects:4.57.0 (3 constraints: a827c123)
 
 com.palantir.conjure:conjure-generator-common:4.57.0 (2 constraints: 0b14fe83)
 
-com.palantir.conjure.java.api:errors:2.72.0 (10 constraints: 75b9b269)
+com.palantir.conjure.java.api:errors:2.73.0 (10 constraints: 77b9846d)
 
-com.palantir.conjure.java.api:service-config:2.72.0 (6 constraints: 3866f6d8)
+com.palantir.conjure.java.api:service-config:2.73.0 (6 constraints: 39660eda)
 
-com.palantir.conjure.java.api:ssl-config:2.72.0 (5 constraints: b54fd22c)
+com.palantir.conjure.java.api:ssl-config:2.73.0 (5 constraints: b74f4a2e)
 
 com.palantir.conjure.java.runtime:client-config:8.35.0 (6 constraints: b76b292f)
 
@@ -86,21 +86,21 @@ com.palantir.refreshable:refreshable:2.12.0 (3 constraints: 2c347af6)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 5825d74d)
 
-com.palantir.safe-logging:logger:3.15.0 (24 constraints: 8fa94d90)
+com.palantir.safe-logging:logger:3.15.0 (24 constraints: 90a9c794)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (32 constraints: 782c6183)
+com.palantir.safe-logging:preconditions:3.15.0 (32 constraints: 7b2c4294)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (29 constraints: 53ffcd28)
+com.palantir.safe-logging:safe-logging:3.15.0 (29 constraints: 55ff3d33)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints: 3a0fb976)
 
 com.palantir.syntactic-paths:syntactic-paths:0.17.0 (2 constraints: f9135082)
 
-com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 6f538253)
+com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 7153d854)
 
 com.palantir.tracing:tracing:6.34.0 (8 constraints: 797edf15)
 
@@ -114,7 +114,7 @@ com.palantir.tritium:tritium-caffeine:0.128.0 (1 constraints: e61018cf)
 
 com.palantir.tritium:tritium-core:0.130.0 (1 constraints: 6c10a3b2)
 
-com.palantir.tritium:tritium-ids:0.127.0 (1 constraints: fd0f97a6)
+com.palantir.tritium:tritium-ids:0.128.0 (1 constraints: fe0f9aa6)
 
 com.palantir.tritium:tritium-metrics:0.130.0 (6 constraints: 8e68fe28)
 
@@ -168,7 +168,7 @@ org.eclipse.collections:eclipse-collections-api:13.0.0 (2 constraints: 1418b976)
 
 org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
-org.immutables:value:2.12.2 (2 constraints: 0115edc1)
+org.immutables:value:2.12.2 (2 constraints: 0215eec1)
 
 org.jboss.logging:jboss-logging:3.6.1.Final (9 constraints: 8faed263)
 
@@ -234,7 +234,7 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: c718909e)
 
 com.palantir.conjure:conjure-core:4.57.0 (1 constraints: 4205603b)
 
-com.palantir.conjure.java.api:test-utils:2.72.0 (1 constraints: 3d054d3b)
+com.palantir.conjure.java.api:test-utils:2.73.0 (1 constraints: 3e05503b)
 
 com.palantir.conjure.java.runtime:conjure-java-annotations:8.35.0 (1 constraints: c6188f9e)
 
