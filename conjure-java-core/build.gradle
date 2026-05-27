@@ -32,6 +32,7 @@ tasks.checkstyleIntegrationInput.enabled = false
 tasks.named('compileIntegrationInputJava', JavaCompile) {
     options.errorprone.disable 'IncubatingMethod'
     options.errorprone.disable 'DeprecatedApiUsage'
+    options.errorprone.disable 'DangerousToStringDoNotLog'
 }
 
 dependencies {
