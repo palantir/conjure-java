@@ -28,7 +28,7 @@ com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
 
 com.google.code.findbugs:jsr305:3.0.2 (14 constraints: 10110b88)
 
-com.google.errorprone:error_prone_annotations:2.49.0 (31 constraints: 9a0462b0)
+com.google.errorprone:error_prone_annotations:2.49.0 (31 constraints: 9c0480b2)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -86,15 +86,15 @@ com.palantir.refreshable:refreshable:2.12.0 (3 constraints: 2c347af6)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 5825d74d)
 
-com.palantir.safe-logging:logger:3.15.0 (24 constraints: 90a9c794)
+com.palantir.safe-logging:logger:3.15.0 (24 constraints: 92a96096)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (32 constraints: 7b2c4294)
+com.palantir.safe-logging:preconditions:3.15.0 (32 constraints: 7d2c3996)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (29 constraints: 55ff3d33)
+com.palantir.safe-logging:safe-logging:3.15.0 (29 constraints: 56fff733)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints: 3a0fb976)
 
@@ -102,11 +102,11 @@ com.palantir.syntactic-paths:syntactic-paths:0.17.0 (2 constraints: f9135082)
 
 com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 7153d854)
 
-com.palantir.tracing:tracing:6.34.0 (8 constraints: 797edf15)
+com.palantir.tracing:tracing:6.35.0 (8 constraints: 7c7e7417)
 
-com.palantir.tracing:tracing-api:6.34.0 (6 constraints: 9858db27)
+com.palantir.tracing:tracing-api:6.35.0 (6 constraints: 9c586b29)
 
-com.palantir.tracing:tracing-undertow:6.34.0 (1 constraints: 3f055b3b)
+com.palantir.tracing:tracing-undertow:6.35.0 (1 constraints: 40055e3b)
 
 com.palantir.tritium:tritium-api:0.130.0 (2 constraints: 891f47f3)
 
@@ -248,7 +248,7 @@ com.palantir.conjure.java.runtime:refresh-utils:8.35.0 (1 constraints: c6188f9e)
 
 com.palantir.safe-logging:preconditions-assertj:3.15.0 (1 constraints: 3b05443b)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.34.0 (1 constraints: 501c99a1)
+com.palantir.tracing:tracing-jersey-jakarta:6.35.0 (1 constraints: 501c99a1)
 
 io.dropwizard:dropwizard-configuration:4.0.13 (2 constraints: 381c2dc1)
 
