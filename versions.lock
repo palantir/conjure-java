@@ -86,13 +86,13 @@ com.palantir.refreshable:refreshable:2.12.0 (3 constraints: 2c347af6)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 5825d74d)
 
-com.palantir.safe-logging:logger:3.15.0 (24 constraints: 8ea9438f)
+com.palantir.safe-logging:logger:3.15.0 (24 constraints: 8fa94d90)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (32 constraints: 762cc680)
+com.palantir.safe-logging:preconditions:3.15.0 (32 constraints: 772cff81)
 
 com.palantir.safe-logging:safe-logging:3.15.0 (29 constraints: 52ffed27)
 
@@ -100,7 +100,7 @@ com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints
 
 com.palantir.syntactic-paths:syntactic-paths:0.16.0 (2 constraints: f8132282)
 
-com.palantir.tokens:auth-tokens:4.4.0 (5 constraints: 6e53a252)
+com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 6f538253)
 
 com.palantir.tracing:tracing:6.34.0 (8 constraints: 797edf15)
 
