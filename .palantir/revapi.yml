@@ -1,0 +1,6 @@
+acceptedBreaks:
+  "8.78.0":
+    com.palantir.conjure.java:conjure-undertow-lib:
+    - code: "java.method.addedToInterface"
+      new: "method java.net.InetSocketAddress com.palantir.conjure.java.undertow.lib.RequestContext::sourceAddress()"
+      justification: "Added method to interface that should not have external implementations"

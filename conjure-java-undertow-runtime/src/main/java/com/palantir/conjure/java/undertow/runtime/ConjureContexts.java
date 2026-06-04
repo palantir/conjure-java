@@ -29,6 +29,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
+import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Deque;
@@ -109,6 +110,11 @@ final class ConjureContexts implements Contexts {
         @Override
         public void requestArg(Arg<?> arg) {
             requestArgHandler.arg(exchange, arg);
+        }
+
+        @Override
+        public InetSocketAddress sourceAddress() {
+            return exchange.getSourceAddress();
         }
 
         @Override
