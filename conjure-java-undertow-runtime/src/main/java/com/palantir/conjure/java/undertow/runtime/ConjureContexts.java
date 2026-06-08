@@ -29,7 +29,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Deque;
@@ -113,8 +113,8 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
-        public InetSocketAddress sourceAddress() {
-            return exchange.getSourceAddress();
+        public Optional<SocketAddress> peerAddress() {
+            return Optional.ofNullable(exchange.getConnection().getPeerAddress());
         }
 
         @Override
