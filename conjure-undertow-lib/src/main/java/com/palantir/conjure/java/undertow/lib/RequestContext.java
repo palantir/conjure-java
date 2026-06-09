@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.Unsafe;
+import java.net.SocketAddress;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +67,11 @@ public interface RequestContext {
      * Implementations may choose to include this data in the request log.
      */
     void requestArg(Arg<?> arg);
+
+    /**
+     * Returns the socket address associated with the connection used to make the current request.
+     */
+    Optional<SocketAddress> peerAddress();
 
     /**
      * Returns the client certificates associated with the connection used to make the current request.
