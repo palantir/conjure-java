@@ -28,6 +28,7 @@ import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
+import io.undertow.util.AttachmentKey;
 import io.undertow.util.HeaderValues;
 import java.net.SocketAddress;
 import java.security.cert.Certificate;
@@ -41,6 +42,9 @@ import javax.net.ssl.SSLSession;
 
 final class ConjureContexts implements Contexts {
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureContexts.class);
+
+    private static final AttachmentKey<RequestContext> ATTACHMENT = AttachmentKey.create(RequestContext.class);
+
     private final RequestArgHandler requestArgHandler;
 
     ConjureContexts(RequestArgHandler requestArgHandler) {
@@ -49,7 +53,12 @@ final class ConjureContexts implements Contexts {
 
     @Override
     public RequestContext createContext(HttpServerExchange exchange, Endpoint _endpoint) {
-        return new ConjureServerRequestContext(exchange, requestArgHandler);
+        RequestContext context = exchange.getAttachment(ATTACHMENT);
+        if (context == null) {
+            context = new ConjureServerRequestContext(exchange, requestArgHandler);
+            exchange.putAttachment(ATTACHMENT, context);
+        }
+        return context;
     }
 
     private static final class ConjureServerRequestContext implements RequestContext {

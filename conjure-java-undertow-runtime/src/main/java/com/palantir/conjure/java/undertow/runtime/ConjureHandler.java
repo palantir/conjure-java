@@ -240,6 +240,7 @@ public final class ConjureHandler implements HttpHandler {
                             // to provide user and trace information on exceptions.
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
                             endpoint -> Optional.of(new TracedStateHandler(endpoint.handler())),
+                            endpoint -> Optional.of(new EndpointRequestArgHandler(endpoint, runtime.contexts())),
                             endpoint -> Optional.of(
                                     new ConjureExceptionHandler(endpoint.handler(), runtime.exceptionHandler())))
                     .build()
