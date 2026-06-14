@@ -6,7 +6,7 @@ com.fasterxml.jackson.core:jackson-annotations:2.21 (24 constraints: 119bbc06)
 
 com.fasterxml.jackson.core:jackson-core:2.21.4 (23 constraints: ffd8e9fe)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.4 (34 constraints: 1992761c)
+com.fasterxml.jackson.core:jackson-databind:2.21.4 (34 constraints: 1f92be31)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.4 (4 constraints: 7c6cf9c0)
 
@@ -44,11 +44,11 @@ com.palantir.conjure:conjure-api-objects:4.57.0 (3 constraints: a827c123)
 
 com.palantir.conjure:conjure-generator-common:4.57.0 (2 constraints: 0b14fe83)
 
-com.palantir.conjure.java.api:errors:2.73.0 (10 constraints: 7fb95073)
+com.palantir.conjure.java.api:errors:2.74.0 (10 constraints: 81b92277)
 
-com.palantir.conjure.java.api:service-config:2.73.0 (6 constraints: 3e661adc)
+com.palantir.conjure.java.api:service-config:2.74.0 (6 constraints: 3f6632dd)
 
-com.palantir.conjure.java.api:ssl-config:2.73.0 (5 constraints: ba4fe82e)
+com.palantir.conjure.java.api:ssl-config:2.74.0 (5 constraints: bc4f6030)
 
 com.palantir.conjure.java.runtime:client-config:8.37.0 (6 constraints: c56bfe34)
 
@@ -86,15 +86,15 @@ com.palantir.refreshable:refreshable:2.13.0 (3 constraints: 2f340df7)
 
 com.palantir.ri:resource-identifier:2.19.0 (3 constraints: 6025364f)
 
-com.palantir.safe-logging:logger:3.16.0 (24 constraints: a8a97bcb)
+com.palantir.safe-logging:logger:3.16.0 (24 constraints: a9a9f5cf)
 
 com.palantir.safe-logging:logger-slf4j:3.16.0 (1 constraints: 350e9950)
 
 com.palantir.safe-logging:logger-spi:3.16.0 (2 constraints: 791e18b1)
 
-com.palantir.safe-logging:preconditions:3.16.0 (32 constraints: 992cf5f1)
+com.palantir.safe-logging:preconditions:3.16.0 (32 constraints: 9c2ce502)
 
-com.palantir.safe-logging:safe-logging:3.16.0 (29 constraints: 72ffbe83)
+com.palantir.safe-logging:safe-logging:3.16.0 (29 constraints: 74ff2e8e)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.9.0 (1 constraints: 3b0fbc76)
 
@@ -234,7 +234,7 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: c718909e)
 
 com.palantir.conjure:conjure-core:4.57.0 (1 constraints: 4205603b)
 
-com.palantir.conjure.java.api:test-utils:2.73.0 (1 constraints: 3e05503b)
+com.palantir.conjure.java.api:test-utils:2.74.0 (1 constraints: 3f05533b)
 
 com.palantir.conjure.java.runtime:conjure-java-annotations:8.37.0 (1 constraints: c818959e)
 
