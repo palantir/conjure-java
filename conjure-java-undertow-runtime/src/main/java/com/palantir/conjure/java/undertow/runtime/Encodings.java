@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.serialization.ObjectMappers.RecyclerPoolType;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -121,7 +122,12 @@ public final class Encodings {
 
     /** Returns a serializer for the Conjure JSON wire format. */
     public static Encoding json() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerObjectMapper())) {
+        return json(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    /** Returns a serializer for the Conjure JSON wire format using the given Jackson buffer recycler pool. */
+    public static Encoding json(RecyclerPoolType recyclerPool) {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerObjectMapper(recyclerPool))) {
             private static final String CONTENT_TYPE = "application/json";
 
             @Override
@@ -133,7 +139,12 @@ public final class Encodings {
 
     /** Returns a serializer for the Conjure CBOR wire format. */
     public static Encoding cbor() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newCborServerObjectMapper())) {
+        return cbor(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    /** Returns a serializer for the Conjure CBOR wire format using the given Jackson buffer recycler pool. */
+    public static Encoding cbor(RecyclerPoolType recyclerPool) {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newCborServerObjectMapper(recyclerPool))) {
             private static final String CONTENT_TYPE = "application/cbor";
 
             @Override
@@ -145,7 +156,12 @@ public final class Encodings {
 
     /** Returns a serializer for the Conjure Smile wire format. */
     public static Encoding smile() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newSmileServerObjectMapper())) {
+        return smile(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    /** Returns a serializer for the Conjure Smile wire format using the given Jackson buffer recycler pool. */
+    public static Encoding smile(RecyclerPoolType recyclerPool) {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newSmileServerObjectMapper(recyclerPool))) {
             private static final String CONTENT_TYPE = "application/x-jackson-smile";
 
             @Override
