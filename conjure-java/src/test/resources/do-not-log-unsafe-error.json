@@ -1,0 +1,22 @@
+{
+  "version" : 1,
+  "errors" : [ {
+    "errorName" : {
+      "name" : "DoNotLogAsUnsafe",
+      "package" : "com.palantir.test"
+    },
+    "namespace" : "Test",
+    "code" : "INVALID_ARGUMENT",
+    "safeArgs" : [ ],
+    "unsafeArgs" : [ {
+      "fieldName" : "token",
+      "type" : {
+        "type" : "primitive",
+        "primitive" : "BEARERTOKEN"
+      }
+    } ]
+  } ],
+  "types" : [ ],
+  "services" : [ ],
+  "extensions" : { }
+}

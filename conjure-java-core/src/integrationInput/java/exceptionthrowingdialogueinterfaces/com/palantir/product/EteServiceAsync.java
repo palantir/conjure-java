@@ -452,44 +452,14 @@ public interface EteServiceAsync {
             private final Deserializer<SimpleUnion> unionDeserializer = _runtime.bodySerDe()
                     .deserializer(createExceptionDeserializerArgs(new TypeMarker<SimpleUnion>() {}));
 
-            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
-                return ExceptionDeserializerArgs.<T>builder()
-                        .returnType(returnType)
-                        .exception(
-                                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                        .DIFFERENT_PACKAGE_ERROR
-                                        .name(),
-                                new TypeMarker<
-                                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                                .DifferentPackageErrorSerializableError>() {},
-                                new TypeMarker<
-                                        exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrors
-                                                .DifferentPackageErrorException>() {})
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {})
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_UNSAFE_ARG.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {})
-                        .exception(
-                                ConjureErrors.ERROR_WITH_COMPLEX_ARGS.name(),
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {})
-                        .exception(
-                                ConjureErrors.INVALID_SERVICE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {})
-                        .exception(
-                                ConjureErrors.INVALID_TYPE_DEFINITION.name(),
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {},
-                                new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {})
-                        .exception(
-                                ConjureJavaErrors.JAVA_COMPILATION_FAILED.name(),
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {},
-                                new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {})
-                        .build();
+            private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
+                ExceptionDeserializerArgs.Builder<T> builder =
+                        ExceptionDeserializerArgs.<T>builder().returnType(returnType);
+                exceptionthrowingdialogueinterfaces.com.palantir.another.ConjureErrorsTypeMarkers.registerExceptions(
+                        builder);
+                ConjureErrorsTypeMarkers.registerExceptions(builder);
+                ConjureJavaErrorsTypeMarkers.registerExceptions(builder);
+                return builder.build();
             }
 
             @Override

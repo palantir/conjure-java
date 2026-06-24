@@ -30,6 +30,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.Headers;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 public final class AuthTest {
@@ -138,6 +139,43 @@ public final class AuthTest {
 
         assertThatServiceExceptionThrownBy(() -> runtime.auth().header(exchange))
                 .hasType(error);
+    }
+
+    @Test
+    public void testJsonWebHandlerThrowsWhenAuthCookieSet() {
+        ErrorType error = ErrorType.create(ErrorType.Code.INTERNAL, "Foo:Bar");
+        UndertowRuntime runtime = ConjureUndertowRuntime.builder()
+                .jsonWebTokenHandler((_exchange, _token) -> {
+                    throw new ServiceException(error);
+                })
+                .build();
+
+        String cookieName = "Auth-Token";
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.setRequestCookie(new CookieImpl(cookieName, "token"));
+
+        assertThatServiceExceptionThrownBy(() -> runtime.auth().cookie(exchange, cookieName))
+                .hasType(error);
+    }
+
+    @Test
+    public void testMalformedCookieStillReportedWhenHandlerWouldThrow() {
+        ErrorType handlerError = ErrorType.create(ErrorType.Code.INTERNAL, "Foo:Bar");
+        AtomicBoolean handlerFired = new AtomicBoolean();
+        UndertowRuntime runtime = ConjureUndertowRuntime.builder()
+                .jsonWebTokenHandler((_exchange, _token) -> {
+                    handlerFired.set(true);
+                    throw new ServiceException(handlerError);
+                })
+                .build();
+
+        String cookieName = "Auth-Token";
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.setRequestCookie(new CookieImpl(cookieName, ""));
+
+        assertThatServiceExceptionThrownBy(() -> runtime.auth().cookie(exchange, cookieName))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
+        assertThat(handlerFired).isFalse();
     }
 
     private static final class TestJsonWebTokenHandler implements JsonWebTokenHandler {

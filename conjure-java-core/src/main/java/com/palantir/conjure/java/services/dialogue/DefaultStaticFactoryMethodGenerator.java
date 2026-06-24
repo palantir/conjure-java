@@ -15,7 +15,6 @@
  */
 package com.palantir.conjure.java.services.dialogue;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
@@ -68,6 +67,7 @@ import com.palantir.javapoet.TypeSpec;
 import com.palantir.javapoet.TypeVariableName;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -141,43 +141,38 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return method;
     }
 
-    private ClassName getClassNameInErrorsPackage(ErrorDefinition errorDef, String name) {
+    private ClassName getTypeMarkersClass(ErrorDefinition errorDef) {
         return ClassName.get(
                 Packages.getPrefixedPackage(errorDef.getErrorName().getPackage(), options.packagePrefix()),
-                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()),
-                name);
+                ErrorGenerationUtils.errorTypesClassName(errorDef.getNamespace()) + "TypeMarkers");
     }
 
     private MethodSpec createHelperToConstructExceptionDeserializerArgs() {
         TypeVariableName typeVariableT = TypeVariableName.get("T");
+        ParameterizedTypeName builderType =
+                ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.Builder.class), typeVariableT);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createExceptionDeserializerArgs")
                 .addTypeVariable(typeVariableT)
-                .addModifiers(Modifier.PRIVATE)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .returns(ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.class), typeVariableT))
                 .addParameter(ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeVariableT), "returnType");
 
-        CodeBlock.Builder exceptions = CodeBlock.builder()
-                .add("return $T.<$T>builder()", ExceptionDeserializerArgs.class, typeVariableT)
-                .add(".returnType(returnType)");
-        // Add exceptions from error definitions
-        for (ErrorDefinition errorDef : errorDefinitions) {
-            String errorName = errorDef.getErrorName().getName();
-            ClassName errorClass = getClassNameInErrorsPackage(
-                    errorDef, CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorName));
-            ClassName serializableErrorClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.serializableErrorClassName(errorName));
-            ClassName exceptionClass =
-                    getClassNameInErrorsPackage(errorDef, ErrorGenerationUtils.errorExceptionClassName(errorName));
-            exceptions.add(
-                    ".exception($T.name(), new $T<$T>() {}, new $T<$T>() {})",
-                    errorClass,
-                    TypeMarker.class,
-                    serializableErrorClass,
-                    TypeMarker.class,
-                    exceptionClass);
-        }
-        exceptions.add(".build();");
-        return methodBuilder.addCode(exceptions.build()).build();
+        CodeBlock.Builder code = CodeBlock.builder()
+                .addStatement(
+                        "$T builder = $T.<$T>builder().returnType(returnType)",
+                        builderType,
+                        ExceptionDeserializerArgs.class,
+                        typeVariableT);
+
+        // Deduplicate by TypeMarkers class (one per error namespace)
+        errorDefinitions.stream()
+                .map(this::getTypeMarkersClass)
+                .distinct()
+                .sorted(Comparator.comparing(ClassName::toString))
+                .forEach(typeMarkersClass -> code.addStatement("$T.registerExceptions(builder)", typeMarkersClass));
+
+        code.addStatement("return builder.build()");
+        return methodBuilder.addCode(code.build()).build();
     }
 
     private ClassName getClassName(ServiceDefinition def) {

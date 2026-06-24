@@ -113,42 +113,15 @@ public interface ErrorServiceBlocking {
                     .optionalInputStreamDeserializer(
                             createExceptionDeserializerArgs(new TypeMarker<Optional<InputStream>>() {}));
 
-            private <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
-                return ExceptionDeserializerArgs.<T>builder()
-                        .returnType(returnType)
-                        .exception(
-                                endpointerrors.com.palantir.another.EndpointSpecificErrors.DIFFERENT_PACKAGE.name(),
-                                new TypeMarker<
-                                        endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                                .DifferentPackageSerializableError>() {},
-                                new TypeMarker<
-                                        endpointerrors.com.palantir.another.EndpointSpecificErrors
-                                                .DifferentPackageException>() {})
-                        .exception(
-                                TestErrors.COMPLICATED_PARAMETERS.name(),
-                                new TypeMarker<TestErrors.ComplicatedParametersSerializableError>() {},
-                                new TypeMarker<TestErrors.ComplicatedParametersException>() {})
-                        .exception(
-                                ConjureErrors.CONFLICTING_CAUSE_SAFE_ARG_ERR.name(),
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrSerializableError>() {},
-                                new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrException>() {})
-                        .exception(
-                                EndpointSpecificTwoErrors.DIFFERENT_NAMESPACE.name(),
-                                new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceSerializableError>() {},
-                                new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceException>() {})
-                        .exception(
-                                EndpointSpecificErrors.ENDPOINT_ERROR.name(),
-                                new TypeMarker<EndpointSpecificErrors.EndpointErrorSerializableError>() {},
-                                new TypeMarker<EndpointSpecificErrors.EndpointErrorException>() {})
-                        .exception(
-                                TestErrors.INVALID_ARGUMENT.name(),
-                                new TypeMarker<TestErrors.InvalidArgumentSerializableError>() {},
-                                new TypeMarker<TestErrors.InvalidArgumentException>() {})
-                        .exception(
-                                TestErrors.NOT_FOUND.name(),
-                                new TypeMarker<TestErrors.NotFoundSerializableError>() {},
-                                new TypeMarker<TestErrors.NotFoundException>() {})
-                        .build();
+            private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
+                ExceptionDeserializerArgs.Builder<T> builder =
+                        ExceptionDeserializerArgs.<T>builder().returnType(returnType);
+                endpointerrors.com.palantir.another.EndpointSpecificErrorsTypeMarkers.registerExceptions(builder);
+                ConjureErrorsTypeMarkers.registerExceptions(builder);
+                EndpointSpecificErrorsTypeMarkers.registerExceptions(builder);
+                EndpointSpecificTwoErrorsTypeMarkers.registerExceptions(builder);
+                TestErrorsTypeMarkers.registerExceptions(builder);
+                return builder.build();
             }
 
             @Override

@@ -26,17 +26,13 @@ spotless {
     }
 }
 
-idea {
-    module {
-        sourceDirs += sourceSets.integrationInput.java.srcDirs
-    }
-}
 
 tasks.checkstyleIntegrationInput.enabled = false
 
 tasks.named('compileIntegrationInputJava', JavaCompile) {
     options.errorprone.disable 'IncubatingMethod'
     options.errorprone.disable 'DeprecatedApiUsage'
+    options.errorprone.disable 'DangerousToStringDoNotLog'
 }
 
 dependencies {
