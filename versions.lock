@@ -76,7 +76,7 @@ com.palantir.dialogue:dialogue-target:6.31.0 (7 constraints: 0c793fe2)
 
 com.palantir.goethe:goethe:0.24.0 (1 constraints: 3805333b)
 
-com.palantir.human-readable-types:human-readable-types:1.13.0 (1 constraints: 3705323b)
+com.palantir.human-readable-types:human-readable-types:1.14.0 (1 constraints: 3805353b)
 
 com.palantir.javapoet:javapoet:0.16.0 (2 constraints: 2f118cee)
 
@@ -92,7 +92,7 @@ com.palantir.safe-logging:logger-slf4j:3.16.0 (1 constraints: 350e9950)
 
 com.palantir.safe-logging:logger-spi:3.16.0 (2 constraints: 791e18b1)
 
-com.palantir.safe-logging:preconditions:3.16.0 (32 constraints: 9f2c100a)
+com.palantir.safe-logging:preconditions:3.16.0 (32 constraints: a02c660c)
 
 com.palantir.safe-logging:safe-logging:3.16.0 (29 constraints: 75ff8b91)
 
