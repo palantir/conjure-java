@@ -112,6 +112,7 @@ final class UnclosableOutputStreams {
         }
 
         @Override
+        @SuppressWarnings("deprecation") // No replacement exists in Undertow's BufferWritableOutputStream interface.
         public void transferFrom(FileChannel source) throws IOException {
             assertOpen();
             bufferWritable.transferFrom(source);
