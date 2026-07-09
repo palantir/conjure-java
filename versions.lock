@@ -22,6 +22,8 @@ com.fasterxml.jackson.datatype:jackson-datatype-joda:2.21.4 (1 constraints: 7f1c
 
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.4 (2 constraints: 362b02b0)
 
+com.fasterxml.jackson.module:jackson-module-blackbird:2.21.4 (2 constraints: 522b95b6)
+
 com.github.ben-manes.caffeine:caffeine:3.2.4 (10 constraints: 6aafbae9)
 
 com.google.auto:auto-common:1.2.2 (2 constraints: 1e175831)
@@ -50,29 +52,29 @@ com.palantir.conjure.java.api:service-config:2.74.0 (6 constraints: 44663edf)
 
 com.palantir.conjure.java.api:ssl-config:2.74.0 (5 constraints: bf4ffe30)
 
-com.palantir.conjure.java.runtime:client-config:8.38.0 (6 constraints: cc6b5839)
+com.palantir.conjure.java.runtime:client-config:8.38.0-13-g8946b5f.dirty (6 constraints: d17beb19)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.38.0 (1 constraints: 891cd4a4)
+com.palantir.conjure.java.runtime:conjure-java-jackson-optimizations:8.38.0-13-g8946b5f.dirty (1 constraints: e02197d1)
 
-com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.38.0 (4 constraints: 404a2226)
+com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.38.0-13-g8946b5f.dirty (4 constraints: 455a6bf1)
 
-com.palantir.conjure.java.runtime:keystores:8.38.0 (3 constraints: 262af560)
+com.palantir.conjure.java.runtime:keystores:8.38.0-13-g8946b5f.dirty (3 constraints: d434ae70)
 
 com.palantir.deadlines:deadlines:0.23.0 (2 constraints: 9d14d3ab)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.32.0 (2 constraints: 7529ed00)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.32.0 (2 constraints: 76292001)
 
 com.palantir.dialogue:dialogue-blocking-channels:6.32.0 (2 constraints: d52307b3)
 
 com.palantir.dialogue:dialogue-clients:6.32.0 (1 constraints: 3d05553b)
 
-com.palantir.dialogue:dialogue-core:6.32.0 (3 constraints: 733dfcde)
+com.palantir.dialogue:dialogue-core:6.32.0 (3 constraints: 743d69df)
 
 com.palantir.dialogue:dialogue-futures:6.32.0 (3 constraints: c833ebbc)
 
-com.palantir.dialogue:dialogue-serde:6.32.0 (3 constraints: b12ecca0)
+com.palantir.dialogue:dialogue-serde:6.32.0 (3 constraints: b22effa0)
 
-com.palantir.dialogue:dialogue-target:6.32.0 (7 constraints: 12796fe5)
+com.palantir.dialogue:dialogue-target:6.32.0 (7 constraints: 137971e6)
 
 com.palantir.goethe:goethe:0.24.0 (1 constraints: 3805333b)
 
@@ -100,7 +102,7 @@ com.palantir.safethreadlocalrandom:safe-thread-local-random:0.10.0 (1 constraint
 
 com.palantir.syntactic-paths:syntactic-paths:0.18.0 (2 constraints: fa137e82)
 
-com.palantir.tokens:auth-tokens:4.7.0 (5 constraints: 7953bc57)
+com.palantir.tokens:auth-tokens:4.7.0 (5 constraints: 7a531a58)
 
 com.palantir.tracing:tracing:6.36.0 (8 constraints: 887eb31f)
 
@@ -118,7 +120,7 @@ com.palantir.tritium:tritium-ids:0.128.0 (1 constraints: fe0f9aa6)
 
 com.palantir.tritium:tritium-metrics:0.132.0 (6 constraints: 76683d20)
 
-com.palantir.tritium:tritium-registry:0.132.0 (11 constraints: 34df6484)
+com.palantir.tritium:tritium-registry:0.134.0 (11 constraints: 40df549a)
 
 com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
@@ -214,8 +216,6 @@ com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.21.4 (1 cons
 
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.21.4 (3 constraints: 67226ef7)
 
-com.fasterxml.jackson.module:jackson-module-blackbird:2.21.4 (1 constraints: b80e705e)
-
 com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.21.4 (2 constraints: fd35a76d)
 
 com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.4 (1 constraints: b80e705e)
@@ -236,19 +236,19 @@ com.palantir.conjure:conjure-core:4.57.0 (1 constraints: 4205603b)
 
 com.palantir.conjure.java.api:test-utils:2.74.0 (1 constraints: 3f05533b)
 
-com.palantir.conjure.java.runtime:conjure-java-annotations:8.38.0 (1 constraints: c918989e)
+com.palantir.conjure.java.runtime:conjure-java-annotations:8.38.0-13-g8946b5f.dirty (1 constraints: 201edb87)
 
-com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:8.38.0 (1 constraints: 4505733b)
+com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:8.38.0-13-g8946b5f.dirty (1 constraints: 9c0a50c5)
 
-com.palantir.conjure.java.runtime:conjure-java-jersey-jakarta-server:8.38.0 (1 constraints: 4505733b)
+com.palantir.conjure.java.runtime:conjure-java-jersey-jakarta-server:8.38.0-13-g8946b5f.dirty (1 constraints: 9c0a50c5)
 
-com.palantir.conjure.java.runtime:conjure-java-legacy-clients:8.38.0 (2 constraints: 0d1e7d45)
+com.palantir.conjure.java.runtime:conjure-java-legacy-clients:8.38.0-13-g8946b5f.dirty (2 constraints: bb2814e8)
 
-com.palantir.conjure.java.runtime:refresh-utils:8.38.0 (1 constraints: c918989e)
+com.palantir.conjure.java.runtime:refresh-utils:8.38.0-13-g8946b5f.dirty (1 constraints: 201edb87)
 
 com.palantir.safe-logging:preconditions-assertj:3.16.0 (1 constraints: 3c05473b)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.36.0 (1 constraints: 511c9ca1)
+com.palantir.tracing:tracing-jersey-jakarta:6.36.0 (1 constraints: 521c9fa1)
 
 io.dropwizard:dropwizard-configuration:4.0.13 (2 constraints: 381c2dc1)
 

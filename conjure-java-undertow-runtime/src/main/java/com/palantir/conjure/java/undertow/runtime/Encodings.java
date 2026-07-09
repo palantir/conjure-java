@@ -121,7 +121,12 @@ public final class Encodings {
 
     /** Returns a serializer for the Conjure JSON wire format. */
     public static Encoding json() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerObjectMapper())) {
+        return json(false);
+    }
+
+    /** Like {@link #json()}, optionally enabling Jackson optimization modules (Blackbird) on the server mapper. */
+    public static Encoding json(boolean useOptimizations) {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerJsonMapper(useOptimizations))) {
             private static final String CONTENT_TYPE = "application/json";
 
             @Override
@@ -133,7 +138,12 @@ public final class Encodings {
 
     /** Returns a serializer for the Conjure CBOR wire format. */
     public static Encoding cbor() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newCborServerObjectMapper())) {
+        return cbor(false);
+    }
+
+    /** Like {@link #cbor()}, optionally enabling Jackson optimization modules (Blackbird) on the server mapper. */
+    public static Encoding cbor(boolean useOptimizations) {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerCborMapper(useOptimizations))) {
             private static final String CONTENT_TYPE = "application/cbor";
 
             @Override
@@ -145,7 +155,12 @@ public final class Encodings {
 
     /** Returns a serializer for the Conjure Smile wire format. */
     public static Encoding smile() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newSmileServerObjectMapper())) {
+        return smile(false);
+    }
+
+    /** Like {@link #smile()}, optionally enabling Jackson optimization modules (Blackbird) on the server mapper. */
+    public static Encoding smile(boolean useOptimizations) {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerSmileMapper(useOptimizations))) {
             private static final String CONTENT_TYPE = "application/x-jackson-smile";
 
             @Override
