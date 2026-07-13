@@ -81,7 +81,7 @@ public class WebSecurityHandlerTest {
         assertThat(connection.getHeaderField(HttpHeaders.X_CONTENT_TYPE_OPTIONS))
                 .isEqualTo("nosniff");
         assertThat(connection.getHeaderField(HttpHeaders.X_FRAME_OPTIONS)).isEqualTo("sameorigin");
-        assertThat(connection.getHeaderField(HttpHeaders.X_XSS_PROTECTION)).isEqualTo("1; mode=block");
+        assertThat(connection.getHeaderField(HttpHeaders.X_XSS_PROTECTION)).isEqualTo("0");
     }
 
     private static HttpURLConnection openConnectionToTestServer() {
