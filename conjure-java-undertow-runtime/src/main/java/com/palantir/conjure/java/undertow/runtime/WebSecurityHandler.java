@@ -44,7 +44,8 @@ final class WebSecurityHandler implements HttpHandler {
             "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';";
     private static final String CONTENT_TYPE_OPTIONS = "nosniff";
     private static final String FRAME_OPTIONS = "sameorigin";
-    private static final String XSS_PROTECTION = "1; mode=block";
+    // disable X-XSS-Protection per https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection
+    private static final String XSS_PROTECTION = "0";
 
     private static final String REFERRER_POLICY = "strict-origin-when-cross-origin";
 
