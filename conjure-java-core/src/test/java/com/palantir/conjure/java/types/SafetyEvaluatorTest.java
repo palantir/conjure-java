@@ -437,8 +437,7 @@ class SafetyEvaluatorTest {
         // Repeated evaluations on the same instance take the memoized path and must agree
         // with fresh evaluators.
         assertThat(shared.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
-        assertThat(shared.evaluate(secondObject))
-                .isEqualTo(new SafetyEvaluator(conjureDef).evaluate(secondObject));
+        assertThat(shared.evaluate(secondObject)).isEqualTo(new SafetyEvaluator(conjureDef).evaluate(secondObject));
     }
 
     @Test
