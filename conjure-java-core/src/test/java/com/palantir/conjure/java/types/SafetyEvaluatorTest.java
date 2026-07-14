@@ -408,4 +408,73 @@ class SafetyEvaluatorTest {
                 Arguments.of(Named.of("Alias", aliasType), conjureAliasDef),
                 Arguments.of(Named.of("Union", unionType), conjureUnionDef));
     }
+
+    @Test
+    void testSharedEvaluatorMatchesFreshEvaluations() {
+        TypeDefinition firstObject = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("bar"))
+                        .type(Type.reference(BAR))
+                        .build())
+                .build());
+        TypeDefinition secondObject = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(BAR)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("aliasRef"))
+                        .type(Type.reference(UNSAFE_ALIAS_NAME))
+                        .build())
+                .build());
+        ConjureDefinition conjureDef = ConjureDefinition.builder()
+                .version(1)
+                .types(firstObject)
+                .types(secondObject)
+                .types(UNSAFE_ALIAS)
+                .build();
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        SafetyEvaluator shared = new SafetyEvaluator(conjureDef);
+        assertThat(shared.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
+        // Repeated evaluations on the same instance take the memoized path and must agree
+        // with fresh evaluators.
+        assertThat(shared.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
+        assertThat(shared.evaluate(secondObject))
+                .isEqualTo(new SafetyEvaluator(conjureDef).evaluate(secondObject));
+    }
+
+    @Test
+    void testRecursiveTypeSubtreeIsNotMemoizedWithCycleSubstitution() {
+        // Foo <-> Bar cycle where only Foo carries unsafe data. While evaluating Foo, the
+        // cycle guard substitutes SAFE for the in-progress Foo reference, making Bar appear
+        // SAFE within that traversal. A later standalone evaluation of Bar on the same
+        // evaluator must still see through the cycle to Foo's unsafe field rather than
+        // reusing the substituted value.
+        TypeDefinition firstObject = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("bar"))
+                        .type(Type.reference(BAR))
+                        .build())
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("aliasRef"))
+                        .type(Type.reference(UNSAFE_ALIAS_NAME))
+                        .build())
+                .build());
+        TypeDefinition secondObject = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(BAR)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("foo"))
+                        .type(Type.reference(FOO))
+                        .build())
+                .build());
+        ConjureDefinition conjureDef = ConjureDefinition.builder()
+                .version(1)
+                .types(firstObject)
+                .types(secondObject)
+                .types(UNSAFE_ALIAS)
+                .build();
+        SafetyEvaluator shared = new SafetyEvaluator(conjureDef);
+        assertThat(shared.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
+        assertThat(shared.evaluate(secondObject)).hasValue(LogSafety.UNSAFE);
+        assertThat(shared.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
+    }
 }
