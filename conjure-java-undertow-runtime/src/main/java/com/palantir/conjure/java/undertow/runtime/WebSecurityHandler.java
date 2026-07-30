@@ -34,8 +34,6 @@ import io.undertow.util.HttpString;
  *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
  *   <dt>Frame Options
  *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
- *   <dt>XSS Protection
- *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
  * </dl>
  */
 final class WebSecurityHandler implements HttpHandler {
@@ -44,8 +42,6 @@ final class WebSecurityHandler implements HttpHandler {
             "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';";
     private static final String CONTENT_TYPE_OPTIONS = "nosniff";
     private static final String FRAME_OPTIONS = "sameorigin";
-    // disable X-XSS-Protection per https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-XSS-Protection
-    private static final String XSS_PROTECTION = "0";
 
     private static final String REFERRER_POLICY = "strict-origin-when-cross-origin";
 
@@ -67,7 +63,6 @@ final class WebSecurityHandler implements HttpHandler {
         headers.put(Headers.REFERRER_POLICY, REFERRER_POLICY);
         headers.put(Headers.X_CONTENT_TYPE_OPTIONS, CONTENT_TYPE_OPTIONS);
         headers.put(Headers.X_FRAME_OPTIONS, FRAME_OPTIONS);
-        headers.put(Headers.X_XSS_PROTECTION, XSS_PROTECTION);
         String userAgent = exchange.getRequestHeaders().getFirst(Headers.USER_AGENT);
         if (userAgent != null) {
             // send the CSP header so that IE10 and IE11 recognise it
