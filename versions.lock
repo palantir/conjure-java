@@ -2,7 +2,7 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.22 (25 constraints: 35b78e54)
+com.fasterxml.jackson.core:jackson-annotations:2.22 (25 constraints: 36b7e856)
 
 com.fasterxml.jackson.core:jackson-core:2.22.1 (23 constraints: e3d8739e)
 
@@ -76,7 +76,7 @@ com.palantir.dialogue:dialogue-target:6.35.0 (7 constraints: 257901f0)
 
 com.palantir.goethe:goethe:0.26.0 (1 constraints: 3a05393b)
 
-com.palantir.human-readable-types:human-readable-types:1.15.0 (1 constraints: 3905383b)
+com.palantir.human-readable-types:human-readable-types:1.16.0 (1 constraints: 3a053b3b)
 
 com.palantir.javapoet:javapoet:0.18.0 (2 constraints: 3211ddee)
 
