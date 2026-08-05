@@ -2,7 +2,7 @@
 
 com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
-com.fasterxml.jackson.core:jackson-annotations:2.22 (25 constraints: 3ab7b161)
+com.fasterxml.jackson.core:jackson-annotations:2.22 (25 constraints: 3bb7ac63)
 
 com.fasterxml.jackson.core:jackson-core:2.22.1 (23 constraints: ddd89795)
 
@@ -98,7 +98,7 @@ com.palantir.safe-logging:safe-logging:3.17.0 (29 constraints: 9affd8e9)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.12.0 (1 constraints: 650f0f86)
 
-com.palantir.syntactic-paths:syntactic-paths:0.19.0 (2 constraints: fb13ac82)
+com.palantir.syntactic-paths:syntactic-paths:0.20.0 (2 constraints: f3133d81)
 
 com.palantir.tokens:auth-tokens:4.8.0 (5 constraints: 7f53845a)
 
