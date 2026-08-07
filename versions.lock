@@ -86,15 +86,15 @@ com.palantir.refreshable:refreshable:2.16.0 (3 constraints: 3834c6f8)
 
 com.palantir.ri:resource-identifier:2.21.0 (3 constraints: 4b25264b)
 
-com.palantir.safe-logging:logger:3.17.0 (24 constraints: c9a9200c)
+com.palantir.safe-logging:logger:3.18.0 (24 constraints: caa9d010)
 
-com.palantir.safe-logging:logger-slf4j:3.17.0 (1 constraints: 360e9c50)
+com.palantir.safe-logging:logger-slf4j:3.18.0 (1 constraints: 370e9f50)
 
-com.palantir.safe-logging:logger-spi:3.17.0 (2 constraints: 7b1e4eb1)
+com.palantir.safe-logging:logger-spi:3.18.0 (2 constraints: 7d1e84b1)
 
-com.palantir.safe-logging:preconditions:3.17.0 (32 constraints: c82c7877)
+com.palantir.safe-logging:preconditions:3.18.0 (32 constraints: ca2c387f)
 
-com.palantir.safe-logging:safe-logging:3.17.0 (29 constraints: 9affd8e9)
+com.palantir.safe-logging:safe-logging:3.18.0 (29 constraints: 9fff11f5)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.12.0 (1 constraints: 650f0f86)
 
@@ -246,7 +246,7 @@ com.palantir.conjure.java.runtime:conjure-java-legacy-clients:8.40.0 (2 constrai
 
 com.palantir.conjure.java.runtime:refresh-utils:8.40.0 (1 constraints: c218849e)
 
-com.palantir.safe-logging:preconditions-assertj:3.17.0 (1 constraints: 3d054a3b)
+com.palantir.safe-logging:preconditions-assertj:3.18.0 (1 constraints: 3e054d3b)
 
 com.palantir.tracing:tracing-jersey-jakarta:6.38.0 (1 constraints: 541ca5a1)
 
