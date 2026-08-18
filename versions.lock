@@ -102,11 +102,11 @@ com.palantir.syntactic-paths:syntactic-paths:0.20.0 (2 constraints: f3133d81)
 
 com.palantir.tokens:auth-tokens:4.8.0 (5 constraints: 8153b85a)
 
-com.palantir.tracing:tracing:6.38.0 (8 constraints: 987ebd2a)
+com.palantir.tracing:tracing:6.40.0 (8 constraints: 837ead1f)
 
-com.palantir.tracing:tracing-api:6.38.0 (6 constraints: b0583733)
+com.palantir.tracing:tracing-api:6.40.0 (6 constraints: 94584b28)
 
-com.palantir.tracing:tracing-undertow:6.38.0 (1 constraints: 4305673b)
+com.palantir.tracing:tracing-undertow:6.40.0 (1 constraints: 3c05533b)
 
 com.palantir.tritium:tritium-api:0.136.0 (2 constraints: 951f85f4)
 
@@ -248,7 +248,7 @@ com.palantir.conjure.java.runtime:refresh-utils:8.40.0 (1 constraints: c218849e)
 
 com.palantir.safe-logging:preconditions-assertj:3.18.0 (1 constraints: 3e054d3b)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.38.0 (1 constraints: 541ca5a1)
+com.palantir.tracing:tracing-jersey-jakarta:6.40.0 (1 constraints: 541ca5a1)
 
 io.dropwizard:dropwizard-configuration:4.0.13 (2 constraints: 381c2dc1)
 
