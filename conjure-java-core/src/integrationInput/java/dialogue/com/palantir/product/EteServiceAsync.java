@@ -4,8 +4,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -35,7 +37,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteServiceAsync.Factory.class)
-public interface EteServiceAsync {
+public interface EteServiceAsync extends ConfigurableDialogueClient<EteServiceAsync> {
     /**
      * foo bar baz.
      *
@@ -780,6 +782,11 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(unionSerializer.serialize(value));
                 return _runtime.clients().call(unionChannel, _request.build(), unionDeserializer);
+            }
+
+            @Override
+            public EteServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return EteServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

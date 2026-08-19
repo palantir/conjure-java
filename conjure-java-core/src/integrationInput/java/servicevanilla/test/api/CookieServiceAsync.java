@@ -3,8 +3,10 @@ package servicevanilla.test.api;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -20,7 +22,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceAsync.Factory.class)
-public interface CookieServiceAsync {
+public interface CookieServiceAsync extends ConfigurableDialogueClient<CookieServiceAsync> {
     /** @apiNote {@code GET /cookies} */
     @ClientEndpoint(method = "GET", path = "/cookies")
     ListenableFuture<Void> eatCookies(BearerToken token);
@@ -41,6 +43,11 @@ public interface CookieServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
                 return _runtime.clients().call(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
+            }
+
+            @Override
+            public CookieServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return CookieServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

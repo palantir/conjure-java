@@ -3,8 +3,10 @@ package exceptionthrowingdialogueinterfaces.com.palantir.product;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -21,7 +23,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceAsync.Factory.class)
-public interface EmptyPathServiceAsync {
+public interface EmptyPathServiceAsync extends ConfigurableDialogueClient<EmptyPathServiceAsync> {
     /** @apiNote {@code GET /} */
     @ClientEndpoint(method = "GET", path = "/")
     ListenableFuture<Boolean> emptyPath();
@@ -56,6 +58,11 @@ public interface EmptyPathServiceAsync {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients().call(emptyPathChannel, _request.build(), emptyPathDeserializer);
+            }
+
+            @Override
+            public EmptyPathServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return EmptyPathServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

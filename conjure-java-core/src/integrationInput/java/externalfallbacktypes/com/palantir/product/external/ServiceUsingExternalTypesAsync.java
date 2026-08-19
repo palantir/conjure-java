@@ -3,8 +3,10 @@ package externalfallbacktypes.com.palantir.product.external;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -23,7 +25,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ServiceUsingExternalTypesAsync.Factory.class)
-public interface ServiceUsingExternalTypesAsync {
+public interface ServiceUsingExternalTypesAsync extends ConfigurableDialogueClient<ServiceUsingExternalTypesAsync> {
     /** @apiNote {@code PUT /external/{path}} */
     @ClientEndpoint(method = "PUT", path = "/external/{path}")
     ListenableFuture<Map<String, String>> external(@Safe String path, @Safe List<String> body);
@@ -48,6 +50,11 @@ public interface ServiceUsingExternalTypesAsync {
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
                 _request.body(externalSerializer.serialize(body));
                 return _runtime.clients().call(externalChannel, _request.build(), externalDeserializer);
+            }
+
+            @Override
+            public ServiceUsingExternalTypesAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return ServiceUsingExternalTypesAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

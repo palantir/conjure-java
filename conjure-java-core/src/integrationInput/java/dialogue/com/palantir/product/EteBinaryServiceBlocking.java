@@ -4,7 +4,9 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -21,7 +23,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteBinaryServiceBlocking.Factory.class)
-public interface EteBinaryServiceBlocking {
+public interface EteBinaryServiceBlocking extends ConfigurableDialogueClient<EteBinaryServiceBlocking> {
     /** @apiNote {@code POST /binary} */
     @ClientEndpoint(method = "POST", path = "/binary")
     @MustBeClosed
@@ -145,6 +147,11 @@ public interface EteBinaryServiceBlocking {
                                 getAliasedChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().optionalInputStreamDeserializer());
+            }
+
+            @Override
+            public EteBinaryServiceBlocking withDialogueCallOptions(DialogueCallOptions options) {
+                return EteBinaryServiceBlocking.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

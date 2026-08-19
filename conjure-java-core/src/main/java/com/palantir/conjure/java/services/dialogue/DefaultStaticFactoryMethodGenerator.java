@@ -74,6 +74,8 @@ import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
 public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryMethodGenerator {
+    private static final ClassName DIALOGUE_CALL_OPTIONS =
+            ClassName.get("com.palantir.dialogue", "DialogueCallOptions");
     private static final String REQUEST = "_request";
     private static final String PLAIN_SER_DE = "_plainSerDe";
 
@@ -125,6 +127,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             impl.addMethod(clientImpl(endpoint));
         });
 
+        impl.addMethod(configurableClientMethod(className));
+
         impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
 
         String javadoc = methodType.switchBy(
@@ -139,6 +143,20 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return method;
+    }
+
+    private static MethodSpec configurableClientMethod(ClassName className) {
+        return MethodSpec.methodBuilder("withDialogueCallOptions")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(className)
+                .addParameter(DIALOGUE_CALL_OPTIONS, "options")
+                .addStatement(
+                        "return $T.of(options.decorate($L), $L)",
+                        className,
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
+                        StaticFactoryMethodGenerator.RUNTIME)
+                .build();
     }
 
     private ClassName getTypeMarkersClass(ErrorDefinition errorDef) {

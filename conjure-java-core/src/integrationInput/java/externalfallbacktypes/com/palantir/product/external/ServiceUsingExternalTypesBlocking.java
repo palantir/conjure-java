@@ -2,8 +2,10 @@ package externalfallbacktypes.com.palantir.product.external;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -22,7 +24,8 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ServiceUsingExternalTypesBlocking.Factory.class)
-public interface ServiceUsingExternalTypesBlocking {
+public interface ServiceUsingExternalTypesBlocking
+        extends ConfigurableDialogueClient<ServiceUsingExternalTypesBlocking> {
     /** @apiNote {@code PUT /external/{path}} */
     @ClientEndpoint(method = "PUT", path = "/external/{path}")
     Map<String, String> external(@Safe String path, @Safe List<String> body);
@@ -48,6 +51,11 @@ public interface ServiceUsingExternalTypesBlocking {
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
                 _request.body(externalSerializer.serialize(body));
                 return _runtime.clients().callBlocking(externalChannel, _request.build(), externalDeserializer);
+            }
+
+            @Override
+            public ServiceUsingExternalTypesBlocking withDialogueCallOptions(DialogueCallOptions options) {
+                return ServiceUsingExternalTypesBlocking.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

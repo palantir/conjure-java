@@ -4,8 +4,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -27,7 +29,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ErrorServiceAsync.Factory.class)
-public interface ErrorServiceAsync {
+public interface ErrorServiceAsync extends ConfigurableDialogueClient<ErrorServiceAsync> {
     /** @apiNote {@code POST /errors/basic} */
     @ClientEndpoint(method = "POST", path = "/errors/basic")
     ListenableFuture<String> testBasicError(AuthHeader authHeader, boolean shouldThrowError);
@@ -207,6 +209,11 @@ public interface ErrorServiceAsync {
                 }
                 return _runtime.clients()
                         .call(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
+            }
+
+            @Override
+            public ErrorServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return ErrorServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

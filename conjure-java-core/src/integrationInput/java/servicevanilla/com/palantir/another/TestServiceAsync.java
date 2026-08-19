@@ -5,8 +5,10 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -43,7 +45,7 @@ import servicevanilla.com.palantir.product.datasets.Dataset;
 /** A Markdown description of the service. */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(TestServiceAsync.Factory.class)
-public interface TestServiceAsync {
+public interface TestServiceAsync extends ConfigurableDialogueClient<TestServiceAsync> {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      *
@@ -576,6 +578,11 @@ public interface TestServiceAsync {
                     _request.putQueryParams("strings", _plainSerDe.serializeString(stringsElement.get()));
                 }
                 return _runtime.clients().call(getForStringsChannel, _request.build(), getForStringsDeserializer);
+            }
+
+            @Override
+            public TestServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return TestServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

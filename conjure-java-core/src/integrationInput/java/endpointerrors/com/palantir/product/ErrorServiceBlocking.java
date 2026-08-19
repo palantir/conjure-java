@@ -4,8 +4,10 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -27,7 +29,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(ErrorServiceBlocking.Factory.class)
-public interface ErrorServiceBlocking {
+public interface ErrorServiceBlocking extends ConfigurableDialogueClient<ErrorServiceBlocking> {
     /** @apiNote {@code POST /errors/basic} */
     @ClientEndpoint(method = "POST", path = "/errors/basic")
     String testBasicError(AuthHeader authHeader, boolean shouldThrowError);
@@ -207,6 +209,11 @@ public interface ErrorServiceBlocking {
                 }
                 return _runtime.clients()
                         .callBlocking(testOptionalBinaryChannel, _request.build(), testOptionalBinaryDeserializer);
+            }
+
+            @Override
+            public ErrorServiceBlocking withDialogueCallOptions(DialogueCallOptions options) {
+                return ErrorServiceBlocking.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

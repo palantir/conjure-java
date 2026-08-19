@@ -4,8 +4,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -24,7 +26,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteBinaryServiceAsync.Factory.class)
-public interface EteBinaryServiceAsync {
+public interface EteBinaryServiceAsync extends ConfigurableDialogueClient<EteBinaryServiceAsync> {
     /** @apiNote {@code POST /binary} */
     @ClientEndpoint(method = "POST", path = "/binary")
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
@@ -187,6 +189,11 @@ public interface EteBinaryServiceAsync {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients().call(getAliasedChannel, _request.build(), getAliasedDeserializer);
+            }
+
+            @Override
+            public EteBinaryServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return EteBinaryServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

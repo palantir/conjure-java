@@ -2,8 +2,10 @@ package exceptionthrowingdialogueinterfaces.test.api;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -23,7 +25,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceBlocking.Factory.class)
-public interface CookieServiceBlocking {
+public interface CookieServiceBlocking extends ConfigurableDialogueClient<CookieServiceBlocking> {
     /** @apiNote {@code GET /cookies} */
     @ClientEndpoint(method = "GET", path = "/cookies")
     void eatCookies(BearerToken token);
@@ -59,6 +61,11 @@ public interface CookieServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
+            }
+
+            @Override
+            public CookieServiceBlocking withDialogueCallOptions(DialogueCallOptions options) {
+                return CookieServiceBlocking.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

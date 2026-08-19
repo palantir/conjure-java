@@ -1,7 +1,9 @@
 package servicevanilla.com.palantir.another;
 
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -15,11 +17,16 @@ import javax.annotation.processing.Generated;
 /** This service has no endpoints. */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(TestEmptyServiceAsync.Factory.class)
-public interface TestEmptyServiceAsync {
+public interface TestEmptyServiceAsync extends ConfigurableDialogueClient<TestEmptyServiceAsync> {
     /** Creates an asynchronous/non-blocking client for a TestEmptyService service. */
     static TestEmptyServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestEmptyServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            @Override
+            public TestEmptyServiceAsync withDialogueCallOptions(DialogueCallOptions options) {
+                return TestEmptyServiceAsync.of(options.decorate(_endpointChannelFactory), _runtime);
+            }
 
             @Override
             public String toString() {

@@ -66,6 +66,11 @@ public final class DialogueServiceGeneratorTests extends TestBase {
 
         // Generated files contain imports
         assertThat(compiledFileContent(src, "test/api/with/imports/ImportServiceBlocking.java"))
+                .contains("import com.palantir.dialogue.ConfigurableDialogueClient;")
+                .contains("import com.palantir.dialogue.DialogueCallOptions;")
+                .contains("ConfigurableDialogueClient<ImportServiceBlocking>")
+                .contains("withDialogueCallOptions(DialogueCallOptions options)")
+                .contains("options.decorate(_endpointChannelFactory)")
                 .contains("import com.palantir.product.StringExample;");
     }
 

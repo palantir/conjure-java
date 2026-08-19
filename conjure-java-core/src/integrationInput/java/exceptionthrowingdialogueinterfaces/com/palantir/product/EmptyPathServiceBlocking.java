@@ -2,8 +2,10 @@ package exceptionthrowingdialogueinterfaces.com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConfigurableDialogueClient;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueCallOptions;
 import com.palantir.dialogue.DialogueService;
 import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
@@ -20,7 +22,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceBlocking.Factory.class)
-public interface EmptyPathServiceBlocking {
+public interface EmptyPathServiceBlocking extends ConfigurableDialogueClient<EmptyPathServiceBlocking> {
     /** @apiNote {@code GET /} */
     @ClientEndpoint(method = "GET", path = "/")
     boolean emptyPath();
@@ -55,6 +57,11 @@ public interface EmptyPathServiceBlocking {
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients().callBlocking(emptyPathChannel, _request.build(), emptyPathDeserializer);
+            }
+
+            @Override
+            public EmptyPathServiceBlocking withDialogueCallOptions(DialogueCallOptions options) {
+                return EmptyPathServiceBlocking.of(options.decorate(_endpointChannelFactory), _runtime);
             }
 
             @Override

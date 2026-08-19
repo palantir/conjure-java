@@ -56,6 +56,8 @@ import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.Strings;
 
 public final class DialogueInterfaceGenerator {
+    private static final ClassName CONFIGURABLE_DIALOGUE_CLIENT =
+            ClassName.get("com.palantir.dialogue", "ConfigurableDialogueClient");
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
@@ -83,6 +85,7 @@ public final class DialogueInterfaceGenerator {
             StaticFactoryMethodGenerator methodGenerator) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
+                .addSuperinterface(ParameterizedTypeName.get(CONFIGURABLE_DIALOGUE_CLIENT, className))
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class))
                 .addAnnotation(AnnotationSpec.builder(DialogueService.class)
                         .addMember("value", "$T.Factory.class", className)
