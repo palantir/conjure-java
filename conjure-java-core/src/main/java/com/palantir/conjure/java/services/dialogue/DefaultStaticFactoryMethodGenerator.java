@@ -144,6 +144,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build();
     }
 
+    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private SerDeFieldsContext collectSerDeFields(ServiceDefinition def, boolean isErrorRespecting) {
         Map<TypeName, String> fieldBaseNames = new HashMap<>();
         Map<TypeName, String> typeMarkerFields = new LinkedHashMap<>();
