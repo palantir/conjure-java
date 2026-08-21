@@ -140,6 +140,7 @@ public final class ComplexExample {
     public static final class Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "metadata", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         private Map<StringAliasEx, Optional<List<ObjectReference>>> metadata = new LinkedHashMap<>();
 
         private EnumExample status;
@@ -159,7 +160,6 @@ public final class ComplexExample {
             return this;
         }
 
-        @JsonSetter(value = "metadata", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder metadata(@Nonnull Map<StringAliasEx, Optional<List<ObjectReference>>> metadata) {
             checkNotBuilt();
             this.metadata = new LinkedHashMap<>(Preconditions.checkNotNull(metadata, "metadata cannot be null"));

@@ -206,6 +206,7 @@ public final class StrictFourFields {
 
         private Optional<String> optionalItem = Optional.empty();
 
+        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private DefaultBuilder() {}
@@ -252,7 +253,6 @@ public final class StrictFourFields {
         }
 
         @Override
-        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));

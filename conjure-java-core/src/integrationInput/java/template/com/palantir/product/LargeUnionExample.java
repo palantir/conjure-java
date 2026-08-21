@@ -6,13 +6,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.util.JsonParserSequence;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +30,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@JsonDeserialize(using = LargeUnionExample.Deserializer.class)
 public final class LargeUnionExample {
     private final Base value;
 
@@ -977,121 +987,12 @@ public final class LargeUnionExample {
         T visitUnknown(@Safe String unknownType);
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes({
-        @JsonSubTypes.Type(U0Wrapper.class),
-        @JsonSubTypes.Type(U1Wrapper.class),
-        @JsonSubTypes.Type(U2Wrapper.class),
-        @JsonSubTypes.Type(U3Wrapper.class),
-        @JsonSubTypes.Type(U4Wrapper.class),
-        @JsonSubTypes.Type(U5Wrapper.class),
-        @JsonSubTypes.Type(U6Wrapper.class),
-        @JsonSubTypes.Type(U7Wrapper.class),
-        @JsonSubTypes.Type(U8Wrapper.class),
-        @JsonSubTypes.Type(U9Wrapper.class),
-        @JsonSubTypes.Type(U10Wrapper.class),
-        @JsonSubTypes.Type(U11Wrapper.class),
-        @JsonSubTypes.Type(U12Wrapper.class),
-        @JsonSubTypes.Type(U13Wrapper.class),
-        @JsonSubTypes.Type(U14Wrapper.class),
-        @JsonSubTypes.Type(U15Wrapper.class),
-        @JsonSubTypes.Type(U16Wrapper.class),
-        @JsonSubTypes.Type(U17Wrapper.class),
-        @JsonSubTypes.Type(U18Wrapper.class),
-        @JsonSubTypes.Type(U19Wrapper.class),
-        @JsonSubTypes.Type(U20Wrapper.class),
-        @JsonSubTypes.Type(U21Wrapper.class),
-        @JsonSubTypes.Type(U22Wrapper.class),
-        @JsonSubTypes.Type(U23Wrapper.class),
-        @JsonSubTypes.Type(U24Wrapper.class),
-        @JsonSubTypes.Type(U25Wrapper.class),
-        @JsonSubTypes.Type(U26Wrapper.class),
-        @JsonSubTypes.Type(U27Wrapper.class),
-        @JsonSubTypes.Type(U28Wrapper.class),
-        @JsonSubTypes.Type(U29Wrapper.class),
-        @JsonSubTypes.Type(U30Wrapper.class),
-        @JsonSubTypes.Type(U31Wrapper.class),
-        @JsonSubTypes.Type(U32Wrapper.class),
-        @JsonSubTypes.Type(U33Wrapper.class),
-        @JsonSubTypes.Type(U34Wrapper.class),
-        @JsonSubTypes.Type(U35Wrapper.class),
-        @JsonSubTypes.Type(U36Wrapper.class),
-        @JsonSubTypes.Type(U37Wrapper.class),
-        @JsonSubTypes.Type(U38Wrapper.class),
-        @JsonSubTypes.Type(U39Wrapper.class),
-        @JsonSubTypes.Type(U40Wrapper.class),
-        @JsonSubTypes.Type(U41Wrapper.class),
-        @JsonSubTypes.Type(U42Wrapper.class),
-        @JsonSubTypes.Type(U43Wrapper.class),
-        @JsonSubTypes.Type(U44Wrapper.class),
-        @JsonSubTypes.Type(U45Wrapper.class),
-        @JsonSubTypes.Type(U46Wrapper.class),
-        @JsonSubTypes.Type(U47Wrapper.class),
-        @JsonSubTypes.Type(U48Wrapper.class),
-        @JsonSubTypes.Type(U49Wrapper.class),
-        @JsonSubTypes.Type(U50Wrapper.class),
-        @JsonSubTypes.Type(U51Wrapper.class),
-        @JsonSubTypes.Type(U52Wrapper.class),
-        @JsonSubTypes.Type(U53Wrapper.class),
-        @JsonSubTypes.Type(U54Wrapper.class),
-        @JsonSubTypes.Type(U55Wrapper.class),
-        @JsonSubTypes.Type(U56Wrapper.class),
-        @JsonSubTypes.Type(U57Wrapper.class),
-        @JsonSubTypes.Type(U58Wrapper.class),
-        @JsonSubTypes.Type(U59Wrapper.class),
-        @JsonSubTypes.Type(U60Wrapper.class),
-        @JsonSubTypes.Type(U61Wrapper.class),
-        @JsonSubTypes.Type(U62Wrapper.class),
-        @JsonSubTypes.Type(U63Wrapper.class),
-        @JsonSubTypes.Type(U64Wrapper.class),
-        @JsonSubTypes.Type(U65Wrapper.class),
-        @JsonSubTypes.Type(U66Wrapper.class),
-        @JsonSubTypes.Type(U67Wrapper.class),
-        @JsonSubTypes.Type(U68Wrapper.class),
-        @JsonSubTypes.Type(U69Wrapper.class),
-        @JsonSubTypes.Type(U70Wrapper.class),
-        @JsonSubTypes.Type(U71Wrapper.class),
-        @JsonSubTypes.Type(U72Wrapper.class),
-        @JsonSubTypes.Type(U73Wrapper.class),
-        @JsonSubTypes.Type(U74Wrapper.class),
-        @JsonSubTypes.Type(U75Wrapper.class),
-        @JsonSubTypes.Type(U76Wrapper.class),
-        @JsonSubTypes.Type(U77Wrapper.class),
-        @JsonSubTypes.Type(U78Wrapper.class),
-        @JsonSubTypes.Type(U79Wrapper.class),
-        @JsonSubTypes.Type(U80Wrapper.class),
-        @JsonSubTypes.Type(U81Wrapper.class),
-        @JsonSubTypes.Type(U82Wrapper.class),
-        @JsonSubTypes.Type(U83Wrapper.class),
-        @JsonSubTypes.Type(U84Wrapper.class),
-        @JsonSubTypes.Type(U85Wrapper.class),
-        @JsonSubTypes.Type(U86Wrapper.class),
-        @JsonSubTypes.Type(U87Wrapper.class),
-        @JsonSubTypes.Type(U88Wrapper.class),
-        @JsonSubTypes.Type(U89Wrapper.class),
-        @JsonSubTypes.Type(U90Wrapper.class),
-        @JsonSubTypes.Type(U91Wrapper.class),
-        @JsonSubTypes.Type(U92Wrapper.class),
-        @JsonSubTypes.Type(U93Wrapper.class),
-        @JsonSubTypes.Type(U94Wrapper.class),
-        @JsonSubTypes.Type(U95Wrapper.class),
-        @JsonSubTypes.Type(U96Wrapper.class),
-        @JsonSubTypes.Type(U97Wrapper.class),
-        @JsonSubTypes.Type(U98Wrapper.class),
-        @JsonSubTypes.Type(U99Wrapper.class),
-        @JsonSubTypes.Type(U100Wrapper.class)
-    })
-    @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
     }
 
     @JsonTypeName("u0")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U0Wrapper implements Base {
         private final String value;
 
@@ -1137,6 +1038,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u1")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U1Wrapper implements Base {
         private final String value;
 
@@ -1182,6 +1084,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u2")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U2Wrapper implements Base {
         private final String value;
 
@@ -1227,6 +1130,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u3")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U3Wrapper implements Base {
         private final String value;
 
@@ -1272,6 +1176,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u4")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U4Wrapper implements Base {
         private final String value;
 
@@ -1317,6 +1222,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u5")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U5Wrapper implements Base {
         private final String value;
 
@@ -1362,6 +1268,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u6")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U6Wrapper implements Base {
         private final String value;
 
@@ -1407,6 +1314,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u7")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U7Wrapper implements Base {
         private final String value;
 
@@ -1452,6 +1360,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u8")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U8Wrapper implements Base {
         private final String value;
 
@@ -1497,6 +1406,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u9")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U9Wrapper implements Base {
         private final String value;
 
@@ -1542,6 +1452,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u10")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U10Wrapper implements Base {
         private final String value;
 
@@ -1587,6 +1498,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u11")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U11Wrapper implements Base {
         private final String value;
 
@@ -1632,6 +1544,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u12")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U12Wrapper implements Base {
         private final String value;
 
@@ -1677,6 +1590,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u13")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U13Wrapper implements Base {
         private final String value;
 
@@ -1722,6 +1636,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u14")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U14Wrapper implements Base {
         private final String value;
 
@@ -1767,6 +1682,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u15")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U15Wrapper implements Base {
         private final String value;
 
@@ -1812,6 +1728,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u16")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U16Wrapper implements Base {
         private final String value;
 
@@ -1857,6 +1774,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u17")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U17Wrapper implements Base {
         private final String value;
 
@@ -1902,6 +1820,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u18")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U18Wrapper implements Base {
         private final String value;
 
@@ -1947,6 +1866,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u19")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U19Wrapper implements Base {
         private final String value;
 
@@ -1992,6 +1912,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u20")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U20Wrapper implements Base {
         private final String value;
 
@@ -2037,6 +1958,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u21")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U21Wrapper implements Base {
         private final String value;
 
@@ -2082,6 +2004,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u22")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U22Wrapper implements Base {
         private final String value;
 
@@ -2127,6 +2050,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u23")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U23Wrapper implements Base {
         private final String value;
 
@@ -2172,6 +2096,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u24")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U24Wrapper implements Base {
         private final String value;
 
@@ -2217,6 +2142,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u25")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U25Wrapper implements Base {
         private final String value;
 
@@ -2262,6 +2188,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u26")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U26Wrapper implements Base {
         private final String value;
 
@@ -2307,6 +2234,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u27")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U27Wrapper implements Base {
         private final String value;
 
@@ -2352,6 +2280,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u28")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U28Wrapper implements Base {
         private final String value;
 
@@ -2397,6 +2326,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u29")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U29Wrapper implements Base {
         private final String value;
 
@@ -2442,6 +2372,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u30")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U30Wrapper implements Base {
         private final String value;
 
@@ -2487,6 +2418,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u31")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U31Wrapper implements Base {
         private final String value;
 
@@ -2532,6 +2464,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u32")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U32Wrapper implements Base {
         private final String value;
 
@@ -2577,6 +2510,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u33")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U33Wrapper implements Base {
         private final String value;
 
@@ -2622,6 +2556,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u34")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U34Wrapper implements Base {
         private final String value;
 
@@ -2667,6 +2602,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u35")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U35Wrapper implements Base {
         private final String value;
 
@@ -2712,6 +2648,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u36")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U36Wrapper implements Base {
         private final String value;
 
@@ -2757,6 +2694,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u37")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U37Wrapper implements Base {
         private final String value;
 
@@ -2802,6 +2740,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u38")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U38Wrapper implements Base {
         private final String value;
 
@@ -2847,6 +2786,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u39")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U39Wrapper implements Base {
         private final String value;
 
@@ -2892,6 +2832,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u40")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U40Wrapper implements Base {
         private final String value;
 
@@ -2937,6 +2878,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u41")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U41Wrapper implements Base {
         private final String value;
 
@@ -2982,6 +2924,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u42")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U42Wrapper implements Base {
         private final String value;
 
@@ -3027,6 +2970,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u43")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U43Wrapper implements Base {
         private final String value;
 
@@ -3072,6 +3016,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u44")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U44Wrapper implements Base {
         private final String value;
 
@@ -3117,6 +3062,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u45")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U45Wrapper implements Base {
         private final String value;
 
@@ -3162,6 +3108,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u46")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U46Wrapper implements Base {
         private final String value;
 
@@ -3207,6 +3154,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u47")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U47Wrapper implements Base {
         private final String value;
 
@@ -3252,6 +3200,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u48")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U48Wrapper implements Base {
         private final String value;
 
@@ -3297,6 +3246,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u49")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U49Wrapper implements Base {
         private final String value;
 
@@ -3342,6 +3292,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u50")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U50Wrapper implements Base {
         private final String value;
 
@@ -3387,6 +3338,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u51")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U51Wrapper implements Base {
         private final String value;
 
@@ -3432,6 +3384,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u52")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U52Wrapper implements Base {
         private final String value;
 
@@ -3477,6 +3430,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u53")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U53Wrapper implements Base {
         private final String value;
 
@@ -3522,6 +3476,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u54")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U54Wrapper implements Base {
         private final String value;
 
@@ -3567,6 +3522,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u55")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U55Wrapper implements Base {
         private final String value;
 
@@ -3612,6 +3568,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u56")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U56Wrapper implements Base {
         private final String value;
 
@@ -3657,6 +3614,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u57")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U57Wrapper implements Base {
         private final String value;
 
@@ -3702,6 +3660,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u58")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U58Wrapper implements Base {
         private final String value;
 
@@ -3747,6 +3706,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u59")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U59Wrapper implements Base {
         private final String value;
 
@@ -3792,6 +3752,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u60")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U60Wrapper implements Base {
         private final String value;
 
@@ -3837,6 +3798,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u61")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U61Wrapper implements Base {
         private final String value;
 
@@ -3882,6 +3844,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u62")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U62Wrapper implements Base {
         private final String value;
 
@@ -3927,6 +3890,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u63")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U63Wrapper implements Base {
         private final String value;
 
@@ -3972,6 +3936,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u64")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U64Wrapper implements Base {
         private final String value;
 
@@ -4017,6 +3982,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u65")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U65Wrapper implements Base {
         private final String value;
 
@@ -4062,6 +4028,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u66")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U66Wrapper implements Base {
         private final String value;
 
@@ -4107,6 +4074,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u67")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U67Wrapper implements Base {
         private final String value;
 
@@ -4152,6 +4120,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u68")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U68Wrapper implements Base {
         private final String value;
 
@@ -4197,6 +4166,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u69")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U69Wrapper implements Base {
         private final String value;
 
@@ -4242,6 +4212,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u70")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U70Wrapper implements Base {
         private final String value;
 
@@ -4287,6 +4258,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u71")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U71Wrapper implements Base {
         private final String value;
 
@@ -4332,6 +4304,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u72")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U72Wrapper implements Base {
         private final String value;
 
@@ -4377,6 +4350,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u73")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U73Wrapper implements Base {
         private final String value;
 
@@ -4422,6 +4396,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u74")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U74Wrapper implements Base {
         private final String value;
 
@@ -4467,6 +4442,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u75")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U75Wrapper implements Base {
         private final String value;
 
@@ -4512,6 +4488,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u76")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U76Wrapper implements Base {
         private final String value;
 
@@ -4557,6 +4534,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u77")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U77Wrapper implements Base {
         private final String value;
 
@@ -4602,6 +4580,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u78")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U78Wrapper implements Base {
         private final String value;
 
@@ -4647,6 +4626,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u79")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U79Wrapper implements Base {
         private final String value;
 
@@ -4692,6 +4672,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u80")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U80Wrapper implements Base {
         private final String value;
 
@@ -4737,6 +4718,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u81")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U81Wrapper implements Base {
         private final String value;
 
@@ -4782,6 +4764,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u82")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U82Wrapper implements Base {
         private final String value;
 
@@ -4827,6 +4810,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u83")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U83Wrapper implements Base {
         private final String value;
 
@@ -4872,6 +4856,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u84")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U84Wrapper implements Base {
         private final String value;
 
@@ -4917,6 +4902,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u85")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U85Wrapper implements Base {
         private final String value;
 
@@ -4962,6 +4948,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u86")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U86Wrapper implements Base {
         private final String value;
 
@@ -5007,6 +4994,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u87")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U87Wrapper implements Base {
         private final String value;
 
@@ -5052,6 +5040,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u88")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U88Wrapper implements Base {
         private final String value;
 
@@ -5097,6 +5086,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u89")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U89Wrapper implements Base {
         private final String value;
 
@@ -5142,6 +5132,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u90")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U90Wrapper implements Base {
         private final String value;
 
@@ -5187,6 +5178,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u91")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U91Wrapper implements Base {
         private final String value;
 
@@ -5232,6 +5224,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u92")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U92Wrapper implements Base {
         private final String value;
 
@@ -5277,6 +5270,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u93")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U93Wrapper implements Base {
         private final String value;
 
@@ -5322,6 +5316,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u94")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U94Wrapper implements Base {
         private final String value;
 
@@ -5367,6 +5362,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u95")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U95Wrapper implements Base {
         private final String value;
 
@@ -5412,6 +5408,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u96")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U96Wrapper implements Base {
         private final String value;
 
@@ -5457,6 +5454,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u97")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U97Wrapper implements Base {
         private final String value;
 
@@ -5502,6 +5500,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u98")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U98Wrapper implements Base {
         private final String value;
 
@@ -5547,6 +5546,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u99")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U99Wrapper implements Base {
         private final String value;
 
@@ -5592,6 +5592,7 @@ public final class LargeUnionExample {
     }
 
     @JsonTypeName("u100")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static final class U100Wrapper implements Base {
         private final String value;
 
@@ -5693,6 +5694,331 @@ public final class LargeUnionExample {
         @Override
         public String toString() {
             return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+        }
+    }
+
+    static final class Deserializer extends JsonDeserializer<LargeUnionExample> implements ResolvableDeserializer {
+        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {
+            U0Wrapper.class,
+            U1Wrapper.class,
+            U2Wrapper.class,
+            U3Wrapper.class,
+            U4Wrapper.class,
+            U5Wrapper.class,
+            U6Wrapper.class,
+            U7Wrapper.class,
+            U8Wrapper.class,
+            U9Wrapper.class,
+            U10Wrapper.class,
+            U11Wrapper.class,
+            U12Wrapper.class,
+            U13Wrapper.class,
+            U14Wrapper.class,
+            U15Wrapper.class,
+            U16Wrapper.class,
+            U17Wrapper.class,
+            U18Wrapper.class,
+            U19Wrapper.class,
+            U20Wrapper.class,
+            U21Wrapper.class,
+            U22Wrapper.class,
+            U23Wrapper.class,
+            U24Wrapper.class,
+            U25Wrapper.class,
+            U26Wrapper.class,
+            U27Wrapper.class,
+            U28Wrapper.class,
+            U29Wrapper.class,
+            U30Wrapper.class,
+            U31Wrapper.class,
+            U32Wrapper.class,
+            U33Wrapper.class,
+            U34Wrapper.class,
+            U35Wrapper.class,
+            U36Wrapper.class,
+            U37Wrapper.class,
+            U38Wrapper.class,
+            U39Wrapper.class,
+            U40Wrapper.class,
+            U41Wrapper.class,
+            U42Wrapper.class,
+            U43Wrapper.class,
+            U44Wrapper.class,
+            U45Wrapper.class,
+            U46Wrapper.class,
+            U47Wrapper.class,
+            U48Wrapper.class,
+            U49Wrapper.class,
+            U50Wrapper.class,
+            U51Wrapper.class,
+            U52Wrapper.class,
+            U53Wrapper.class,
+            U54Wrapper.class,
+            U55Wrapper.class,
+            U56Wrapper.class,
+            U57Wrapper.class,
+            U58Wrapper.class,
+            U59Wrapper.class,
+            U60Wrapper.class,
+            U61Wrapper.class,
+            U62Wrapper.class,
+            U63Wrapper.class,
+            U64Wrapper.class,
+            U65Wrapper.class,
+            U66Wrapper.class,
+            U67Wrapper.class,
+            U68Wrapper.class,
+            U69Wrapper.class,
+            U70Wrapper.class,
+            U71Wrapper.class,
+            U72Wrapper.class,
+            U73Wrapper.class,
+            U74Wrapper.class,
+            U75Wrapper.class,
+            U76Wrapper.class,
+            U77Wrapper.class,
+            U78Wrapper.class,
+            U79Wrapper.class,
+            U80Wrapper.class,
+            U81Wrapper.class,
+            U82Wrapper.class,
+            U83Wrapper.class,
+            U84Wrapper.class,
+            U85Wrapper.class,
+            U86Wrapper.class,
+            U87Wrapper.class,
+            U88Wrapper.class,
+            U89Wrapper.class,
+            U90Wrapper.class,
+            U91Wrapper.class,
+            U92Wrapper.class,
+            U93Wrapper.class,
+            U94Wrapper.class,
+            U95Wrapper.class,
+            U96Wrapper.class,
+            U97Wrapper.class,
+            U98Wrapper.class,
+            U99Wrapper.class,
+            U100Wrapper.class
+        };
+
+        private volatile JsonDeserializer<?>[] deserializers;
+
+        @Override
+        public void resolve(DeserializationContext context) throws JsonMappingException {
+            deserializers = new JsonDeserializer<?>[VARIANT_TYPES.length];
+        }
+
+        @Override
+        public boolean isCachable() {
+            return true;
+        }
+
+        @Override
+        public LargeUnionExample deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            if (!parser.isExpectedStartObjectToken()) {
+                return context.reportInputMismatch(
+                        LargeUnionExample.class, "Expected a JSON object for union deserialization");
+            }
+            JsonToken firstToken = parser.nextToken();
+            if (firstToken == JsonToken.FIELD_NAME && isTypeField(parser.currentName(), context)) {
+                if (parser.nextToken() != JsonToken.VALUE_STRING) {
+                    return context.reportInputMismatch(
+                            LargeUnionExample.class, "Union discriminator 'type' must be a string");
+                }
+                String type = parser.getText();
+                parser.nextToken();
+                return deserializeSelected(parser, context, type);
+            }
+            return deserializeBuffered(parser, context);
+        }
+
+        private LargeUnionExample deserializeBuffered(JsonParser parser, DeserializationContext context)
+                throws IOException {
+            try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
+                buffer.writeStartObject();
+                JsonToken token = parser.currentToken();
+                while (token == JsonToken.FIELD_NAME) {
+                    String fieldName = parser.currentName();
+                    JsonToken valueToken = parser.nextToken();
+                    if (isTypeField(fieldName, context)) {
+                        if (valueToken != JsonToken.VALUE_STRING) {
+                            return context.reportInputMismatch(
+                                    LargeUnionExample.class, "Union discriminator 'type' must be a string");
+                        }
+                        String type = parser.getText();
+                        parser.nextToken();
+                        try (JsonParser bufferedParser = buffer.asParser(parser)) {
+                            JsonParser combinedParser =
+                                    JsonParserSequence.createFlattened(true, bufferedParser, parser);
+                            combinedParser.nextToken();
+                            return deserializeSelected(combinedParser, context, type);
+                        }
+                    }
+                    buffer.writeFieldName(fieldName);
+                    buffer.copyCurrentStructure(parser);
+                    token = parser.nextToken();
+                }
+                if (token != JsonToken.END_OBJECT) {
+                    return context.reportInputMismatch(
+                            LargeUnionExample.class, "Expected the end of a JSON object while deserializing a union");
+                }
+            }
+            return context.reportInputMismatch(LargeUnionExample.class, "Union discriminator 'type' is required");
+        }
+
+        private static boolean isTypeField(String fieldName, DeserializationContext context) {
+            return "type".equals(fieldName)
+                    || (context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+                            && "type".equalsIgnoreCase(fieldName));
+        }
+
+        private LargeUnionExample deserializeSelected(JsonParser parser, DeserializationContext context, String type)
+                throws IOException {
+            int variantIndex =
+                    switch (type) {
+                        case "u0" -> 0;
+                        case "u1" -> 1;
+                        case "u2" -> 2;
+                        case "u3" -> 3;
+                        case "u4" -> 4;
+                        case "u5" -> 5;
+                        case "u6" -> 6;
+                        case "u7" -> 7;
+                        case "u8" -> 8;
+                        case "u9" -> 9;
+                        case "u10" -> 10;
+                        case "u11" -> 11;
+                        case "u12" -> 12;
+                        case "u13" -> 13;
+                        case "u14" -> 14;
+                        case "u15" -> 15;
+                        case "u16" -> 16;
+                        case "u17" -> 17;
+                        case "u18" -> 18;
+                        case "u19" -> 19;
+                        case "u20" -> 20;
+                        case "u21" -> 21;
+                        case "u22" -> 22;
+                        case "u23" -> 23;
+                        case "u24" -> 24;
+                        case "u25" -> 25;
+                        case "u26" -> 26;
+                        case "u27" -> 27;
+                        case "u28" -> 28;
+                        case "u29" -> 29;
+                        case "u30" -> 30;
+                        case "u31" -> 31;
+                        case "u32" -> 32;
+                        case "u33" -> 33;
+                        case "u34" -> 34;
+                        case "u35" -> 35;
+                        case "u36" -> 36;
+                        case "u37" -> 37;
+                        case "u38" -> 38;
+                        case "u39" -> 39;
+                        case "u40" -> 40;
+                        case "u41" -> 41;
+                        case "u42" -> 42;
+                        case "u43" -> 43;
+                        case "u44" -> 44;
+                        case "u45" -> 45;
+                        case "u46" -> 46;
+                        case "u47" -> 47;
+                        case "u48" -> 48;
+                        case "u49" -> 49;
+                        case "u50" -> 50;
+                        case "u51" -> 51;
+                        case "u52" -> 52;
+                        case "u53" -> 53;
+                        case "u54" -> 54;
+                        case "u55" -> 55;
+                        case "u56" -> 56;
+                        case "u57" -> 57;
+                        case "u58" -> 58;
+                        case "u59" -> 59;
+                        case "u60" -> 60;
+                        case "u61" -> 61;
+                        case "u62" -> 62;
+                        case "u63" -> 63;
+                        case "u64" -> 64;
+                        case "u65" -> 65;
+                        case "u66" -> 66;
+                        case "u67" -> 67;
+                        case "u68" -> 68;
+                        case "u69" -> 69;
+                        case "u70" -> 70;
+                        case "u71" -> 71;
+                        case "u72" -> 72;
+                        case "u73" -> 73;
+                        case "u74" -> 74;
+                        case "u75" -> 75;
+                        case "u76" -> 76;
+                        case "u77" -> 77;
+                        case "u78" -> 78;
+                        case "u79" -> 79;
+                        case "u80" -> 80;
+                        case "u81" -> 81;
+                        case "u82" -> 82;
+                        case "u83" -> 83;
+                        case "u84" -> 84;
+                        case "u85" -> 85;
+                        case "u86" -> 86;
+                        case "u87" -> 87;
+                        case "u88" -> 88;
+                        case "u89" -> 89;
+                        case "u90" -> 90;
+                        case "u91" -> 91;
+                        case "u92" -> 92;
+                        case "u93" -> 93;
+                        case "u94" -> 94;
+                        case "u95" -> 95;
+                        case "u96" -> 96;
+                        case "u97" -> 97;
+                        case "u98" -> 98;
+                        case "u99" -> 99;
+                        case "u100" -> 100;
+                        default -> -1;
+                    };
+            if (variantIndex < 0) {
+                return deserializeUnknown(parser, context, type);
+            }
+            JsonDeserializer<?> deserializer = deserializers[variantIndex];
+            if (deserializer == null) {
+                deserializer = resolveDeserializer(context, variantIndex);
+            }
+            return new LargeUnionExample((Base) deserializer.deserialize(parser, context));
+        }
+
+        private synchronized JsonDeserializer<?> resolveDeserializer(DeserializationContext context, int variantIndex)
+                throws JsonMappingException {
+            JsonDeserializer<?> deserializer = deserializers[variantIndex];
+            if (deserializer == null) {
+                deserializer = context.findRootValueDeserializer(context.constructType(VARIANT_TYPES[variantIndex]));
+                JsonDeserializer<?>[] updated = deserializers.clone();
+                updated[variantIndex] = deserializer;
+                deserializers = updated;
+            }
+            return deserializer;
+        }
+
+        private static LargeUnionExample deserializeUnknown(
+                JsonParser parser, DeserializationContext context, String type) throws IOException {
+            Map<String, Object> values = new HashMap<>();
+            if (parser.currentToken() == JsonToken.START_OBJECT) {
+                parser.nextToken();
+            }
+            while (parser.currentToken() == JsonToken.FIELD_NAME) {
+                String fieldName = parser.currentName();
+                parser.nextToken();
+                values.put(fieldName, context.readValue(parser, Object.class));
+                parser.nextToken();
+            }
+            if (parser.currentToken() != JsonToken.END_OBJECT) {
+                return context.reportInputMismatch(
+                        LargeUnionExample.class, "Expected the end of a JSON object while deserializing a union");
+            }
+            return new LargeUnionExample(new UnknownWrapper(type, values));
         }
     }
 }
