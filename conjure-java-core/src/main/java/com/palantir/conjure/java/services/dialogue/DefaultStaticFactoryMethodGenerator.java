@@ -29,7 +29,6 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
-import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
@@ -122,11 +121,13 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             impl.addMethod(createHelperToConstructExceptionDeserializerArgs());
         }
 
-        ReturnTypeFieldsContext context = collectReturnTypeFields(def, isErrorRespecting);
-        generateTypeMarkerFields(impl, context, isErrorRespecting);
+        SerDeFieldsContext context = collectSerDeFields(def, isErrorRespecting);
+        generateTypeMarkerFields(impl, context);
         generateExceptionArgsFields(impl, context);
         generateDeserializerFields(impl, context, isErrorRespecting);
-        generateEndpointImplementations(impl, def, context.endpointToDeserializerField());
+        generateSerializerFields(impl, context);
+        generateEndpointImplementations(
+                impl, def, context.endpointToSerializerField(), context.endpointToDeserializerField());
 
         impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
 
@@ -143,12 +144,15 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build();
     }
 
-    private ReturnTypeFieldsContext collectReturnTypeFields(ServiceDefinition def, boolean isErrorRespecting) {
+    private SerDeFieldsContext collectSerDeFields(ServiceDefinition def, boolean isErrorRespecting) {
+        Map<TypeName, String> fieldBaseNames = new HashMap<>();
         Map<TypeName, String> typeMarkerFields = new LinkedHashMap<>();
         Map<TypeName, String> exceptionArgsFields = new LinkedHashMap<>();
         Map<TypeName, String> deserializerFieldNames = new LinkedHashMap<>();
         Map<TypeName, DeserializerType> deserializerTypes = new LinkedHashMap<>();
+        Map<TypeName, String> serializerFieldNames = new LinkedHashMap<>();
         Map<String, String> endpointToDeserializerField = new HashMap<>();
+        Map<String, String> endpointToSerializerField = new HashMap<>();
         Set<String> usedBaseNames = new HashSet<>();
 
         for (EndpointDefinition endpoint : def.getEndpoints()) {
@@ -159,9 +163,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 continue;
             }
 
+            String baseName = fieldBaseNames.computeIfAbsent(
+                    returnClassName, typeName -> uniqueFieldBaseName(typeName, usedBaseNames));
             if (!deserializerFieldNames.containsKey(returnClassName)) {
-                String baseName = uniqueFieldBaseName(returnClassName, usedBaseNames);
-                typeMarkerFields.put(returnClassName, baseName + "TypeMarker");
+                if (isErrorRespecting || endpoint.getReturns().isPresent()) {
+                    typeMarkerFields.put(returnClassName, baseName + "TypeMarker");
+                }
                 if (isErrorRespecting) {
                     exceptionArgsFields.put(returnClassName, baseName + "ExceptionArgs");
                 }
@@ -176,31 +183,42 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                     endpoint.getEndpointName().get(), deserializerFieldNames.get(returnClassName));
         }
 
-        return new ReturnTypeFieldsContext(
+        for (EndpointDefinition endpoint : def.getEndpoints()) {
+            endpoint.getArgs().stream()
+                    .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
+                    .findAny()
+                    .filter(body -> !body.getType().accept(TypeVisitor.IS_BINARY))
+                    .ifPresent(body -> {
+                        TypeName bodyClassName = Primitives.box(returnTypes.baseType(body.getType()));
+                        String baseName = fieldBaseNames.computeIfAbsent(
+                                bodyClassName, typeName -> uniqueFieldBaseName(typeName, usedBaseNames));
+                        typeMarkerFields.putIfAbsent(bodyClassName, baseName + "TypeMarker");
+                        serializerFieldNames.putIfAbsent(bodyClassName, baseName + "Serializer");
+                        endpointToSerializerField.put(
+                                endpoint.getEndpointName().get(), serializerFieldNames.get(bodyClassName));
+                    });
+        }
+
+        return new SerDeFieldsContext(
                 typeMarkerFields,
                 exceptionArgsFields,
                 deserializerFieldNames,
                 deserializerTypes,
-                endpointToDeserializerField);
+                serializerFieldNames,
+                endpointToDeserializerField,
+                endpointToSerializerField);
     }
 
-    private static void generateTypeMarkerFields(
-            TypeSpec.Builder impl, ReturnTypeFieldsContext context, boolean isErrorRespecting) {
-        context.typeMarkerFields().forEach((typeName, fieldName) -> {
-            DeserializerType deserType = context.deserializerTypes().get(typeName);
-            if (!isErrorRespecting && deserType == DeserializerType.EMPTY_BODY) {
-                // Non-error empty body deserializer does not need a TypeMarker
-                return;
-            }
-            impl.addField(
-                    FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName), fieldName)
-                            .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                            .initializer("new $T<$T>() {}", TypeMarker.class, typeName)
-                            .build());
-        });
+    private static void generateTypeMarkerFields(TypeSpec.Builder impl, SerDeFieldsContext context) {
+        context.typeMarkerFields()
+                .forEach((typeName, fieldName) -> impl.addField(FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName), fieldName)
+                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                        .initializer("new $T<$T>() {}", TypeMarker.class, typeName)
+                        .build()));
     }
 
-    private static void generateExceptionArgsFields(TypeSpec.Builder impl, ReturnTypeFieldsContext context) {
+    private static void generateExceptionArgsFields(TypeSpec.Builder impl, SerDeFieldsContext context) {
         context.exceptionArgsFields().forEach((typeName, fieldName) -> {
             impl.addField(FieldSpec.builder(
                             ParameterizedTypeName.get(ClassName.get(ExceptionDeserializerArgs.class), typeName),
@@ -214,7 +232,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     }
 
     private static void generateDeserializerFields(
-            TypeSpec.Builder impl, ReturnTypeFieldsContext context, boolean isErrorRespecting) {
+            TypeSpec.Builder impl, SerDeFieldsContext context, boolean isErrorRespecting) {
         context.deserializerFieldNames().forEach((typeName, fieldName) -> {
             ParameterizedTypeName deserializerType =
                     ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
@@ -227,8 +245,20 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         });
     }
 
+    private static void generateSerializerFields(TypeSpec.Builder impl, SerDeFieldsContext context) {
+        context.serializerFieldNames()
+                .forEach((typeName, fieldName) -> impl.addField(FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName), fieldName)
+                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        .initializer(
+                                "$L.bodySerDe().serializer($L)",
+                                StaticFactoryMethodGenerator.RUNTIME,
+                                context.typeMarkerFields().get(typeName))
+                        .build()));
+    }
+
     private static CodeBlock createDeserializerInitializer(
-            DeserializerType deserType, TypeName typeName, ReturnTypeFieldsContext context, boolean isErrorRespecting) {
+            DeserializerType deserType, TypeName typeName, SerDeFieldsContext context, boolean isErrorRespecting) {
         if (isErrorRespecting) {
             String argsField = context.exceptionArgsFields().get(typeName);
             return switch (deserType) {
@@ -265,16 +295,13 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     }
 
     private void generateEndpointImplementations(
-            TypeSpec.Builder impl, ServiceDefinition def, Map<String, String> endpointToDeserializerField) {
+            TypeSpec.Builder impl,
+            ServiceDefinition def,
+            Map<String, String> endpointToSerializerField,
+            Map<String, String> endpointToDeserializerField) {
         def.getEndpoints().forEach(endpoint -> {
-            endpoint.getArgs().stream()
-                    .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
-                    .findAny()
-                    .flatMap(body -> serializer(endpoint.getEndpointName(), body.getType()))
-                    .ifPresent(impl::addField);
-
             impl.addField(bindEndpointChannel(def, endpoint));
-            impl.addMethod(clientImpl(endpoint, endpointToDeserializerField));
+            impl.addMethod(clientImpl(endpoint, endpointToSerializerField, endpointToDeserializerField));
         });
     }
 
@@ -367,23 +394,10 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build();
     }
 
-    private Optional<FieldSpec> serializer(EndpointName endpointName, Type type) {
-        if (type.accept(TypeVisitor.IS_BINARY)) {
-            return Optional.empty();
-        }
-        TypeName className = Primitives.box(returnTypes.baseType(type));
-        ParameterizedTypeName deserializerType = ParameterizedTypeName.get(ClassName.get(Serializer.class), className);
-        return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Serializer")
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer(
-                        "$L.bodySerDe().serializer(new $T<$T>() {})",
-                        StaticFactoryMethodGenerator.RUNTIME,
-                        TypeMarker.class,
-                        className)
-                .build());
-    }
-
-    private MethodSpec clientImpl(EndpointDefinition def, Map<String, String> endpointToDeserializerField) {
+    private MethodSpec clientImpl(
+            EndpointDefinition def,
+            Map<String, String> endpointToSerializerField,
+            Map<String, String> endpointToDeserializerField) {
         List<ParameterSpec> params = parameterTypes.implementationMethodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
@@ -406,7 +420,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .ifPresent(requestParams::add);
 
         def.getArgs().stream()
-                .map(param -> generateParam(def.getEndpointName().get(), param))
+                .map(param -> generateParam(def.getEndpointName().get(), param, endpointToSerializerField))
                 .forEach(requestParams::add);
 
         CodeBlock request = CodeBlock.builder()
@@ -453,7 +467,8 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
     }
 
-    private CodeBlock generateParam(String endpointName, ArgumentDefinition param) {
+    private CodeBlock generateParam(
+            String endpointName, ArgumentDefinition param, Map<String, String> endpointToSerializerField) {
         return param.getParamType().accept(new ParameterType.Visitor<CodeBlock>() {
             @Override
             public CodeBlock visitBody(BodyParameterType value) {
@@ -466,7 +481,11 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                             StaticFactoryMethodGenerator.RUNTIME,
                             param.getArgName());
                 }
-                return CodeBlock.of("$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
+                return CodeBlock.of(
+                        "$L.body($L.serialize($L));",
+                        REQUEST,
+                        endpointToSerializerField.get(endpointName),
+                        param.getArgName());
             }
 
             @Override
@@ -678,12 +697,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         OPTIONAL_BINARY;
     }
 
-    private record ReturnTypeFieldsContext(
+    private record SerDeFieldsContext(
             Map<TypeName, String> typeMarkerFields,
             Map<TypeName, String> exceptionArgsFields,
             Map<TypeName, String> deserializerFieldNames,
             Map<TypeName, DeserializerType> deserializerTypes,
-            Map<String, String> endpointToDeserializerField) {}
+            Map<TypeName, String> serializerFieldNames,
+            Map<String, String> endpointToDeserializerField,
+            Map<String, String> endpointToSerializerField) {}
 
     private DeserializerType getDeserializerType(Optional<Type> type, TypeName className) {
         if (type.isEmpty()) {

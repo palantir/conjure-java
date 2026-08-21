@@ -34,13 +34,15 @@ public interface ServiceUsingExternalTypesBlocking {
             private static final TypeMarker<Map<String, String>> mapStringStringTypeMarker =
                     new TypeMarker<Map<String, String>>() {};
 
+            private static final TypeMarker<List<String>> listStringTypeMarker = new TypeMarker<List<String>>() {};
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final Deserializer<Map<String, String>> mapStringStringDeserializer =
                     _runtime.bodySerDe().deserializer(mapStringStringTypeMarker);
 
-            private final Serializer<List<String>> externalSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
+            private final Serializer<List<String>> listStringSerializer =
+                    _runtime.bodySerDe().serializer(listStringTypeMarker);
 
             private final EndpointChannel externalChannel =
                     _endpointChannelFactory.endpoint(DialogueServiceUsingExternalTypesEndpoints.external);
@@ -49,7 +51,7 @@ public interface ServiceUsingExternalTypesBlocking {
             public Map<String, String> external(String path, List<String> body) {
                 Request.Builder _request = Request.builder();
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
-                _request.body(externalSerializer.serialize(body));
+                _request.body(listStringSerializer.serialize(body));
                 return _runtime.clients().callBlocking(externalChannel, _request.build(), mapStringStringDeserializer);
             }
 

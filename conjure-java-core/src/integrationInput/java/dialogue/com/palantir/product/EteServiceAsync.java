@@ -271,6 +271,14 @@ public interface EteServiceAsync {
 
             private static final TypeMarker<SimpleUnion> simpleUnionTypeMarker = new TypeMarker<SimpleUnion>() {};
 
+            private static final TypeMarker<List<Optional<String>>> listOptionalStringTypeMarker =
+                    new TypeMarker<List<Optional<String>>>() {};
+
+            private static final TypeMarker<Set<Optional<String>>> setOptionalStringTypeMarker =
+                    new TypeMarker<Set<Optional<String>>>() {};
+
+            private static final TypeMarker<List<String>> listStringTypeMarker = new TypeMarker<List<String>>() {};
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final Deserializer<String> stringDeserializer =
@@ -338,6 +346,29 @@ public interface EteServiceAsync {
             private final Deserializer<SimpleUnion> simpleUnionDeserializer =
                     _runtime.bodySerDe().deserializer(simpleUnionTypeMarker);
 
+            private final Serializer<StringAliasExample> stringAliasExampleSerializer =
+                    _runtime.bodySerDe().serializer(stringAliasExampleTypeMarker);
+
+            private final Serializer<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample1pxrnbvSerializer =
+                            _runtime.bodySerDe().serializer(stringAliasExample1pxrnbvTypeMarker);
+
+            private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleSerializer =
+                            _runtime.bodySerDe().serializer(optionalStringAliasExampleTypeMarker);
+
+            private final Serializer<List<Optional<String>>> listOptionalStringSerializer =
+                    _runtime.bodySerDe().serializer(listOptionalStringTypeMarker);
+
+            private final Serializer<Set<Optional<String>>> setOptionalStringSerializer =
+                    _runtime.bodySerDe().serializer(setOptionalStringTypeMarker);
+
+            private final Serializer<List<String>> listStringSerializer =
+                    _runtime.bodySerDe().serializer(listStringTypeMarker);
+
+            private final Serializer<SimpleUnion> simpleUnionSerializer =
+                    _runtime.bodySerDe().serializer(simpleUnionTypeMarker);
+
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
             private final EndpointChannel integerChannel =
@@ -376,9 +407,6 @@ public interface EteServiceAsync {
             private final EndpointChannel optionalExternalLongQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
 
-            private final Serializer<StringAliasExample> notNullBodySerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
-
             private final EndpointChannel notNullBodyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBody);
 
@@ -391,17 +419,8 @@ public interface EteServiceAsync {
             private final EndpointChannel aliasTwoChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasTwo);
 
-            private final Serializer<allexamples.com.palantir.product.StringAliasExample>
-                    notNullBodyExternalImportSerializer = _runtime.bodySerDe()
-                            .serializer(new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {});
-
             private final EndpointChannel notNullBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBodyExternalImport);
-
-            private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
-                    optionalBodyExternalImportSerializer = _runtime.bodySerDe()
-                            .serializer(
-                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel optionalBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalBodyExternalImport);
@@ -436,26 +455,14 @@ public interface EteServiceAsync {
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
-            private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
-
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
-
-            private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
 
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
-            private final Serializer<List<String>> receiveListOfStringsSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
-
             private final EndpointChannel receiveListOfStringsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
-
-            private final Serializer<SimpleUnion> unionSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<SimpleUnion>() {});
 
             private final EndpointChannel unionChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.union);
 
@@ -573,7 +580,7 @@ public interface EteServiceAsync {
                     AuthHeader authHeader, StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(notNullBodySerializer.serialize(notNullBody));
+                _request.body(stringAliasExampleSerializer.serialize(notNullBody));
                 return _runtime.clients().call(notNullBodyChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
@@ -616,7 +623,7 @@ public interface EteServiceAsync {
                     AuthHeader authHeader, allexamples.com.palantir.product.StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
+                _request.body(stringAliasExample1pxrnbvSerializer.serialize(notNullBody));
                 return _runtime.clients()
                         .call(
                                 notNullBodyExternalImportChannel,
@@ -630,7 +637,7 @@ public interface EteServiceAsync {
                             AuthHeader authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> body) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(optionalBodyExternalImportSerializer.serialize(body));
+                _request.body(optionalStringAliasExampleSerializer.serialize(body));
                 return _runtime.clients()
                         .call(
                                 optionalBodyExternalImportChannel,
@@ -759,7 +766,7 @@ public interface EteServiceAsync {
             public ListenableFuture<Void> receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(receiveListOfOptionalsSerializer.serialize(value));
+                _request.body(listOptionalStringSerializer.serialize(value));
                 return _runtime.clients().call(receiveListOfOptionalsChannel, _request.build(), voidDeserializer);
             }
 
@@ -767,7 +774,7 @@ public interface EteServiceAsync {
             public ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(receiveSetOfOptionalsSerializer.serialize(value));
+                _request.body(setOptionalStringSerializer.serialize(value));
                 return _runtime.clients().call(receiveSetOfOptionalsChannel, _request.build(), voidDeserializer);
             }
 
@@ -775,7 +782,7 @@ public interface EteServiceAsync {
             public ListenableFuture<Void> receiveListOfStrings(AuthHeader authHeader, List<String> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(receiveListOfStringsSerializer.serialize(value));
+                _request.body(listStringSerializer.serialize(value));
                 return _runtime.clients().call(receiveListOfStringsChannel, _request.build(), voidDeserializer);
             }
 
@@ -783,7 +790,7 @@ public interface EteServiceAsync {
             public ListenableFuture<SimpleUnion> union(AuthHeader authHeader, SimpleUnion value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(unionSerializer.serialize(value));
+                _request.body(simpleUnionSerializer.serialize(value));
                 return _runtime.clients().call(unionChannel, _request.build(), simpleUnionDeserializer);
             }
 
