@@ -131,6 +131,7 @@ public final class BackingFileSystem {
 
         private String baseUri;
 
+        @JsonSetter(value = "configuration", nulls = Nulls.SKIP)
         private Map<String, String> configuration = new LinkedHashMap<>();
 
         private Builder() {}
@@ -158,7 +159,6 @@ public final class BackingFileSystem {
             return this;
         }
 
-        @JsonSetter(value = "configuration", nulls = Nulls.SKIP)
         public Builder configuration(@Nonnull Map<String, String> configuration) {
             checkNotBuilt();
             this.configuration =
