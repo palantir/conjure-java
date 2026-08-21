@@ -193,7 +193,7 @@ public final class BeanBuilderGenerator {
         List<EnrichedField> allFields = enrichFields(typeDef.getFields());
         List<EnrichedField> fieldsNeedingBuilderStage = allFields.stream()
                 .filter(field -> !BeanBuilderGenerator.stagedBuilderFieldShouldBeInFinalStage(field))
-                .collect(Collectors.toList());
+                .toList();
 
         if (fieldsNeedingBuilderStage.isEmpty()) {
             addBuilderImpl(specBuilder, typeDef, typesMap);
@@ -206,7 +206,7 @@ public final class BeanBuilderGenerator {
         interfaces.add(generateBuilderFinalStageInterface(
                 allFields.stream()
                         .filter(field -> !fieldsNeedingBuilderStage.contains(field))
-                        .collect(Collectors.toList()),
+                        .toList(),
                 false));
         specBuilder.addTypes(interfaces);
         addBuilderInterfaceAndMethod(specBuilder, interfaces);
@@ -234,7 +234,7 @@ public final class BeanBuilderGenerator {
                 .map(stageInterface ->
                         ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name()))
                 .map(Primitives::box)
-                .collect(Collectors.toList());
+                .toList();
 
         TypeSpec builderInterface = TypeSpec.interfaceBuilder(STAGED_BUILDER_INTERFACE_NAME)
                 .addModifiers(Modifier.PUBLIC)
@@ -251,7 +251,7 @@ public final class BeanBuilderGenerator {
                                                         objectClass.simpleName(),
                                                         STAGED_BUILDER_INTERFACE_NAME))
                                 .build())
-                        .collect(Collectors.toList()))
+                        .toList())
                 .addSuperinterfaces(interfaceClassNames)
                 .build();
 
@@ -337,7 +337,7 @@ public final class BeanBuilderGenerator {
                 .addMethods(fields.stream()
                         .map(field -> generateMethodsForFinalStageInterfaceField(field, completedStageClass, strict))
                         .flatMap(List::stream)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
     }
 
@@ -423,6 +423,13 @@ public final class BeanBuilderGenerator {
             boolean strict) {
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
+        Collection<FieldSpec> builderFields = enrichedFields.stream()
+                .map(field -> field.conjureDef().getType().accept(TypeVisitor.IS_MAP)
+                        ? field.poetSpec().toBuilder()
+                                .addAnnotation(createJacksonSetterAnnotation(field, typesMap))
+                                .build()
+                        : field.poetSpec())
+                .toList();
         TypeSpec.Builder specBuilder = TypeSpec.classBuilder(className);
 
         boolean implementsInterface = builderInterfaceClass.isPresent();
@@ -438,7 +445,7 @@ public final class BeanBuilderGenerator {
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(boolean.class, BUILT_FIELD).build())
-                .addFields(poetFields)
+                .addFields(builderFields)
                 .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
                 .addMethod(createFromObject(enrichedFields, implementsInterface))
@@ -457,7 +464,7 @@ public final class BeanBuilderGenerator {
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
         List<EnrichedField> primitives =
-                enrichedFields.stream().filter(EnrichedField::isPrimitive).collect(Collectors.toList());
+                enrichedFields.stream().filter(EnrichedField::isPrimitive).toList();
 
         if (primitives.isEmpty()) {
             return Collections.emptyList();
@@ -522,7 +529,7 @@ public final class BeanBuilderGenerator {
                 .map(field -> FieldSpec.builder(TypeName.BOOLEAN, deriveFieldInitializedName(field), Modifier.PRIVATE)
                         .initializer("false")
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static String deriveFieldInitializedName(EnrichedField field) {
@@ -655,7 +662,7 @@ public final class BeanBuilderGenerator {
         // Certain type combinations and feature flags may produce highly optimized code paths.
         // These optimized paths include deserialization, so if it isn't enabled we should add the
         // simple deserializer.
-        if (!isPrimitiveOptimized(type)) {
+        if (!isPrimitiveOptimized(type) && !type.accept(TypeVisitor.IS_MAP)) {
             setterBuilder.addAnnotation(createJacksonSetterAnnotation(enriched, typesMap));
         }
 
