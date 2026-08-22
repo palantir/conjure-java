@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: '[Enhancement] Strict Staged Builders Support Primitive Optimized Collections'
-  links:
-  - https://github.com/palantir/conjure-java/pull/2464

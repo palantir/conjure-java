@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Reduce Optional allocations in SafetyEvaluator
-  links:
-  - https://github.com/palantir/conjure-java/pull/2433

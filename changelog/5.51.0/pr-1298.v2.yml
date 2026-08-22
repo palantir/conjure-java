@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Include safety annotations on undertow and dialogue interfaces
-  links:
-  - https://github.com/palantir/conjure-java/pull/1298

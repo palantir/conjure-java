@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: On enum, generate values() similar to java enums, which returns a list
-    containing all possible valid values.
-  links:
-  - https://github.com/palantir/conjure-java/pull/768

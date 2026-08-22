@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: conjure-undertow propagates QosException metadata
-  links:
-  - https://github.com/palantir/conjure-java/pull/2373

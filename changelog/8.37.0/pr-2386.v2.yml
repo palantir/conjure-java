@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: '[FR] Add Serialization Optimization for Primitive Collection Types'
-  links:
-  - https://github.com/palantir/conjure-java/pull/2386

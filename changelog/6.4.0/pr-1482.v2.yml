@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Generated dialogue endpoints implement the modern `renderPath` method
-  links:
-  - https://github.com/palantir/conjure-java/pull/1482

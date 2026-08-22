@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: UnclosableOutputStream passes through BufferWritableOutputStream
-  links:
-  - https://github.com/palantir/conjure-java/pull/2415

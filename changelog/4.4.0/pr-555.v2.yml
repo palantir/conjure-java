@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Simplify conjure object toString implementation
-  links:
-  - https://github.com/palantir/conjure-java/pull/555

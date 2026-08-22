@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: Undertow endpoints disallow request body collections with null values
-    when `--nonNullCollections` is set
-  links:
-  - https://github.com/palantir/conjure-java/pull/1051

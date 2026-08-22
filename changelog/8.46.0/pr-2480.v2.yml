@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: Add a test to ensure only registered test case content exists in the
-    snapshot testing folder.
-  links:
-  - https://github.com/palantir/conjure-java/pull/2480
