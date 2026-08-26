@@ -21,6 +21,8 @@ import com.palantir.logsafe.SafeArg;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Captures generic type information.
@@ -79,14 +81,110 @@ public abstract class TypeMarker<T> {
         return "TypeMarker{type=" + type + '}';
     }
 
-    /** Create a new {@link TypeMarker} instance wrapping the provided {@link Type}. */
-    public static TypeMarker<?> of(Type type) {
-        return new WrappingTypeMarker(type);
+    /** Create a new {@link TypeMarker} instance wrapping the provided class. */
+    public static <T> TypeMarker<T> of(Class<T> type) {
+        return new WrappingTypeMarker<>(type);
     }
 
-    private static final class WrappingTypeMarker extends TypeMarker<Object> {
+    /** Create a new {@link TypeMarker} instance wrapping the provided {@link Type}. */
+    public static TypeMarker<?> of(Type type) {
+        return new WrappingTypeMarker<>(type);
+    }
+
+    /**
+     * Creates a type marker for a parameterized type. The returned type is inferred from the invocation context, so
+     * callers must ensure it matches {@code rawType} and {@code typeArguments}.
+     */
+    @SafeVarargs
+    public static <T> TypeMarker<T> ofGeneric(Class<?> rawType, TypeMarker<?>... typeArguments) {
+        Preconditions.checkNotNull(rawType, "Raw type is required");
+        TypeMarker<?>[] checkedTypeArguments = Preconditions.checkNotNull(typeArguments, "Type arguments are required");
+        int expectedTypeArguments = rawType.getTypeParameters().length;
+        Preconditions.checkArgument(
+                expectedTypeArguments > 0, "Raw type is not generic", SafeArg.of("rawType", rawType));
+        Preconditions.checkArgument(
+                expectedTypeArguments == checkedTypeArguments.length,
+                "Incorrect number of type arguments",
+                SafeArg.of("rawType", rawType),
+                SafeArg.of("expected", expectedTypeArguments),
+                SafeArg.of("actual", checkedTypeArguments.length));
+        Type[] types = new Type[checkedTypeArguments.length];
+        for (int index = 0; index < checkedTypeArguments.length; index++) {
+            types[index] = Preconditions.checkNotNull(checkedTypeArguments[index], "Type argument is required")
+                    .getType();
+        }
+        return new WrappingTypeMarker<>(new ParameterizedTypeImpl(rawType, types));
+    }
+
+    private static final class WrappingTypeMarker<T> extends TypeMarker<T> {
         private WrappingTypeMarker(Type type) {
             super(type);
+        }
+    }
+
+    private static final class ParameterizedTypeImpl implements ParameterizedType {
+        private final Class<?> rawType;
+        private final Type ownerType;
+        private final Type[] typeArguments;
+
+        private ParameterizedTypeImpl(Class<?> rawType, Type[] typeArguments) {
+            this.rawType = rawType;
+            this.ownerType = rawType.getDeclaringClass();
+            this.typeArguments = typeArguments.clone();
+        }
+
+        @Override
+        public Type[] getActualTypeArguments() {
+            return typeArguments.clone();
+        }
+
+        @Override
+        public Type getRawType() {
+            return rawType;
+        }
+
+        @Override
+        public Type getOwnerType() {
+            return ownerType;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof ParameterizedType that)) {
+                return false;
+            }
+            return Objects.equals(ownerType, that.getOwnerType())
+                    && Objects.equals(rawType, that.getRawType())
+                    && Arrays.equals(typeArguments, that.getActualTypeArguments());
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(typeArguments) ^ Objects.hashCode(ownerType) ^ Objects.hashCode(rawType);
+        }
+
+        @Override
+        public String getTypeName() {
+            return toString();
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder(rawType.getTypeName());
+            if (typeArguments.length > 0) {
+                result.append('<');
+                for (int index = 0; index < typeArguments.length; index++) {
+                    if (index > 0) {
+                        result.append(", ");
+                    }
+                    result.append(typeArguments[index].getTypeName());
+                }
+                result.append('>');
+            }
+            return result.toString();
         }
     }
 }

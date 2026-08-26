@@ -31,6 +31,23 @@ import org.junit.jupiter.api.Test;
 public class TypeMarkersTest {
 
     @Test
+    public void testFactoryForClass() {
+        TypeMarker<String> marker = TypeMarker.of(String.class);
+
+        assertThat(marker.getType()).isEqualTo(String.class);
+    }
+
+    @Test
+    public void testFactoryForGenericType() {
+        TypeMarker<List<Optional<String>>> marker =
+                TypeMarker.ofGeneric(List.class, TypeMarker.ofGeneric(Optional.class, TypeMarker.of(String.class)));
+
+        assertThat(marker).isEqualTo(new TypeMarker<List<Optional<String>>>() {});
+        assertThat(marker.getType().getTypeName()).isEqualTo("java.util.List<java.util.Optional<java.lang.String>>");
+        assertThat(marker.getClass()).isEqualTo(TypeMarker.of(String.class).getClass());
+    }
+
+    @Test
     public void testIsOptional_optional() {
         assertThat(TypeMarkers.isOptional(new TypeMarker<Optional<String>>() {}))
                 .isTrue();

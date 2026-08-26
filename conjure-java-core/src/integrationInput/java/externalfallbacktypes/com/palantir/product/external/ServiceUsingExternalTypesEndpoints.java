@@ -48,8 +48,12 @@ public final class ServiceUsingExternalTypesEndpoints implements UndertowService
         ExternalEndpoint(UndertowRuntime runtime, ServiceUsingExternalTypes delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ImmutableList<String>>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Map<String, String>>() {}, this);
+            this.deserializer = runtime.bodySerDe()
+                    .deserializer(TypeMarker.ofGeneric(ImmutableList.class, TypeMarker.of(String.class)), this);
+            this.serializer = runtime.bodySerDe()
+                    .serializer(
+                            TypeMarker.ofGeneric(Map.class, TypeMarker.of(String.class), TypeMarker.of(String.class)),
+                            this);
         }
 
         @Override

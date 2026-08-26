@@ -58,8 +58,8 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
         CollectionEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.valuesDeserializer =
-                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableList<String>>() {}, runtime, this);
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    TypeMarker.ofGeneric(ImmutableList.class, TypeMarker.of(String.class)), runtime, this);
         }
 
         @Override
@@ -105,8 +105,8 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
         ListEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.valuesDeserializer =
-                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableList<String>>() {}, runtime, this);
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    TypeMarker.ofGeneric(ImmutableList.class, TypeMarker.of(String.class)), runtime, this);
         }
 
         @Override
@@ -152,8 +152,8 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
         SetEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.valuesDeserializer =
-                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableSet<String>>() {}, runtime, this);
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    TypeMarker.ofGeneric(ImmutableSet.class, TypeMarker.of(String.class)), runtime, this);
         }
 
         @Override
@@ -200,7 +200,9 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
-                    new TypeMarker<ImmutableMap<String, String>>() {}, runtime, this);
+                    TypeMarker.ofGeneric(ImmutableMap.class, TypeMarker.of(String.class), TypeMarker.of(String.class)),
+                    runtime,
+                    this);
         }
 
         @Override
@@ -246,8 +248,8 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
         MultisetEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.valuesDeserializer =
-                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableMultiset<String>>() {}, runtime, this);
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    TypeMarker.ofGeneric(ImmutableMultiset.class, TypeMarker.of(String.class)), runtime, this);
         }
 
         @Override
@@ -294,7 +296,10 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
-                    new TypeMarker<ImmutableListMultimap<String, String>>() {}, runtime, this);
+                    TypeMarker.ofGeneric(
+                            ImmutableListMultimap.class, TypeMarker.of(String.class), TypeMarker.of(String.class)),
+                    runtime,
+                    this);
         }
 
         @Override
@@ -341,7 +346,10 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
-                    new TypeMarker<ImmutableListMultimap<String, String>>() {}, runtime, this);
+                    TypeMarker.ofGeneric(
+                            ImmutableListMultimap.class, TypeMarker.of(String.class), TypeMarker.of(String.class)),
+                    runtime,
+                    this);
         }
 
         @Override
@@ -388,7 +396,10 @@ public final class CollectionBodyParamEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
-                    new TypeMarker<ImmutableSetMultimap<String, String>>() {}, runtime, this);
+                    TypeMarker.ofGeneric(
+                            ImmutableSetMultimap.class, TypeMarker.of(String.class), TypeMarker.of(String.class)),
+                    runtime,
+                    this);
         }
 
         @Override

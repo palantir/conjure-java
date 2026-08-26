@@ -205,11 +205,10 @@ public final class ConjureUndertowEndpointsGenerator {
                                         .build())
                                 .constructorInitializer(CodeBlock.builder()
                                         .addStatement(
-                                                "this.$N = $L.deserializer(new $T<$T>() {}, $N, this)",
+                                                "this.$N = $L.deserializer($L, $N, this)",
                                                 deserializerFieldName,
                                                 deserializerFactory,
-                                                TypeMarker.class,
-                                                requestBodyType,
+                                                typeMarker(requestBodyType),
                                                 RUNTIME_NAME)
                                         .build())
                                 .build());
@@ -457,11 +456,10 @@ public final class ConjureUndertowEndpointsGenerator {
                             .build())
                     .constructorInitializer(CodeBlock.builder()
                             .addStatement(
-                                    "this.$N = $L.serializer(new $T<$T>() {}, $N, this)",
+                                    "this.$N = $L.serializer($L, $N, this)",
                                     returnType.serializerFieldName(),
                                     returnType.serializerFactory(),
-                                    TypeMarker.class,
-                                    responseTypeName,
+                                    typeMarker(responseTypeName),
                                     RUNTIME_NAME)
                             .build())
                     .build());
@@ -823,6 +821,19 @@ public final class ConjureUndertowEndpointsGenerator {
             .put(ClassName.get(ListMultimap.class), ImmutableListMultimap.class)
             .put(ClassName.get(SetMultimap.class), ImmutableSetMultimap.class)
             .buildOrThrow();
+
+    private static CodeBlock typeMarker(TypeName typeName) {
+        if (typeName instanceof ClassName className) {
+            return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
+        }
+        if (typeName instanceof ParameterizedTypeName parameterizedTypeName) {
+            CodeBlock.Builder result =
+                    CodeBlock.builder().add("$T.ofGeneric($T.class", TypeMarker.class, parameterizedTypeName.rawType());
+            parameterizedTypeName.typeArguments().forEach(typeArgument -> result.add(", $L", typeMarker(typeArgument)));
+            return result.add(")").build();
+        }
+        throw new SafeIllegalStateException("Unsupported type marker type", SafeArg.of("type", typeName));
+    }
 
     private static TypeName immutableCollection(TypeName input) {
         if (input instanceof ParameterizedTypeName parameterized) {
