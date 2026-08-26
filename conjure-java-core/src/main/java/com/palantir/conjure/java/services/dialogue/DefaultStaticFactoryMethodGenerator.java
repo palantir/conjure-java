@@ -188,7 +188,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             endpoint.getArgs().stream()
                     .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
                     .findAny()
-                    .filter(body -> !body.getType().accept(TypeVisitor.IS_BINARY))
+                    .filter(body -> !parameterTypes.isBinary(body.getType()))
                     .ifPresent(body -> {
                         TypeName bodyClassName = Primitives.box(returnTypes.baseType(body.getType()));
                         String baseName = fieldBaseNames.computeIfAbsent(
@@ -473,9 +473,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return param.getParamType().accept(new ParameterType.Visitor<CodeBlock>() {
             @Override
             public CodeBlock visitBody(BodyParameterType value) {
-                if (parameterTypes
-                        .baseType(param.getType())
-                        .equals(parameterTypes.baseType(Type.primitive(PrimitiveType.BINARY)))) {
+                if (parameterTypes.isBinary(param.getType())) {
                     return CodeBlock.of(
                             "$L.body($L.bodySerDe().serialize($L));",
                             REQUEST,

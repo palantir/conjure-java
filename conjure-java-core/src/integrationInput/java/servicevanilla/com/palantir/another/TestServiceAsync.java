@@ -205,8 +205,6 @@ public interface TestServiceAsync {
             private static final TypeMarker<CreateDatasetRequest> createDatasetRequestTypeMarker =
                     new TypeMarker<CreateDatasetRequest>() {};
 
-            private static final TypeMarker<InputStream> inputStreamTypeMarker = new TypeMarker<InputStream>() {};
-
             private static final TypeMarker<String> stringTypeMarker = new TypeMarker<String>() {};
 
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -243,9 +241,6 @@ public interface TestServiceAsync {
 
             private final Serializer<CreateDatasetRequest> createDatasetRequestSerializer =
                     _runtime.bodySerDe().serializer(createDatasetRequestTypeMarker);
-
-            private final Serializer<InputStream> inputStreamSerializer =
-                    _runtime.bodySerDe().serializer(inputStreamTypeMarker);
 
             private final Serializer<String> stringSerializer =
                     _runtime.bodySerDe().serializer(stringTypeMarker);

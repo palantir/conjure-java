@@ -33,6 +33,7 @@ import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.PathParameterType;
+import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
@@ -54,6 +55,10 @@ public final class ParameterTypeMapper {
 
     public TypeName baseType(Type type) {
         return parameterTypes.getClassName(type);
+    }
+
+    public boolean isBinary(Type type) {
+        return baseType(type).equals(baseType(Type.primitive(PrimitiveType.BINARY)));
     }
 
     public List<ParameterSpec> interfaceMethodParams(EndpointDefinition endpointDef) {
