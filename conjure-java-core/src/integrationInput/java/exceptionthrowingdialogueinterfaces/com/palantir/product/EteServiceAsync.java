@@ -254,7 +254,7 @@ public interface EteServiceAsync {
                     new TypeMarker<NestedStringAliasExample>() {};
 
             private static final TypeMarker<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample1pxrnbvTypeMarker =
+                    stringAliasExample2TypeMarker =
                             new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {};
 
             private static final TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>
@@ -328,8 +328,7 @@ public interface EteServiceAsync {
                             createExceptionDeserializerArgs(nestedStringAliasExampleTypeMarker);
 
             private static final ExceptionDeserializerArgs<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample1pxrnbvExceptionArgs =
-                            createExceptionDeserializerArgs(stringAliasExample1pxrnbvTypeMarker);
+                    stringAliasExample2ExceptionArgs = createExceptionDeserializerArgs(stringAliasExample2TypeMarker);
 
             private static final ExceptionDeserializerArgs<
                             Optional<allexamples.com.palantir.product.StringAliasExample>>
@@ -399,8 +398,8 @@ public interface EteServiceAsync {
                     _runtime.bodySerDe().deserializer(nestedStringAliasExampleExceptionArgs);
 
             private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample1pxrnbvDeserializer =
-                            _runtime.bodySerDe().deserializer(stringAliasExample1pxrnbvExceptionArgs);
+                    stringAliasExample2Deserializer =
+                            _runtime.bodySerDe().deserializer(stringAliasExample2ExceptionArgs);
 
             private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalStringAliasExampleDeserializer =
@@ -428,8 +427,7 @@ public interface EteServiceAsync {
                     _runtime.bodySerDe().serializer(stringAliasExampleTypeMarker);
 
             private final Serializer<allexamples.com.palantir.product.StringAliasExample>
-                    stringAliasExample1pxrnbvSerializer =
-                            _runtime.bodySerDe().serializer(stringAliasExample1pxrnbvTypeMarker);
+                    stringAliasExample2Serializer = _runtime.bodySerDe().serializer(stringAliasExample2TypeMarker);
 
             private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalStringAliasExampleSerializer =
@@ -797,17 +795,14 @@ public interface EteServiceAsync {
                     AuthHeader authHeader, allexamples.com.palantir.product.StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(stringAliasExample1pxrnbvSerializer.serialize(notNullBody));
+                _request.body(stringAliasExample2Serializer.serialize(notNullBody));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
                 return _runtime.clients()
-                        .call(
-                                notNullBodyExternalImportChannel,
-                                _request.build(),
-                                stringAliasExample1pxrnbvDeserializer);
+                        .call(notNullBodyExternalImportChannel, _request.build(), stringAliasExample2Deserializer);
             }
 
             @Override

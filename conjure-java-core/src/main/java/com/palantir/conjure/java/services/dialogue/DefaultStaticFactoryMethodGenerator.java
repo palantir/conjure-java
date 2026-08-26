@@ -346,16 +346,19 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
     /**
      * Computes a unique camelCase field base name for a given TypeName. If the derived name collides with an
-     * already-used name, a deterministic hash suffix is appended.
+     * already-used name, a numeric suffix is appended.
      */
     private static String uniqueFieldBaseName(TypeName typeName, Set<String> usedNames) {
         String base = typeNameToFieldBase(typeName);
         if (usedNames.add(base)) {
             return base;
         }
-        String candidate = base + deterministicHash(typeName);
-        usedNames.add(candidate);
-        return candidate;
+        for (int suffix = 2; ; suffix++) {
+            String candidate = base + suffix;
+            if (usedNames.add(candidate)) {
+                return candidate;
+            }
+        }
     }
 
     private static String deterministicHash(TypeName typeName) {
