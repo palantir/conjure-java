@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: Conjure errors may provide Jetbrains annotations when the `--jetbrainsContractAnnotations`
-    flag is provided
-  links:
-  - https://github.com/palantir/conjure-java/pull/1884

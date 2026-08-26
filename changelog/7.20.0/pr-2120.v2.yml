@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Jackson StreamConstraintExceptions parsing requests produce 422 status
-  links:
-  - https://github.com/palantir/conjure-java/pull/2120

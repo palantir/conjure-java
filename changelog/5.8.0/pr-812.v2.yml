@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: conjure-undertow handles comma-separated multi-value accept headers
-  links:
-  - https://github.com/palantir/conjure-java/pull/812

@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Avoid sending empty optional values within generated objects.
-  links:
-  - https://github.com/palantir/conjure-java/pull/1300

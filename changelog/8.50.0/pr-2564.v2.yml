@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Bump dropwizard dependency (and jersey-common to 3.x)
-  links:
-  - https://github.com/palantir/conjure-java/pull/2564

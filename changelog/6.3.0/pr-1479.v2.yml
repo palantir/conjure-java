@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Remove redundant conjure-undertow tracing span
-  links:
-  - https://github.com/palantir/conjure-java/pull/1479

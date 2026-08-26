@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Dialogue service generator avoids method references to the same type
-  links:
-  - https://github.com/palantir/conjure-java/pull/819

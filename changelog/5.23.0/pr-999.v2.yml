@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: SafeExchangeCompletionListener also catches failures from `next.proceed()`
-  links:
-  - https://github.com/palantir/conjure-java/pull/999

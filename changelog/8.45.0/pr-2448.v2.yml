@@ -1,6 +1,0 @@
-type: feature
-feature:
-  description: Makes immutable copies of collections for union and alias types if
-    the defensiveCollections flag is enabled.
-  links:
-  - https://github.com/palantir/conjure-java/pull/2448

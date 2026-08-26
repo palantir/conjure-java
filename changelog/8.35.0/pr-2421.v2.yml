@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: 'remove bounds check on input ''long'' values into ''alias: double'''
-  links:
-  - https://github.com/palantir/conjure-java/pull/2421

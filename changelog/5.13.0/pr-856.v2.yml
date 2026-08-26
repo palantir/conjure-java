@@ -1,6 +1,0 @@
-type: fix
-fix:
-  description: Add prefix to internal variable names to avoid collisions with user
-    variables
-  links:
-  - https://github.com/palantir/conjure-java/pull/856
