@@ -58,13 +58,13 @@ public final class GenericImplEndpoints implements UndertowService {
         GenericEndpoint(UndertowRuntime runtime, GenericImpl delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.inputDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.inputDeserializer = DefaultSerDe.INSTANCE.deserializer(TypeMarker.of(String.class), runtime, this);
             this.pathParamDeserializer = new PathParamDeserializer<>(
                     "pathParam",
                     ParamDecoders.complexParamDecoder(runtime.plainSerDe(), GenericImpl.ParamExample::valueOf));
             this.queryParamDeserializer = new QueryParamDeserializer<>(
                     "queryParam", ParamDecoders.integerCollectionParamDecoder(runtime.plainSerDe()));
-            this.genericSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<Boolean>() {}, runtime, this);
+            this.genericSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(Boolean.class), runtime, this);
         }
 
         @Override

@@ -68,7 +68,7 @@ public final class CookieParamsEndpoints implements UndertowService {
                     "optionalIntCookie", ParamDecoders.optionalIntegerParamDecoder(runtime.plainSerDe()));
             this.decoderCookieDeserializer =
                     new CookieDeserializer<>("decoderCookie", CookieParams.StringParamDecoder.INSTANCE);
-            this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
