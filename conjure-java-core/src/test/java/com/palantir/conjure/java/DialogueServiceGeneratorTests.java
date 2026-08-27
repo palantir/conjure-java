@@ -67,6 +67,14 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         // Generated files contain imports
         assertThat(compiledFileContent(src, "test/api/with/imports/ImportServiceBlocking.java"))
                 .contains("import com.palantir.product.StringExample;");
+
+        String testService = compiledFileContent(src, "com/palantir/another/TestServiceBlocking.java");
+        assertThat(testService)
+                .as("Identical body types share a serializer")
+                .containsOnlyOnce("private final Serializer<String> stringSerializer");
+        assertThat(testService)
+                .as("Binary body aliases do not produce serializer fields")
+                .doesNotContain("Serializer<InputStream>", "TypeMarker<InputStream>");
     }
 
     @Test

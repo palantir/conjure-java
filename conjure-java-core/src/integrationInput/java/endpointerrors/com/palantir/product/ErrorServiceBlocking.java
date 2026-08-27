@@ -65,6 +65,14 @@ public interface ErrorServiceBlocking {
             private static final TypeMarker<Optional<InputStream>> optionalInputStreamTypeMarker =
                     new TypeMarker<Optional<InputStream>>() {};
 
+            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+
+            private static final TypeMarker<Optional<String>> optionalStringTypeMarker =
+                    new TypeMarker<Optional<String>>() {};
+
+            private static final TypeMarker<OptionalBinaryResponseMode> optionalBinaryResponseModeTypeMarker =
+                    new TypeMarker<OptionalBinaryResponseMode>() {};
+
             private static final ExceptionDeserializerArgs<String> stringExceptionArgs =
                     createExceptionDeserializerArgs(stringTypeMarker);
 
@@ -91,38 +99,29 @@ public interface ErrorServiceBlocking {
             private final Deserializer<Optional<InputStream>> optionalInputStreamDeserializer =
                     _runtime.bodySerDe().optionalInputStreamDeserializer(optionalInputStreamExceptionArgs);
 
-            private final Serializer<Boolean> testBasicErrorSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
+            private final Serializer<Boolean> booleanSerializer =
+                    _runtime.bodySerDe().serializer(booleanTypeMarker);
+
+            private final Serializer<Optional<String>> optionalStringSerializer =
+                    _runtime.bodySerDe().serializer(optionalStringTypeMarker);
+
+            private final Serializer<OptionalBinaryResponseMode> optionalBinaryResponseModeSerializer =
+                    _runtime.bodySerDe().serializer(optionalBinaryResponseModeTypeMarker);
 
             private final EndpointChannel testBasicErrorChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBasicError);
 
-            private final Serializer<Boolean> testImportedErrorSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
-
             private final EndpointChannel testImportedErrorChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testImportedError);
-
-            private final Serializer<Optional<String>> testMultipleErrorsAndPackagesSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testMultipleErrorsAndPackagesChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testMultipleErrorsAndPackages);
 
-            private final Serializer<Boolean> testEmptyBodySerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
-
             private final EndpointChannel testEmptyBodyChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testEmptyBody);
 
-            private final Serializer<Boolean> testBinarySerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
-
             private final EndpointChannel testBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testBinary);
-
-            private final Serializer<OptionalBinaryResponseMode> testOptionalBinarySerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<OptionalBinaryResponseMode>() {});
 
             private final EndpointChannel testOptionalBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueErrorEndpoints.testOptionalBinary);
@@ -142,7 +141,7 @@ public interface ErrorServiceBlocking {
             public String testBasicError(AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(testBasicErrorSerializer.serialize(shouldThrowError));
+                _request.body(booleanSerializer.serialize(shouldThrowError));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
@@ -155,7 +154,7 @@ public interface ErrorServiceBlocking {
             public String testImportedError(AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(testImportedErrorSerializer.serialize(shouldThrowError));
+                _request.body(booleanSerializer.serialize(shouldThrowError));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
@@ -168,7 +167,7 @@ public interface ErrorServiceBlocking {
             public String testMultipleErrorsAndPackages(AuthHeader authHeader, Optional<String> errorToThrow) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(testMultipleErrorsAndPackagesSerializer.serialize(errorToThrow));
+                _request.body(optionalStringSerializer.serialize(errorToThrow));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
@@ -182,7 +181,7 @@ public interface ErrorServiceBlocking {
             public void testEmptyBody(AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(testEmptyBodySerializer.serialize(shouldThrowError));
+                _request.body(booleanSerializer.serialize(shouldThrowError));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
@@ -195,7 +194,7 @@ public interface ErrorServiceBlocking {
             public InputStream testBinary(AuthHeader authHeader, boolean shouldThrowError) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(testBinarySerializer.serialize(shouldThrowError));
+                _request.body(booleanSerializer.serialize(shouldThrowError));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
@@ -208,7 +207,7 @@ public interface ErrorServiceBlocking {
             public Optional<InputStream> testOptionalBinary(AuthHeader authHeader, OptionalBinaryResponseMode mode) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(testOptionalBinarySerializer.serialize(mode));
+                _request.body(optionalBinaryResponseModeSerializer.serialize(mode));
                 if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
                     _request.putHeaderParams(
                             "Accept-Conjure-Error-Parameter-Format",
