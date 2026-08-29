@@ -366,6 +366,119 @@ class SafetyEvaluatorTest {
                 .hasValue(LogSafety.SAFE);
     }
 
+    @Test
+    void testCyclicTypes_bothSafe() {
+        // Foo has a field referencing Bar, Bar has a field referencing Foo.
+        // Both fields are marked safe, so both types should evaluate as safe.
+        TypeDefinition foo = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("bar"))
+                        .type(Type.reference(BAR))
+                        .build())
+                .build());
+        TypeDefinition bar = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(BAR)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("foo"))
+                        .type(Type.reference(FOO))
+                        .build())
+                .build());
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(foo).types(bar).build();
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        // Evaluation order should not matter for the result
+        assertThat(evaluator.evaluate(foo)).hasValue(LogSafety.SAFE);
+        assertThat(evaluator.evaluate(bar)).hasValue(LogSafety.SAFE);
+    }
+
+    @Test
+    void testCyclicTypes_withUnsafeField() {
+        // Foo references Bar, Bar references Foo and also has an unsafe string field.
+        // The unsafe field should propagate through the cycle.
+        TypeDefinition foo = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("bar"))
+                        .type(Type.reference(BAR))
+                        .build())
+                .build());
+        TypeDefinition bar = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(BAR)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("foo"))
+                        .type(Type.reference(FOO))
+                        .build())
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("unsafeField"))
+                        .type(Type.primitive(PrimitiveType.STRING))
+                        .safety(LogSafety.UNSAFE)
+                        .build())
+                .build());
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(foo).types(bar).build();
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(bar)).hasValue(LogSafety.UNSAFE);
+        assertThat(evaluator.evaluate(foo)).hasValue(LogSafety.UNSAFE);
+    }
+
+    @Test
+    void testCyclicTypes_evaluationOrderIndependent() {
+        // Verifies that the cache does not cause different results depending on which
+        // type in a cycle is evaluated first.
+        TypeDefinition foo = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("bar"))
+                        .type(Type.reference(BAR))
+                        .build())
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("unsafeField"))
+                        .type(Type.primitive(PrimitiveType.STRING))
+                        .safety(LogSafety.UNSAFE)
+                        .build())
+                .build());
+        TypeDefinition bar = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(BAR)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("foo"))
+                        .type(Type.reference(FOO))
+                        .build())
+                .build());
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(foo).types(bar).build();
+
+        // Evaluate foo first, then bar
+        SafetyEvaluator evaluator1 = new SafetyEvaluator(conjureDef);
+        Optional<LogSafety> fooFirst = evaluator1.evaluate(foo);
+        Optional<LogSafety> barAfterFoo = evaluator1.evaluate(bar);
+
+        // Evaluate bar first, then foo
+        SafetyEvaluator evaluator2 = new SafetyEvaluator(conjureDef);
+        Optional<LogSafety> barFirst = evaluator2.evaluate(bar);
+        Optional<LogSafety> fooAfterBar = evaluator2.evaluate(foo);
+
+        // Results should be identical regardless of evaluation order
+        assertThat(fooFirst).isEqualTo(fooAfterBar);
+        assertThat(barAfterFoo).isEqualTo(barFirst);
+    }
+
+    @Test
+    void testSelfReferentialType() {
+        // A type that references itself (e.g. a linked list node)
+        TypeDefinition node = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("next"))
+                        .type(Type.reference(FOO))
+                        .build())
+                .build());
+        ConjureDefinition conjureDef =
+                ConjureDefinition.builder().version(1).types(node).build();
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(node)).hasValue(LogSafety.SAFE);
+    }
+
     private static Stream<Arguments> getTypes(Type externalReference) {
         TypeDefinition objectType = TypeDefinition.object(ObjectDefinition.builder()
                 .typeName(FOO)
