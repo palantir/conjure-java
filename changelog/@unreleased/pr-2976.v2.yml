@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: SafetyEvaluator memoizes per-type safety results, making objects
+    codegen cost proportional to type-graph size rather than the number of paths
+    through it. Large, dense conjure definitions generate up to 10-25x faster
+    with byte-identical output.
+  links:
+    - https://github.com/palantir/conjure-java/pull/2976
