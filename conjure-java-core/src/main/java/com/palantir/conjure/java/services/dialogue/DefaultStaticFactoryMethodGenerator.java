@@ -117,14 +117,14 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
         boolean isErrorParameterFormatRespecting = options.generateErrorParameterFormatRespectingDialogueInterfaces();
 
-        if (isErrorRespecting) {
+        if (isErrorParameterFormatRespecting) {
             impl.addMethod(createHelperToConstructExceptionDeserializerArgs());
         }
 
-        SerDeFieldsContext context = collectSerDeFields(def, isErrorRespecting);
+        SerDeFieldsContext context = collectSerDeFields(def, isErrorParameterFormatRespecting);
         generateTypeMarkerFields(impl, context);
         generateExceptionArgsFields(impl, context);
-        generateDeserializerFields(impl, context, isErrorRespecting);
+        generateDeserializerFields(impl, context, isErrorParameterFormatRespecting);
         generateSerializerFields(impl, context);
         generateEndpointImplementations(
                 impl, def, context.endpointToSerializerField(), context.endpointToDeserializerField());
