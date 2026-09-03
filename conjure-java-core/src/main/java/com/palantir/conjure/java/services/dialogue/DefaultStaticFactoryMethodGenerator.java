@@ -17,7 +17,6 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.hash.Hashing;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormats;
 import com.palantir.conjure.java.services.Auth;
@@ -361,15 +360,6 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         }
     }
 
-    private static String deterministicHash(TypeName typeName) {
-        // Use deterministic hash to deconflict colliding names
-        return Integer.toUnsignedString(
-                Hashing.murmur3_32_fixed()
-                        .hashUnencodedChars(typeName.toString())
-                        .asInt(),
-                36);
-    }
-
     private static String typeNameToFieldBase(TypeName typeName) {
         if (typeName instanceof ParameterizedTypeName parameterized) {
             StringBuilder sb = new StringBuilder();
@@ -383,7 +373,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         } else if (typeName instanceof ClassName cn) {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, cn.simpleName());
         } else {
-            return "type" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, deterministicHash(typeName));
+            throw new SafeIllegalStateException("Invalid type", SafeArg.of("type", typeName));
         }
     }
 
