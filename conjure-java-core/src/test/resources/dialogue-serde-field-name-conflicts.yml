@@ -1,0 +1,25 @@
+types:
+  definitions:
+    default-package: test.dialogue
+    objects:
+      ListString:
+        fields:
+          value: string
+
+services:
+  SerDeService:
+    name: SerDe Service
+    package: test.dialogue
+    base-path: /
+    endpoints:
+      parameterized:
+        http: POST /parameterized
+        args:
+          value: list<string>
+        returns: list<string>
+
+      flattened:
+        http: POST /flattened
+        args:
+          value: ListString
+        returns: ListString
