@@ -115,7 +115,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
                 .build());
 
-        boolean isErrorRespecting = options.generateErrorParameterFormatRespectingDialogueInterfaces();
+        boolean isErrorParameterFormatRespecting = options.generateErrorParameterFormatRespectingDialogueInterfaces();
 
         if (isErrorRespecting) {
             impl.addMethod(createHelperToConstructExceptionDeserializerArgs());
