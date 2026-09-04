@@ -1,0 +1,7 @@
+types:
+  definitions:
+    default-package: com.test
+    objects:
+      OneValueEnum:
+        values:
+          - ONE
