@@ -132,6 +132,7 @@ public final class CollectionExample {
 
         private Set<String> stringSet = ConjureCollections.newSet();
 
+        @JsonSetter(value = "stringMap", nulls = Nulls.SKIP)
         private Map<String, String> stringMap = new LinkedHashMap<>();
 
         private Builder() {}
@@ -186,7 +187,6 @@ public final class CollectionExample {
             return this;
         }
 
-        @JsonSetter(value = "stringMap", nulls = Nulls.SKIP)
         public Builder stringMap(@Nonnull Map<String, String> stringMap) {
             checkNotBuilt();
             this.stringMap = new LinkedHashMap<>(Preconditions.checkNotNull(stringMap, "stringMap cannot be null"));
