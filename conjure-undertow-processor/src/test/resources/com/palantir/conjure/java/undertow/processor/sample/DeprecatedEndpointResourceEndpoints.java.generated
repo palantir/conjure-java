@@ -48,7 +48,7 @@ public final class DeprecatedEndpointResourceEndpoints implements UndertowServic
         PingEndpoint(UndertowRuntime runtime, DeprecatedEndpointResource delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.pingSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.pingSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override

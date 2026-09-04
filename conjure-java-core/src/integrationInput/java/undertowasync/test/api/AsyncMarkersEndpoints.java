@@ -48,7 +48,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
         AsyncMarkerEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -100,7 +100,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
         AsyncTagEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -155,7 +155,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
         SyncEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override

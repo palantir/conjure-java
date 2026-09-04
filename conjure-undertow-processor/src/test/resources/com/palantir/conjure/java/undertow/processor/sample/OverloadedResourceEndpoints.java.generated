@@ -49,7 +49,7 @@ public final class OverloadedResourceEndpoints implements UndertowService {
         EndpointEndpoint_0(UndertowRuntime runtime, OverloadedResource delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.endpointSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.endpointSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
@@ -102,7 +102,7 @@ public final class OverloadedResourceEndpoints implements UndertowService {
             this.delegate = delegate;
             this.valueDeserializer =
                     new QueryParamDeserializer<>("q", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
-            this.endpointSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.endpointSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
