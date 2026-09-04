@@ -218,232 +218,251 @@ public interface EteServiceAsync {
     /** Creates an asynchronous/non-blocking client for a EteService service. */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceAsync() {
+            private static final TypeMarker<String> stringTypeMarker = new TypeMarker<String>() {};
+
+            private static final TypeMarker<Integer> integerTypeMarker = new TypeMarker<Integer>() {};
+
+            private static final TypeMarker<Double> doubleTypeMarker = new TypeMarker<Double>() {};
+
+            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+
+            private static final TypeMarker<SafeLong> safeLongTypeMarker = new TypeMarker<SafeLong>() {};
+
+            private static final TypeMarker<ResourceIdentifier> resourceIdentifierTypeMarker =
+                    new TypeMarker<ResourceIdentifier>() {};
+
+            private static final TypeMarker<BearerToken> bearerTokenTypeMarker = new TypeMarker<BearerToken>() {};
+
+            private static final TypeMarker<Optional<String>> optionalStringTypeMarker =
+                    new TypeMarker<Optional<String>>() {};
+
+            private static final TypeMarker<OffsetDateTime> offsetDateTimeTypeMarker =
+                    new TypeMarker<OffsetDateTime>() {};
+
+            private static final TypeMarker<Long> longTypeMarker = new TypeMarker<Long>() {};
+
+            private static final TypeMarker<Optional<Long>> optionalLongTypeMarker =
+                    new TypeMarker<Optional<Long>>() {};
+
+            private static final TypeMarker<StringAliasExample> stringAliasExampleTypeMarker =
+                    new TypeMarker<StringAliasExample>() {};
+
+            private static final TypeMarker<NestedStringAliasExample> nestedStringAliasExampleTypeMarker =
+                    new TypeMarker<NestedStringAliasExample>() {};
+
+            private static final TypeMarker<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample2TypeMarker =
+                            new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {};
+
+            private static final TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleTypeMarker =
+                            new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {};
+
+            private static final TypeMarker<SimpleEnum> simpleEnumTypeMarker = new TypeMarker<SimpleEnum>() {};
+
+            private static final TypeMarker<List<SimpleEnum>> listSimpleEnumTypeMarker =
+                    new TypeMarker<List<SimpleEnum>>() {};
+
+            private static final TypeMarker<Optional<SimpleEnum>> optionalSimpleEnumTypeMarker =
+                    new TypeMarker<Optional<SimpleEnum>>() {};
+
+            private static final TypeMarker<Optional<LongAlias>> optionalLongAliasTypeMarker =
+                    new TypeMarker<Optional<LongAlias>>() {};
+
+            private static final TypeMarker<SimpleUnion> simpleUnionTypeMarker = new TypeMarker<SimpleUnion>() {};
+
+            private static final TypeMarker<List<Optional<String>>> listOptionalStringTypeMarker =
+                    new TypeMarker<List<Optional<String>>>() {};
+
+            private static final TypeMarker<Set<Optional<String>>> setOptionalStringTypeMarker =
+                    new TypeMarker<Set<Optional<String>>>() {};
+
+            private static final TypeMarker<List<String>> listStringTypeMarker = new TypeMarker<List<String>>() {};
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
-
             private final Deserializer<String> stringDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+                    _runtime.bodySerDe().deserializer(stringTypeMarker);
+
+            private final Deserializer<Integer> integerDeserializer =
+                    _runtime.bodySerDe().deserializer(integerTypeMarker);
+
+            private final Deserializer<Double> doubleDeserializer =
+                    _runtime.bodySerDe().deserializer(doubleTypeMarker);
+
+            private final Deserializer<Boolean> booleanDeserializer =
+                    _runtime.bodySerDe().deserializer(booleanTypeMarker);
+
+            private final Deserializer<SafeLong> safeLongDeserializer =
+                    _runtime.bodySerDe().deserializer(safeLongTypeMarker);
+
+            private final Deserializer<ResourceIdentifier> resourceIdentifierDeserializer =
+                    _runtime.bodySerDe().deserializer(resourceIdentifierTypeMarker);
+
+            private final Deserializer<BearerToken> bearerTokenDeserializer =
+                    _runtime.bodySerDe().deserializer(bearerTokenTypeMarker);
+
+            private final Deserializer<Optional<String>> optionalStringDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalStringTypeMarker);
+
+            private final Deserializer<OffsetDateTime> offsetDateTimeDeserializer =
+                    _runtime.bodySerDe().deserializer(offsetDateTimeTypeMarker);
+
+            private final Deserializer<Long> longDeserializer =
+                    _runtime.bodySerDe().deserializer(longTypeMarker);
+
+            private final Deserializer<Optional<Long>> optionalLongDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalLongTypeMarker);
+
+            private final Deserializer<StringAliasExample> stringAliasExampleDeserializer =
+                    _runtime.bodySerDe().deserializer(stringAliasExampleTypeMarker);
+
+            private final Deserializer<NestedStringAliasExample> nestedStringAliasExampleDeserializer =
+                    _runtime.bodySerDe().deserializer(nestedStringAliasExampleTypeMarker);
+
+            private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample2Deserializer = _runtime.bodySerDe().deserializer(stringAliasExample2TypeMarker);
+
+            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleDeserializer =
+                            _runtime.bodySerDe().deserializer(optionalStringAliasExampleTypeMarker);
+
+            private final Deserializer<Void> voidDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Deserializer<SimpleEnum> simpleEnumDeserializer =
+                    _runtime.bodySerDe().deserializer(simpleEnumTypeMarker);
+
+            private final Deserializer<List<SimpleEnum>> listSimpleEnumDeserializer =
+                    _runtime.bodySerDe().deserializer(listSimpleEnumTypeMarker);
+
+            private final Deserializer<Optional<SimpleEnum>> optionalSimpleEnumDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalSimpleEnumTypeMarker);
+
+            private final Deserializer<Optional<LongAlias>> optionalLongAliasDeserializer =
+                    _runtime.bodySerDe().deserializer(optionalLongAliasTypeMarker);
+
+            private final Deserializer<SimpleUnion> simpleUnionDeserializer =
+                    _runtime.bodySerDe().deserializer(simpleUnionTypeMarker);
+
+            private final Serializer<StringAliasExample> stringAliasExampleSerializer =
+                    _runtime.bodySerDe().serializer(stringAliasExampleTypeMarker);
+
+            private final Serializer<allexamples.com.palantir.product.StringAliasExample>
+                    stringAliasExample2Serializer = _runtime.bodySerDe().serializer(stringAliasExample2TypeMarker);
+
+            private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
+                    optionalStringAliasExampleSerializer =
+                            _runtime.bodySerDe().serializer(optionalStringAliasExampleTypeMarker);
+
+            private final Serializer<List<Optional<String>>> listOptionalStringSerializer =
+                    _runtime.bodySerDe().serializer(listOptionalStringTypeMarker);
+
+            private final Serializer<Set<Optional<String>>> setOptionalStringSerializer =
+                    _runtime.bodySerDe().serializer(setOptionalStringTypeMarker);
+
+            private final Serializer<List<String>> listStringSerializer =
+                    _runtime.bodySerDe().serializer(listStringTypeMarker);
+
+            private final Serializer<SimpleUnion> simpleUnionSerializer =
+                    _runtime.bodySerDe().serializer(simpleUnionTypeMarker);
+
+            private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
             private final EndpointChannel integerChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.integer);
 
-            private final Deserializer<Integer> integerDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
-
             private final EndpointChannel double_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.double_);
-
-            private final Deserializer<Double> double_Deserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
 
             private final EndpointChannel boolean_Channel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.boolean_);
 
-            private final Deserializer<Boolean> boolean_Deserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
-
             private final EndpointChannel safelongChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.safelong);
 
-            private final Deserializer<SafeLong> safelongDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<SafeLong>() {});
-
             private final EndpointChannel ridChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.rid);
-
-            private final Deserializer<ResourceIdentifier> ridDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<ResourceIdentifier>() {});
 
             private final EndpointChannel bearertokenChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.bearertoken);
 
-            private final Deserializer<BearerToken> bearertokenDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<BearerToken>() {});
-
             private final EndpointChannel optionalStringChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalString);
-
-            private final Deserializer<Optional<String>> optionalStringDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel optionalEmptyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEmpty);
 
-            private final Deserializer<Optional<String>> optionalEmptyDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
-
             private final EndpointChannel datetimeChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.datetime);
-
-            private final Deserializer<OffsetDateTime> datetimeDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<OffsetDateTime>() {});
 
             private final EndpointChannel binaryChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.binary);
 
             private final EndpointChannel pathChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.path);
 
-            private final Deserializer<String> pathDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
-
             private final EndpointChannel externalLongPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.externalLongPath);
-
-            private final Deserializer<Long> externalLongPathDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Long>() {});
 
             private final EndpointChannel optionalExternalLongQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
 
-            private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Long>>() {});
-
-            private final Serializer<StringAliasExample> notNullBodySerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
-
             private final EndpointChannel notNullBodyChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBody);
-
-            private final Deserializer<StringAliasExample> notNullBodyDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel aliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasOne);
 
-            private final Deserializer<StringAliasExample> aliasOneDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
-
             private final EndpointChannel optionalAliasOneChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalAliasOne);
-
-            private final Deserializer<StringAliasExample> optionalAliasOneDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel aliasTwoChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasTwo);
 
-            private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<NestedStringAliasExample>() {});
-
-            private final Serializer<allexamples.com.palantir.product.StringAliasExample>
-                    notNullBodyExternalImportSerializer = _runtime.bodySerDe()
-                            .serializer(new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {});
-
             private final EndpointChannel notNullBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.notNullBodyExternalImport);
-
-            private final Deserializer<allexamples.com.palantir.product.StringAliasExample>
-                    notNullBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {});
-
-            private final Serializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
-                    optionalBodyExternalImportSerializer = _runtime.bodySerDe()
-                            .serializer(
-                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel optionalBodyExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalBodyExternalImport);
 
-            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
-                    optionalBodyExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(
-                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
-
             private final EndpointChannel optionalQueryExternalImportChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalQueryExternalImport);
-
-            private final Deserializer<Optional<allexamples.com.palantir.product.StringAliasExample>>
-                    optionalQueryExternalImportDeserializer = _runtime.bodySerDe()
-                            .deserializer(
-                                    new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {});
 
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
-            private final Deserializer<Void> noReturnDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
-
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
-
-            private final Deserializer<SimpleEnum> enumQueryDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
 
             private final EndpointChannel enumListQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumListQuery);
 
-            private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<List<SimpleEnum>>() {});
-
             private final EndpointChannel optionalEnumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalEnumQuery);
-
-            private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<SimpleEnum>>() {});
 
             private final EndpointChannel enumHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumHeader);
 
-            private final Deserializer<SimpleEnum> enumHeaderDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
-
             private final EndpointChannel jsonErrorsHeaderChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.jsonErrorsHeader);
-
-            private final Deserializer<String> jsonErrorsHeaderDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
 
-            private final Deserializer<String> errorParameterSerializationDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
-
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
-
-            private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Optional<LongAlias>>() {});
 
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
-            private final Deserializer<Void> complexQueryParametersDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
-
-            private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
-
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
-
-            private final Deserializer<Void> receiveListOfOptionalsDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
-
-            private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
 
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
-            private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
-
-            private final Serializer<List<String>> receiveListOfStringsSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
-
             private final EndpointChannel receiveListOfStringsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
-            private final Deserializer<Void> receiveListOfStringsDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
-
-            private final Serializer<SimpleUnion> unionSerializer =
-                    _runtime.bodySerDe().serializer(new TypeMarker<SimpleUnion>() {});
-
             private final EndpointChannel unionChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.union);
-
-            private final Deserializer<SimpleUnion> unionDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<SimpleUnion>() {});
 
             @Override
             public ListenableFuture<String> string(AuthHeader authHeader) {
@@ -463,35 +482,35 @@ public interface EteServiceAsync {
             public ListenableFuture<Double> double_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(double_Channel, _request.build(), double_Deserializer);
+                return _runtime.clients().call(double_Channel, _request.build(), doubleDeserializer);
             }
 
             @Override
             public ListenableFuture<Boolean> boolean_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(boolean_Channel, _request.build(), boolean_Deserializer);
+                return _runtime.clients().call(boolean_Channel, _request.build(), booleanDeserializer);
             }
 
             @Override
             public ListenableFuture<SafeLong> safelong(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(safelongChannel, _request.build(), safelongDeserializer);
+                return _runtime.clients().call(safelongChannel, _request.build(), safeLongDeserializer);
             }
 
             @Override
             public ListenableFuture<ResourceIdentifier> rid(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(ridChannel, _request.build(), ridDeserializer);
+                return _runtime.clients().call(ridChannel, _request.build(), resourceIdentifierDeserializer);
             }
 
             @Override
             public ListenableFuture<BearerToken> bearertoken(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(bearertokenChannel, _request.build(), bearertokenDeserializer);
+                return _runtime.clients().call(bearertokenChannel, _request.build(), bearerTokenDeserializer);
             }
 
             @Override
@@ -505,14 +524,14 @@ public interface EteServiceAsync {
             public ListenableFuture<Optional<String>> optionalEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(optionalEmptyChannel, _request.build(), optionalEmptyDeserializer);
+                return _runtime.clients().call(optionalEmptyChannel, _request.build(), optionalStringDeserializer);
             }
 
             @Override
             public ListenableFuture<OffsetDateTime> datetime(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(datetimeChannel, _request.build(), datetimeDeserializer);
+                return _runtime.clients().call(datetimeChannel, _request.build(), offsetDateTimeDeserializer);
             }
 
             @Override
@@ -531,7 +550,7 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("param", _plainSerDe.serializeString(param));
-                return _runtime.clients().call(pathChannel, _request.build(), pathDeserializer);
+                return _runtime.clients().call(pathChannel, _request.build(), stringDeserializer);
             }
 
             @Override
@@ -539,7 +558,7 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("param", Objects.toString(param));
-                return _runtime.clients().call(externalLongPathChannel, _request.build(), externalLongPathDeserializer);
+                return _runtime.clients().call(externalLongPathChannel, _request.build(), longDeserializer);
             }
 
             @Override
@@ -551,10 +570,7 @@ public interface EteServiceAsync {
                     _request.putQueryParams("param", Objects.toString(param.get()));
                 }
                 return _runtime.clients()
-                        .call(
-                                optionalExternalLongQueryChannel,
-                                _request.build(),
-                                optionalExternalLongQueryDeserializer);
+                        .call(optionalExternalLongQueryChannel, _request.build(), optionalLongDeserializer);
             }
 
             @Override
@@ -562,8 +578,8 @@ public interface EteServiceAsync {
                     AuthHeader authHeader, StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(notNullBodySerializer.serialize(notNullBody));
-                return _runtime.clients().call(notNullBodyChannel, _request.build(), notNullBodyDeserializer);
+                _request.body(stringAliasExampleSerializer.serialize(notNullBody));
+                return _runtime.clients().call(notNullBodyChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
             @Override
@@ -572,7 +588,7 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("queryParamName", _plainSerDe.serializeString(queryParamName.get()));
-                return _runtime.clients().call(aliasOneChannel, _request.build(), aliasOneDeserializer);
+                return _runtime.clients().call(aliasOneChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
             @Override
@@ -585,7 +601,8 @@ public interface EteServiceAsync {
                             "queryParamName",
                             _plainSerDe.serializeString(queryParamName.get().get()));
                 }
-                return _runtime.clients().call(optionalAliasOneChannel, _request.build(), optionalAliasOneDeserializer);
+                return _runtime.clients()
+                        .call(optionalAliasOneChannel, _request.build(), stringAliasExampleDeserializer);
             }
 
             @Override
@@ -596,7 +613,7 @@ public interface EteServiceAsync {
                 _request.putQueryParams(
                         "queryParamName",
                         _plainSerDe.serializeString(queryParamName.get().get()));
-                return _runtime.clients().call(aliasTwoChannel, _request.build(), aliasTwoDeserializer);
+                return _runtime.clients().call(aliasTwoChannel, _request.build(), nestedStringAliasExampleDeserializer);
             }
 
             @Override
@@ -604,12 +621,9 @@ public interface EteServiceAsync {
                     AuthHeader authHeader, allexamples.com.palantir.product.StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
+                _request.body(stringAliasExample2Serializer.serialize(notNullBody));
                 return _runtime.clients()
-                        .call(
-                                notNullBodyExternalImportChannel,
-                                _request.build(),
-                                notNullBodyExternalImportDeserializer);
+                        .call(notNullBodyExternalImportChannel, _request.build(), stringAliasExample2Deserializer);
             }
 
             @Override
@@ -618,12 +632,12 @@ public interface EteServiceAsync {
                             AuthHeader authHeader, Optional<allexamples.com.palantir.product.StringAliasExample> body) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(optionalBodyExternalImportSerializer.serialize(body));
+                _request.body(optionalStringAliasExampleSerializer.serialize(body));
                 return _runtime.clients()
                         .call(
                                 optionalBodyExternalImportChannel,
                                 _request.build(),
-                                optionalBodyExternalImportDeserializer);
+                                optionalStringAliasExampleDeserializer);
             }
 
             @Override
@@ -640,14 +654,14 @@ public interface EteServiceAsync {
                         .call(
                                 optionalQueryExternalImportChannel,
                                 _request.build(),
-                                optionalQueryExternalImportDeserializer);
+                                optionalStringAliasExampleDeserializer);
             }
 
             @Override
             public ListenableFuture<Void> noReturn(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(noReturnChannel, _request.build(), noReturnDeserializer);
+                return _runtime.clients().call(noReturnChannel, _request.build(), voidDeserializer);
             }
 
             @Override
@@ -655,7 +669,7 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("queryParamName", Objects.toString(queryParamName));
-                return _runtime.clients().call(enumQueryChannel, _request.build(), enumQueryDeserializer);
+                return _runtime.clients().call(enumQueryChannel, _request.build(), simpleEnumDeserializer);
             }
 
             @Override
@@ -666,7 +680,7 @@ public interface EteServiceAsync {
                 for (SimpleEnum queryParamNameElement : queryParamName) {
                     _request.putQueryParams("queryParamName", Objects.toString(queryParamNameElement));
                 }
-                return _runtime.clients().call(enumListQueryChannel, _request.build(), enumListQueryDeserializer);
+                return _runtime.clients().call(enumListQueryChannel, _request.build(), listSimpleEnumDeserializer);
             }
 
             @Override
@@ -678,7 +692,7 @@ public interface EteServiceAsync {
                     _request.putQueryParams("queryParamName", Objects.toString(queryParamName.get()));
                 }
                 return _runtime.clients()
-                        .call(optionalEnumQueryChannel, _request.build(), optionalEnumQueryDeserializer);
+                        .call(optionalEnumQueryChannel, _request.build(), optionalSimpleEnumDeserializer);
             }
 
             @Override
@@ -686,7 +700,7 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
-                return _runtime.clients().call(enumHeaderChannel, _request.build(), enumHeaderDeserializer);
+                return _runtime.clients().call(enumHeaderChannel, _request.build(), simpleEnumDeserializer);
             }
 
             @Override
@@ -695,7 +709,7 @@ public interface EteServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
-                return _runtime.clients().call(jsonErrorsHeaderChannel, _request.build(), jsonErrorsHeaderDeserializer);
+                return _runtime.clients().call(jsonErrorsHeaderChannel, _request.build(), stringDeserializer);
             }
 
             @Override
@@ -705,10 +719,7 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
                 return _runtime.clients()
-                        .call(
-                                errorParameterSerializationChannel,
-                                _request.build(),
-                                errorParameterSerializationDeserializer);
+                        .call(errorParameterSerializationChannel, _request.build(), stringDeserializer);
             }
 
             @Override
@@ -721,7 +732,7 @@ public interface EteServiceAsync {
                             "input", Objects.toString(input.get().get()));
                 }
                 return _runtime.clients()
-                        .call(aliasLongEndpointChannel, _request.build(), aliasLongEndpointDeserializer);
+                        .call(aliasLongEndpointChannel, _request.build(), optionalLongAliasDeserializer);
             }
 
             @Override
@@ -743,43 +754,39 @@ public interface EteServiceAsync {
                 for (int intsElement : ints) {
                     _request.putQueryParams("ints", _plainSerDe.serializeInteger(intsElement));
                 }
-                return _runtime.clients()
-                        .call(complexQueryParametersChannel, _request.build(), complexQueryParametersDeserializer);
+                return _runtime.clients().call(complexQueryParametersChannel, _request.build(), voidDeserializer);
             }
 
             @Override
             public ListenableFuture<Void> receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(receiveListOfOptionalsSerializer.serialize(value));
-                return _runtime.clients()
-                        .call(receiveListOfOptionalsChannel, _request.build(), receiveListOfOptionalsDeserializer);
+                _request.body(listOptionalStringSerializer.serialize(value));
+                return _runtime.clients().call(receiveListOfOptionalsChannel, _request.build(), voidDeserializer);
             }
 
             @Override
             public ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(receiveSetOfOptionalsSerializer.serialize(value));
-                return _runtime.clients()
-                        .call(receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
+                _request.body(setOptionalStringSerializer.serialize(value));
+                return _runtime.clients().call(receiveSetOfOptionalsChannel, _request.build(), voidDeserializer);
             }
 
             @Override
             public ListenableFuture<Void> receiveListOfStrings(AuthHeader authHeader, List<String> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(receiveListOfStringsSerializer.serialize(value));
-                return _runtime.clients()
-                        .call(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
+                _request.body(listStringSerializer.serialize(value));
+                return _runtime.clients().call(receiveListOfStringsChannel, _request.build(), voidDeserializer);
             }
 
             @Override
             public ListenableFuture<SimpleUnion> union(AuthHeader authHeader, SimpleUnion value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(unionSerializer.serialize(value));
-                return _runtime.clients().call(unionChannel, _request.build(), unionDeserializer);
+                _request.body(simpleUnionSerializer.serialize(value));
+                return _runtime.clients().call(unionChannel, _request.build(), simpleUnionDeserializer);
             }
 
             @Override

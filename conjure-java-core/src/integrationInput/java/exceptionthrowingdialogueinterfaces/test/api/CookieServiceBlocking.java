@@ -31,13 +31,18 @@ public interface CookieServiceBlocking {
     /** Creates a synchronous/blocking client for a CookieService service. */
     static CookieServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceBlocking() {
+            private static final TypeMarker<Void> voidTypeMarker = new TypeMarker<Void>() {};
+
+            private static final ExceptionDeserializerArgs<Void> voidExceptionArgs =
+                    createExceptionDeserializerArgs(voidTypeMarker);
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Deserializer<Void> voidDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer(voidExceptionArgs);
 
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
-
-            private final Deserializer<Void> eatCookiesDeserializer = _runtime.bodySerDe()
-                    .emptyBodyDeserializer(createExceptionDeserializerArgs(new TypeMarker<Void>() {}));
 
             private static <T> ExceptionDeserializerArgs<T> createExceptionDeserializerArgs(TypeMarker<T> returnType) {
                 ExceptionDeserializerArgs.Builder<T> builder =
@@ -58,7 +63,7 @@ public interface CookieServiceBlocking {
                             "Accept-Conjure-Error-Parameter-Format",
                             _runtime.bodySerDe().errorParameterFormat().get().toString());
                 }
-                _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
+                _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), voidDeserializer);
             }
 
             @Override

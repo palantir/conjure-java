@@ -27,18 +27,20 @@ public interface EmptyPathServiceBlocking {
     /** Creates a synchronous/blocking client for a EmptyPathService service. */
     static EmptyPathServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EmptyPathServiceBlocking() {
+            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final Deserializer<Boolean> booleanDeserializer =
+                    _runtime.bodySerDe().deserializer(booleanTypeMarker);
 
             private final EndpointChannel emptyPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEmptyPathEndpoints.emptyPath);
 
-            private final Deserializer<Boolean> emptyPathDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
-
             @Override
             public boolean emptyPath() {
                 Request.Builder _request = Request.builder();
-                return _runtime.clients().callBlocking(emptyPathChannel, _request.build(), emptyPathDeserializer);
+                return _runtime.clients().callBlocking(emptyPathChannel, _request.build(), booleanDeserializer);
             }
 
             @Override
