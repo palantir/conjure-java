@@ -31,7 +31,7 @@ import java.lang.reflect.TypeVariable;
  *
  * .
  */
-@SuppressWarnings("unused") // Generic type exists for compile time safety but is not used internally.
+// Generic type exists for compile time safety but is not used internally.
 public abstract class TypeMarker<T> {
 
     private final Type type;

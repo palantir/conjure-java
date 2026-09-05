@@ -269,8 +269,7 @@ public final class ConjureJavaCli implements Runnable {
                         "If --sealedUnions is enabled, this flag enables visitor generation for back-compatibility.")
         private boolean sealedUnionVisitors;
 
-        @SuppressWarnings("unused")
-        @CommandLine.Unmatched
+                @CommandLine.Unmatched
         private List<String> unmatchedOptions;
 
         @Override
