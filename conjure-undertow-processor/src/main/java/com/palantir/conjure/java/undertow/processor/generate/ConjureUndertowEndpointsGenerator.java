@@ -157,7 +157,7 @@ public final class ConjureUndertowEndpointsGenerator {
         return endpointClassName;
     }
 
-    @SuppressWarnings({"checkstyle:MethodLength", "checkstyle:CyclomaticComplexity"})
+    @SuppressWarnings({"checkstyle:CyclomaticComplexity", "checkstyle:MethodLength"})
     private static TypeSpec endpoint(ServiceDefinition service, EndpointDefinition endpoint) {
         List<AdditionalField> additionalFields = new ArrayList<>();
         MethodSpec.Builder handlerBuilder = MethodSpec.methodBuilder("handleRequest")

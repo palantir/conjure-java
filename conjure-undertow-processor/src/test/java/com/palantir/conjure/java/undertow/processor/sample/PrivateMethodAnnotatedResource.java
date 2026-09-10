@@ -21,7 +21,6 @@ import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 
 public final class PrivateMethodAnnotatedResource {
 
-    @SuppressWarnings("unused")
     @Handle(method = HttpMethod.GET, path = "/oops")
     private void ping() {}
 }

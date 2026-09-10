@@ -96,7 +96,6 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
     private static final class LazyTraceValue {
 
         @JsonValue
-        @SuppressWarnings("unused")
         public String traceId() {
             return Tracer.getTraceId();
         }
