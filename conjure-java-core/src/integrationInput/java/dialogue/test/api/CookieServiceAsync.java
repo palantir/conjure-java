@@ -30,17 +30,17 @@ public interface CookieServiceAsync {
         return new CookieServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
+            private final Deserializer<Void> voidDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
-
-            private final Deserializer<Void> eatCookiesDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
             public ListenableFuture<Void> eatCookies(BearerToken token) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
-                return _runtime.clients().call(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
+                return _runtime.clients().call(eatCookiesChannel, _request.build(), voidDeserializer);
             }
 
             @Override

@@ -29,17 +29,17 @@ public interface CookieServiceBlocking {
         return new CookieServiceBlocking() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
+            private final Deserializer<Void> voidDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
-
-            private final Deserializer<Void> eatCookiesDeserializer =
-                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
             public void eatCookies(BearerToken token) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
-                _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
+                _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), voidDeserializer);
             }
 
             @Override

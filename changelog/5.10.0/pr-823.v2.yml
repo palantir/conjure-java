@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Update conjure-undertow default encodings
-  links:
-  - https://github.com/palantir/conjure-java/pull/823

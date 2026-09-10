@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: conjure-undertow processor supports specializing generic interfaces
-  links:
-  - https://github.com/palantir/conjure-java/pull/1873

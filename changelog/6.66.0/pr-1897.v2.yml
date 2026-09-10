@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Add docs for visitor builders to README
-  links:
-  - https://github.com/palantir/conjure-java/pull/1897

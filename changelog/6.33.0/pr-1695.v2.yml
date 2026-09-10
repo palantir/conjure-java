@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: conjure-undertow supports custom OPTIONS and PATCH endpoints
-  links:
-  - https://github.com/palantir/conjure-java/pull/1695

@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: handle DeadlineExpiredException in standard exception mapper
-  links:
-  - https://github.com/palantir/conjure-java/pull/2454

@@ -1,6 +1,0 @@
-type: fix
-fix:
-  description: Revert publishing the conjure-java jar to avoid breaking conjure generator
-    distribution resolution with our standard plugins.
-  links:
-  - https://github.com/palantir/conjure-java/pull/1179

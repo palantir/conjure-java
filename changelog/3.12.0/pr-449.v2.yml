@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Implement SafeExchangeCompletionListener utility
-  links:
-  - https://github.com/palantir/conjure-java/pull/449

@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: '`throwOnUnknown` results in SafeIllegalArgumentException rather than SafeIllegalStateException.'
-  links:
-  - https://github.com/palantir/conjure-java/pull/1226

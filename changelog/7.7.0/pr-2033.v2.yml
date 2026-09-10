@@ -1,5 +1,0 @@
-type: feature
-feature:
-  description: Add `RequestContext` method to get cookie values.
-  links:
-  - https://github.com/palantir/conjure-java/pull/2033

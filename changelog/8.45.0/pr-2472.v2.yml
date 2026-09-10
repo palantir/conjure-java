@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: 'nit: Make ReturnTypeMapper package-private'
-  links:
-  - https://github.com/palantir/conjure-java/pull/2472

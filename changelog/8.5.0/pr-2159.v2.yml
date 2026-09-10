@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: support deprecated-for-removal on dialogue code generation
-  links:
-  - https://github.com/palantir/conjure-java/pull/2159

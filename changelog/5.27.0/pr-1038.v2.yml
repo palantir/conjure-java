@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Generated objects memoized hash code is not volatile
-  links:
-  - https://github.com/palantir/conjure-java/pull/1038

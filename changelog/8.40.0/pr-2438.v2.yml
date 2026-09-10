@@ -1,6 +1,0 @@
-type: fix
-fix:
-  description: '[Fix] Fix Staged Builder Compilation Issue and Strict Staged Builder
-    Deserialization'
-  links:
-  - https://github.com/palantir/conjure-java/pull/2438

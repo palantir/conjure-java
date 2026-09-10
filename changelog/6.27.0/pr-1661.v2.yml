@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: '[processor] Support multiple body parameters to support multipart
-    use-cases'
-  links:
-  - https://github.com/palantir/conjure-java/pull/1661

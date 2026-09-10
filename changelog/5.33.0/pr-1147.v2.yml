@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Generate tags for dialogue endpoints
-  links:
-  - https://github.com/palantir/conjure-java/pull/1147

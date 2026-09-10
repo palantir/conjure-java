@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Add flag to exclude generation of async Dialogue interfaces
-  links:
-  - https://github.com/palantir/conjure-java/pull/2423

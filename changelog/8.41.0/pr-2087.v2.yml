@@ -1,5 +1,0 @@
-type: feature
-feature:
-  description: Add flag to exclude static factory methods from generated objects
-  links:
-  - https://github.com/palantir/conjure-java/pull/2087

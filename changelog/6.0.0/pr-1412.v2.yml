@@ -1,5 +1,0 @@
-type: break
-break:
-  description: Require java 11. Standardize code-formatting on Goethe
-  links:
-  - https://github.com/palantir/conjure-java/pull/1412

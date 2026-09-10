@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Move generated service handler to service interface
-  links:
-  - https://github.com/palantir/conjure-java/pull/975

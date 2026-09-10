@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Union unknown variant is defined with unknown safety
-  links:
-  - https://github.com/palantir/conjure-java/pull/1763

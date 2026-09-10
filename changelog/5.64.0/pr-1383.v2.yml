@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: conjure-undertow GET endpoints support HEAD requests as well
-  links:
-  - https://github.com/palantir/conjure-java/pull/1383

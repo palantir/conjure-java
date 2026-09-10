@@ -50,6 +50,27 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         return new String(Files.readAllBytes(Paths.get(srcDir.getPath(), clazz)), StandardCharsets.UTF_8);
     }
 
+    private String generateExampleTestService(Options options, String outputDirectory) throws IOException {
+        ConjureDefinition conjure = Conjure.parse(ConjureArgs.builder()
+                .addDefinitions(
+                        new File("src/test/resources/example-types.yml"),
+                        new File("src/test/resources/example-service.yml"))
+                .safetyDeclarations(SafetyDeclarationRequirements.ALLOWED)
+                .build());
+        File src = generateDialogueServices(conjure, options, outputDirectory);
+        return compiledFileContent(src, "com/palantir/another/TestServiceBlocking.java");
+    }
+
+    private File generateDialogueServices(ConjureDefinition conjure, Options options, String outputDirectory)
+            throws IOException {
+        File src =
+                Files.createDirectory(folder.toPath().resolve(outputDirectory)).toFile();
+        new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(options)))
+                .emit(conjure, src);
+        return src;
+    }
+
     @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ConjureArgs.builder()
@@ -67,6 +88,74 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         // Generated files contain imports
         assertThat(compiledFileContent(src, "test/api/with/imports/ImportServiceBlocking.java"))
                 .contains("import com.palantir.product.StringExample;");
+    }
+
+    @Test
+    public void testSharedRequestAndResponseTypes() throws IOException {
+        String testService = generateExampleTestService(Options.empty(), "shared-types");
+
+        assertThat(testService)
+                .as("Identical body types share a serializer")
+                .containsOnlyOnce("private final Serializer<String> stringSerializer");
+        assertThat(testService)
+                .as("A type used in both requests and responses shares a TypeMarker")
+                .containsOnlyOnce("new TypeMarker<Optional<String>>() {}")
+                .contains(
+                        "_runtime.bodySerDe().deserializer(optionalStringTypeMarker)",
+                        "_runtime.bodySerDe().serializer(optionalStringTypeMarker)");
+    }
+
+    @Test
+    public void testBinaryBodyAliasesDoNotProduceSerializerFields() throws IOException {
+        String testService = generateExampleTestService(Options.empty(), "binary-aliases");
+
+        assertThat(testService)
+                .doesNotContain(
+                        "private final Serializer<InputStream>",
+                        "TypeMarker<InputStream>",
+                        "private final Serializer<BinaryRequestBody>",
+                        "TypeMarker<BinaryRequestBody>")
+                .contains("_runtime.bodySerDe().serialize(input)");
+    }
+
+    @Test
+    public void testEmptyResponseFields() throws IOException {
+        String standardService = generateExampleTestService(Options.empty(), "standard-empty-response");
+        assertThat(standardService)
+                .as("Standard empty responses do not need a TypeMarker")
+                .doesNotContain("TypeMarker<Void>")
+                .containsOnlyOnce("private final Deserializer<Void> voidDeserializer")
+                .contains("_runtime.bodySerDe().emptyBodyDeserializer()");
+
+        Options errorParameterFormatRespecting = Options.builder()
+                .generateErrorParameterFormatRespectingDialogueInterfaces(true)
+                .build();
+        String errorRespectingService =
+                generateExampleTestService(errorParameterFormatRespecting, "error-respecting-empty-response");
+        assertThat(errorRespectingService)
+                .as("Error-respecting empty responses need shared exception deserialization fields")
+                .containsOnlyOnce("new TypeMarker<Void>() {}")
+                .containsOnlyOnce("private static final ExceptionDeserializerArgs<Void> voidExceptionArgs")
+                .containsOnlyOnce("private final Deserializer<Void> voidDeserializer")
+                .contains("_runtime.bodySerDe().emptyBodyDeserializer(voidExceptionArgs)");
+    }
+
+    @Test
+    public void testParameterizedAndFlattenedTypeNamesAreDeconflicted() throws IOException {
+        ConjureDefinition conjure = Conjure.parse(ConjureArgs.builder()
+                .addDefinitions(new File("src/test/resources/dialogue-serde-field-name-conflicts.yml"))
+                .safetyDeclarations(SafetyDeclarationRequirements.ALLOWED)
+                .build());
+        File src = generateDialogueServices(conjure, Options.empty(), "field-name-conflicts");
+        String service = compiledFileContent(src, "test/dialogue/SerDeServiceBlocking.java");
+
+        assertThat(service)
+                .contains("private static final TypeMarker<List<String>> listStringTypeMarker")
+                .containsPattern("private static final TypeMarker<ListString> listString[a-z0-9]+TypeMarker")
+                .contains("private final Serializer<List<String>> listStringSerializer")
+                .containsPattern("private final Serializer<ListString> listString[a-z0-9]+Serializer")
+                .contains("private final Deserializer<List<String>> listStringDeserializer")
+                .containsPattern("private final Deserializer<ListString> listString[a-z0-9]+Deserializer");
     }
 
     @Test

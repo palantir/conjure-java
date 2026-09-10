@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Migrates the rest of the snapshot generation tests to the new framework.
-  links:
-  - https://github.com/palantir/conjure-java/pull/2463

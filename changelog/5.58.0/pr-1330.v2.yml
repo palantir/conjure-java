@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Re-apply endpoint information to conjure-undertow spans
-  links:
-  - https://github.com/palantir/conjure-java/pull/1330

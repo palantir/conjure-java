@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: 'Performance: faster enum equals method.'
-  links:
-  - https://github.com/palantir/conjure-java/pull/1919

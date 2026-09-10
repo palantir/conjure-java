@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Support alias of wrapper null coercion
-  links:
-  - https://github.com/palantir/conjure-java/pull/1156
