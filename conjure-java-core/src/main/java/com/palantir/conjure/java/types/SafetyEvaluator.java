@@ -38,6 +38,7 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.logsafe.Preconditions;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,10 @@ public final class SafetyEvaluator {
 
     private final Map<TypeName, TypeDefinition> definitionMap;
 
+    // Memoization cache shared across all evaluate() calls on this instance. Avoids redundant recursive
+    // traversals of the type graph, which otherwise dominate generation time for large definitions.
+    private final Map<TypeName, Optional<LogSafety>> cache = new HashMap<>();
+
     public SafetyEvaluator(ConjureDefinition definition) {
         this(TypeFunctions.toTypesMap(definition));
     }
@@ -75,12 +80,12 @@ public final class SafetyEvaluator {
 
     public Optional<LogSafety> evaluate(TypeDefinition def) {
         return Preconditions.checkNotNull(def, "TypeDefinition is required")
-                .accept(new TypeDefinitionSafetyVisitor(definitionMap, new HashSet<>()));
+                .accept(new TypeDefinitionSafetyVisitor(definitionMap, cache, new HashSet<>()));
     }
 
     public Optional<LogSafety> evaluate(Type type) {
         return Preconditions.checkNotNull(type, "TypeDefinition is required")
-                .accept(new TypeDefinitionSafetyVisitor(definitionMap, new HashSet<>()).fieldVisitor);
+                .accept(new TypeDefinitionSafetyVisitor(definitionMap, cache, new HashSet<>()).fieldVisitor);
     }
 
     public Optional<LogSafety> evaluate(Type type, Optional<LogSafety> declaredSafety) {
@@ -124,10 +129,19 @@ public final class SafetyEvaluator {
     }
 
     private static final class TypeDefinitionSafetyVisitor implements TypeDefinition.Visitor<Optional<LogSafety>> {
+        private final Map<TypeName, Optional<LogSafety>> cache;
         private final Set<TypeName> inProgress;
         private final Type.Visitor<Optional<LogSafety>> fieldVisitor;
 
-        private TypeDefinitionSafetyVisitor(Map<TypeName, TypeDefinition> definitionMap, Set<TypeName> inProgress) {
+        // Tracks whether cycle-breaking (the SAFE fallback for back-edges) was used anywhere
+        // in the current evaluation subtree. Used to decide whether a result is safe to cache.
+        private boolean encounteredCycle;
+
+        private TypeDefinitionSafetyVisitor(
+                Map<TypeName, TypeDefinition> definitionMap,
+                Map<TypeName, Optional<LogSafety>> cache,
+                Set<TypeName> inProgress) {
+            this.cache = cache;
             this.inProgress = inProgress;
             this.fieldVisitor = new FieldSafetyVisitor(definitionMap, this);
         }
@@ -170,14 +184,41 @@ public final class SafetyEvaluator {
         }
 
         private Optional<LogSafety> with(TypeName typeName, Supplier<Optional<LogSafety>> task) {
+            // Return memoized result if this type has already been fully evaluated.
+            // Note: cache values are Optional<LogSafety> which may be Optional.empty(),
+            // so we check for null (absent key) rather than emptiness.
+            Optional<LogSafety> cached = cache.get(typeName);
+            if (cached != null) {
+                return cached;
+            }
             if (!inProgress.add(typeName)) {
                 // Given recursive evaluation, we return the least restrictive type: SAFE.
+                // Mark that this subtree's result depends on cycle-breaking.
+                encounteredCycle = true;
                 return OPTIONAL_OF_SAFE;
             }
+
+            // Save and reset cycle state so we can detect cycles within this type's subtree only.
+            boolean previousCycleState = encounteredCycle;
+            encounteredCycle = false;
+
             Optional<LogSafety> result = task.get();
+
+            boolean subtreeHadCycle = encounteredCycle;
+            // Propagate cycle detection upward: if this subtree had a cycle, callers should know.
+            encounteredCycle = previousCycleState || subtreeHadCycle;
+
             if (!inProgress.remove(typeName)) {
                 throw new IllegalStateException(
                         "Failed to remove " + typeName + " from in-progress, something is very wrong!");
+            }
+
+            // Only cache results where no cycle was encountered in the subtree.
+            // When a cycle is broken with the SAFE heuristic, the result depends on which type
+            // was the entry point, so caching it would produce incorrect results if the same
+            // type is later evaluated from a different starting point.
+            if (!subtreeHadCycle) {
+                cache.put(typeName, result);
             }
             return result;
         }
