@@ -19,10 +19,12 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CompileTimeConstant;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeLoggable;
 import io.undertow.util.StatusCodes;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Internal type to signal a conjure protocol-level failure with a specific response code. */
 final class FrameworkException extends RuntimeException implements SafeLoggable {
@@ -31,6 +33,7 @@ final class FrameworkException extends RuntimeException implements SafeLoggable 
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnprocessableEntity");
     private static final ErrorType UNSUPPORTED_MEDIA_TYPE =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnsupportedMediaType");
+    private static final ErrorType IO_ERROR = ErrorType.create(Code.CUSTOM_CLIENT, "Conjure:Io");
 
     private final String logMessage;
     private final List<Arg<?>> arguments;
@@ -52,6 +55,11 @@ final class FrameworkException extends RuntimeException implements SafeLoggable 
 
     static FrameworkException unsupportedMediaType(@CompileTimeConstant String message, Arg<?>... args) {
         return new FrameworkException(message, UNSUPPORTED_MEDIA_TYPE, StatusCodes.UNSUPPORTED_MEDIA_TYPE, null, args);
+    }
+
+    static FrameworkException ioFailure(
+            @CompileTimeConstant String message, @Nullable Throwable cause, Arg<?>... args) {
+        return new FrameworkException(message, IO_ERROR, IO_ERROR.httpErrorCode(), cause, args);
     }
 
     @Override
