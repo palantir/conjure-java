@@ -36,7 +36,6 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
@@ -83,6 +82,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -838,10 +838,8 @@ public final class UnionGenerator {
         TypeSpec.Builder builder = TypeSpec.classBuilder(deserializerClass)
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(ClassName.get(JsonDeserializer.class), unionClass))
-                .addSuperinterface(ResolvableDeserializer.class)
                 .addField(generateVariantTypesField(unionClass, memberTypeDefs, options))
-                .addField(generateDeserializersField())
-                .addMethod(generateResolveMethod())
+                .addField(generateVariantDeserializersField())
                 .addMethod(generateIsCachableMethod())
                 .addMethod(generateDeserializeMethod(unionClass))
                 .addMethod(generateDeserializeBufferedMethod(unionClass))
@@ -874,21 +872,12 @@ public final class UnionGenerator {
                 .build();
     }
 
-    private static FieldSpec generateDeserializersField() {
+    private static FieldSpec generateVariantDeserializersField() {
         TypeName deserializerType = ParameterizedTypeName.get(
                 ClassName.get(JsonDeserializer.class), WildcardTypeName.subtypeOf(Object.class));
-        return FieldSpec.builder(
-                        ArrayTypeName.of(deserializerType), "deserializers", Modifier.PRIVATE, Modifier.VOLATILE)
-                .build();
-    }
-
-    private static MethodSpec generateResolveMethod() {
-        return MethodSpec.methodBuilder("resolve")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(DeserializationContext.class, "context")
-                .addException(JsonMappingException.class)
-                .addStatement("deserializers = new $T<?>[VARIANT_TYPES.length]", JsonDeserializer.class)
+        TypeName cacheType = ParameterizedTypeName.get(ClassName.get(AtomicReferenceArray.class), deserializerType);
+        return FieldSpec.builder(cacheType, "variantDeserializers", Modifier.PRIVATE, Modifier.FINAL)
+                .initializer("new $T<>(VARIANT_TYPES.length)", AtomicReferenceArray.class)
                 .build();
     }
 
@@ -932,9 +921,14 @@ public final class UnionGenerator {
                         unionClass,
                         "Expected a JSON object for union deserialization")
                 .endControlFlow()
+                .addStatement(
+                        "boolean acceptCaseInsensitiveProperties = context.isEnabled("
+                                + "$T.ACCEPT_CASE_INSENSITIVE_PROPERTIES)",
+                        MapperFeature.class)
                 .addStatement("$T firstToken = parser.nextToken()", JsonToken.class)
                 .beginControlFlow(
-                        "if (firstToken == $T.FIELD_NAME && isTypeField(parser.currentName(), context))",
+                        "if (firstToken == $T.FIELD_NAME"
+                                + " && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties))",
                         JsonToken.class)
                 .beginControlFlow("if (parser.nextToken() != $T.VALUE_STRING)", JsonToken.class)
                 .addStatement(
@@ -946,7 +940,7 @@ public final class UnionGenerator {
                 .addStatement("parser.nextToken()")
                 .addStatement("return deserializeSelected(parser, context, type)")
                 .endControlFlow()
-                .addStatement("return deserializeBuffered(parser, context)")
+                .addStatement("return deserializeBuffered(parser, context, acceptCaseInsensitiveProperties)")
                 .build();
     }
 
@@ -956,6 +950,7 @@ public final class UnionGenerator {
                 .returns(unionClass)
                 .addParameter(JsonParser.class, "parser")
                 .addParameter(DeserializationContext.class, "context")
+                .addParameter(TypeName.BOOLEAN, "acceptCaseInsensitiveProperties")
                 .addException(IOException.class)
                 .beginControlFlow("try ($T buffer = context.bufferForInputBuffering(parser))", TokenBuffer.class)
                 .addStatement("buffer.writeStartObject()")
@@ -963,7 +958,7 @@ public final class UnionGenerator {
                 .beginControlFlow("while (token == $T.FIELD_NAME)", JsonToken.class)
                 .addStatement("$T fieldName = parser.currentName()", String.class)
                 .addStatement("$T valueToken = parser.nextToken()", JsonToken.class)
-                .beginControlFlow("if (isTypeField(fieldName, context))")
+                .beginControlFlow("if (isTypeField(fieldName, acceptCaseInsensitiveProperties))")
                 .beginControlFlow("if (valueToken != $T.VALUE_STRING)", JsonToken.class)
                 .addStatement(
                         "return context.reportInputMismatch($T.class, $S)",
@@ -1004,12 +999,11 @@ public final class UnionGenerator {
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .returns(TypeName.BOOLEAN)
                 .addParameter(String.class, "fieldName")
-                .addParameter(DeserializationContext.class, "context")
+                .addParameter(TypeName.BOOLEAN, "acceptCaseInsensitiveProperties")
                 .addStatement(
-                        "return $S.equals(fieldName) || (context.isEnabled($T.ACCEPT_CASE_INSENSITIVE_PROPERTIES)"
-                                + " && $S.equalsIgnoreCase(fieldName))",
+                        "return $S.equals(fieldName)"
+                                + " || (acceptCaseInsensitiveProperties && $S.equalsIgnoreCase(fieldName))",
                         "type",
-                        MapperFeature.class,
                         "type")
                 .build();
     }
@@ -1031,7 +1025,7 @@ public final class UnionGenerator {
         builder.beginControlFlow("if (variantIndex < 0)");
         builder.addStatement("return deserializeUnknown(parser, context, type)");
         builder.endControlFlow();
-        builder.addStatement("$T<?> deserializer = deserializers[variantIndex]", JsonDeserializer.class)
+        builder.addStatement("$T<?> deserializer = variantDeserializers.get(variantIndex)", JsonDeserializer.class)
                 .beginControlFlow("if (deserializer == null)")
                 .addStatement("deserializer = resolveDeserializer(context, variantIndex)")
                 .endControlFlow();
@@ -1050,20 +1044,19 @@ public final class UnionGenerator {
         ParameterizedTypeName deserializerType = ParameterizedTypeName.get(
                 ClassName.get(JsonDeserializer.class), WildcardTypeName.subtypeOf(Object.class));
         return MethodSpec.methodBuilder("resolveDeserializer")
-                .addModifiers(Modifier.PRIVATE, Modifier.SYNCHRONIZED)
+                .addModifiers(Modifier.PRIVATE)
                 .returns(deserializerType)
                 .addParameter(DeserializationContext.class, "context")
                 .addParameter(TypeName.INT, "variantIndex")
                 .addException(JsonMappingException.class)
-                .addStatement("$T deserializer = deserializers[variantIndex]", deserializerType)
-                .beginControlFlow("if (deserializer == null)")
-                .addStatement("deserializer = context.findRootValueDeserializer("
-                        + "context.constructType(VARIANT_TYPES[variantIndex]))")
-                .addStatement("$T[] updated = deserializers.clone()", deserializerType)
-                .addStatement("updated[variantIndex] = deserializer")
-                .addStatement("deserializers = updated")
-                .endControlFlow()
+                .addStatement(
+                        "$T deserializer = context.findContextualValueDeserializer("
+                                + "context.constructType(VARIANT_TYPES[variantIndex]), null)",
+                        deserializerType)
+                .beginControlFlow("if (variantDeserializers.compareAndSet(variantIndex, null, deserializer))")
                 .addStatement("return deserializer")
+                .endControlFlow()
+                .addStatement("return variantDeserializers.get(variantIndex)")
                 .build();
     }
 
