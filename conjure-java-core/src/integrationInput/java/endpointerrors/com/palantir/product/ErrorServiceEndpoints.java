@@ -54,8 +54,8 @@ public final class ErrorServiceEndpoints implements UndertowService {
         TestBasicErrorEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Boolean.class), this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -105,8 +105,8 @@ public final class ErrorServiceEndpoints implements UndertowService {
         TestImportedErrorEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Boolean.class), this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -156,8 +156,8 @@ public final class ErrorServiceEndpoints implements UndertowService {
         TestMultipleErrorsAndPackagesEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.optionalOf(String.class), this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -208,7 +208,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
         TestEmptyBodyEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Boolean.class), this);
         }
 
         @Override
@@ -255,7 +255,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
         TestBinaryEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Boolean.class), this);
         }
 
         @Override
@@ -302,7 +302,7 @@ public final class ErrorServiceEndpoints implements UndertowService {
         TestOptionalBinaryEndpoint(UndertowRuntime runtime, UndertowErrorService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<OptionalBinaryResponseMode>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(OptionalBinaryResponseMode.class), this);
         }
 
         @Override

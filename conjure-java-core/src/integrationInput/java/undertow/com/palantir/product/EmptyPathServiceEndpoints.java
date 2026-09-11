@@ -41,7 +41,7 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
         EmptyPathEndpoint(UndertowRuntime runtime, UndertowEmptyPathService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Boolean.class), this);
         }
 
         @Override

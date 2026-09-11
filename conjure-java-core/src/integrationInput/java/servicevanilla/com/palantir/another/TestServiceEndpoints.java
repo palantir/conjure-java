@@ -86,7 +86,8 @@ public final class TestServiceEndpoints implements UndertowService {
         GetFileSystemsEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Map<String, BackingFileSystem>>() {}, this);
+            this.serializer =
+                    runtime.bodySerDe().serializer(TypeMarker.mapOf(String.class, BackingFileSystem.class), this);
         }
 
         @Override
@@ -139,8 +140,8 @@ public final class TestServiceEndpoints implements UndertowService {
         CreateDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<CreateDatasetRequest>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Dataset>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(CreateDatasetRequest.class), this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Dataset.class), this);
         }
 
         @Override
@@ -191,7 +192,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<Dataset>>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.optionalOf(Dataset.class), this);
         }
 
         @Override
@@ -395,7 +396,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetAliasedStringEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<AliasedString>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(AliasedString.class), this);
         }
 
         @Override
@@ -534,7 +535,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetBranchesEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Set<String>>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.setOf(String.class), this);
         }
 
         @Override
@@ -585,7 +586,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetBranchesDeprecatedEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Set<String>>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.setOf(String.class), this);
         }
 
         @Override
@@ -644,7 +645,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetBranchesDeprecatedForRemovalEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Set<String>>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.setOf(String.class), this);
         }
 
         @Override
@@ -706,7 +707,7 @@ public final class TestServiceEndpoints implements UndertowService {
         ResolveBranchEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.optionalOf(String.class), this);
         }
 
         @Override
@@ -762,7 +763,7 @@ public final class TestServiceEndpoints implements UndertowService {
         TestParamEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.optionalOf(String.class), this);
         }
 
         @Override
@@ -819,8 +820,8 @@ public final class TestServiceEndpoints implements UndertowService {
         TestQueryParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Integer>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(String.class), this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Integer.class), this);
         }
 
         @Override
@@ -878,7 +879,7 @@ public final class TestServiceEndpoints implements UndertowService {
         TestNoResponseQueryParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -934,7 +935,7 @@ public final class TestServiceEndpoints implements UndertowService {
         TestBooleanEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Boolean.class), this);
         }
 
         @Override
@@ -980,7 +981,7 @@ public final class TestServiceEndpoints implements UndertowService {
         TestDoubleEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Double>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Double.class), this);
         }
 
         @Override
@@ -1026,7 +1027,7 @@ public final class TestServiceEndpoints implements UndertowService {
         TestIntegerEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Integer>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Integer.class), this);
         }
 
         @Override
@@ -1074,8 +1075,8 @@ public final class TestServiceEndpoints implements UndertowService {
         TestPostOptionalEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {}, this);
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.optionalOf(String.class), this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.optionalOf(String.class), this);
         }
 
         @Override

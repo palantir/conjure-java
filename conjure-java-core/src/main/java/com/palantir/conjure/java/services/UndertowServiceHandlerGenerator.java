@@ -287,10 +287,10 @@ final class UndertowServiceHandlerGenerator {
                             FieldSpec.builder(type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                                     .build());
                     ctorBuilder.addStatement(
-                            "this.$1N = $2N.bodySerDe().deserializer(new $3T() {}, this)",
+                            "this.$1N = $2N.bodySerDe().deserializer($3L, this)",
                             DESERIALIZER_VAR_NAME,
                             RUNTIME_VAR_NAME,
-                            ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
+                            typeMarker(typeName));
                 });
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
@@ -301,10 +301,10 @@ final class UndertowServiceHandlerGenerator {
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
                 ctorBuilder.addStatement(
-                        "this.$1N = $2N.bodySerDe().serializer(new $3T() {}, this)",
+                        "this.$1N = $2N.bodySerDe().serializer($3L, this)",
                         SERIALIZER_VAR_NAME,
                         RUNTIME_VAR_NAME,
-                        ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
+                        typeMarker(typeName));
             }
         });
 
@@ -404,6 +404,35 @@ final class UndertowServiceHandlerGenerator {
     private static final ClassName IMMUTABLE_LIST_NAME = ClassName.get(ImmutableList.class);
     private static final ClassName SET_NAME = ClassName.get(Set.class);
     private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
+    private static final ClassName MAP_NAME = ClassName.get(Map.class);
+    private static final Map<ClassName, String> TYPE_MARKER_FACTORIES = Map.of(
+            LIST_NAME, "listOf", SET_NAME, "setOf", ClassName.get(Optional.class), "optionalOf", MAP_NAME, "mapOf");
+
+    private static CodeBlock typeMarker(TypeName type) {
+        if (type instanceof ClassName className) {
+            return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
+        }
+        if (type instanceof ParameterizedTypeName parameterized
+                && TYPE_MARKER_FACTORIES.containsKey(parameterized.rawType())
+                && hasExpectedSimpleTypeArguments(parameterized)) {
+            CodeBlock.Builder result = CodeBlock.builder()
+                    .add("$T.$L(", TypeMarker.class, TYPE_MARKER_FACTORIES.get(parameterized.rawType()));
+            for (int index = 0; index < parameterized.typeArguments().size(); index++) {
+                if (index > 0) {
+                    result.add(", ");
+                }
+                result.add("$T.class", parameterized.typeArguments().get(index));
+            }
+            return result.add(")").build();
+        }
+        return CodeBlock.of("new $T<$T>() {}", TypeMarker.class, type);
+    }
+
+    private static boolean hasExpectedSimpleTypeArguments(ParameterizedTypeName type) {
+        int expectedArguments = MAP_NAME.equals(type.rawType()) ? 2 : 1;
+        return type.typeArguments().size() == expectedArguments
+                && type.typeArguments().stream().allMatch(ClassName.class::isInstance);
+    }
 
     private TypeName immutableCollection(TypeName input) {
         // Note that only the outermost collection is considered for replacement to avoid

@@ -205,11 +205,10 @@ public final class ConjureUndertowEndpointsGenerator {
                                         .build())
                                 .constructorInitializer(CodeBlock.builder()
                                         .addStatement(
-                                                "this.$N = $L.deserializer(new $T<$T>() {}, $N, this)",
+                                                "this.$N = $L.deserializer($L, $N, this)",
                                                 deserializerFieldName,
                                                 deserializerFactory,
-                                                TypeMarker.class,
-                                                requestBodyType,
+                                                typeMarker(requestBodyType),
                                                 RUNTIME_NAME)
                                         .build())
                                 .build());
@@ -457,11 +456,10 @@ public final class ConjureUndertowEndpointsGenerator {
                             .build())
                     .constructorInitializer(CodeBlock.builder()
                             .addStatement(
-                                    "this.$N = $L.serializer(new $T<$T>() {}, $N, this)",
+                                    "this.$N = $L.serializer($L, $N, this)",
                                     returnType.serializerFieldName(),
                                     returnType.serializerFactory(),
-                                    TypeMarker.class,
-                                    responseTypeName,
+                                    typeMarker(responseTypeName),
                                     RUNTIME_NAME)
                             .build())
                     .build());
@@ -811,6 +809,43 @@ public final class ConjureUndertowEndpointsGenerator {
                         "$N.requestArg($T.of($S, $N))", REQUEST_CONTEXT, UnsafeArg.class, name, variableName));
             default -> throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
         };
+    }
+
+    private static final ClassName MAP_NAME = ClassName.get(Map.class);
+    private static final Map<ClassName, String> TYPE_MARKER_FACTORIES = Map.of(
+            ClassName.get(List.class),
+            "listOf",
+            ClassName.get(Set.class),
+            "setOf",
+            ClassName.get(Optional.class),
+            "optionalOf",
+            MAP_NAME,
+            "mapOf");
+
+    private static CodeBlock typeMarker(TypeName type) {
+        if (type instanceof ClassName className) {
+            return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
+        }
+        if (type instanceof ParameterizedTypeName parameterized
+                && TYPE_MARKER_FACTORIES.containsKey(parameterized.rawType())
+                && hasExpectedSimpleTypeArguments(parameterized)) {
+            CodeBlock.Builder result = CodeBlock.builder()
+                    .add("$T.$L(", TypeMarker.class, TYPE_MARKER_FACTORIES.get(parameterized.rawType()));
+            for (int index = 0; index < parameterized.typeArguments().size(); index++) {
+                if (index > 0) {
+                    result.add(", ");
+                }
+                result.add("$T.class", parameterized.typeArguments().get(index));
+            }
+            return result.add(")").build();
+        }
+        return CodeBlock.of("new $T<$T>() {}", TypeMarker.class, type);
+    }
+
+    private static boolean hasExpectedSimpleTypeArguments(ParameterizedTypeName type) {
+        int expectedArguments = MAP_NAME.equals(type.rawType()) ? 2 : 1;
+        return type.typeArguments().size() == expectedArguments
+                && type.typeArguments().stream().allMatch(ClassName.class::isInstance);
     }
 
     private static final Map<ClassName, Class<?>> COLLECTION_CLASSES = ImmutableMap.<ClassName, Class<?>>builder()
