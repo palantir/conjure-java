@@ -44,11 +44,11 @@ com.palantir.conjure:conjure-api-objects:4.57.0 (3 constraints: a827c123)
 
 com.palantir.conjure:conjure-generator-common:4.57.0 (2 constraints: 0b14fe83)
 
-com.palantir.conjure.java.api:errors:2.78.0 (10 constraints: adb9bc9e)
+com.palantir.conjure.java.api:errors:2.79.0 (10 constraints: afb98ea2)
 
-com.palantir.conjure.java.api:service-config:2.78.0 (6 constraints: 5a6655ea)
+com.palantir.conjure.java.api:service-config:2.79.0 (6 constraints: 5b666deb)
 
-com.palantir.conjure.java.api:ssl-config:2.78.0 (5 constraints: d14fbb38)
+com.palantir.conjure.java.api:ssl-config:2.79.0 (5 constraints: d34f333a)
 
 com.palantir.conjure.java.runtime:client-config:8.41.0 (6 constraints: a86b2626)
 
@@ -86,21 +86,21 @@ com.palantir.refreshable:refreshable:2.17.0 (3 constraints: 3a34f9f8)
 
 com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 4e25bb4b)
 
-com.palantir.safe-logging:logger:3.19.0 (24 constraints: e5a9874e)
+com.palantir.safe-logging:logger:3.19.0 (24 constraints: e6a90153)
 
 com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (32 constraints: ee2c52f1)
+com.palantir.safe-logging:preconditions:3.19.0 (32 constraints: f12c4202)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (29 constraints: c1ff5152)
+com.palantir.safe-logging:safe-logging:3.19.0 (29 constraints: c3ffc15c)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
 com.palantir.syntactic-paths:syntactic-paths:0.21.0 (2 constraints: f4136b81)
 
-com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 8653d55c)
+com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 8753805d)
 
 com.palantir.tracing:tracing:6.40.0 (8 constraints: 687ed10d)
 
@@ -168,7 +168,7 @@ org.eclipse.collections:eclipse-collections-api:13.0.0 (2 constraints: 1418b976)
 
 org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
-org.immutables:value:2.12.2 (2 constraints: 0215eec1)
+org.immutables:value:2.12.2 (1 constraints: 3905373b)
 
 org.jboss.logging:jboss-logging:3.6.1.Final (9 constraints: 8faed263)
 
@@ -234,7 +234,7 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: c718909e)
 
 com.palantir.conjure:conjure-core:4.57.0 (1 constraints: 4205603b)
 
-com.palantir.conjure.java.api:test-utils:2.78.0 (1 constraints: 43055f3b)
+com.palantir.conjure.java.api:test-utils:2.79.0 (1 constraints: 4405623b)
 
 com.palantir.conjure.java.runtime:conjure-java-annotations:8.41.0 (1 constraints: c318879e)
 
