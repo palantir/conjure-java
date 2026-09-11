@@ -922,6 +922,25 @@ public final class WireFormatTests {
     }
 
     @Test
+    void testUnionType_deserialize_caseInsensitiveDiscriminator() throws JsonProcessingException {
+        ObjectMapper caseInsensitiveMapper = mapper.copy();
+        caseInsensitiveMapper.setConfig(caseInsensitiveMapper
+                .getDeserializationConfig()
+                .with(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
+
+        assertThat(caseInsensitiveMapper.readValue("{\"TYPE\":\"foo\",\"foo\":\"first\"}", SimpleUnion.class))
+                .isEqualTo(SimpleUnion.foo("first"));
+        assertThat(caseInsensitiveMapper.readValue("{\"foo\":\"last\",\"TYPE\":\"foo\"}", SimpleUnion.class))
+                .isEqualTo(SimpleUnion.foo("last"));
+        assertThat(caseInsensitiveMapper.readValue(
+                        "{\"TYPE\":\"thisFieldIsAnInteger\",\"thisFieldIsAnInteger\":42}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
+        assertThat(caseInsensitiveMapper.readValue(
+                        "{\"thisFieldIsAnInteger\":42,\"TYPE\":\"thisFieldIsAnInteger\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
+    }
+
+    @Test
     void testSealedUnionType_serialize_unknownVariant() throws JsonProcessingException {
         SimpleUnion simpleUnion = SimpleUnion.unknown("test", Map.of("foo", "bar"));
         assertThat(mapper.writeValueAsString(simpleUnion)).isEqualTo("{\"type\":\"test\",\"test\":{\"foo\":\"bar\"}}");
