@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -32,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
@@ -417,17 +417,13 @@ public abstract sealed class UnionExample
         }
     }
 
-    static final class Deserializer extends JsonDeserializer<UnionExample> implements ResolvableDeserializer {
+    static final class Deserializer extends JsonDeserializer<UnionExample> {
         private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {
             StringVariant.class, IntVariant.class, ObjectVariant.class, CollectionVariant.class, OptionalVariant.class
         };
 
-        private volatile JsonDeserializer<?>[] deserializers;
-
-        @Override
-        public void resolve(DeserializationContext context) throws JsonMappingException {
-            deserializers = new JsonDeserializer<?>[VARIANT_TYPES.length];
-        }
+        private final AtomicReferenceArray<JsonDeserializer<?>> variantDeserializers =
+                new AtomicReferenceArray<>(VARIANT_TYPES.length);
 
         @Override
         public boolean isCachable() {
@@ -440,8 +436,11 @@ public abstract sealed class UnionExample
                 return context.reportInputMismatch(
                         UnionExample.class, "Expected a JSON object for union deserialization");
             }
+            boolean acceptCaseInsensitiveProperties =
+                    context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
             JsonToken firstToken = parser.nextToken();
-            if (firstToken == JsonToken.FIELD_NAME && isTypeField(parser.currentName(), context)) {
+            if (firstToken == JsonToken.FIELD_NAME
+                    && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties)) {
                 if (parser.nextToken() != JsonToken.VALUE_STRING) {
                     return context.reportInputMismatch(
                             UnionExample.class, "Union discriminator 'type' must be a string");
@@ -450,17 +449,19 @@ public abstract sealed class UnionExample
                 parser.nextToken();
                 return deserializeSelected(parser, context, type);
             }
-            return deserializeBuffered(parser, context);
+            return deserializeBuffered(parser, context, acceptCaseInsensitiveProperties);
         }
 
-        private UnionExample deserializeBuffered(JsonParser parser, DeserializationContext context) throws IOException {
+        private UnionExample deserializeBuffered(
+                JsonParser parser, DeserializationContext context, boolean acceptCaseInsensitiveProperties)
+                throws IOException {
             try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
                 buffer.writeStartObject();
                 JsonToken token = parser.currentToken();
                 while (token == JsonToken.FIELD_NAME) {
                     String fieldName = parser.currentName();
                     JsonToken valueToken = parser.nextToken();
-                    if (isTypeField(fieldName, context)) {
+                    if (isTypeField(fieldName, acceptCaseInsensitiveProperties)) {
                         if (valueToken != JsonToken.VALUE_STRING) {
                             return context.reportInputMismatch(
                                     UnionExample.class, "Union discriminator 'type' must be a string");
@@ -486,10 +487,8 @@ public abstract sealed class UnionExample
             return context.reportInputMismatch(UnionExample.class, "Union discriminator 'type' is required");
         }
 
-        private static boolean isTypeField(String fieldName, DeserializationContext context) {
-            return "type".equals(fieldName)
-                    || (context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-                            && "type".equalsIgnoreCase(fieldName));
+        private static boolean isTypeField(String fieldName, boolean acceptCaseInsensitiveProperties) {
+            return "type".equals(fieldName) || (acceptCaseInsensitiveProperties && "type".equalsIgnoreCase(fieldName));
         }
 
         private UnionExample deserializeSelected(JsonParser parser, DeserializationContext context, String type)
@@ -506,23 +505,21 @@ public abstract sealed class UnionExample
             if (variantIndex < 0) {
                 return deserializeUnknown(parser, context, type);
             }
-            JsonDeserializer<?> deserializer = deserializers[variantIndex];
+            JsonDeserializer<?> deserializer = variantDeserializers.get(variantIndex);
             if (deserializer == null) {
                 deserializer = resolveDeserializer(context, variantIndex);
             }
             return (UnionExample) deserializer.deserialize(parser, context);
         }
 
-        private synchronized JsonDeserializer<?> resolveDeserializer(DeserializationContext context, int variantIndex)
+        private JsonDeserializer<?> resolveDeserializer(DeserializationContext context, int variantIndex)
                 throws JsonMappingException {
-            JsonDeserializer<?> deserializer = deserializers[variantIndex];
-            if (deserializer == null) {
-                deserializer = context.findRootValueDeserializer(context.constructType(VARIANT_TYPES[variantIndex]));
-                JsonDeserializer<?>[] updated = deserializers.clone();
-                updated[variantIndex] = deserializer;
-                deserializers = updated;
+            JsonDeserializer<?> deserializer =
+                    context.findContextualValueDeserializer(context.constructType(VARIANT_TYPES[variantIndex]), null);
+            if (variantDeserializers.compareAndSet(variantIndex, null, deserializer)) {
+                return deserializer;
             }
-            return deserializer;
+            return variantDeserializers.get(variantIndex);
         }
 
         private static UnionExample deserializeUnknown(JsonParser parser, DeserializationContext context, String type)

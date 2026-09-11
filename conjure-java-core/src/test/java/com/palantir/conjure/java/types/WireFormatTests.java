@@ -52,6 +52,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.google.common.collect.ImmutableList;
@@ -876,6 +877,25 @@ public final class WireFormatTests {
     void testSealedUnionType_deserialize() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnion.class))
                 .isEqualTo(SimpleUnion.foo("test"));
+    }
+
+    @Test
+    void testUnionType_deserialize_caseInsensitiveDiscriminator() throws JsonProcessingException {
+        ObjectMapper caseInsensitiveMapper = mapper.copy();
+        caseInsensitiveMapper.setConfig(caseInsensitiveMapper
+                .getDeserializationConfig()
+                .with(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
+
+        assertThat(caseInsensitiveMapper.readValue("{\"TYPE\":\"foo\",\"foo\":\"first\"}", SimpleUnion.class))
+                .isEqualTo(SimpleUnion.foo("first"));
+        assertThat(caseInsensitiveMapper.readValue("{\"foo\":\"last\",\"TYPE\":\"foo\"}", SimpleUnion.class))
+                .isEqualTo(SimpleUnion.foo("last"));
+        assertThat(caseInsensitiveMapper.readValue(
+                        "{\"TYPE\":\"thisFieldIsAnInteger\",\"thisFieldIsAnInteger\":42}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
+        assertThat(caseInsensitiveMapper.readValue(
+                        "{\"thisFieldIsAnInteger\":42,\"TYPE\":\"thisFieldIsAnInteger\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
     }
 
     @Test
