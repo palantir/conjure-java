@@ -34,6 +34,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collector;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
@@ -180,32 +181,64 @@ public final class MethodSpecs {
     }
 
     static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
+        return createToString(thisClassName, fieldNames, Set.of());
+    }
+
+    /**
+     * Creates a {@code toString} method that renders fields listed in {@code redactedFieldNames} as the literal string
+     * {@code REDACTED} instead of the field's actual value. All other fields are rendered normally.
+     */
+    static MethodSpec createToString(
+            String thisClassName, List<FieldName> fieldNames, Set<FieldName> redactedFieldNames) {
         return MethodSpec.methodBuilder("toString")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(String.class))
-                .addCode(
-                        fieldNames.isEmpty()
-                                ? CodeBlock.builder()
-                                        .addStatement("return $S", thisClassName + "{}")
-                                        .build()
-                                : CodeBlock.builder()
-                                        .addStatement("return $L", toStringConcatenation(thisClassName, fieldNames))
-                                        .build())
+                .addCode(buildToStringBody(thisClassName, fieldNames, redactedFieldNames))
                 .build();
     }
 
-    private static CodeBlock toStringConcatenation(String thisClassName, List<FieldName> fieldNames) {
+    /**
+     * Creates a {@code dangerousToString} method that renders every field's real value, without redaction — including
+     * any {@code @DoNotLog} fields. The method is intentionally named to make the risk visible at call sites.
+     */
+    static MethodSpec createDangerousToString(String thisClassName, List<FieldName> fieldNames) {
+        return MethodSpec.methodBuilder("dangerousToString")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ClassName.get(String.class))
+                .addCode(buildToStringBody(thisClassName, fieldNames, Set.of()))
+                .build();
+    }
+
+    private static CodeBlock buildToStringBody(
+            String thisClassName, List<FieldName> fieldNames, Set<FieldName> redactedFieldNames) {
+        if (fieldNames.isEmpty()) {
+            return CodeBlock.builder()
+                    .addStatement("return $S", thisClassName + "{}")
+                    .build();
+        }
+        return CodeBlock.builder()
+                .addStatement("return $L", toStringConcatenation(thisClassName, fieldNames, redactedFieldNames))
+                .build();
+    }
+
+    private static CodeBlock toStringConcatenation(
+            String thisClassName, List<FieldName> fieldNames, Set<FieldName> redactedFieldNames) {
         checkState(!fieldNames.isEmpty(), "String concatenation is only necessary if there are fields");
+        FieldName firstField = fieldNames.get(0);
+        boolean firstRedacted = redactedFieldNames.contains(firstField);
         CodeBlock.Builder builder = CodeBlock.builder()
-                .add("$S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ");
-        for (int i = 0; i < fieldNames.size(); i++) {
+                .add("$S\n", thisClassName + '{' + firstField.get() + ": " + (firstRedacted ? "REDACTED" : ""));
+        if (!firstRedacted) {
+            builder.add(" + $N", JavaNameSanitizer.sanitize(firstField));
+        }
+        for (int i = 1; i < fieldNames.size(); i++) {
             FieldName fieldName = fieldNames.get(i);
-            // The name of the first field is included with the class name
-            if (i != 0) {
-                builder.add(" + $S", ", " + fieldName.get() + ": ");
+            boolean redacted = redactedFieldNames.contains(fieldName);
+            builder.add(" + $S", ", " + fieldName.get() + ": " + (redacted ? "REDACTED" : ""));
+            if (!redacted) {
+                builder.add(" + $N", JavaNameSanitizer.sanitize(fieldName));
             }
-            builder.add(" + $N", JavaNameSanitizer.sanitize(fieldName));
         }
         return builder.add(" + '}'").build();
     }

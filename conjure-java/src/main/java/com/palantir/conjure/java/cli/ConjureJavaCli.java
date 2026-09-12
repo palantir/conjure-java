@@ -269,6 +269,14 @@ public final class ConjureJavaCli implements Runnable {
                         "If --sealedUnions is enabled, this flag enables visitor generation for back-compatibility.")
         private boolean sealedUnionVisitors;
 
+        @CommandLine.Option(
+                names = "--redactToStringDoNotLog",
+                defaultValue = "false",
+                description = "Generated toString methods render @DoNotLog-annotated field values as the literal"
+                        + " string REDACTED. Objects also get a dangerousToString method that returns the full"
+                        + " representation including @DoNotLog values for the rare debugging cases that need it.")
+        private boolean redactToStringDoNotLog;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -347,6 +355,7 @@ public final class ConjureJavaCli implements Runnable {
                                     generateErrorParameterFormatRespectingDialogueInterfaces)
                             .sealedUnions(sealedUnions)
                             .sealedUnionVisitors(sealedUnionVisitors)
+                            .redactToStringDoNotLog(redactToStringDoNotLog)
                             .build())
                     .build();
         }

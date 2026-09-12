@@ -1,0 +1,45 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      # Object with a mix of safe, unsafe, and do-not-log fields. Exercises:
+      # - toString redacts the do-not-log field value
+      # - dangerousToString is generated alongside and renders the full value
+      ObjectWithDoNotLogField:
+        fields:
+          safeString:
+            type: string
+            safety: safe
+          unsafeInt:
+            type: integer
+            safety: unsafe
+          secretToken:
+            type: string
+            safety: do-not-log
+      # Object with all do-not-log fields.
+      ObjectAllDoNotLog:
+        fields:
+          secret:
+            type: string
+            safety: do-not-log
+          token:
+            type: string
+            safety: do-not-log
+      # Object with no do-not-log fields. dangerousToString is still emitted (so the
+      # method's presence is stable across schema evolution), and produces the same
+      # output as toString in this case.
+      ObjectNoDoNotLog:
+        fields:
+          safeString:
+            type: string
+            safety: safe
+          unsafeInt:
+            type: integer
+            safety: unsafe
+      # Alias whose safety declaration is do-not-log. toString should render REDACTED.
+      SecretAlias:
+        alias: string
+        safety: do-not-log
+      # Alias with no safety declaration should be unaffected.
+      PlainAlias:
+        alias: string
