@@ -246,6 +246,7 @@ public final class MultipleOrderedStages {
 
         private Set<SafeLong> items = ConjureCollections.newSet();
 
+        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private Optional<OneField> optionalItem = Optional.empty();
@@ -302,7 +303,6 @@ public final class MultipleOrderedStages {
         }
 
         @Override
-        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));

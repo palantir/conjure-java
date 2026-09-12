@@ -72,6 +72,7 @@ project('verification-client-api') {
 
         implementation project(':conjure-java-client-verifier:verification-server-api')
         implementation 'com.fasterxml.jackson.core:jackson-annotations'
+        implementation 'com.fasterxml.jackson.core:jackson-core'
         implementation 'com.fasterxml.jackson.core:jackson-databind'
         implementation 'com.google.code.findbugs:jsr305'
         implementation 'com.google.errorprone:error_prone_annotations'
@@ -89,5 +90,4 @@ tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureE
         check('Slf4jLogsafeArgs', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
     }
 }
-
 

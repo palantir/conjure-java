@@ -207,6 +207,7 @@ public final class MultipleFieldsOnlyFinalStage {
 
         private List<String> items = ConjureCollections.newList();
 
+        @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
@@ -215,6 +216,7 @@ public final class MultipleFieldsOnlyFinalStage {
 
         private List<String> itemsOld = ConjureCollections.newList();
 
+        @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
         private Map<String, Integer> itemsMapOld = new LinkedHashMap<>();
 
         private Optional<String> optionalItemOld = Optional.empty();
@@ -255,7 +257,6 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
         public Builder itemsMap(@Nonnull Map<String, Integer> itemsMap) {
             checkNotBuilt();
             this.itemsMap = new LinkedHashMap<>(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
@@ -333,7 +334,6 @@ public final class MultipleFieldsOnlyFinalStage {
 
         /** @deprecated this map is deprecated */
         @Deprecated
-        @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
         public Builder itemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
             checkNotBuilt();
             this.itemsMapOld =
