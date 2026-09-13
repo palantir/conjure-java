@@ -66,6 +66,7 @@ public final class EnumGenerator {
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
     private static final String UNKNOWN_TYPE_PARAM_NAME = "unknownType";
     private static final String UNKNOWN_TYPE_NAME = "unknown";
+    private static final String UNKNOWN_HANDLER_STAGE = "unknown_";
     private static final String COMPLETED = "completed_";
     private static final String STAGE_VISITOR_BUILDER = "StageVisitorBuilder";
     private static final String VISITOR_FIELD_NAME_SUFFIX = "Visitor";
@@ -222,7 +223,7 @@ public final class EnumGenerator {
 
     private static Stream<String> stageEnumNames(Iterable<EnumValueDefinition> values) {
         return Stream.concat(
-                ImmutableList.copyOf(values).stream().map(EnumValueDefinition::getValue), Stream.of(UNKNOWN_TYPE_NAME));
+                ImmutableList.copyOf(values).stream().map(EnumValueDefinition::getValue), Stream.of(UNKNOWN_HANDLER_STAGE));
     }
 
     private static List<MethodSpec> generateMemberVisitMethods(Iterable<EnumValueDefinition> values) {
@@ -277,7 +278,7 @@ public final class EnumGenerator {
             String value = valueIter.next();
             String nextBuilderStageName = valueIter.hasNext() ? valueIter.peek() : COMPLETED;
             ClassName nextStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStageName);
-            List<MethodSpec> methods = UNKNOWN_TYPE_NAME.equals(value)
+            List<MethodSpec> methods = UNKNOWN_HANDLER_STAGE.equals(value)
                     ? unknownSpecificVisitorPrototypes(visitResultType, nextStageClassName)
                     : ImmutableList.of(visitorBuilderSetterPrototype(value, visitResultType, nextStageClassName)
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -348,14 +349,15 @@ public final class EnumGenerator {
             Iterable<EnumValueDefinition> values, TypeVariableName visitResultType) {
         return stageEnumNames(values)
                 .map(value -> FieldSpec.builder(
-                                UNKNOWN_TYPE_NAME.equals(value)
+                                UNKNOWN_HANDLER_STAGE.equals(value)
                                         ? ParameterizedTypeName.get(
                                                 ClassName.get(Function.class),
                                                 UNKNOWN_MEMBER_TYPE.annotated(AnnotationSpec.builder(Safe.class)
                                                         .build()),
                                                 visitResultType)
                                         : visitorObjectTypeName(visitResultType),
-                                visitorFieldName(value),
+                                visitorFieldName(
+                                        UNKNOWN_HANDLER_STAGE.equals(value) ? UNKNOWN_TYPE_NAME : value),
                                 Modifier.PRIVATE)
                         .build())
                 .collect(Collectors.toList());
@@ -380,7 +382,7 @@ public final class EnumGenerator {
             String value = valueIter.next();
             String nextBuilderStage = valueIter.hasNext() ? valueIter.peek() : COMPLETED;
             ClassName nextVisitorStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStage);
-            if (UNKNOWN_TYPE_NAME.equals(value)) {
+            if (UNKNOWN_HANDLER_STAGE.equals(value)) {
                 setterMethods.addAll(
                         unknownSpecificVisitorSetters(enclosingClass, visitResultType, nextVisitorStageClassName));
             } else {
@@ -535,12 +537,15 @@ public final class EnumGenerator {
     private static List<MethodSpec> allDelegatingVisitorMethods(
             Iterable<EnumValueDefinition> values, TypeName visitorResultType) {
         return stageEnumNames(values)
-                .map(value -> UNKNOWN_TYPE_NAME.equals(value)
-                        ? MethodSpec.methodBuilder(getVisitorMethodName(value))
+                .map(value -> UNKNOWN_HANDLER_STAGE.equals(value)
+                        ? MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(Override.class)
                                 .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
-                                .addStatement("return $N.apply($N)", visitorFieldName(value), UNKNOWN_TYPE_PARAM_NAME)
+                                .addStatement(
+                                        "return $N.apply($N)",
+                                        visitorFieldName(UNKNOWN_TYPE_NAME),
+                                        UNKNOWN_TYPE_PARAM_NAME)
                                 .returns(visitorResultType)
                                 .build()
                         : MethodSpec.methodBuilder(getVisitorMethodName(value))
