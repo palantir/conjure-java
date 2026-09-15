@@ -12,10 +12,10 @@ import javax.annotation.processing.Generated;
 public final class ConjureJavaErrorsTypeMarkers {
     private static final TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>
             JAVA_COMPILATION_FAILED_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureJavaErrors.JavaCompilationFailedSerializableError>() {};
+                    TypeMarker.of(ConjureJavaErrors.JavaCompilationFailedSerializableError.class);
 
     private static final TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>
-            JAVA_COMPILATION_FAILED_EXCEPTION = new TypeMarker<ConjureJavaErrors.JavaCompilationFailedException>() {};
+            JAVA_COMPILATION_FAILED_EXCEPTION = TypeMarker.of(ConjureJavaErrors.JavaCompilationFailedException.class);
 
     private ConjureJavaErrorsTypeMarkers() {}
 

@@ -12,39 +12,39 @@ import javax.annotation.processing.Generated;
 public final class ConjureErrorsTypeMarkers {
     private static final TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>
             CONFLICTING_CAUSE_SAFE_ARG_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.ConflictingCauseSafeArgSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>
-            CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION = new TypeMarker<ConjureErrors.ConflictingCauseSafeArgException>() {};
+            CONFLICTING_CAUSE_SAFE_ARG_EXCEPTION = TypeMarker.of(ConjureErrors.ConflictingCauseSafeArgException.class);
 
     private static final TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>
             CONFLICTING_CAUSE_UNSAFE_ARG_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.ConflictingCauseUnsafeArgSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>
             CONFLICTING_CAUSE_UNSAFE_ARG_EXCEPTION =
-                    new TypeMarker<ConjureErrors.ConflictingCauseUnsafeArgException>() {};
+                    TypeMarker.of(ConjureErrors.ConflictingCauseUnsafeArgException.class);
 
     private static final TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>
             ERROR_WITH_COMPLEX_ARGS_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.ErrorWithComplexArgsSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.ErrorWithComplexArgsSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.ErrorWithComplexArgsException> ERROR_WITH_COMPLEX_ARGS_EXCEPTION =
-            new TypeMarker<ConjureErrors.ErrorWithComplexArgsException>() {};
+            TypeMarker.of(ConjureErrors.ErrorWithComplexArgsException.class);
 
     private static final TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>
             INVALID_SERVICE_DEFINITION_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.InvalidServiceDefinitionSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.InvalidServiceDefinitionSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.InvalidServiceDefinitionException>
-            INVALID_SERVICE_DEFINITION_EXCEPTION = new TypeMarker<ConjureErrors.InvalidServiceDefinitionException>() {};
+            INVALID_SERVICE_DEFINITION_EXCEPTION = TypeMarker.of(ConjureErrors.InvalidServiceDefinitionException.class);
 
     private static final TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>
             INVALID_TYPE_DEFINITION_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.InvalidTypeDefinitionSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.InvalidTypeDefinitionSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.InvalidTypeDefinitionException> INVALID_TYPE_DEFINITION_EXCEPTION =
-            new TypeMarker<ConjureErrors.InvalidTypeDefinitionException>() {};
+            TypeMarker.of(ConjureErrors.InvalidTypeDefinitionException.class);
 
     private ConjureErrorsTypeMarkers() {}
 

@@ -12,10 +12,10 @@ import javax.annotation.processing.Generated;
 public final class EndpointSpecificTwoErrorsTypeMarkers {
     private static final TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceSerializableError>
             DIFFERENT_NAMESPACE_SERIALIZABLE_ERROR =
-                    new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceSerializableError>() {};
+                    TypeMarker.of(EndpointSpecificTwoErrors.DifferentNamespaceSerializableError.class);
 
     private static final TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceException>
-            DIFFERENT_NAMESPACE_EXCEPTION = new TypeMarker<EndpointSpecificTwoErrors.DifferentNamespaceException>() {};
+            DIFFERENT_NAMESPACE_EXCEPTION = TypeMarker.of(EndpointSpecificTwoErrors.DifferentNamespaceException.class);
 
     private EndpointSpecificTwoErrorsTypeMarkers() {}
 
