@@ -811,41 +811,27 @@ public final class ConjureUndertowEndpointsGenerator {
         };
     }
 
-    private static final ClassName MAP_NAME = ClassName.get(Map.class);
-    private static final Map<ClassName, String> TYPE_MARKER_FACTORIES = Map.of(
-            ClassName.get(List.class),
-            "listOf",
-            ClassName.get(Set.class),
-            "setOf",
-            ClassName.get(Optional.class),
-            "optionalOf",
-            MAP_NAME,
-            "mapOf");
+    private static final Map<ClassName, String> TYPE_MARKER_FACTORY_METHODS = Map.of(
+            ClassName.get(List.class), "listOf",
+            ClassName.get(Set.class), "setOf",
+            ClassName.get(Optional.class), "optionalOf",
+            ClassName.get(Map.class), "mapOf");
 
     private static CodeBlock typeMarker(TypeName type) {
         if (type instanceof ClassName className) {
             return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
         }
         if (type instanceof ParameterizedTypeName parameterized
-                && TYPE_MARKER_FACTORIES.containsKey(parameterized.rawType())
-                && hasExpectedSimpleTypeArguments(parameterized)) {
-            CodeBlock.Builder result = CodeBlock.builder()
-                    .add("$T.$L(", TypeMarker.class, TYPE_MARKER_FACTORIES.get(parameterized.rawType()));
-            for (int index = 0; index < parameterized.typeArguments().size(); index++) {
-                if (index > 0) {
-                    result.add(", ");
-                }
-                result.add("$T.class", parameterized.typeArguments().get(index));
+                && parameterized.typeArguments().stream().allMatch(ClassName.class::isInstance)) {
+            String factoryMethod = TYPE_MARKER_FACTORY_METHODS.get(parameterized.rawType());
+            if (factoryMethod != null) {
+                CodeBlock arguments = parameterized.typeArguments().stream()
+                        .map(argument -> CodeBlock.of("$T.class", argument))
+                        .collect(CodeBlock.joining(", "));
+                return CodeBlock.of("$T.$L($L)", TypeMarker.class, factoryMethod, arguments);
             }
-            return result.add(")").build();
         }
         return CodeBlock.of("new $T<$T>() {}", TypeMarker.class, type);
-    }
-
-    private static boolean hasExpectedSimpleTypeArguments(ParameterizedTypeName type) {
-        int expectedArguments = MAP_NAME.equals(type.rawType()) ? 2 : 1;
-        return type.typeArguments().size() == expectedArguments
-                && type.typeArguments().stream().allMatch(ClassName.class::isInstance);
     }
 
     private static final Map<ClassName, Class<?>> COLLECTION_CLASSES = ImmutableMap.<ClassName, Class<?>>builder()
