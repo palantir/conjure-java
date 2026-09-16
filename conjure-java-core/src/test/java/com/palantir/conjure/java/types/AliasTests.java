@@ -168,4 +168,13 @@ public class AliasTests {
         assertThat(higher.compareTo(lower)).isPositive();
         assertThat(lower.compareTo(equalToLower)).isZero();
     }
+
+    @Test
+    public void testUuidAliasComparisonBug() {
+        UuidAliasExample lower = UuidAliasExample.of(UUID.fromString("7fffffff-ffff-ffff-0000-000000000000"));
+        UuidAliasExample higher = UuidAliasExample.of(UUID.fromString("80000000-0000-0000-0000-000000000000"));
+
+        // Should actually be negative
+        assertThat(lower.compareTo(higher)).isPositive();
+    }
 }
