@@ -174,7 +174,7 @@ public class AliasTests {
         UuidAliasExample lower = UuidAliasExample.of(UUID.fromString("7fffffff-ffff-ffff-0000-000000000000"));
         UuidAliasExample higher = UuidAliasExample.of(UUID.fromString("80000000-0000-0000-0000-000000000000"));
 
-        // Should actually be negative
+        // Should actually be negative, but this is a documented bug. See JDK-7025832
         assertThat(lower.compareTo(higher)).isPositive();
     }
 }
