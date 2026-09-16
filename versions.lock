@@ -58,7 +58,7 @@ com.palantir.conjure.java.runtime:conjure-java-jackson-serialization:8.42.0 (4 c
 
 com.palantir.conjure.java.runtime:keystores:8.42.0 (3 constraints: 162acb5d)
 
-com.palantir.deadlines:deadlines:0.26.0 (2 constraints: a3146cac)
+com.palantir.deadlines:deadlines:0.27.0 (2 constraints: a4149cac)
 
 com.palantir.dialogue:dialogue-apache-hc5-client:6.43.0 (2 constraints: 7a298e01)
 
@@ -86,15 +86,15 @@ com.palantir.refreshable:refreshable:2.17.0 (3 constraints: 3b3459f9)
 
 com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 4e25bb4b)
 
-com.palantir.safe-logging:logger:3.19.0 (24 constraints: eea9d969)
+com.palantir.safe-logging:logger:3.19.0 (24 constraints: efa9936c)
 
 com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (32 constraints: f92c6821)
+com.palantir.safe-logging:preconditions:3.19.0 (32 constraints: fa2c5c25)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (29 constraints: cbff0d7c)
+com.palantir.safe-logging:safe-logging:3.19.0 (29 constraints: ccff6a7f)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
@@ -102,7 +102,7 @@ com.palantir.syntactic-paths:syntactic-paths:0.21.0 (2 constraints: f4136b81)
 
 com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 8853de5d)
 
-com.palantir.tracing:tracing:6.41.0 (8 constraints: 6b7e660f)
+com.palantir.tracing:tracing:6.41.0 (8 constraints: 647eed06)
 
 com.palantir.tracing:tracing-api:6.41.0 (6 constraints: 8a58ec20)
 
@@ -116,15 +116,15 @@ com.palantir.tritium:tritium-core:0.137.0 (1 constraints: 7310b8b2)
 
 com.palantir.tritium:tritium-ids:0.128.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.137.0 (6 constraints: 9468332f)
+com.palantir.tritium:tritium-metrics:0.137.0 (6 constraints: 95683b30)
 
-com.palantir.tritium:tritium-registry:0.137.0 (11 constraints: 6fdfcbc4)
+com.palantir.tritium:tritium-registry:0.137.0 (11 constraints: 70df02c6)
 
 com.squareup:javapoet:1.13.0 (1 constraints: f50b65f7)
 
 info.picocli:picocli:4.7.7 (1 constraints: 14051b36)
 
-io.dropwizard.metrics:metrics-core:4.2.40 (28 constraints: ffe6d925)
+io.dropwizard.metrics:metrics-core:4.2.40 (28 constraints: f7e63205)
 
 io.smallrye.common:smallrye-common-annotation:2.14.0 (1 constraints: f20d0944)
 
