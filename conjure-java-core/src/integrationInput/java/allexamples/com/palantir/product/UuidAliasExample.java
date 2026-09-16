@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class UuidAliasExample {
+public final class UuidAliasExample implements Comparable<UuidAliasExample> {
     private final UUID value;
 
     private UuidAliasExample(@Nonnull UUID value) {
@@ -38,6 +38,11 @@ public final class UuidAliasExample {
     @Override
     public int hashCode() {
         return this.value.hashCode();
+    }
+
+    @Override
+    public int compareTo(UuidAliasExample other) {
+        return value.compareTo(other.get());
     }
 
     public static UuidAliasExample valueOf(String value) {

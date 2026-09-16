@@ -600,7 +600,7 @@ public final class AliasGenerator {
 
         @Override
         public Optional<MethodSpec> visitUuid() {
-            return Optional.empty();
+            return Optional.of(createCompareTo(aliasName));
         }
 
         @Override
