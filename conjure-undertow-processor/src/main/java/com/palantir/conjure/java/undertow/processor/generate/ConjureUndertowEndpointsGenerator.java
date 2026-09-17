@@ -26,6 +26,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
+import com.palantir.conjure.java.codegen.lib.TypeMarkers;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
@@ -811,27 +812,10 @@ public final class ConjureUndertowEndpointsGenerator {
         };
     }
 
-    private static final Map<ClassName, String> TYPE_MARKER_FACTORY_METHODS = Map.of(
-            ClassName.get(List.class), "listOf",
-            ClassName.get(Set.class), "setOf",
-            ClassName.get(Optional.class), "optionalOf",
-            ClassName.get(Map.class), "mapOf");
+    private static final ClassName TYPE_MARKER = ClassName.get(TypeMarker.class);
 
     private static CodeBlock typeMarker(TypeName type) {
-        if (type instanceof ClassName className) {
-            return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
-        }
-        if (type instanceof ParameterizedTypeName parameterized
-                && parameterized.typeArguments().stream().allMatch(ClassName.class::isInstance)) {
-            String factoryMethod = TYPE_MARKER_FACTORY_METHODS.get(parameterized.rawType());
-            if (factoryMethod != null) {
-                CodeBlock arguments = parameterized.typeArguments().stream()
-                        .map(argument -> CodeBlock.of("$T.class", argument))
-                        .collect(CodeBlock.joining(", "));
-                return CodeBlock.of("$T.$L($L)", TypeMarker.class, factoryMethod, arguments);
-            }
-        }
-        return CodeBlock.of("new $T<$T>() {}", TypeMarker.class, type);
+        return TypeMarkers.typeMarker(TYPE_MARKER, type);
     }
 
     private static final Map<ClassName, Class<?>> COLLECTION_CLASSES = ImmutableMap.<ClassName, Class<?>>builder()

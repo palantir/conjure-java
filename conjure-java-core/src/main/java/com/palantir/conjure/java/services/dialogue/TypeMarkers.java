@@ -19,41 +19,18 @@ package com.palantir.conjure.java.services.dialogue;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
-import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
- * Produces {@link CodeBlock}s which create {@link TypeMarker} instances. Simple types and one level of
- * parameterization over simple types use {@link TypeMarker} factory methods; anything more complex falls back to
- * anonymous {@link TypeMarker} subclasses.
+ * Produces {@link CodeBlock}s which create {@link TypeMarker} instances for generated dialogue clients. See
+ * {@link com.palantir.conjure.java.codegen.lib.TypeMarkers} for the underlying logic.
  */
 final class TypeMarkers {
 
-    private static final Map<ClassName, String> TYPE_MARKER_FACTORY_METHODS = Map.of(
-            ClassName.get(List.class), "listOf",
-            ClassName.get(Set.class), "setOf",
-            ClassName.get(Optional.class), "optionalOf",
-            ClassName.get(Map.class), "mapOf");
+    private static final ClassName TYPE_MARKER = ClassName.get(TypeMarker.class);
 
     static CodeBlock typeMarker(TypeName type) {
-        if (type instanceof ClassName className) {
-            return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
-        }
-        if (type instanceof ParameterizedTypeName parameterized
-                && parameterized.typeArguments().stream().allMatch(ClassName.class::isInstance)) {
-            String factoryMethod = TYPE_MARKER_FACTORY_METHODS.get(parameterized.rawType());
-            if (factoryMethod != null) {
-                CodeBlock arguments = parameterized.typeArguments().stream()
-                        .map(argument -> CodeBlock.of("$T.class", argument))
-                        .collect(CodeBlock.joining(", "));
-                return CodeBlock.of("$T.$L($L)", TypeMarker.class, factoryMethod, arguments);
-            }
-        }
-        return CodeBlock.of("new $T<$T>() {}", TypeMarker.class, type);
+        return com.palantir.conjure.java.codegen.lib.TypeMarkers.typeMarker(TYPE_MARKER, type);
     }
 
     private TypeMarkers() {}

@@ -27,6 +27,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.codegen.lib.TypeMarkers;
 import com.palantir.conjure.java.services.UndertowTypeFunctions.AsyncRequestProcessingMetadata;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.SafetyEvaluator;
@@ -404,31 +405,10 @@ final class UndertowServiceHandlerGenerator {
     private static final ClassName IMMUTABLE_LIST_NAME = ClassName.get(ImmutableList.class);
     private static final ClassName SET_NAME = ClassName.get(Set.class);
     private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
-    private static final Map<ClassName, String> TYPE_MARKER_FACTORY_METHODS = Map.of(
-            ClassName.get(List.class),
-            "listOf",
-            ClassName.get(Set.class),
-            "setOf",
-            ClassName.get(Optional.class),
-            "optionalOf",
-            ClassName.get(Map.class),
-            "mapOf");
+    private static final ClassName TYPE_MARKER = ClassName.get(TypeMarker.class);
 
     private static CodeBlock typeMarker(TypeName type) {
-        if (type instanceof ClassName className) {
-            return CodeBlock.of("$T.of($T.class)", TypeMarker.class, className);
-        }
-        if (type instanceof ParameterizedTypeName parameterized
-                && parameterized.typeArguments().stream().allMatch(ClassName.class::isInstance)) {
-            String factoryMethod = TYPE_MARKER_FACTORY_METHODS.get(parameterized.rawType());
-            if (factoryMethod != null) {
-                CodeBlock arguments = parameterized.typeArguments().stream()
-                        .map(argument -> CodeBlock.of("$T.class", argument))
-                        .collect(CodeBlock.joining(", "));
-                return CodeBlock.of("$T.$L($L)", TypeMarker.class, factoryMethod, arguments);
-            }
-        }
-        return CodeBlock.of("new $T<$T>() {}", TypeMarker.class, type);
+        return TypeMarkers.typeMarker(TYPE_MARKER, type);
     }
 
     private TypeName immutableCollection(TypeName input) {

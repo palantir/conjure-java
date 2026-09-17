@@ -36,6 +36,7 @@ tasks.named('compileIntegrationInputJava', JavaCompile) {
 }
 
 dependencies {
+    api project(':conjure-codegen-lib')
     api project(':conjure-undertow-lib')
     api 'com.fasterxml.jackson.core:jackson-databind'
     api 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
