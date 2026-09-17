@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 public class AliasTests {
@@ -155,5 +156,25 @@ public class AliasTests {
 
         Map<String, Boolean> internal = alias.get();
         assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> internal.put("bar", true));
+    }
+
+    @Test
+    public void testUuidAliasComparison() {
+        UuidAliasExample lower = UuidAliasExample.of(new UUID(0L, 1L));
+        UuidAliasExample higher = UuidAliasExample.of(new UUID(0L, 2L));
+        UuidAliasExample equalToLower = UuidAliasExample.of(new UUID(0L, 1L));
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(equalToLower)).isZero();
+    }
+
+    @Test
+    public void testUuidAliasComparisonBug() {
+        UuidAliasExample lower = UuidAliasExample.of(UUID.fromString("7fffffff-ffff-ffff-0000-000000000000"));
+        UuidAliasExample higher = UuidAliasExample.of(UUID.fromString("80000000-0000-0000-0000-000000000000"));
+
+        // Should actually be negative, but this is a documented bug. See JDK-7025832
+        assertThat(lower.compareTo(higher)).isPositive();
     }
 }
