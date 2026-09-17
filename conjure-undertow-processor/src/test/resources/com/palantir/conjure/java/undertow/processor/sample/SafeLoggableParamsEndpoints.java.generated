@@ -381,7 +381,7 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
             this.contextDeserializer = new QueryParamDeserializer<>(
                     "context", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
             this.safeLoggingReusesContextSerializer =
-                    DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+                    DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
@@ -437,8 +437,8 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
         BodyParamEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.bodyDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
-            this.bodyParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.bodyDeserializer = DefaultSerDe.INSTANCE.deserializer(TypeMarker.of(String.class), runtime, this);
+            this.bodyParamSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override

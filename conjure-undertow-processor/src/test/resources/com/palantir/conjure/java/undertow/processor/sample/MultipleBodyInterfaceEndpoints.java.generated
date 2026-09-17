@@ -49,9 +49,9 @@ public final class MultipleBodyInterfaceEndpoints implements UndertowService {
         PostEndpoint(UndertowRuntime runtime, MultipleBodyInterface delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.oneDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
-            this.twoDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
-            this.threeDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.oneDeserializer = DefaultSerDe.INSTANCE.deserializer(TypeMarker.of(String.class), runtime, this);
+            this.twoDeserializer = DefaultSerDe.INSTANCE.deserializer(TypeMarker.of(String.class), runtime, this);
+            this.threeDeserializer = DefaultSerDe.INSTANCE.deserializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override

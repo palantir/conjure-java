@@ -12,10 +12,10 @@ import javax.annotation.processing.Generated;
 public final class ConjureErrorsTypeMarkers {
     private static final TypeMarker<ConjureErrors.DifferentPackageErrorSerializableError>
             DIFFERENT_PACKAGE_ERROR_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.DifferentPackageErrorSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.DifferentPackageErrorSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.DifferentPackageErrorException> DIFFERENT_PACKAGE_ERROR_EXCEPTION =
-            new TypeMarker<ConjureErrors.DifferentPackageErrorException>() {};
+            TypeMarker.of(ConjureErrors.DifferentPackageErrorException.class);
 
     private ConjureErrorsTypeMarkers() {}
 

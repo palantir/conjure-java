@@ -31,7 +31,7 @@ public interface CookieServiceBlocking {
     /** Creates a synchronous/blocking client for a CookieService service. */
     static CookieServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceBlocking() {
-            private static final TypeMarker<Void> voidTypeMarker = new TypeMarker<Void>() {};
+            private static final TypeMarker<Void> voidTypeMarker = TypeMarker.of(Void.class);
 
             private static final ExceptionDeserializerArgs<Void> voidExceptionArgs =
                     createExceptionDeserializerArgs(voidTypeMarker);
