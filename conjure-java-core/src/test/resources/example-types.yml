@@ -143,6 +143,8 @@ types:
         alias: bearertoken
       UuidAliasExample:
         alias: uuid
+      AliasOfUuidAliasExample:
+        alias: UuidAliasExample
       MapAliasExample:
         alias: map<string, any>
       OptionalMapAliasExample:

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.AliasOfUuidAliasExample;
 import allexamples.com.palantir.product.DoubleAliasExample;
 import allexamples.com.palantir.product.ExternalLongAliasOne;
 import allexamples.com.palantir.product.ExternalLongAliasTwo;
@@ -176,5 +177,16 @@ public class AliasTests {
 
         // Should actually be negative, but this is a documented bug. See JDK-7025832
         assertThat(lower.compareTo(higher)).isPositive();
+    }
+
+    @Test
+    public void testAliasOfUuidAliasComparison() {
+        AliasOfUuidAliasExample lower = AliasOfUuidAliasExample.of(UuidAliasExample.of(new UUID(0L, 1L)));
+        AliasOfUuidAliasExample higher = AliasOfUuidAliasExample.of(UuidAliasExample.of(new UUID(0L, 2L)));
+        AliasOfUuidAliasExample equalToLower = AliasOfUuidAliasExample.of(UuidAliasExample.of(new UUID(0L, 1L)));
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(equalToLower)).isZero();
     }
 }
