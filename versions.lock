@@ -142,7 +142,7 @@ io.smallrye.common:smallrye-common-os:2.4.0 (1 constraints: b10e835a)
 
 io.smallrye.common:smallrye-common-ref:2.4.0 (1 constraints: b10e835a)
 
-io.undertow:undertow-core:2.2.38.Final (2 constraints: ea19a2fe)
+io.undertow:undertow-core:2.2.40.Final (2 constraints: e319fffc)
 
 jakarta.annotation:jakarta.annotation-api:2.1.1 (6 constraints: cd5ca708)
 
