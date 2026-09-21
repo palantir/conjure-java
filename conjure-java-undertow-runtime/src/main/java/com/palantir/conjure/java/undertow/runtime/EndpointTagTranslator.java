@@ -24,15 +24,11 @@ import io.undertow.server.HttpServerExchange;
 /** A {@link TagTranslator} which populates {@link Endpoint} metadata. */
 final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
 
-    private final String serviceName;
-    private final String endpointName;
     private final String httpPath;
     private final boolean deprecated;
     private final boolean incubating;
 
     EndpointTagTranslator(Endpoint endpoint) {
-        this.serviceName = endpoint.serviceName();
-        this.endpointName = endpoint.name();
         this.httpPath = endpoint.template();
         this.deprecated = endpoint.deprecated().isPresent();
         this.incubating = endpoint.tags().contains("incubating");
@@ -40,8 +36,6 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
 
     @Override
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange _data) {
-        adapter.tag(target, "serviceName", serviceName);
-        adapter.tag(target, "endpointName", endpointName);
         // Note: CompletedRequestTagTranslator already provides TraceTags.HTTP_METHOD
         adapter.tag(target, TraceTags.HTTP_URL_PATH_TEMPLATE, httpPath);
         if (deprecated) {
@@ -55,8 +49,6 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
     @Override
     public String toString() {
         return "TracedRequestTagTranslator{serviceName='"
-                + serviceName + "', endpointName='"
-                + endpointName + "', httpPath='"
                 + httpPath + "', deprecated="
                 + deprecated + ", incubating="
                 + incubating + "}";
