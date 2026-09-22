@@ -28,9 +28,16 @@ import com.palantir.conjure.spec.TypeName;
 public final class MoreVisitors {
     private MoreVisitors() {}
 
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final IsExternalType IS_EXTERNAL = new IsExternalType();
+
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final ExternalType EXTERNAL = new ExternalType();
+
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final IsInternalReference IS_INTERNAL_REFERENCE = new IsInternalReference();
+
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final IsCollection IS_COLLECTION = new IsCollection();
 
     private static final class IsExternalType extends IsTypeVisitor {

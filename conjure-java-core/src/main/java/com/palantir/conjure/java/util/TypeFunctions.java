@@ -217,6 +217,7 @@ public final class TypeFunctions {
         });
     }
 
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final GetTypeVisitor<PrimitiveType> PRIMITIVE_VISITOR = new GetTypeVisitor<PrimitiveType>() {
         @Override
         public PrimitiveType visitPrimitive(PrimitiveType value) {
@@ -224,6 +225,7 @@ public final class TypeFunctions {
         }
     };
 
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final GetTypeVisitor<OptionalType> OPTIONAL_VISITOR = new GetTypeVisitor<OptionalType>() {
         @Override
         public OptionalType visitOptional(OptionalType value) {
@@ -231,6 +233,7 @@ public final class TypeFunctions {
         }
     };
 
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final IsTypeVisitor IS_REFERENCE_VISITOR = new IsTypeVisitor() {
         @Override
         public Boolean visitReference(TypeName _value) {
@@ -238,6 +241,7 @@ public final class TypeFunctions {
         }
     };
 
+    @SuppressWarnings("for-rollout:ExposedPrivateType")
     public static final IsTypeVisitor IS_OPTIONAL_BINARY_VISITOR = new IsTypeVisitor() {
         @Override
         public Boolean visitOptional(OptionalType value) {

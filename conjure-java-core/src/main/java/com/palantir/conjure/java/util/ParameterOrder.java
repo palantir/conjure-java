@@ -93,6 +93,7 @@ public final class ParameterOrder {
         }
     };
 
+    @SuppressWarnings("for-rollout:BoxingComparator")
     private static final Comparator<ArgumentDefinition> COMPARATOR = Comparator.comparing(
             o -> o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER));
 
