@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.AliasOfBooleanAliasExample;
 import allexamples.com.palantir.product.AliasOfUuidAliasExample;
+import allexamples.com.palantir.product.BooleanAliasExample;
 import allexamples.com.palantir.product.DoubleAliasExample;
 import allexamples.com.palantir.product.ExternalLongAliasOne;
 import allexamples.com.palantir.product.ExternalLongAliasTwo;
@@ -35,6 +37,7 @@ import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedL
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedMap;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedPrimitiveList;
 import defensivenonnullcollections.com.palantir.product.ExampleDefensiveAliasedSet;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -188,5 +191,15 @@ public class AliasTests {
         assertThat(lower.compareTo(higher)).isNegative();
         assertThat(higher.compareTo(lower)).isPositive();
         assertThat(lower.compareTo(equalToLower)).isZero();
+    }
+
+    @Test
+    public void testAliasOfBooleanAliasIsNotComparable() {
+        AliasOfBooleanAliasExample alias = AliasOfBooleanAliasExample.of(BooleanAliasExample.of(true));
+
+        assertThat(alias).isNotInstanceOf(Comparable.class);
+        assertThat(AliasOfBooleanAliasExample.class.getMethods())
+                .extracting(Method::getName)
+                .doesNotContain("compareTo");
     }
 }

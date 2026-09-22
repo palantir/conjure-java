@@ -412,23 +412,6 @@ public final class AliasGenerator {
         return Optional.empty();
     }
 
-    private static Optional<MethodSpec> referenceToComparable(
-            TypeName aliasName, TypeMapper typeMapper, Type conjureType) {
-        // If it resolves down to a primitive, return the comparable function. If the comparable function is present
-        // after the recursion, ignore the return value and then add compareTo
-        if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
-            return typeMapper
-                    .getType(conjureType.accept(TypeVisitor.REFERENCE))
-                    .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
-                    .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
-                    .flatMap(type -> referenceToComparable(
-                                    typeMapper.getClassName(type.getAlias()), typeMapper, type.getAlias())
-                            .map(ignored -> createCompareTo(aliasName)));
-        } else {
-            return conjureType.accept(new ComparableVisitor(aliasName, typeMapper, conjureType));
-        }
-    }
-
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private static CodeBlock valueOfFactoryMethodForPrimitive(PrimitiveType primitiveType, TypeName aliasTypeName) {
         TypeName boxedTypeName = Primitives.box(aliasTypeName).withoutAnnotations();
@@ -559,6 +542,23 @@ public final class AliasGenerator {
         @Override
         public Optional<MethodSpec> visitUnknown(@Safe String unknownType) {
             throw new IllegalStateException("Unknown type: " + unknownType);
+        }
+
+        private static Optional<MethodSpec> referenceToComparable(
+                TypeName aliasName, TypeMapper typeMapper, Type conjureType) {
+            // If it resolves down to a primitive, return the comparable function. If the comparable function is present
+            // after the recursion, ignore the return value and then add compareTo
+            if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
+                return typeMapper
+                        .getType(conjureType.accept(TypeVisitor.REFERENCE))
+                        .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
+                        .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
+                        .flatMap(type -> referenceToComparable(
+                                        typeMapper.getClassName(type.getAlias()), typeMapper, type.getAlias())
+                                .map(ignored -> createCompareTo(aliasName)));
+            } else {
+                return conjureType.accept(new ComparableVisitor(aliasName, typeMapper, conjureType));
+            }
         }
     }
 

@@ -134,6 +134,8 @@ types:
         alias: integer
       BooleanAliasExample:
         alias: boolean
+      AliasOfBooleanAliasExample:
+        alias: BooleanAliasExample
       SafeLongAliasExample:
         alias: safelong
         safety: safe
