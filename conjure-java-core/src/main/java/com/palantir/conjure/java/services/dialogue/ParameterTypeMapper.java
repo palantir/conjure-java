@@ -69,6 +69,7 @@ public final class ParameterTypeMapper {
         return methodParams(endpointDef, false);
     }
 
+    @SuppressWarnings("for-rollout:BoxingComparator")
     private List<ParameterSpec> methodParams(EndpointDefinition endpointDef, boolean includeSafetyAnnotations) {
         ImmutableList.Builder<ParameterSpec> paramSpecBuilder = ImmutableList.builder();
         endpointDef.getAuth().ifPresent(auth -> paramSpecBuilder.add(Auth.authParam(auth)));
