@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import allexamples.com.palantir.product.AliasOfAliasOfDoubleAliasExample;
 import allexamples.com.palantir.product.AliasOfBooleanAliasExample;
+import allexamples.com.palantir.product.AliasOfDoubleAliasExample;
 import allexamples.com.palantir.product.AliasOfUuidAliasExample;
 import allexamples.com.palantir.product.BooleanAliasExample;
 import allexamples.com.palantir.product.DoubleAliasExample;
@@ -46,6 +48,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class AliasTests {
     private static final ObjectMapper TEST_MAPPER = ObjectMappers.newServerObjectMapper()
@@ -191,6 +195,28 @@ public class AliasTests {
         assertThat(lower.compareTo(higher)).isNegative();
         assertThat(higher.compareTo(lower)).isPositive();
         assertThat(lower.compareTo(equalToLower)).isZero();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.0, 2.0, -1",
+        "2.0, 1.0, 1",
+        "1.0, 1.0, 0",
+        "-0.0, 0.0, -1",
+        "0.0, -0.0, 1",
+        "-Infinity, 1.0, -1",
+        "Infinity, 1.0, 1",
+        "NaN, Infinity, 1",
+        "Infinity, NaN, -1",
+        "NaN, NaN, 0"
+    })
+    public void testAliasOfAliasOfDoubleAliasComparison(double left, double right, int expectedComparison) {
+        AliasOfAliasOfDoubleAliasExample leftAlias =
+                AliasOfAliasOfDoubleAliasExample.of(AliasOfDoubleAliasExample.of(DoubleAliasExample.of(left)));
+        AliasOfAliasOfDoubleAliasExample rightAlias =
+                AliasOfAliasOfDoubleAliasExample.of(AliasOfDoubleAliasExample.of(DoubleAliasExample.of(right)));
+
+        assertThat(leftAlias.compareTo(rightAlias)).isEqualTo(expectedComparison);
     }
 
     @Test

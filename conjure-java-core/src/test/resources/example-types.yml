@@ -127,6 +127,10 @@ types:
         alias: StringAliasExample
       DoubleAliasExample:
         alias: double
+      AliasOfDoubleAliasExample:
+        alias: DoubleAliasExample
+      AliasOfAliasOfDoubleAliasExample:
+        alias: AliasOfDoubleAliasExample
       SafeDoubleAliasExample:
         alias: double
         safety: safe
