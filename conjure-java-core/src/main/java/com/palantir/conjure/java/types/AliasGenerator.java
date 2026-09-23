@@ -113,7 +113,7 @@ public final class AliasGenerator {
         }
 
         typeDef.getAlias()
-                .accept(new ComparableVisitor(thisClass))
+                .accept(new ComparableVisitor(thisClass, typeMapper, typeDef.getAlias()))
                 .ifPresent(compareTo -> spec.addSuperinterface(
                                 ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
                         .addMethod(compareTo));
@@ -495,9 +495,13 @@ public final class AliasGenerator {
 
     private static final class ComparableVisitor implements Type.Visitor<Optional<MethodSpec>> {
         private final TypeName aliasName;
+        private final TypeMapper typeMapper;
+        private final Type conjureType;
 
-        ComparableVisitor(TypeName aliasName) {
+        ComparableVisitor(TypeName aliasName, TypeMapper typeMapper, Type conjureType) {
             this.aliasName = aliasName;
+            this.typeMapper = typeMapper;
+            this.conjureType = conjureType;
         }
 
         @Override
@@ -527,9 +531,7 @@ public final class AliasGenerator {
 
         @Override
         public Optional<MethodSpec> visitReference(com.palantir.conjure.spec.TypeName _value) {
-            // We could detect if this is an alias to another alias which is itself comparable, however
-            // that's out of scope for the initial implementation.
-            return Optional.empty();
+            return referenceToComparable(this.aliasName, this.typeMapper, this.conjureType);
         }
 
         @Override
@@ -540,6 +542,23 @@ public final class AliasGenerator {
         @Override
         public Optional<MethodSpec> visitUnknown(@Safe String unknownType) {
             throw new IllegalStateException("Unknown type: " + unknownType);
+        }
+
+        private static Optional<MethodSpec> referenceToComparable(
+                TypeName aliasName, TypeMapper typeMapper, Type conjureType) {
+            // If it resolves down to a primitive, return the comparable function. If the comparable function is present
+            // after the recursion, ignore the return value and then add compareTo
+            if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
+                return typeMapper
+                        .getType(conjureType.accept(TypeVisitor.REFERENCE))
+                        .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
+                        .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
+                        .flatMap(type -> referenceToComparable(
+                                        typeMapper.getClassName(type.getAlias()), typeMapper, type.getAlias())
+                                .map(ignored -> createCompareTo(aliasName)));
+            } else {
+                return conjureType.accept(new ComparableVisitor(aliasName, typeMapper, conjureType));
+            }
         }
     }
 
