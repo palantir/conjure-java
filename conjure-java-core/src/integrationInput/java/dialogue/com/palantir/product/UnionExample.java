@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -107,6 +108,7 @@ public abstract sealed class UnionExample
 
     @JsonTypeName("stringVariant")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class StringVariant extends UnionExample implements Known {
@@ -155,6 +157,7 @@ public abstract sealed class UnionExample
 
     @JsonTypeName("intVariant")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class IntVariant extends UnionExample implements Known {
@@ -203,6 +206,7 @@ public abstract sealed class UnionExample
 
     @JsonTypeName("objectVariant")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class ObjectVariant extends UnionExample implements Known {
@@ -251,6 +255,7 @@ public abstract sealed class UnionExample
 
     @JsonTypeName("collectionVariant")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class CollectionVariant extends UnionExample implements Known {
@@ -300,6 +305,7 @@ public abstract sealed class UnionExample
 
     @JsonTypeName("optionalVariant")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class OptionalVariant extends UnionExample implements Known {
@@ -347,6 +353,7 @@ public abstract sealed class UnionExample
         }
     }
 
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Unknown extends UnionExample {
@@ -525,13 +532,21 @@ public abstract sealed class UnionExample
         private static UnionExample deserializeUnknown(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
             Map<String, Object> values = new HashMap<>();
+            JsonDeserializer<Object> valueDeserializer = null;
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 parser.nextToken();
             }
             while (parser.currentToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextToken();
-                values.put(fieldName, context.readValue(parser, Object.class));
+                if (valueDeserializer == null) {
+                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                }
+                values.put(
+                        fieldName,
+                        parser.currentToken() == JsonToken.VALUE_NULL
+                                ? valueDeserializer.getNullValue(context)
+                                : valueDeserializer.deserialize(parser, context));
                 parser.nextToken();
             }
             if (parser.currentToken() != JsonToken.END_OBJECT) {

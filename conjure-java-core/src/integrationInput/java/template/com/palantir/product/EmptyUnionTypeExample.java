@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -127,6 +128,7 @@ public final class EmptyUnionTypeExample {
         <T> T accept(Visitor<T> visitor);
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -289,13 +291,21 @@ public final class EmptyUnionTypeExample {
         private static EmptyUnionTypeExample deserializeUnknown(
                 JsonParser parser, DeserializationContext context, String type) throws IOException {
             Map<String, Object> values = new HashMap<>();
+            JsonDeserializer<Object> valueDeserializer = null;
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 parser.nextToken();
             }
             while (parser.currentToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextToken();
-                values.put(fieldName, context.readValue(parser, Object.class));
+                if (valueDeserializer == null) {
+                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                }
+                values.put(
+                        fieldName,
+                        parser.currentToken() == JsonToken.VALUE_NULL
+                                ? valueDeserializer.getNullValue(context)
+                                : valueDeserializer.deserialize(parser, context));
                 parser.nextToken();
             }
             if (parser.currentToken() != JsonToken.END_OBJECT) {
