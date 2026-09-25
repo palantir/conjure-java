@@ -5,14 +5,20 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
+import com.palantir.conjure.java.lib.internal.ConjureUnionSerializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +29,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true,
-        defaultImpl = CamelCaseUnion.Unknown.class)
-@JsonSubTypes(@JsonSubTypes.Type(value = CamelCaseUnion.CamelCasedField.class, name = "camelCasedField"))
+@JsonDeserialize(using = CamelCaseUnion.Deserializer.class)
+@JsonSerialize(using = ConjureUnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedField, CamelCaseUnion.Unknown {
     public static CamelCaseUnion camelCasedField(String value) {
@@ -61,6 +62,10 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
     public sealed interface Known permits CamelCasedField {}
 
     @JsonTypeName("camelCasedField")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class CamelCasedField extends CamelCaseUnion implements Known {
         private final String value;
 
@@ -105,6 +110,9 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         }
     }
 
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown extends CamelCaseUnion {
         private final String type;
 
@@ -162,6 +170,28 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         @Override
         public String toString() {
             return "CamelCaseUnion{value: UnknownWrapper{value: " + value + "}}";
+        }
+    }
+
+    static final class Deserializer extends ConjureUnionDeserializer<CamelCaseUnion> {
+        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {CamelCasedField.class};
+
+        Deserializer() {
+            super(CamelCaseUnion.class, VARIANT_TYPES);
+        }
+
+        @Override
+        protected CamelCaseUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
+                throws IOException {
+            int variantIndex =
+                    switch (type) {
+                        case "camelCasedField" -> 0;
+                        default -> -1;
+                    };
+            if (variantIndex < 0) {
+                return new Unknown(type, deserializeUnknown(parser, context));
+            }
+            return (CamelCaseUnion) deserializeVariant(parser, context, variantIndex);
         }
     }
 

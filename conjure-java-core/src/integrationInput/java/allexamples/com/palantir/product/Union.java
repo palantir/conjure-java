@@ -5,15 +5,19 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +29,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@JsonDeserialize(using = Union.Deserializer.class)
 public final class Union {
     private final Base value;
 
@@ -231,23 +236,13 @@ public final class Union {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes({
-        @JsonSubTypes.Type(FooWrapper.class),
-        @JsonSubTypes.Type(BarWrapper.class),
-        @JsonSubTypes.Type(BazWrapper.class)
-    })
-    @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
     }
 
     @JsonTypeName("foo")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class FooWrapper implements Base {
         private final String value;
 
@@ -293,6 +288,8 @@ public final class Union {
     }
 
     @JsonTypeName("bar")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class BarWrapper implements Base {
         private final int value;
 
@@ -339,6 +336,8 @@ public final class Union {
     }
 
     @JsonTypeName("baz")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class BazWrapper implements Base {
         private final long value;
 
@@ -384,6 +383,7 @@ public final class Union {
         }
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -441,6 +441,31 @@ public final class Union {
         @Override
         public String toString() {
             return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+        }
+    }
+
+    static final class Deserializer extends ConjureUnionDeserializer<Union> {
+        private static final Class<?>[] VARIANT_TYPES =
+                new Class<?>[] {FooWrapper.class, BarWrapper.class, BazWrapper.class};
+
+        Deserializer() {
+            super(Union.class, VARIANT_TYPES);
+        }
+
+        @Override
+        protected Union deserializeSelected(JsonParser parser, DeserializationContext context, String type)
+                throws IOException {
+            int variantIndex =
+                    switch (type) {
+                        case "foo" -> 0;
+                        case "bar" -> 1;
+                        case "baz" -> 2;
+                        default -> -1;
+                    };
+            if (variantIndex < 0) {
+                return new Union(new UnknownWrapper(type, deserializeUnknown(parser, context)));
+            }
+            return new Union((Base) deserializeVariant(parser, context, variantIndex));
         }
     }
 }

@@ -5,15 +5,19 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +28,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@JsonDeserialize(using = UnionWithUnknownString.Deserializer.class)
 public final class UnionWithUnknownString {
     private final Base value;
 
@@ -155,19 +160,13 @@ public final class UnionWithUnknownString {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes(@JsonSubTypes.Type(Unknown_Wrapper.class))
-    @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
     }
 
     @JsonTypeName("unknown")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class Unknown_Wrapper implements Base {
         private final String value;
 
@@ -212,6 +211,7 @@ public final class UnionWithUnknownString {
         }
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -269,6 +269,28 @@ public final class UnionWithUnknownString {
         @Override
         public String toString() {
             return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+        }
+    }
+
+    static final class Deserializer extends ConjureUnionDeserializer<UnionWithUnknownString> {
+        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {Unknown_Wrapper.class};
+
+        Deserializer() {
+            super(UnionWithUnknownString.class, VARIANT_TYPES);
+        }
+
+        @Override
+        protected UnionWithUnknownString deserializeSelected(
+                JsonParser parser, DeserializationContext context, String type) throws IOException {
+            int variantIndex =
+                    switch (type) {
+                        case "unknown" -> 0;
+                        default -> -1;
+                    };
+            if (variantIndex < 0) {
+                return new UnionWithUnknownString(new UnknownWrapper(type, deserializeUnknown(parser, context)));
+            }
+            return new UnionWithUnknownString((Base) deserializeVariant(parser, context, variantIndex));
         }
     }
 }

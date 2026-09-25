@@ -5,16 +5,21 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
+import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -26,6 +31,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@JsonDeserialize(using = ExampleDefensiveCollectionMapsUnion.Deserializer.class)
 public final class ExampleDefensiveCollectionMapsUnion {
     private final Base value;
 
@@ -184,28 +190,32 @@ public final class ExampleDefensiveCollectionMapsUnion {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes({@JsonSubTypes.Type(MapWrapper.class), @JsonSubTypes.Type(MapOptionalWrapper.class)})
-    @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
     }
 
     @JsonTypeName("map")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class MapWrapper implements Base {
         private final Map<String, String> value;
 
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private MapWrapper(
-                @JsonSetter(value = "map", nulls = Nulls.AS_EMPTY, contentNulls = Nulls.FAIL) @Nonnull
-                        Map<String, String> value) {
+        private MapWrapper(Map<String, String> value) {
+            this(value, false);
+        }
+
+        private MapWrapper(Map<String, String> value, boolean owned) {
             Preconditions.checkNotNull(value, "map cannot be null");
-            this.value = Collections.unmodifiableMap(new LinkedHashMap<>(value));
+            this.value = Collections.unmodifiableMap(owned ? value : new LinkedHashMap<>(value));
+        }
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private static MapWrapper fromJson(
+                @JsonSetter(value = "map", nulls = Nulls.AS_EMPTY, contentNulls = Nulls.FAIL)
+                        @Nonnull
+                        @JsonDeserialize(using = ConjureMapDeserializer.class)
+                        Map<String, String> value) {
+            return new MapWrapper(value, true);
         }
 
         @JsonProperty(value = "type", index = 0)
@@ -244,15 +254,27 @@ public final class ExampleDefensiveCollectionMapsUnion {
     }
 
     @JsonTypeName("mapOptional")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class MapOptionalWrapper implements Base {
         private final Map<String, Optional<String>> value;
 
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private MapOptionalWrapper(
-                @JsonSetter(value = "mapOptional", nulls = Nulls.AS_EMPTY, contentNulls = Nulls.AS_EMPTY) @Nonnull
-                        Map<String, Optional<String>> value) {
+        private MapOptionalWrapper(Map<String, Optional<String>> value) {
+            this(value, false);
+        }
+
+        private MapOptionalWrapper(Map<String, Optional<String>> value, boolean owned) {
             Preconditions.checkNotNull(value, "mapOptional cannot be null");
-            this.value = Collections.unmodifiableMap(new LinkedHashMap<>(value));
+            this.value = Collections.unmodifiableMap(owned ? value : new LinkedHashMap<>(value));
+        }
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private static MapOptionalWrapper fromJson(
+                @JsonSetter(value = "mapOptional", nulls = Nulls.AS_EMPTY, contentNulls = Nulls.AS_EMPTY)
+                        @Nonnull
+                        @JsonDeserialize(using = ConjureMapDeserializer.class)
+                        Map<String, Optional<String>> value) {
+            return new MapOptionalWrapper(value, true);
         }
 
         @JsonProperty(value = "type", index = 0)
@@ -290,6 +312,7 @@ public final class ExampleDefensiveCollectionMapsUnion {
         }
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -347,6 +370,30 @@ public final class ExampleDefensiveCollectionMapsUnion {
         @Override
         public String toString() {
             return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+        }
+    }
+
+    static final class Deserializer extends ConjureUnionDeserializer<ExampleDefensiveCollectionMapsUnion> {
+        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {MapWrapper.class, MapOptionalWrapper.class};
+
+        Deserializer() {
+            super(ExampleDefensiveCollectionMapsUnion.class, VARIANT_TYPES);
+        }
+
+        @Override
+        protected ExampleDefensiveCollectionMapsUnion deserializeSelected(
+                JsonParser parser, DeserializationContext context, String type) throws IOException {
+            int variantIndex =
+                    switch (type) {
+                        case "map" -> 0;
+                        case "mapOptional" -> 1;
+                        default -> -1;
+                    };
+            if (variantIndex < 0) {
+                return new ExampleDefensiveCollectionMapsUnion(
+                        new UnknownWrapper(type, deserializeUnknown(parser, context)));
+            }
+            return new ExampleDefensiveCollectionMapsUnion((Base) deserializeVariant(parser, context, variantIndex));
         }
     }
 }

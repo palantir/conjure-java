@@ -53,6 +53,7 @@ dependencies {
 
     implementation project(':conjure-lib')
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.google.code.findbugs:jsr305'
     implementation 'com.google.errorprone:error_prone_annotations'
     implementation 'com.palantir.common:streams'
@@ -97,6 +98,7 @@ dependencies {
     integrationInputImplementation project(':conjure-lib')
     integrationInputImplementation project(':conjure-undertow-lib')
     integrationInputImplementation 'com.fasterxml.jackson.core:jackson-annotations'
+    integrationInputImplementation 'com.fasterxml.jackson.core:jackson-core'
     integrationInputImplementation 'com.fasterxml.jackson.core:jackson-databind'
     integrationInputImplementation 'com.google.code.findbugs:jsr305'
     integrationInputImplementation 'com.google.errorprone:error_prone_annotations'

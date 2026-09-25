@@ -5,18 +5,21 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -28,6 +31,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@JsonDeserialize(using = ExampleDefensiveCollectionSetsUnion.Deserializer.class)
 public final class ExampleDefensiveCollectionSetsUnion {
     private final Base value;
 
@@ -153,19 +157,13 @@ public final class ExampleDefensiveCollectionSetsUnion {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes(@JsonSubTypes.Type(SetWrapper.class))
-    @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
     }
 
     @JsonTypeName("set")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class SetWrapper implements Base {
         private final Set<String> value;
 
@@ -212,6 +210,7 @@ public final class ExampleDefensiveCollectionSetsUnion {
         }
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -269,6 +268,29 @@ public final class ExampleDefensiveCollectionSetsUnion {
         @Override
         public String toString() {
             return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+        }
+    }
+
+    static final class Deserializer extends ConjureUnionDeserializer<ExampleDefensiveCollectionSetsUnion> {
+        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {SetWrapper.class};
+
+        Deserializer() {
+            super(ExampleDefensiveCollectionSetsUnion.class, VARIANT_TYPES);
+        }
+
+        @Override
+        protected ExampleDefensiveCollectionSetsUnion deserializeSelected(
+                JsonParser parser, DeserializationContext context, String type) throws IOException {
+            int variantIndex =
+                    switch (type) {
+                        case "set" -> 0;
+                        default -> -1;
+                    };
+            if (variantIndex < 0) {
+                return new ExampleDefensiveCollectionSetsUnion(
+                        new UnknownWrapper(type, deserializeUnknown(parser, context)));
+            }
+            return new ExampleDefensiveCollectionSetsUnion((Base) deserializeVariant(parser, context, variantIndex));
         }
     }
 }

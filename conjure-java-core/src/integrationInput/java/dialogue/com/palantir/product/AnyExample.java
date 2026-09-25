@@ -111,6 +111,7 @@ public final class AnyExample {
 
         private Object anyValue;
 
+        @JsonSetter(value = "anyMap", nulls = Nulls.SKIP)
         private Map<String, Object> anyMap = new LinkedHashMap<>();
 
         private Builder() {}
@@ -129,7 +130,6 @@ public final class AnyExample {
             return this;
         }
 
-        @JsonSetter(value = "anyMap", nulls = Nulls.SKIP)
         public Builder anyMap(@Nonnull Map<String, Object> anyMap) {
             checkNotBuilt();
             this.anyMap = new LinkedHashMap<>(Preconditions.checkNotNull(anyMap, "anyMap cannot be null"));
