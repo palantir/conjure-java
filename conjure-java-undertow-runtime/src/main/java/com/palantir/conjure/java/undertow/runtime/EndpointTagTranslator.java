@@ -48,7 +48,7 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
 
     @Override
     public String toString() {
-        return "TracedRequestTagTranslator{serviceName='"
+        return "EndpointTagTranslator{httpPath='"
                 + httpPath + "', deprecated="
                 + deprecated + ", incubating="
                 + incubating + "}";
