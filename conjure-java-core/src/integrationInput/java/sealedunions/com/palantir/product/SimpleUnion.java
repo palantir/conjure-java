@@ -8,20 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.util.JsonParserSequence;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
+import com.palantir.conjure.java.lib.internal.ConjureUnionSerializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -30,7 +23,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -40,7 +32,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 @JsonDeserialize(using = SimpleUnion.Deserializer.class)
-@JsonSerialize(using = SimpleUnion.Serializer.class)
+@JsonSerialize(using = ConjureUnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class SimpleUnion
         permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
@@ -295,87 +287,15 @@ public abstract sealed class SimpleUnion
         }
     }
 
-    static final class Serializer extends JsonSerializer<SimpleUnion> {
-        @Override
-        public void serialize(SimpleUnion value, JsonGenerator generator, SerializerProvider serializers)
-                throws IOException {
-            serializers.findValueSerializer(value.getClass()).serialize(value, generator, serializers);
-        }
-    }
-
-    static final class Deserializer extends JsonDeserializer<SimpleUnion> {
+    static final class Deserializer extends ConjureUnionDeserializer<SimpleUnion> {
         private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {Foo.class, Bar.class, Baz.class};
 
-        private final AtomicReferenceArray<JsonDeserializer<?>> variantDeserializers =
-                new AtomicReferenceArray<>(VARIANT_TYPES.length);
-
-        @Override
-        public boolean isCachable() {
-            return true;
+        Deserializer() {
+            super(SimpleUnion.class, VARIANT_TYPES);
         }
 
         @Override
-        public SimpleUnion deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            if (!parser.isExpectedStartObjectToken()) {
-                return context.reportInputMismatch(
-                        SimpleUnion.class, "Expected a JSON object for union deserialization");
-            }
-            boolean acceptCaseInsensitiveProperties =
-                    context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
-            JsonToken firstToken = parser.nextToken();
-            if (firstToken == JsonToken.FIELD_NAME
-                    && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties)) {
-                if (parser.nextToken() != JsonToken.VALUE_STRING) {
-                    return context.reportInputMismatch(
-                            SimpleUnion.class, "Union discriminator 'type' must be a string");
-                }
-                String type = parser.getText();
-                parser.nextToken();
-                return deserializeSelected(parser, context, type);
-            }
-            return deserializeBuffered(parser, context, acceptCaseInsensitiveProperties);
-        }
-
-        private SimpleUnion deserializeBuffered(
-                JsonParser parser, DeserializationContext context, boolean acceptCaseInsensitiveProperties)
-                throws IOException {
-            try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
-                buffer.writeStartObject();
-                JsonToken token = parser.currentToken();
-                while (token == JsonToken.FIELD_NAME) {
-                    String fieldName = parser.currentName();
-                    JsonToken valueToken = parser.nextToken();
-                    if (isTypeField(fieldName, acceptCaseInsensitiveProperties)) {
-                        if (valueToken != JsonToken.VALUE_STRING) {
-                            return context.reportInputMismatch(
-                                    SimpleUnion.class, "Union discriminator 'type' must be a string");
-                        }
-                        String type = parser.getText();
-                        parser.nextToken();
-                        try (JsonParser bufferedParser = buffer.asParser(parser)) {
-                            JsonParser combinedParser =
-                                    JsonParserSequence.createFlattened(true, bufferedParser, parser);
-                            combinedParser.nextToken();
-                            return deserializeSelected(combinedParser, context, type);
-                        }
-                    }
-                    buffer.writeFieldName(fieldName);
-                    buffer.copyCurrentStructure(parser);
-                    token = parser.nextToken();
-                }
-                if (token != JsonToken.END_OBJECT) {
-                    return context.reportInputMismatch(
-                            SimpleUnion.class, "Expected the end of a JSON object while deserializing a union");
-                }
-            }
-            return context.reportInputMismatch(SimpleUnion.class, "Union discriminator 'type' is required");
-        }
-
-        private static boolean isTypeField(String fieldName, boolean acceptCaseInsensitiveProperties) {
-            return "type".equals(fieldName) || (acceptCaseInsensitiveProperties && "type".equalsIgnoreCase(fieldName));
-        }
-
-        private SimpleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
+        protected SimpleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
             int variantIndex =
                     switch (type) {
@@ -385,50 +305,9 @@ public abstract sealed class SimpleUnion
                         default -> -1;
                     };
             if (variantIndex < 0) {
-                return deserializeUnknown(parser, context, type);
+                return new Unknown(type, deserializeUnknown(parser, context));
             }
-            JsonDeserializer<?> deserializer = variantDeserializers.get(variantIndex);
-            if (deserializer == null) {
-                deserializer = resolveDeserializer(context, variantIndex);
-            }
-            return (SimpleUnion) deserializer.deserialize(parser, context);
-        }
-
-        private JsonDeserializer<?> resolveDeserializer(DeserializationContext context, int variantIndex)
-                throws JsonMappingException {
-            JsonDeserializer<?> deserializer =
-                    context.findContextualValueDeserializer(context.constructType(VARIANT_TYPES[variantIndex]), null);
-            if (variantDeserializers.compareAndSet(variantIndex, null, deserializer)) {
-                return deserializer;
-            }
-            return variantDeserializers.get(variantIndex);
-        }
-
-        private static SimpleUnion deserializeUnknown(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            Map<String, Object> values = new HashMap<>();
-            JsonDeserializer<Object> valueDeserializer = null;
-            if (parser.currentToken() == JsonToken.START_OBJECT) {
-                parser.nextToken();
-            }
-            while (parser.currentToken() == JsonToken.FIELD_NAME) {
-                String fieldName = parser.currentName();
-                parser.nextToken();
-                if (valueDeserializer == null) {
-                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
-                }
-                values.put(
-                        fieldName,
-                        parser.currentToken() == JsonToken.VALUE_NULL
-                                ? valueDeserializer.getNullValue(context)
-                                : valueDeserializer.deserialize(parser, context));
-                parser.nextToken();
-            }
-            if (parser.currentToken() != JsonToken.END_OBJECT) {
-                return context.reportInputMismatch(
-                        SimpleUnion.class, "Expected the end of a JSON object while deserializing a union");
-            }
-            return new Unknown(type, values);
+            return (SimpleUnion) deserializeVariant(parser, context, variantIndex);
         }
     }
 
