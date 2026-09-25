@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -86,6 +87,7 @@ public abstract sealed class SimpleUnion
 
     @JsonTypeName("foo")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Foo extends SimpleUnion implements Known {
@@ -134,6 +136,7 @@ public abstract sealed class SimpleUnion
 
     @JsonTypeName("bar")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Bar extends SimpleUnion implements Known {
@@ -182,6 +185,7 @@ public abstract sealed class SimpleUnion
 
     @JsonTypeName("baz")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Baz extends SimpleUnion implements Known {
@@ -228,6 +232,7 @@ public abstract sealed class SimpleUnion
         }
     }
 
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Unknown extends SimpleUnion {
@@ -402,13 +407,21 @@ public abstract sealed class SimpleUnion
         private static SimpleUnion deserializeUnknown(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
             Map<String, Object> values = new HashMap<>();
+            JsonDeserializer<Object> valueDeserializer = null;
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 parser.nextToken();
             }
             while (parser.currentToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextToken();
-                values.put(fieldName, context.readValue(parser, Object.class));
+                if (valueDeserializer == null) {
+                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                }
+                values.put(
+                        fieldName,
+                        parser.currentToken() == JsonToken.VALUE_NULL
+                                ? valueDeserializer.getNullValue(context)
+                                : valueDeserializer.deserialize(parser, context));
                 parser.nextToken();
             }
             if (parser.currentToken() != JsonToken.END_OBJECT) {

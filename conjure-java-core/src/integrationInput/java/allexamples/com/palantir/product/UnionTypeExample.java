@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -710,6 +711,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("stringExample")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class StringExampleWrapper implements Base {
         private final StringExample value;
 
@@ -756,6 +758,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("thisFieldIsAnInteger")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class ThisFieldIsAnIntegerWrapper implements Base {
         private final int value;
 
@@ -803,6 +806,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("alsoAnInteger")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class AlsoAnIntegerWrapper implements Base {
         private final int value;
 
@@ -849,6 +853,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("if")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class IfWrapper implements Base {
         private final int value;
 
@@ -895,6 +900,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("new")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class NewWrapper implements Base {
         private final int value;
 
@@ -941,6 +947,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("interface")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class InterfaceWrapper implements Base {
         private final int value;
 
@@ -987,6 +994,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("completed")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class CompletedWrapper implements Base {
         private final int value;
 
@@ -1033,6 +1041,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("unknown")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class Unknown_Wrapper implements Base {
         private final int value;
 
@@ -1079,6 +1088,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("optional")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class OptionalWrapper implements Base {
         private final Optional<String> value;
 
@@ -1126,6 +1136,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("list")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class ListWrapper implements Base {
         private final List<String> value;
 
@@ -1172,6 +1183,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("set")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class SetWrapper implements Base {
         private final Set<String> value;
 
@@ -1220,6 +1232,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("map")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class MapWrapper implements Base {
         private final Map<String, String> value;
 
@@ -1266,6 +1279,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("optionalAlias")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class OptionalAliasWrapper implements Base {
         private final OptionalAlias value;
 
@@ -1313,6 +1327,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("listAlias")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class ListAliasWrapper implements Base {
         private final ListAlias value;
 
@@ -1359,6 +1374,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("setAlias")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class SetAliasWrapper implements Base {
         private final SetAlias value;
 
@@ -1405,6 +1421,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("mapAlias")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class MapAliasWrapper implements Base {
         private final MapAliasExample value;
 
@@ -1452,6 +1469,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("booleanField")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class BooleanFieldWrapper implements Base {
         private final boolean value;
 
@@ -1498,6 +1516,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("safeInt")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class SafeIntWrapper implements Base {
         private final int value;
 
@@ -1544,6 +1563,7 @@ public final class UnionTypeExample {
 
     @JsonTypeName("unsafeDouble")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class UnsafeDoubleWrapper implements Base {
         private final double value;
 
@@ -1588,6 +1608,7 @@ public final class UnionTypeExample {
         }
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -1788,13 +1809,21 @@ public final class UnionTypeExample {
         private static UnionTypeExample deserializeUnknown(
                 JsonParser parser, DeserializationContext context, String type) throws IOException {
             Map<String, Object> values = new HashMap<>();
+            JsonDeserializer<Object> valueDeserializer = null;
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 parser.nextToken();
             }
             while (parser.currentToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextToken();
-                values.put(fieldName, context.readValue(parser, Object.class));
+                if (valueDeserializer == null) {
+                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                }
+                values.put(
+                        fieldName,
+                        parser.currentToken() == JsonToken.VALUE_NULL
+                                ? valueDeserializer.getNullValue(context)
+                                : valueDeserializer.deserialize(parser, context));
                 parser.nextToken();
             }
             if (parser.currentToken() != JsonToken.END_OBJECT) {
