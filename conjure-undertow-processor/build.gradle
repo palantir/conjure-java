@@ -1,6 +1,7 @@
 apply plugin: 'com.palantir.external-publish-jar'
 
 dependencies {
+    implementation project(':conjure-codegen-lib')
     implementation project(':conjure-lib')
     implementation project(':conjure-undertow-annotations')
     implementation project(':conjure-undertow-lib')

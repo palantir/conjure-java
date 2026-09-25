@@ -40,6 +40,7 @@ import com.palantir.conjure.java.undertow.processor.sample.MultipleAuthHeaderPar
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
+import com.palantir.conjure.java.undertow.processor.sample.NestedGenericBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.NestedInterface;
 import com.palantir.conjure.java.undertow.processor.sample.OptionalPrimitives;
 import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
@@ -99,6 +100,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testCollectionBodyParam() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, CollectionBodyParam.class);
+    }
+
+    @Test
+    public void testNestedGenericBodyParam() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, NestedGenericBodyParam.class);
     }
 
     @Test

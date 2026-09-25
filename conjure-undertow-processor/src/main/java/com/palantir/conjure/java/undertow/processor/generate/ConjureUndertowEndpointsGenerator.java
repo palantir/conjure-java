@@ -26,6 +26,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
+import com.palantir.conjure.java.codegen.lib.TypeMarkers;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
@@ -205,11 +206,10 @@ public final class ConjureUndertowEndpointsGenerator {
                                         .build())
                                 .constructorInitializer(CodeBlock.builder()
                                         .addStatement(
-                                                "this.$N = $L.deserializer(new $T<$T>() {}, $N, this)",
+                                                "this.$N = $L.deserializer($L, $N, this)",
                                                 deserializerFieldName,
                                                 deserializerFactory,
-                                                TypeMarker.class,
-                                                requestBodyType,
+                                                typeMarker(requestBodyType),
                                                 RUNTIME_NAME)
                                         .build())
                                 .build());
@@ -457,11 +457,10 @@ public final class ConjureUndertowEndpointsGenerator {
                             .build())
                     .constructorInitializer(CodeBlock.builder()
                             .addStatement(
-                                    "this.$N = $L.serializer(new $T<$T>() {}, $N, this)",
+                                    "this.$N = $L.serializer($L, $N, this)",
                                     returnType.serializerFieldName(),
                                     returnType.serializerFactory(),
-                                    TypeMarker.class,
-                                    responseTypeName,
+                                    typeMarker(responseTypeName),
                                     RUNTIME_NAME)
                             .build())
                     .build());
@@ -811,6 +810,12 @@ public final class ConjureUndertowEndpointsGenerator {
                         "$N.requestArg($T.of($S, $N))", REQUEST_CONTEXT, UnsafeArg.class, name, variableName));
             default -> throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
         };
+    }
+
+    private static final ClassName TYPE_MARKER = ClassName.get(TypeMarker.class);
+
+    private static CodeBlock typeMarker(TypeName type) {
+        return TypeMarkers.typeMarker(TYPE_MARKER, type);
     }
 
     private static final Map<ClassName, Class<?>> COLLECTION_CLASSES = ImmutableMap.<ClassName, Class<?>>builder()

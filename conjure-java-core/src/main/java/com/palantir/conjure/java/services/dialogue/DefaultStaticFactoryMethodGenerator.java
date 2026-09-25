@@ -215,7 +215,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .forEach((typeName, fieldName) -> impl.addField(FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName), fieldName)
                         .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                        .initializer("new $T<$T>() {}", TypeMarker.class, typeName)
+                        .initializer(TypeMarkers.typeMarker(typeName))
                         .build()));
     }
 

@@ -218,58 +218,57 @@ public interface EteServiceAsync {
     /** Creates an asynchronous/non-blocking client for a EteService service. */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceAsync() {
-            private static final TypeMarker<String> stringTypeMarker = new TypeMarker<String>() {};
+            private static final TypeMarker<String> stringTypeMarker = TypeMarker.of(String.class);
 
-            private static final TypeMarker<Integer> integerTypeMarker = new TypeMarker<Integer>() {};
+            private static final TypeMarker<Integer> integerTypeMarker = TypeMarker.of(Integer.class);
 
-            private static final TypeMarker<Double> doubleTypeMarker = new TypeMarker<Double>() {};
+            private static final TypeMarker<Double> doubleTypeMarker = TypeMarker.of(Double.class);
 
-            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+            private static final TypeMarker<Boolean> booleanTypeMarker = TypeMarker.of(Boolean.class);
 
-            private static final TypeMarker<SafeLong> safeLongTypeMarker = new TypeMarker<SafeLong>() {};
+            private static final TypeMarker<SafeLong> safeLongTypeMarker = TypeMarker.of(SafeLong.class);
 
             private static final TypeMarker<ResourceIdentifier> resourceIdentifierTypeMarker =
-                    new TypeMarker<ResourceIdentifier>() {};
+                    TypeMarker.of(ResourceIdentifier.class);
 
-            private static final TypeMarker<BearerToken> bearerTokenTypeMarker = new TypeMarker<BearerToken>() {};
+            private static final TypeMarker<BearerToken> bearerTokenTypeMarker = TypeMarker.of(BearerToken.class);
 
             private static final TypeMarker<Optional<String>> optionalStringTypeMarker =
-                    new TypeMarker<Optional<String>>() {};
+                    TypeMarker.optionalOf(String.class);
 
             private static final TypeMarker<OffsetDateTime> offsetDateTimeTypeMarker =
-                    new TypeMarker<OffsetDateTime>() {};
+                    TypeMarker.of(OffsetDateTime.class);
 
-            private static final TypeMarker<Long> longTypeMarker = new TypeMarker<Long>() {};
+            private static final TypeMarker<Long> longTypeMarker = TypeMarker.of(Long.class);
 
-            private static final TypeMarker<Optional<Long>> optionalLongTypeMarker =
-                    new TypeMarker<Optional<Long>>() {};
+            private static final TypeMarker<Optional<Long>> optionalLongTypeMarker = TypeMarker.optionalOf(Long.class);
 
             private static final TypeMarker<StringAliasExample> stringAliasExampleTypeMarker =
-                    new TypeMarker<StringAliasExample>() {};
+                    TypeMarker.of(StringAliasExample.class);
 
             private static final TypeMarker<NestedStringAliasExample> nestedStringAliasExampleTypeMarker =
-                    new TypeMarker<NestedStringAliasExample>() {};
+                    TypeMarker.of(NestedStringAliasExample.class);
 
             private static final TypeMarker<allexamples.com.palantir.product.StringAliasExample>
                     stringAliasExample2TypeMarker =
-                            new TypeMarker<allexamples.com.palantir.product.StringAliasExample>() {};
+                            TypeMarker.of(allexamples.com.palantir.product.StringAliasExample.class);
 
             private static final TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>
                     optionalStringAliasExampleTypeMarker =
-                            new TypeMarker<Optional<allexamples.com.palantir.product.StringAliasExample>>() {};
+                            TypeMarker.optionalOf(allexamples.com.palantir.product.StringAliasExample.class);
 
-            private static final TypeMarker<SimpleEnum> simpleEnumTypeMarker = new TypeMarker<SimpleEnum>() {};
+            private static final TypeMarker<SimpleEnum> simpleEnumTypeMarker = TypeMarker.of(SimpleEnum.class);
 
             private static final TypeMarker<List<SimpleEnum>> listSimpleEnumTypeMarker =
-                    new TypeMarker<List<SimpleEnum>>() {};
+                    TypeMarker.listOf(SimpleEnum.class);
 
             private static final TypeMarker<Optional<SimpleEnum>> optionalSimpleEnumTypeMarker =
-                    new TypeMarker<Optional<SimpleEnum>>() {};
+                    TypeMarker.optionalOf(SimpleEnum.class);
 
             private static final TypeMarker<Optional<LongAlias>> optionalLongAliasTypeMarker =
-                    new TypeMarker<Optional<LongAlias>>() {};
+                    TypeMarker.optionalOf(LongAlias.class);
 
-            private static final TypeMarker<SimpleUnion> simpleUnionTypeMarker = new TypeMarker<SimpleUnion>() {};
+            private static final TypeMarker<SimpleUnion> simpleUnionTypeMarker = TypeMarker.of(SimpleUnion.class);
 
             private static final TypeMarker<List<Optional<String>>> listOptionalStringTypeMarker =
                     new TypeMarker<List<Optional<String>>>() {};
@@ -277,7 +276,7 @@ public interface EteServiceAsync {
             private static final TypeMarker<Set<Optional<String>>> setOptionalStringTypeMarker =
                     new TypeMarker<Set<Optional<String>>>() {};
 
-            private static final TypeMarker<List<String>> listStringTypeMarker = new TypeMarker<List<String>>() {};
+            private static final TypeMarker<List<String>> listStringTypeMarker = TypeMarker.listOf(String.class);
 
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 

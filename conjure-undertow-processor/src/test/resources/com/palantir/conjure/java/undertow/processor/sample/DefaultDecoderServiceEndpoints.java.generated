@@ -154,7 +154,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "createFactory",
                     ParamDecoders.complexCollectionParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
-            this.queryParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.queryParamSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
@@ -333,7 +333,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "createFactory",
                     ParamDecoders.complexCollectionParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
-            this.formParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.formParamSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
@@ -491,7 +491,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "createFactory",
                     ParamDecoders.complexCollectionParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
-            this.headersSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.headersSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override
@@ -623,7 +623,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "createFactory",
                     ParamDecoders.complexParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
-            this.pathParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.pathParamSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override

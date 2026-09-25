@@ -58,7 +58,7 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         DelayEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -113,7 +113,7 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         DelayFiveSecondTimeoutEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -321,7 +321,7 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         FutureTraceIdEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Object>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(Object.class), this);
         }
 
         @Override

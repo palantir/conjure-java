@@ -118,7 +118,7 @@ final class ErrorTypeMarkersGenerator {
                         Modifier.PRIVATE,
                         Modifier.STATIC,
                         Modifier.FINAL)
-                .initializer("new $T<$T>() {}", TypeMarker.class, type)
+                .initializer(TypeMarkers.typeMarker(type))
                 .build();
     }
 }
