@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -993,6 +994,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u0")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U0Wrapper implements Base {
         private final String value;
 
@@ -1039,6 +1041,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u1")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U1Wrapper implements Base {
         private final String value;
 
@@ -1085,6 +1088,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u2")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U2Wrapper implements Base {
         private final String value;
 
@@ -1131,6 +1135,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u3")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U3Wrapper implements Base {
         private final String value;
 
@@ -1177,6 +1182,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u4")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U4Wrapper implements Base {
         private final String value;
 
@@ -1223,6 +1229,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u5")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U5Wrapper implements Base {
         private final String value;
 
@@ -1269,6 +1276,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u6")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U6Wrapper implements Base {
         private final String value;
 
@@ -1315,6 +1323,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u7")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U7Wrapper implements Base {
         private final String value;
 
@@ -1361,6 +1370,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u8")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U8Wrapper implements Base {
         private final String value;
 
@@ -1407,6 +1417,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u9")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U9Wrapper implements Base {
         private final String value;
 
@@ -1453,6 +1464,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u10")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U10Wrapper implements Base {
         private final String value;
 
@@ -1499,6 +1511,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u11")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U11Wrapper implements Base {
         private final String value;
 
@@ -1545,6 +1558,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u12")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U12Wrapper implements Base {
         private final String value;
 
@@ -1591,6 +1605,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u13")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U13Wrapper implements Base {
         private final String value;
 
@@ -1637,6 +1652,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u14")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U14Wrapper implements Base {
         private final String value;
 
@@ -1683,6 +1699,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u15")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U15Wrapper implements Base {
         private final String value;
 
@@ -1729,6 +1746,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u16")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U16Wrapper implements Base {
         private final String value;
 
@@ -1775,6 +1793,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u17")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U17Wrapper implements Base {
         private final String value;
 
@@ -1821,6 +1840,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u18")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U18Wrapper implements Base {
         private final String value;
 
@@ -1867,6 +1887,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u19")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U19Wrapper implements Base {
         private final String value;
 
@@ -1913,6 +1934,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u20")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U20Wrapper implements Base {
         private final String value;
 
@@ -1959,6 +1981,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u21")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U21Wrapper implements Base {
         private final String value;
 
@@ -2005,6 +2028,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u22")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U22Wrapper implements Base {
         private final String value;
 
@@ -2051,6 +2075,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u23")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U23Wrapper implements Base {
         private final String value;
 
@@ -2097,6 +2122,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u24")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U24Wrapper implements Base {
         private final String value;
 
@@ -2143,6 +2169,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u25")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U25Wrapper implements Base {
         private final String value;
 
@@ -2189,6 +2216,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u26")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U26Wrapper implements Base {
         private final String value;
 
@@ -2235,6 +2263,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u27")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U27Wrapper implements Base {
         private final String value;
 
@@ -2281,6 +2310,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u28")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U28Wrapper implements Base {
         private final String value;
 
@@ -2327,6 +2357,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u29")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U29Wrapper implements Base {
         private final String value;
 
@@ -2373,6 +2404,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u30")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U30Wrapper implements Base {
         private final String value;
 
@@ -2419,6 +2451,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u31")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U31Wrapper implements Base {
         private final String value;
 
@@ -2465,6 +2498,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u32")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U32Wrapper implements Base {
         private final String value;
 
@@ -2511,6 +2545,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u33")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U33Wrapper implements Base {
         private final String value;
 
@@ -2557,6 +2592,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u34")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U34Wrapper implements Base {
         private final String value;
 
@@ -2603,6 +2639,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u35")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U35Wrapper implements Base {
         private final String value;
 
@@ -2649,6 +2686,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u36")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U36Wrapper implements Base {
         private final String value;
 
@@ -2695,6 +2733,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u37")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U37Wrapper implements Base {
         private final String value;
 
@@ -2741,6 +2780,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u38")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U38Wrapper implements Base {
         private final String value;
 
@@ -2787,6 +2827,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u39")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U39Wrapper implements Base {
         private final String value;
 
@@ -2833,6 +2874,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u40")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U40Wrapper implements Base {
         private final String value;
 
@@ -2879,6 +2921,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u41")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U41Wrapper implements Base {
         private final String value;
 
@@ -2925,6 +2968,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u42")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U42Wrapper implements Base {
         private final String value;
 
@@ -2971,6 +3015,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u43")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U43Wrapper implements Base {
         private final String value;
 
@@ -3017,6 +3062,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u44")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U44Wrapper implements Base {
         private final String value;
 
@@ -3063,6 +3109,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u45")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U45Wrapper implements Base {
         private final String value;
 
@@ -3109,6 +3156,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u46")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U46Wrapper implements Base {
         private final String value;
 
@@ -3155,6 +3203,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u47")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U47Wrapper implements Base {
         private final String value;
 
@@ -3201,6 +3250,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u48")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U48Wrapper implements Base {
         private final String value;
 
@@ -3247,6 +3297,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u49")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U49Wrapper implements Base {
         private final String value;
 
@@ -3293,6 +3344,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u50")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U50Wrapper implements Base {
         private final String value;
 
@@ -3339,6 +3391,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u51")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U51Wrapper implements Base {
         private final String value;
 
@@ -3385,6 +3438,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u52")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U52Wrapper implements Base {
         private final String value;
 
@@ -3431,6 +3485,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u53")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U53Wrapper implements Base {
         private final String value;
 
@@ -3477,6 +3532,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u54")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U54Wrapper implements Base {
         private final String value;
 
@@ -3523,6 +3579,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u55")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U55Wrapper implements Base {
         private final String value;
 
@@ -3569,6 +3626,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u56")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U56Wrapper implements Base {
         private final String value;
 
@@ -3615,6 +3673,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u57")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U57Wrapper implements Base {
         private final String value;
 
@@ -3661,6 +3720,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u58")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U58Wrapper implements Base {
         private final String value;
 
@@ -3707,6 +3767,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u59")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U59Wrapper implements Base {
         private final String value;
 
@@ -3753,6 +3814,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u60")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U60Wrapper implements Base {
         private final String value;
 
@@ -3799,6 +3861,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u61")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U61Wrapper implements Base {
         private final String value;
 
@@ -3845,6 +3908,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u62")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U62Wrapper implements Base {
         private final String value;
 
@@ -3891,6 +3955,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u63")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U63Wrapper implements Base {
         private final String value;
 
@@ -3937,6 +4002,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u64")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U64Wrapper implements Base {
         private final String value;
 
@@ -3983,6 +4049,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u65")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U65Wrapper implements Base {
         private final String value;
 
@@ -4029,6 +4096,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u66")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U66Wrapper implements Base {
         private final String value;
 
@@ -4075,6 +4143,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u67")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U67Wrapper implements Base {
         private final String value;
 
@@ -4121,6 +4190,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u68")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U68Wrapper implements Base {
         private final String value;
 
@@ -4167,6 +4237,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u69")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U69Wrapper implements Base {
         private final String value;
 
@@ -4213,6 +4284,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u70")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U70Wrapper implements Base {
         private final String value;
 
@@ -4259,6 +4331,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u71")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U71Wrapper implements Base {
         private final String value;
 
@@ -4305,6 +4378,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u72")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U72Wrapper implements Base {
         private final String value;
 
@@ -4351,6 +4425,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u73")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U73Wrapper implements Base {
         private final String value;
 
@@ -4397,6 +4472,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u74")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U74Wrapper implements Base {
         private final String value;
 
@@ -4443,6 +4519,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u75")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U75Wrapper implements Base {
         private final String value;
 
@@ -4489,6 +4566,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u76")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U76Wrapper implements Base {
         private final String value;
 
@@ -4535,6 +4613,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u77")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U77Wrapper implements Base {
         private final String value;
 
@@ -4581,6 +4660,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u78")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U78Wrapper implements Base {
         private final String value;
 
@@ -4627,6 +4707,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u79")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U79Wrapper implements Base {
         private final String value;
 
@@ -4673,6 +4754,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u80")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U80Wrapper implements Base {
         private final String value;
 
@@ -4719,6 +4801,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u81")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U81Wrapper implements Base {
         private final String value;
 
@@ -4765,6 +4848,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u82")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U82Wrapper implements Base {
         private final String value;
 
@@ -4811,6 +4895,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u83")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U83Wrapper implements Base {
         private final String value;
 
@@ -4857,6 +4942,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u84")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U84Wrapper implements Base {
         private final String value;
 
@@ -4903,6 +4989,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u85")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U85Wrapper implements Base {
         private final String value;
 
@@ -4949,6 +5036,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u86")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U86Wrapper implements Base {
         private final String value;
 
@@ -4995,6 +5083,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u87")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U87Wrapper implements Base {
         private final String value;
 
@@ -5041,6 +5130,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u88")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U88Wrapper implements Base {
         private final String value;
 
@@ -5087,6 +5177,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u89")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U89Wrapper implements Base {
         private final String value;
 
@@ -5133,6 +5224,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u90")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U90Wrapper implements Base {
         private final String value;
 
@@ -5179,6 +5271,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u91")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U91Wrapper implements Base {
         private final String value;
 
@@ -5225,6 +5318,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u92")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U92Wrapper implements Base {
         private final String value;
 
@@ -5271,6 +5365,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u93")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U93Wrapper implements Base {
         private final String value;
 
@@ -5317,6 +5412,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u94")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U94Wrapper implements Base {
         private final String value;
 
@@ -5363,6 +5459,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u95")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U95Wrapper implements Base {
         private final String value;
 
@@ -5409,6 +5506,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u96")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U96Wrapper implements Base {
         private final String value;
 
@@ -5455,6 +5553,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u97")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U97Wrapper implements Base {
         private final String value;
 
@@ -5501,6 +5600,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u98")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U98Wrapper implements Base {
         private final String value;
 
@@ -5547,6 +5647,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u99")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U99Wrapper implements Base {
         private final String value;
 
@@ -5593,6 +5694,7 @@ public final class LargeUnionExample {
 
     @JsonTypeName("u100")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     private static final class U100Wrapper implements Base {
         private final String value;
 
@@ -5637,6 +5739,7 @@ public final class LargeUnionExample {
         }
     }
 
+    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -6001,13 +6104,21 @@ public final class LargeUnionExample {
         private static LargeUnionExample deserializeUnknown(
                 JsonParser parser, DeserializationContext context, String type) throws IOException {
             Map<String, Object> values = new HashMap<>();
+            JsonDeserializer<Object> valueDeserializer = null;
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 parser.nextToken();
             }
             while (parser.currentToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextToken();
-                values.put(fieldName, context.readValue(parser, Object.class));
+                if (valueDeserializer == null) {
+                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                }
+                values.put(
+                        fieldName,
+                        parser.currentToken() == JsonToken.VALUE_NULL
+                                ? valueDeserializer.getNullValue(context)
+                                : valueDeserializer.deserialize(parser, context));
                 parser.nextToken();
             }
             if (parser.currentToken() != JsonToken.END_OBJECT) {

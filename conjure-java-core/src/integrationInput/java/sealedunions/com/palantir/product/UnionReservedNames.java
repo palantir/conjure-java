@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -199,6 +200,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("known")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Known_ extends UnionReservedNames implements Known {
@@ -247,6 +249,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("unknown")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Unknown_ extends UnionReservedNames implements Known {
@@ -295,6 +298,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("if")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class If extends UnionReservedNames implements Known {
@@ -343,6 +347,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("new")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class New extends UnionReservedNames implements Known {
@@ -391,6 +396,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("interface")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Interface extends UnionReservedNames implements Known {
@@ -439,6 +445,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("void")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Void extends UnionReservedNames implements Known {
@@ -487,6 +494,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("return")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Return extends UnionReservedNames implements Known {
@@ -535,6 +543,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("private")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Private extends UnionReservedNames implements Known {
@@ -583,6 +592,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("public")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Public extends UnionReservedNames implements Known {
@@ -631,6 +641,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("int")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Int extends UnionReservedNames implements Known {
@@ -679,6 +690,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("import")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Import extends UnionReservedNames implements Known {
@@ -727,6 +739,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("final")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Final extends UnionReservedNames implements Known {
@@ -775,6 +788,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("throws")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Throws extends UnionReservedNames implements Known {
@@ -823,6 +837,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("static")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Static extends UnionReservedNames implements Known {
@@ -871,6 +886,7 @@ public abstract sealed class UnionReservedNames
 
     @JsonTypeName("unionReservedNames")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class UnionReservedNames_ extends UnionReservedNames implements Known {
@@ -917,6 +933,7 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
     public static final class Unknown extends UnionReservedNames {
@@ -1119,13 +1136,21 @@ public abstract sealed class UnionReservedNames
         private static UnionReservedNames deserializeUnknown(
                 JsonParser parser, DeserializationContext context, String type) throws IOException {
             Map<String, Object> values = new HashMap<>();
+            JsonDeserializer<Object> valueDeserializer = null;
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 parser.nextToken();
             }
             while (parser.currentToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextToken();
-                values.put(fieldName, context.readValue(parser, Object.class));
+                if (valueDeserializer == null) {
+                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                }
+                values.put(
+                        fieldName,
+                        parser.currentToken() == JsonToken.VALUE_NULL
+                                ? valueDeserializer.getNullValue(context)
+                                : valueDeserializer.deserialize(parser, context));
                 parser.nextToken();
             }
             if (parser.currentToken() != JsonToken.END_OBJECT) {
