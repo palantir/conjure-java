@@ -210,7 +210,7 @@ public final class ConjureHandler implements HttpHandler {
                             // Begin the server span as early as possible to capture the most of the request.
                             endpoint -> Optional.of(new TracedRequestHandler(
                                     endpoint.handler(),
-                                    "Undertow: " + endpoint.method() + " " + endpoint.template(),
+                                    "Undertow: " + endpoint.serviceName() + "." + endpoint.name(),
                                     CompletedRequestTagTranslator.INSTANCE.andThen(
                                             new EndpointTagTranslator(endpoint)))),
                             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
