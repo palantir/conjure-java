@@ -48,11 +48,14 @@ public abstract class ConjureUnionDeserializer<T> extends JsonDeserializer<T> {
 
     @Override
     public final T deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-        if (!parser.isExpectedStartObjectToken()) {
+        // Delegating creators may consume START_OBJECT before invoking this deserializer.
+        JsonToken firstToken = parser.currentToken();
+        if (parser.isExpectedStartObjectToken()) {
+            firstToken = parser.nextToken();
+        } else if (firstToken != JsonToken.FIELD_NAME && firstToken != JsonToken.END_OBJECT) {
             return context.reportInputMismatch(unionClass, "Expected a JSON object for union deserialization");
         }
         boolean acceptCaseInsensitiveProperties = context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
-        JsonToken firstToken = parser.nextToken();
         if (firstToken == JsonToken.FIELD_NAME && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties)) {
             if (parser.nextToken() != JsonToken.VALUE_STRING) {
                 return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");

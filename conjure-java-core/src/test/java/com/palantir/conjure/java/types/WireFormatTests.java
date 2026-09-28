@@ -881,6 +881,16 @@ public final class WireFormatTests {
     }
 
     @Test
+    void testSealedUnionAlias_serialize() throws JsonProcessingException {
+        SimpleUnionAlias alias = SimpleUnionAlias.of(SimpleUnion.foo("test"));
+        assertThat(mapper.writeValueAsString(alias)).isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+        assertThat(mapper.writerFor(SimpleUnionAlias.class).writeValueAsString(alias))
+                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+        assertThat(mapper.writeValueAsString(Map.of("key", alias)))
+                .isEqualTo("{\"key\":{\"type\":\"foo\",\"foo\":\"test\"}}");
+    }
+
+    @Test
     void testSealedUnionAlias_deserialize() throws JsonProcessingException {
         SimpleUnionAlias expected = SimpleUnionAlias.of(SimpleUnion.foo("test"));
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnionAlias.class))
