@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -139,9 +140,11 @@ public final class NestedCollectionExample {
         private List<List<String>> nestedList = ConjureCollections.newList();
 
         @JsonSetter(value = "nestedMap", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, Map<String, String>> nestedMap = new LinkedHashMap<>();
 
         @JsonSetter(value = "mixedCollection", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, List<ObjectReference>> mixedCollection = new LinkedHashMap<>();
 
         private Builder() {}
