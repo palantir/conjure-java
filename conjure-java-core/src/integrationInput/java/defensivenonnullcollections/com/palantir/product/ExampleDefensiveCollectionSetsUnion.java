@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureSetDeserializer;
 import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -167,12 +168,27 @@ public final class ExampleDefensiveCollectionSetsUnion {
     private static final class SetWrapper implements Base {
         private final Set<String> value;
 
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private SetWrapper(
-                @JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @JsonDeserialize(as = LinkedHashSet.class) @Nonnull
-                        Set<String> value) {
+        private SetWrapper(Set<String> value) {
+            this(value, false);
+        }
+
+        private SetWrapper(Set<String> value, boolean owned) {
             Preconditions.checkNotNull(value, "set cannot be null");
-            this.value = Collections.unmodifiableSet(ConjureCollections.newNonNullSet(value));
+            if (owned) {
+                for (Object element : value) {
+                    Preconditions.checkNotNull(element, "iterable cannot contain null elements");
+                }
+            }
+            this.value = Collections.unmodifiableSet(owned ? value : ConjureCollections.newNonNullSet(value));
+        }
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private static SetWrapper fromJson(
+                @JsonSetter(value = "set", nulls = Nulls.AS_EMPTY)
+                        @JsonDeserialize(as = LinkedHashSet.class, using = ConjureSetDeserializer.class)
+                        @Nonnull
+                        Set<String> value) {
+            return new SetWrapper(value, true);
         }
 
         @JsonProperty(value = "type", index = 0)
