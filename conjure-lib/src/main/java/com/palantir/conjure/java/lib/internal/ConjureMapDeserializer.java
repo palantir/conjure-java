@@ -31,14 +31,15 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Internal Jackson support for transferring ownership of maps to generated union values. */
+/** Internal Jackson support for transferring ownership of maps to generated values. */
 public final class ConjureMapDeserializer extends JsonDeserializer<Object> implements ContextualDeserializer {
     @Override
     public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)
             throws JsonMappingException {
         JsonDeserializer<?> delegate = context.findContextualValueDeserializer(property.getType(), property);
-        // Only Jackson's standard LinkedHashMap constructor guarantees a fresh, privately owned map.
+        // Custom constructors and problem handlers can return shared maps.
         if (delegate.getClass() == MapDeserializer.class
+                && context.getConfig().getProblemHandlers() == null
                 && ((MapDeserializer) delegate).getValueInstantiator().getClass()
                         == JDKValueInstantiators.findStdValueInstantiator(context.getConfig(), LinkedHashMap.class)
                                 .getClass()

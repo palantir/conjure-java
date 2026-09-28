@@ -29,6 +29,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -427,6 +428,9 @@ public final class BeanBuilderGenerator {
                 .map(field -> field.conjureDef().getType().accept(TypeVisitor.IS_MAP)
                         ? field.poetSpec().toBuilder()
                                 .addAnnotation(createJacksonSetterAnnotation(field, typesMap))
+                                .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                                        .addMember("using", "$T.class", ConjureMapDeserializer.class)
+                                        .build())
                                 .build()
                         : field.poetSpec())
                 .toList();
