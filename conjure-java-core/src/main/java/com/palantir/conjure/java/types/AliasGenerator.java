@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureSetDeserializer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -139,13 +140,36 @@ public final class AliasGenerator {
                     .build());
         }
 
+        boolean ownedSet = options.defensiveCollections() && typeDef.getAlias().accept(TypeVisitor.IS_SET);
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                .addAnnotations(ownedSet ? List.of() : List.of(ConjureAnnotations.delegatingJsonCreator()))
                 .addParameter(getAliasFactoryParameter(typeDef.getAlias(), aliasTypeName, typeMapper, options))
                 .returns(thisClass)
                 .addStatement(createStaticFactory(typeDef.getAlias(), thisClass, options))
                 .build());
+
+        if (ownedSet) {
+            MethodSpec.Builder factory = MethodSpec.methodBuilder("fromJson")
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                    .addParameter(Parameters.nonnullParameter(aliasTypeName, "value").toBuilder()
+                            .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                                    .addMember("as", "$T.class", LinkedHashSet.class)
+                                    .addMember("using", "$T.class", ConjureSetDeserializer.class)
+                                    .build())
+                            .build())
+                    .returns(thisClass)
+                    .addStatement("$L", Expressions.requireNonNull("value", "value cannot be null"));
+            if (options.nonNullCollections()) {
+                factory.beginControlFlow("for ($T element : value)", Object.class)
+                        .addStatement(
+                                "$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
+                        .endControlFlow();
+            }
+            spec.addMethod(
+                    factory.addStatement("return new $T(value)", thisClass).build());
+        }
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
         typeDef.getAlias().accept(new DefaultConstructorVisitor(aliasTypeName)).ifPresent(ctor -> {

@@ -36,6 +36,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
+import com.palantir.conjure.java.lib.internal.ConjureSetDeserializer;
 import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.conjure.java.lib.internal.ConjureUnionSerializer;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -1071,14 +1072,17 @@ public final class UnionGenerator {
             String jsonFactoryName) {
         ParameterSpec.Builder jsonParameter = ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                 .addAnnotation(wrapperConstructorParameterAnnotation(memberTypeDef, typeMapper, typesMap, options))
-                .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
+                .addAnnotations(deserializationAnnotationForSets(memberTypeDef, options))
                 .addAnnotation(Nonnull.class);
         CodeBlock checkNotNull =
                 Expressions.requireNonNull(VALUE_FIELD_NAME, String.format("%s cannot be null", memberName.get()));
-        if (options.defensiveCollections() && memberTypeDef.getType().accept(TypeVisitor.IS_MAP)) {
-            jsonParameter.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                    .addMember("using", "$T.class", ConjureMapDeserializer.class)
-                    .build());
+        Type type = memberTypeDef.getType();
+        if (options.defensiveCollections() && (type.accept(TypeVisitor.IS_MAP) || type.accept(TypeVisitor.IS_SET))) {
+            if (type.accept(TypeVisitor.IS_MAP)) {
+                jsonParameter.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                        .addMember("using", "$T.class", ConjureMapDeserializer.class)
+                        .build());
+            }
             return List.of(
                     MethodSpec.constructorBuilder()
                             .addModifiers(Modifier.PRIVATE)
@@ -1097,11 +1101,7 @@ public final class UnionGenerator {
                             .addParameter(memberType, VALUE_FIELD_NAME)
                             .addParameter(TypeName.BOOLEAN, "owned")
                             .addStatement("$L", checkNotNull)
-                            .addStatement(
-                                    "this.$1L = $2T.unmodifiableMap(owned ? $1L : new $3T<>($1L))",
-                                    VALUE_FIELD_NAME,
-                                    Collections.class,
-                                    LinkedHashMap.class)
+                            .addCode(createOwnedConstructor(type, options))
                             .build());
         }
         return List.of(MethodSpec.constructorBuilder()
@@ -1111,6 +1111,33 @@ public final class UnionGenerator {
                 .addStatement("$L", checkNotNull)
                 .addStatement(createConstructor(memberTypeDef.getType(), options))
                 .build());
+    }
+
+    private static CodeBlock createOwnedConstructor(Type type, Options options) {
+        if (type.accept(TypeVisitor.IS_MAP)) {
+            return CodeBlock.builder()
+                    .addStatement(
+                            "this.$1L = $2T.unmodifiableMap(owned ? $1L : new $3T<>($1L))",
+                            VALUE_FIELD_NAME,
+                            Collections.class,
+                            LinkedHashMap.class)
+                    .build();
+        }
+        CodeBlock.Builder body = CodeBlock.builder();
+        if (options.nonNullCollections()) {
+            body.beginControlFlow("if (owned)")
+                    .beginControlFlow("for ($T element : $L)", Object.class, VALUE_FIELD_NAME)
+                    .addStatement("$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
+                    .endControlFlow()
+                    .endControlFlow();
+        }
+        return body.addStatement(
+                        "this.$1L = $2T.unmodifiableSet(owned ? $1L : $3T.$4L($1L))",
+                        VALUE_FIELD_NAME,
+                        Collections.class,
+                        ConjureCollections.class,
+                        CollectionType.from(type, options).getConjureCollectionStaticFactoryMethod())
+                .build();
     }
 
     private static AnnotationSpec typeFirstAnnotation() {
@@ -1127,11 +1154,14 @@ public final class UnionGenerator {
         return builder.addMember("index", "$L", 0).build();
     }
 
-    private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field) {
+    private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field, Options options) {
         if (field.getType().accept(TypeVisitor.IS_SET)) {
-            return List.of(AnnotationSpec.builder(JsonDeserialize.class)
-                    .addMember("as", "$T.class", LinkedHashSet.class)
-                    .build());
+            AnnotationSpec.Builder annotation =
+                    AnnotationSpec.builder(JsonDeserialize.class).addMember("as", "$T.class", LinkedHashSet.class);
+            if (options.defensiveCollections()) {
+                annotation.addMember("using", "$T.class", ConjureSetDeserializer.class);
+            }
+            return List.of(annotation.build());
         }
         return List.of();
     }

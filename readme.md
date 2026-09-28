@@ -119,6 +119,8 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     Jackson writes the `type` discriminator first so generated readers can avoid buffering. Readers also accept the discriminator in any position. With `--defensiveCollections`, public union factories copy input maps. Standard Jackson-created maps are wrapped without an additional copy; custom map deserializers, custom map constructors, or registered deserialization problem handlers use a copying fallback to preserve ownership and immutability. Bean map fields use the same ownership checks when Jackson populates their builders directly.
 
+    Defensive Set unions and Set aliases also take ownership of standard Jackson-created ordered sets with scalar elements, avoiding a second set allocation. Public factories continue to copy their inputs. Custom collection or element deserializers, custom constructors, recovery handlers, and polymorphic sets use a copying fallback. Encounter order, deduplication, and configured null-element validation are preserved.
+
     ```java
     Foo output = unionTypeExample.accept(new Visitor<Foo>() {
 
