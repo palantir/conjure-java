@@ -388,7 +388,7 @@ org.hibernate.validator:hibernate-validator:8.0.2.Final (3 constraints: 3f38e3dc
 
 org.javassist:javassist:3.30.2-GA (3 constraints: 242662eb)
 
-org.junit.jupiter:junit-jupiter:6.1.3 (3 constraints: 3245f2ef)
+org.junit.jupiter:junit-jupiter:6.1.3 (3 constraints: 5d450c13)
 
 org.junit.jupiter:junit-jupiter-api:6.1.3 (5 constraints: 69438fee)
 
