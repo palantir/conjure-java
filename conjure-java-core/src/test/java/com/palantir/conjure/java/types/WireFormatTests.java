@@ -90,6 +90,7 @@ import sealedunions.com.palantir.product.CamelCaseUnion;
 import sealedunions.com.palantir.product.EmptyObject;
 import sealedunions.com.palantir.product.NestedEmptyUnion;
 import sealedunions.com.palantir.product.SimpleUnion;
+import sealedunions.com.palantir.product.SimpleUnionAlias;
 import sealedunions.com.palantir.product.UnionReservedNames;
 
 @Execution(ExecutionMode.CONCURRENT)
@@ -877,6 +878,19 @@ public final class WireFormatTests {
     void testSealedUnionType_deserialize() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnion.class))
                 .isEqualTo(SimpleUnion.foo("test"));
+    }
+
+    @Test
+    void testSealedUnionAlias_deserialize() throws JsonProcessingException {
+        SimpleUnionAlias expected = SimpleUnionAlias.of(SimpleUnion.foo("test"));
+        assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnionAlias.class))
+                .isEqualTo(expected);
+        assertThat(mapper.readValue("{\"foo\":\"test\",\"type\":\"foo\"}", SimpleUnionAlias.class))
+                .isEqualTo(expected);
+        assertThat(mapper.readValue(
+                        "{\"key\":{\"type\":\"foo\",\"foo\":\"test\"}}",
+                        new TypeReference<Map<String, SimpleUnionAlias>>() {}))
+                .containsExactly(Map.entry("key", expected));
     }
 
     @Test
