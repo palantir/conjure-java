@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import sealedunions.com.palantir.product.SimpleUnion;
 
@@ -70,18 +70,17 @@ final class JacksonPerformanceTests {
 
     @Test
     void sharedUnionCodeKeepsMapperCustomizationIsolated() throws IOException {
-        ObjectMapper first = mapperWithStringPrefix("first:");
-        ObjectMapper second = mapperWithStringPrefix("second:");
+        Map<String, ObjectMapper> mappers =
+                Map.of("first:", mapperWithStringPrefix("first:"), "second:", mapperWithStringPrefix("second:"));
         String json = "{\"type\":\"foo\",\"foo\":\"value\"}";
         for (int iteration = 0; iteration < 2; iteration++) {
-            assertThat(first.readValue(json, Union.class)).isEqualTo(Union.foo("first:value"));
-            assertThat(second.readValue(json, Union.class)).isEqualTo(Union.foo("second:value"));
-            assertThat(first.readValue(json, SimpleUnion.class)).isEqualTo(SimpleUnion.foo("first:value"));
-            assertThat(second.readValue(json, SimpleUnion.class)).isEqualTo(SimpleUnion.foo("second:value"));
-            assertThat(first.writerFor(SimpleUnion.class).writeValueAsString(SimpleUnion.foo("value")))
-                    .isEqualTo("{\"type\":\"foo\",\"foo\":\"first:value\"}");
-            assertThat(second.writerFor(SimpleUnion.class).writeValueAsString(SimpleUnion.foo("value")))
-                    .isEqualTo("{\"type\":\"foo\",\"foo\":\"second:value\"}");
+            for (String prefix : List.of("first:", "second:")) {
+                ObjectMapper mapper = mappers.get(prefix);
+                assertThat(mapper.readValue(json, Union.class)).isEqualTo(Union.foo(prefix + "value"));
+                assertThat(mapper.readValue(json, SimpleUnion.class)).isEqualTo(SimpleUnion.foo(prefix + "value"));
+                assertThat(mapper.writerFor(SimpleUnion.class).writeValueAsString(SimpleUnion.foo("value")))
+                        .isEqualTo("{\"type\":\"foo\",\"foo\":\"" + prefix + "value\"}");
+            }
         }
     }
 
@@ -208,7 +207,7 @@ final class JacksonPerformanceTests {
         String json = mapper.writerFor(type).writeValueAsString(value);
         assertThat(json).startsWith("{\"type\":");
         AtomicInteger bufferProbes = new AtomicInteger();
-        assertThat(readWithBufferProbe(json, type, bufferProbes)).isEqualTo(value);
+        assertThat(readWithBufferProbe(MAPPER, json, type, bufferProbes)).isEqualTo(value);
         assertThat(bufferProbes).hasValue(0);
     }
 
@@ -238,60 +237,43 @@ final class JacksonPerformanceTests {
         }
     }
 
-    @Test
-    void typeFirstUnionsDoNotCreateInputBuffers() throws IOException {
-        AtomicInteger bufferProbes = new AtomicInteger();
-
-        UnionTypeExample union = readWithBufferProbe(
-                "{\"type\":\"thisFieldIsAnInteger\",\"thisFieldIsAnInteger\":42}",
-                UnionTypeExample.class,
-                bufferProbes);
-        SimpleUnion sealed =
-                readWithBufferProbe("{\"type\":\"foo\",\"foo\":\"value\"}", SimpleUnion.class, bufferProbes);
-
-        assertThat(union).isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
-        assertThat(sealed).isEqualTo(SimpleUnion.foo("value"));
-        assertThat(bufferProbes).hasValue(0);
+    @ParameterizedTest
+    @CsvSource({"false,false", "false,true", "true,false", "true,true"})
+    void knownUnionsUseExpectedBuffering(boolean sealed, boolean caseInsensitive) throws IOException {
+        ObjectMapper mapper = MAPPER.copy();
+        if (caseInsensitive) {
+            mapper.setConfig(mapper.getDeserializationConfig().with(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
+        }
+        Class<?> type = sealed ? SimpleUnion.class : UnionTypeExample.class;
+        Object expected = sealed ? SimpleUnion.foo("value") : UnionTypeExample.thisFieldIsAnInteger(42);
+        String discriminator =
+                "\"%s\":\"%s\"".formatted(caseInsensitive ? "TYPE" : "type", sealed ? "foo" : "thisFieldIsAnInteger");
+        String payload = sealed ? "\"foo\":\"value\"" : "\"thisFieldIsAnInteger\":42";
+        String ignored = sealed ? "[1,2]" : "{\"nested\":[1,2]}";
+        for (String json : List.of(
+                "{" + discriminator + "," + payload + "}",
+                "{" + payload + "," + discriminator + "}",
+                "{\"ignoredBefore\":" + ignored + "," + discriminator + "," + payload + ",\"ignoredAfter\":true}")) {
+            AtomicInteger bufferProbes = new AtomicInteger();
+            assertThat(readWithBufferProbe(mapper, json, type, bufferProbes)).isEqualTo(expected);
+            if (json.startsWith("{" + discriminator)) {
+                assertThat(bufferProbes).hasValue(0);
+            } else {
+                assertThat(bufferProbes.get()).isPositive();
+            }
+        }
     }
 
-    @Test
-    void outOfOrderUnionsUseBufferedCompatibilityPath() throws IOException {
-        AtomicInteger bufferProbes = new AtomicInteger();
-
-        UnionTypeExample union = readWithBufferProbe(
-                "{\"thisFieldIsAnInteger\":42,\"type\":\"thisFieldIsAnInteger\"}",
-                UnionTypeExample.class,
-                bufferProbes);
-        SimpleUnion sealed =
-                readWithBufferProbe("{\"foo\":\"value\",\"type\":\"foo\"}", SimpleUnion.class, bufferProbes);
-
-        assertThat(union).isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
-        assertThat(sealed).isEqualTo(SimpleUnion.foo("value"));
-        assertThat(bufferProbes).hasValueGreaterThanOrEqualTo(2);
-    }
-
-    @Test
-    void bufferedPathCombinesPropertiesBeforeAndAfterType() throws IOException {
-        UnionTypeExample union = MAPPER.readValue(
-                "{\"ignoredBefore\":{\"nested\":[1,2]},\"type\":\"thisFieldIsAnInteger\","
-                        + "\"thisFieldIsAnInteger\":42,\"ignoredAfter\":true}",
-                UnionTypeExample.class);
-        SimpleUnion sealed = MAPPER.readValue(
-                "{\"ignoredBefore\":[1,2],\"type\":\"foo\",\"foo\":\"value\",\"ignoredAfter\":true}",
-                SimpleUnion.class);
-
-        assertThat(union).isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
-        assertThat(sealed).isEqualTo(SimpleUnion.foo("value"));
-    }
-
-    @Test
-    void unknownUnionsPreserveAllPropertiesOnBothPaths() throws IOException {
-        assertUnknownRoundTrips("{\"type\":\"future\",\"extra\":\"value\",\"future\":42}", UnionTypeExample.class);
-        assertUnknownRoundTrips("{\"extra\":\"value\",\"future\":42,\"type\":\"future\"}", UnionTypeExample.class);
-        assertUnknownRoundTrips("{\"extra\":\"value\",\"type\":\"future\",\"future\":42}", UnionTypeExample.class);
-        assertUnknownRoundTrips("{\"type\":\"future\",\"extra\":\"value\",\"future\":42}", SimpleUnion.class);
-        assertUnknownRoundTrips("{\"extra\":\"value\",\"future\":42,\"type\":\"future\"}", SimpleUnion.class);
-        assertUnknownRoundTrips("{\"extra\":\"value\",\"type\":\"future\",\"future\":42}", SimpleUnion.class);
+    @ParameterizedTest
+    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class})
+    void unknownUnionsPreserveAllPropertiesOnBothPaths(Class<?> type) throws IOException {
+        for (String json : List.of(
+                "{\"type\":\"future\",\"extra\":\"value\",\"future\":42}",
+                "{\"extra\":\"value\",\"future\":42,\"type\":\"future\"}",
+                "{\"extra\":\"value\",\"type\":\"future\",\"future\":42}")) {
+            assertThat(MAPPER.readTree(MAPPER.writeValueAsBytes(MAPPER.readValue(json, type))))
+                    .isEqualTo(MAPPER.readTree(json));
+        }
     }
 
     @Test
@@ -305,23 +287,16 @@ final class JacksonPerformanceTests {
         assertThat(publicSetter.getAnnotation(JsonSetter.class)).isNull();
     }
 
-    private static <T> T readWithBufferProbe(String input, Class<T> type, AtomicInteger bufferProbes)
-            throws IOException {
-        try (JsonParser parser = new JsonParserDelegate(MAPPER.createParser(input)) {
+    private static <T> T readWithBufferProbe(
+            ObjectMapper mapper, String input, Class<T> type, AtomicInteger bufferProbes) throws IOException {
+        try (JsonParser parser = new JsonParserDelegate(mapper.createParser(input)) {
             @Override
             public boolean canReadTypeId() {
                 bufferProbes.incrementAndGet();
                 return super.canReadTypeId();
             }
         }) {
-            return MAPPER.readValue(parser, type);
+            return mapper.readValue(parser, type);
         }
-    }
-
-    private static void assertUnknownRoundTrips(String input, Class<?> type) throws IOException {
-        Object value = MAPPER.readValue(input, type);
-        JsonNode expected = MAPPER.readTree(input);
-        JsonNode actual = MAPPER.readTree(MAPPER.writeValueAsBytes(value));
-        assertThat(actual).isEqualTo(expected);
     }
 }
