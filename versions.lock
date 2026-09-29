@@ -72,7 +72,7 @@ com.palantir.dialogue:dialogue-futures:6.43.0 (3 constraints: ce3312be)
 
 com.palantir.dialogue:dialogue-serde:6.43.0 (3 constraints: b82e5ea2)
 
-com.palantir.dialogue:dialogue-target:6.43.0 (7 constraints: 2179dcee)
+com.palantir.dialogue:dialogue-target:6.43.0 (7 constraints: f17892aa)
 
 com.palantir.goethe:goethe:0.29.0 (1 constraints: 3d05423b)
 
