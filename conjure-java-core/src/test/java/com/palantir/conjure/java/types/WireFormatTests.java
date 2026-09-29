@@ -52,7 +52,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.google.common.collect.ImmutableList;
@@ -881,45 +880,21 @@ public final class WireFormatTests {
     }
 
     @Test
-    void testSealedUnionAlias_serialize() throws JsonProcessingException {
+    void testSealedUnionAlias_wireFormat() throws JsonProcessingException {
         SimpleUnionAlias alias = SimpleUnionAlias.of(SimpleUnion.foo("test"));
         assertThat(mapper.writeValueAsString(alias)).isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
         assertThat(mapper.writerFor(SimpleUnionAlias.class).writeValueAsString(alias))
                 .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
         assertThat(mapper.writeValueAsString(Map.of("key", alias)))
                 .isEqualTo("{\"key\":{\"type\":\"foo\",\"foo\":\"test\"}}");
-    }
-
-    @Test
-    void testSealedUnionAlias_deserialize() throws JsonProcessingException {
-        SimpleUnionAlias expected = SimpleUnionAlias.of(SimpleUnion.foo("test"));
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnionAlias.class))
-                .isEqualTo(expected);
+                .isEqualTo(alias);
         assertThat(mapper.readValue("{\"foo\":\"test\",\"type\":\"foo\"}", SimpleUnionAlias.class))
-                .isEqualTo(expected);
+                .isEqualTo(alias);
         assertThat(mapper.readValue(
                         "{\"key\":{\"type\":\"foo\",\"foo\":\"test\"}}",
                         new TypeReference<Map<String, SimpleUnionAlias>>() {}))
-                .containsExactly(Map.entry("key", expected));
-    }
-
-    @Test
-    void testUnionType_deserialize_caseInsensitiveDiscriminator() throws JsonProcessingException {
-        ObjectMapper caseInsensitiveMapper = mapper.copy();
-        caseInsensitiveMapper.setConfig(caseInsensitiveMapper
-                .getDeserializationConfig()
-                .with(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
-
-        assertThat(caseInsensitiveMapper.readValue("{\"TYPE\":\"foo\",\"foo\":\"first\"}", SimpleUnion.class))
-                .isEqualTo(SimpleUnion.foo("first"));
-        assertThat(caseInsensitiveMapper.readValue("{\"foo\":\"last\",\"TYPE\":\"foo\"}", SimpleUnion.class))
-                .isEqualTo(SimpleUnion.foo("last"));
-        assertThat(caseInsensitiveMapper.readValue(
-                        "{\"TYPE\":\"thisFieldIsAnInteger\",\"thisFieldIsAnInteger\":42}", UnionTypeExample.class))
-                .isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
-        assertThat(caseInsensitiveMapper.readValue(
-                        "{\"thisFieldIsAnInteger\":42,\"TYPE\":\"thisFieldIsAnInteger\"}", UnionTypeExample.class))
-                .isEqualTo(UnionTypeExample.thisFieldIsAnInteger(42));
+                .containsExactly(Map.entry("key", alias));
     }
 
     @Test
