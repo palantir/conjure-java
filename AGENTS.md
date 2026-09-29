@@ -112,11 +112,9 @@ Run validation in increasing scope, choosing tasks that cover every modified mod
   - Use `instanceof` for guard clauses where only one variant needs handling and others early-return
 
 ### Collections
-- Prefer Guava's immutable collections (`ImmutableSet`, `ImmutableList`, `ImmutableMap`) with builder pattern over mutable collection classes (`LinkedHashSet`, `ArrayList`, `HashMap
-`).
+- Prefer Guava's immutable collections (`ImmutableSet`, `ImmutableList`, `ImmutableMap`) with builder pattern over mutable collection classes (`LinkedHashSet`, `ArrayList`, `HashMap`).
   - JDK immutable utilities like `Set.of()` or `List.of()` are fine.
-- **Method boundaries vs. internal use**: An immutable or unmodifiable view of a collection is strongly preferred at method boundaries (e.g., return types and parameters). For inter
-mediate results within a method scope (e.g., a collection immediately passed into a builder), using `Collectors.toSet()` or similar mutable collector is acceptable for efficiency.
+- **Method boundaries vs. internal use**: An immutable or unmodifiable view of a collection is strongly preferred at method boundaries (e.g., return types and parameters). For intermediate results within a method scope (e.g., a collection immediately passed into a builder), using `Collectors.toSet()` or similar mutable collector is acceptable for efficiency.
 
 ### Testing Conventions
 - Prefer Mockito's `eq()` matchers over `any()` for higher test coverage, unless the assertion is not relevant for the test.

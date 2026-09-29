@@ -19,6 +19,7 @@ package com.palantir.conjure.java.lib.internal;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import java.io.IOException;
 
 /** Internal Jackson serializer that delegates from a sealed union to its concrete variant. */
@@ -26,5 +27,14 @@ public final class ConjureUnionSerializer extends JsonSerializer<Object> {
     @Override
     public void serialize(Object value, JsonGenerator generator, SerializerProvider serializers) throws IOException {
         serializers.findValueSerializer(value.getClass()).serialize(value, generator, serializers);
+    }
+
+    @Override
+    public void serializeWithType(
+            Object value, JsonGenerator generator, SerializerProvider serializers, TypeSerializer typeSerializer)
+            throws IOException {
+        serializers
+                .findValueSerializer(value.getClass())
+                .serializeWithType(value, generator, serializers, typeSerializer);
     }
 }
