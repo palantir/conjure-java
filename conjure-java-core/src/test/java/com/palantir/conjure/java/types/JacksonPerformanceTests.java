@@ -58,11 +58,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import sealedunions.com.palantir.product.SimpleUnion;
+import sealedunions.com.palantir.product.SimpleUnionAlias;
 
 final class JacksonPerformanceTests {
 
@@ -144,12 +147,14 @@ final class JacksonPerformanceTests {
         assertTypeFirst(mapper, UnionTypeExample.thisFieldIsAnInteger(42), UnionTypeExample.class);
         assertTypeFirst(mapper, SimpleUnion.foo("value"), SimpleUnion.class);
         assertTypeFirst(mapper, SimpleUnion.foo("value"), SimpleUnion.Foo.class);
+        assertTypeFirst(mapper, SimpleUnionAlias.of(SimpleUnion.foo("value")), SimpleUnionAlias.class);
         assertTypeFirst(mapper, UnionTypeExample.unknown("future", 42), UnionTypeExample.class);
         assertTypeFirst(mapper, SimpleUnion.unknown("future", 42), SimpleUnion.class);
+        assertTypeFirst(mapper, SimpleUnionAlias.of(SimpleUnion.unknown("future", 42)), SimpleUnionAlias.class);
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class})
+    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class, SimpleUnionAlias.class})
     void unknownDeserializerIsResolvedLazilyOncePerUnion(Class<?> unionType) throws IOException {
         AtomicInteger resolutions = new AtomicInteger();
         ObjectMapper mapper = new ObjectMapper()
@@ -178,7 +183,7 @@ final class JacksonPerformanceTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class})
+    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class, SimpleUnionAlias.class})
     void unknownPayloadsRetainRootTyping(Class<?> unionType) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerSubtypes(new NamedType(LinkedHashMap.class, "map"));
@@ -238,14 +243,13 @@ final class JacksonPerformanceTests {
     }
 
     @ParameterizedTest
-    @CsvSource({"false,false", "false,true", "true,false", "true,true"})
-    void knownUnionsUseExpectedBuffering(boolean sealed, boolean caseInsensitive) throws IOException {
+    @MethodSource("knownUnionCases")
+    void knownUnionsUseExpectedBuffering(Class<?> type, Object expected, boolean caseInsensitive) throws IOException {
         ObjectMapper mapper = MAPPER.copy();
         if (caseInsensitive) {
             mapper.setConfig(mapper.getDeserializationConfig().with(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
         }
-        Class<?> type = sealed ? SimpleUnion.class : UnionTypeExample.class;
-        Object expected = sealed ? SimpleUnion.foo("value") : UnionTypeExample.thisFieldIsAnInteger(42);
+        boolean sealed = type != UnionTypeExample.class;
         String discriminator =
                 "\"%s\":\"%s\"".formatted(caseInsensitive ? "TYPE" : "type", sealed ? "foo" : "thisFieldIsAnInteger");
         String payload = sealed ? "\"foo\":\"value\"" : "\"thisFieldIsAnInteger\":42";
@@ -264,8 +268,20 @@ final class JacksonPerformanceTests {
         }
     }
 
+    private static Stream<Arguments> knownUnionCases() {
+        return Stream.of(false, true)
+                .flatMap(caseInsensitive -> Stream.of(
+                        Arguments.of(
+                                UnionTypeExample.class, UnionTypeExample.thisFieldIsAnInteger(42), caseInsensitive),
+                        Arguments.of(SimpleUnion.class, SimpleUnion.foo("value"), caseInsensitive),
+                        Arguments.of(
+                                SimpleUnionAlias.class,
+                                SimpleUnionAlias.of(SimpleUnion.foo("value")),
+                                caseInsensitive)));
+    }
+
     @ParameterizedTest
-    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class})
+    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class, SimpleUnionAlias.class})
     void unknownUnionsPreserveAllPropertiesOnBothPaths(Class<?> type) throws IOException {
         for (String json : List.of(
                 "{\"type\":\"future\",\"extra\":\"value\",\"future\":42}",
