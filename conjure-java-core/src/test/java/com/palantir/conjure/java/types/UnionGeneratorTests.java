@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -76,6 +77,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 final class UnionGeneratorTests {
+    private static final ObjectMapper JSON_MAPPER = ObjectMappers.newServerObjectMapper();
+
     @TempDir
     Path output;
 
@@ -88,25 +91,18 @@ final class UnionGeneratorTests {
             for (String field : name.equals("Named")
                     ? List.of("serializer", "deserializer", "serializer_", "deserializer_")
                     : List.of("value")) {
-                union.union(FieldDefinition.builder()
-                        .fieldName(FieldName.of(field))
-                        .type(Type.primitive(PrimitiveType.STRING))
-                        .build());
+                union.union(field(field, Type.primitive(PrimitiveType.STRING)));
             }
             definition.types(TypeDefinition.union(union.build()));
         }
         ConjureDefinition conjure = definition.build();
         ConjureDefinitionValidator.validateAll(conjure, SafetyDeclarationRequirements.ALLOWED);
-        List<JavaFileObject> sources = new ObjectGenerator(Options.builder()
+        try (URLClassLoader loader = generate(
+                conjure,
+                Options.builder()
                         .sealedUnions(sealed)
                         .sealedUnionVisitors(visitors)
-                        .build())
-                .generate(conjure)
-                .map(JavaFile::toJavaFileObject)
-                .toList();
-        compile(sources);
-        try (URLClassLoader loader = new URLClassLoader(
-                new URL[] {output.toUri().toURL()}, getClass().getClassLoader())) {
+                        .build())) {
             ObjectMapper mapper = new ObjectMapper();
             for (String name : List.of("Serializer", "Deserializer", "Serializer_", "Deserializer_", "Named")) {
                 Class<?> type = loader.loadClass("collision." + name);
@@ -132,47 +128,7 @@ final class UnionGeneratorTests {
         "true,false,false", "true,false,true", "true,true,false", "true,true,true"
     })
     void mapOwnershipAndWireSemantics(boolean sealed, boolean defensive, boolean nonNull) throws Exception {
-        Type string = Type.primitive(PrimitiveType.STRING);
-        Type map = Type.map(MapType.of(string, string));
-        TypeName alias = TypeName.of("MapAlias", "ownership");
-        ConjureDefinition definition = ConjureDefinition.builder()
-                .version(1)
-                .types(TypeDefinition.alias(
-                        AliasDefinition.builder().typeName(alias).alias(map).build()))
-                .types(TypeDefinition.union(UnionDefinition.builder()
-                        .typeName(TypeName.of("MapUnion", "ownership"))
-                        .union(FieldDefinition.builder()
-                                .fieldName(FieldName.of("fromJson"))
-                                .type(map)
-                                .build())
-                        .union(FieldDefinition.builder()
-                                .fieldName(FieldName.of("fromJson_"))
-                                .type(map)
-                                .build())
-                        .union(FieldDefinition.builder()
-                                .fieldName(FieldName.of("map"))
-                                .type(map)
-                                .build())
-                        .union(FieldDefinition.builder()
-                                .fieldName(FieldName.of("mapOptional"))
-                                .type(Type.map(MapType.of(string, Type.optional(OptionalType.of(string)))))
-                                .build())
-                        .union(FieldDefinition.builder()
-                                .fieldName(FieldName.of("alias"))
-                                .type(Type.reference(alias))
-                                .build())
-                        .build()))
-                .build();
-        compile(new ObjectGenerator(Options.builder()
-                        .sealedUnions(sealed)
-                        .defensiveCollections(defensive)
-                        .nonNullCollections(nonNull)
-                        .build())
-                .generate(definition)
-                .map(JavaFile::toJavaFileObject)
-                .toList());
-        try (URLClassLoader loader = new URLClassLoader(
-                new URL[] {output.toUri().toURL()}, getClass().getClassLoader())) {
+        try (URLClassLoader loader = generateCollections(sealed, defensive, nonNull)) {
             Class<?> type = loader.loadClass("ownership.MapUnion");
             ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
             for (String json : List.of(
@@ -181,32 +137,20 @@ final class UnionGeneratorTests {
                 Object union = mapper.readValue(json, type);
                 Map<?, ?> value = mapValue(union, sealed);
                 assertThat(new ArrayList<>(value.keySet())).isEqualTo(List.of("z", "a"));
-                assertThat(mapper.readTree(mapper.writeValueAsString(union))).isEqualTo(mapper.readTree(json));
+                assertThat(wireTree(mapper, union)).isEqualTo(mapper.readTree(json));
                 if (defensive) {
                     assertThatThrownBy(value::clear).isInstanceOf(UnsupportedOperationException.class);
                 }
             }
-            for (String field : List.of("map", "mapOptional", "alias", "fromJson", "fromJson_")) {
-                for (String json : List.of(
-                        "{\"type\":\"" + field + "\"}", "{\"type\":\"" + field + "\",\"" + field + "\":null}")) {
-                    Object union = mapper.readValue(json, type);
-                    assertThat(mapper.readTree(mapper.writeValueAsBytes(union))
-                                    .get(field)
-                                    .isEmpty())
-                            .isTrue();
-                }
-            }
+            assertEmptyVariants(mapper, type, "map", "mapOptional", "alias", "fromJson", "fromJson_");
             Object optional = mapper.readValue("{\"type\":\"mapOptional\",\"mapOptional\":{\"empty\":null}}", type);
-            assertThat(mapper.readTree(mapper.writeValueAsBytes(optional))
-                            .get("mapOptional")
-                            .get("empty")
-                            .isNull())
+            assertThat(wireTree(mapper, optional).at("/mapOptional/empty").isNull())
                     .isTrue();
             String nullElement = "{\"type\":\"map\",\"map\":{\"empty\":null}}";
             if (defensive && nonNull) {
                 assertThatThrownBy(() -> mapper.readValue(nullElement, type)).isInstanceOf(IOException.class);
             } else {
-                assertThat(mapper.readTree(mapper.writeValueAsBytes(mapper.readValue(nullElement, type))))
+                assertThat(wireTree(mapper, mapper.readValue(nullElement, type)))
                         .isEqualTo(mapper.readTree(nullElement));
             }
             Map<String, String> callerMap = new LinkedHashMap<>(Map.of("original", "value"));
@@ -216,35 +160,7 @@ final class UnionGeneratorTests {
 
             if (defensive) {
                 Map<String, String> shared = new LinkedHashMap<>(Map.of("shared", "original"));
-                ObjectMapper customMapper = ObjectMappers.newServerObjectMapper()
-                        .registerModule(new SimpleModule().addDeserializer(Map.class, new JsonDeserializer<>() {
-                            @Override
-                            public Map<?, ?> deserialize(JsonParser parser, DeserializationContext _context)
-                                    throws IOException {
-                                parser.skipChildren();
-                                return shared;
-                            }
-
-                            @Override
-                            public Map<?, ?> getEmptyValue(DeserializationContext _context) {
-                                return shared;
-                            }
-                        }));
-                ObjectMapper customConstructorMapper = ObjectMappers.newServerObjectMapper()
-                        .registerModule(new SimpleModule()
-                                .addValueInstantiator(
-                                        LinkedHashMap.class, new ValueInstantiator.Base(LinkedHashMap.class) {
-                                            @Override
-                                            public boolean canCreateUsingDefault() {
-                                                return true;
-                                            }
-
-                                            @Override
-                                            public Object createUsingDefault(DeserializationContext _context) {
-                                                return shared;
-                                            }
-                                        }));
-                for (ObjectMapper custom : List.of(customMapper, customConstructorMapper)) {
+                for (ObjectMapper custom : customMappers(Map.class, shared)) {
                     for (String json : List.of(
                             "{\"type\":\"map\",\"map\":{}}", "{\"type\":\"map\",\"map\":null}", "{\"type\":\"map\"}")) {
                         shared.put("shared", "original");
@@ -281,51 +197,9 @@ final class UnionGeneratorTests {
         "true,false,false", "true,false,true", "true,true,false", "true,true,true"
     })
     void setOwnershipAndAliasWireSemantics(boolean sealed, boolean defensive, boolean nonNull) throws Exception {
-        Type string = Type.primitive(PrimitiveType.STRING);
-        Type set = Type.set(SetType.of(string));
-        TypeName unionName = TypeName.of("SetUnion", "setownership");
-        TypeName setAlias = TypeName.of("SetAlias", "setownership");
-        ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
-        Map<String, Type> aliases = Map.of(
-                "SetAlias", set,
-                "ListAlias", Type.list(ListType.of(string)),
-                "MapAlias", Type.map(MapType.of(string, string)),
-                "UnionAlias", Type.reference(unionName));
-        aliases.forEach((name, type) -> definition.types(TypeDefinition.alias(AliasDefinition.builder()
-                .typeName(TypeName.of(name, "setownership"))
-                .alias(type)
-                .build())));
-        UnionDefinition.Builder union = UnionDefinition.builder().typeName(unionName);
-        Map<String, Type> variants = Map.of(
-                "set",
-                set,
-                "fromJson",
-                set,
-                "fromJson_",
-                set,
-                "setOptional",
-                Type.set(SetType.of(Type.optional(OptionalType.of(string)))),
-                "numbers",
-                Type.set(SetType.of(Type.primitive(PrimitiveType.INTEGER))),
-                "alias",
-                Type.reference(setAlias));
-        variants.forEach((name, type) -> union.union(FieldDefinition.builder()
-                .fieldName(FieldName.of(name))
-                .type(type)
-                .build()));
-        definition.types(TypeDefinition.union(union.build()));
-        compile(new ObjectGenerator(Options.builder()
-                        .sealedUnions(sealed)
-                        .defensiveCollections(defensive)
-                        .nonNullCollections(nonNull)
-                        .build())
-                .generate(definition.build())
-                .map(JavaFile::toJavaFileObject)
-                .toList());
-        try (URLClassLoader loader = new URLClassLoader(
-                new URL[] {output.toUri().toURL()}, getClass().getClassLoader())) {
-            Class<?> type = loader.loadClass("setownership.SetUnion");
-            Class<?> aliasType = loader.loadClass("setownership.SetAlias");
+        try (URLClassLoader loader = generateCollections(sealed, defensive, nonNull)) {
+            Class<?> type = loader.loadClass("ownership.SetUnion");
+            Class<?> aliasType = loader.loadClass("ownership.SetAlias");
             for (ObjectMapper mapper : List.of(
                     ObjectMappers.newServerObjectMapper(),
                     ObjectMappers.newCborServerObjectMapper(),
@@ -351,71 +225,61 @@ final class UnionGeneratorTests {
 
     private static void assertSetWireSemantics(
             ObjectMapper mapper, Class<?> type, boolean sealed, boolean defensive, boolean nonNull) throws Exception {
-        ObjectMapper jsonMapper = ObjectMappers.newServerObjectMapper();
         for (String json : List.of(
                 "{\"type\":\"set\",\"set\":[\"z\",\"a\",\"z\"]}", "{\"set\":[\"z\",\"a\",\"z\"],\"type\":\"set\"}")) {
-            Object value = mapper.readValue(mapper.writeValueAsBytes(jsonMapper.readTree(json)), type);
+            Object value = mapper.readValue(mapper.writeValueAsBytes(JSON_MAPPER.readTree(json)), type);
             Set<?> set = (Set<?>) unionValue(value, sealed);
             assertThat(new ArrayList<>(set)).isEqualTo(List.of("z", "a"));
-            assertThat(mapper.readTree(mapper.writeValueAsBytes(value)))
-                    .isEqualTo(jsonMapper.readTree("{\"type\":\"set\",\"set\":[\"z\",\"a\"]}"));
+            assertThat(wireTree(mapper, value))
+                    .isEqualTo(JSON_MAPPER.readTree("{\"type\":\"set\",\"set\":[\"z\",\"a\"]}"));
             if (defensive) {
                 assertThatThrownBy(set::clear).isInstanceOf(UnsupportedOperationException.class);
             }
         }
-        for (String field : List.of("set", "setOptional", "numbers", "alias", "fromJson", "fromJson_")) {
-            for (String json :
-                    List.of("{\"type\":\"" + field + "\"}", "{\"type\":\"" + field + "\",\"" + field + "\":null}")) {
-                Object value = mapper.readValue(mapper.writeValueAsBytes(jsonMapper.readTree(json)), type);
-                assertThat(mapper.readTree(mapper.writeValueAsBytes(value))
-                                .get(field)
-                                .isEmpty())
-                        .isTrue();
-            }
-        }
-        JsonNode optional = jsonMapper.readTree("{\"type\":\"setOptional\",\"setOptional\":[null,\"a\"]}");
-        assertThat(mapper.readTree(
-                        mapper.writeValueAsBytes(mapper.readValue(mapper.writeValueAsBytes(optional), type))))
+        assertEmptyVariants(mapper, type, "set", "setOptional", "numbers", "alias", "fromJson", "fromJson_");
+        JsonNode optional = JSON_MAPPER.readTree("{\"type\":\"setOptional\",\"setOptional\":[null,\"a\"]}");
+        assertThat(wireTree(mapper, mapper.readValue(mapper.writeValueAsBytes(optional), type)))
                 .isEqualTo(optional);
-        JsonNode nullable = jsonMapper.readTree("{\"type\":\"set\",\"set\":[null]}");
+        JsonNode nullable = JSON_MAPPER.readTree("{\"type\":\"set\",\"set\":[null]}");
         if (defensive && nonNull) {
             assertThatThrownBy(() -> mapper.readValue(mapper.writeValueAsBytes(nullable), type))
                     .isInstanceOf(IOException.class)
                     .hasMessageContaining("iterable cannot contain null elements");
         } else {
-            assertThat(mapper.readTree(
-                            mapper.writeValueAsBytes(mapper.readValue(mapper.writeValueAsBytes(nullable), type))))
+            assertThat(wireTree(mapper, mapper.readValue(mapper.writeValueAsBytes(nullable), type)))
                     .isEqualTo(nullable);
         }
     }
 
+    private static JsonNode wireTree(ObjectMapper mapper, Object value) throws IOException {
+        return mapper.readTree(mapper.writeValueAsBytes(value));
+    }
+
+    private static void assertEmptyVariants(ObjectMapper mapper, Class<?> type, String... fields) throws IOException {
+        for (String field : fields) {
+            for (String json :
+                    List.of("{\"type\":\"" + field + "\"}", "{\"type\":\"" + field + "\",\"" + field + "\":null}")) {
+                Object value = mapper.readValue(mapper.writeValueAsBytes(JSON_MAPPER.readTree(json)), type);
+                assertThat(wireTree(mapper, value).get(field).isEmpty()).isTrue();
+            }
+        }
+    }
+
     private static void assertAliasWireSemantics(ObjectMapper mapper, ClassLoader loader) throws Exception {
-        ObjectMapper jsonMapper = ObjectMappers.newServerObjectMapper();
-        Class<?> unionType = loader.loadClass("setownership.SetUnion");
-        Map<String, Object> inputs = Map.of(
-                "SetAlias",
-                new LinkedHashSet<>(List.of("z", "a")),
-                "ListAlias",
-                List.of("z", "a", "z"),
-                "MapAlias",
-                new LinkedHashMap<>(Map.of("key", "value")),
-                "UnionAlias",
-                unionType.getMethod("set", Set.class).invoke(null, new LinkedHashSet<>(List.of("z", "a"))));
-        Map<String, String> documents = Map.of(
-                "SetAlias", "[\"z\",\"a\"]",
-                "ListAlias", "[\"z\",\"a\",\"z\"]",
-                "MapAlias", "{\"key\":\"value\"}",
-                "UnionAlias", "{\"type\":\"set\",\"set\":[\"z\",\"a\"]}");
-        for (String name : inputs.keySet()) {
-            Class<?> type = loader.loadClass("setownership." + name);
-            Class<?> parameter = switch (name) {
-                case "SetAlias" -> Set.class;
-                case "ListAlias" -> List.class;
-                case "MapAlias" -> Map.class;
-                default -> unionType;
-            };
-            Object expected = type.getMethod("of", parameter).invoke(null, inputs.get(name));
-            JsonNode wireValue = jsonMapper.readTree(documents.get(name));
+        Class<?> unionType = loader.loadClass("ownership.SetUnion");
+        for (AliasCase alias : List.of(
+                new AliasCase("SetAlias", Set.class, new LinkedHashSet<>(List.of("z", "a")), "[\"z\",\"a\"]"),
+                new AliasCase("ListAlias", List.class, List.of("z", "a", "z"), "[\"z\",\"a\",\"z\"]"),
+                new AliasCase(
+                        "MapAlias", Map.class, new LinkedHashMap<>(Map.of("key", "value")), "{\"key\":\"value\"}"),
+                new AliasCase(
+                        "UnionAlias",
+                        unionType,
+                        unionType.getMethod("set", Set.class).invoke(null, new LinkedHashSet<>(List.of("z", "a"))),
+                        "{\"type\":\"set\",\"set\":[\"z\",\"a\"]}"))) {
+            Class<?> type = loader.loadClass("ownership." + alias.name());
+            Object expected = type.getMethod("of", alias.parameter()).invoke(null, alias.input());
+            JsonNode wireValue = JSON_MAPPER.readTree(alias.json());
             byte[] serialized = mapper.writerFor(type).writeValueAsBytes(expected);
             assertThat(mapper.readTree(serialized)).isEqualTo(wireValue);
             assertThat(mapper.readValue(mapper.writeValueAsBytes(wireValue), type))
@@ -431,37 +295,12 @@ final class UnionGeneratorTests {
         }
     }
 
+    private record AliasCase(String name, Class<?> parameter, Object input, String json) {}
+
     private static void assertCustomSetOwnership(Class<?> type, Class<?> aliasType, boolean sealed, boolean nonNull)
             throws Exception {
         Set<String> shared = new LinkedHashSet<>();
-        SimpleModule module = new SimpleModule();
-        module.setDeserializers(new SimpleDeserializers(Map.of(LinkedHashSet.class, new JsonDeserializer<Set<?>>() {
-            @Override
-            public Set<?> deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
-                parser.skipChildren();
-                return shared;
-            }
-
-            @Override
-            public Set<?> getEmptyValue(DeserializationContext _context) {
-                return shared;
-            }
-        })));
-        ObjectMapper customDeserializer = ObjectMappers.newServerObjectMapper().registerModule(module);
-        ObjectMapper customConstructor = ObjectMappers.newServerObjectMapper()
-                .registerModule(new SimpleModule()
-                        .addValueInstantiator(LinkedHashSet.class, new ValueInstantiator.Base(LinkedHashSet.class) {
-                            @Override
-                            public boolean canCreateUsingDefault() {
-                                return true;
-                            }
-
-                            @Override
-                            public Object createUsingDefault(DeserializationContext _context) {
-                                return shared;
-                            }
-                        }));
-        for (ObjectMapper mapper : List.of(customDeserializer, customConstructor)) {
+        for (ObjectMapper mapper : customMappers(LinkedHashSet.class, shared)) {
             for (String json :
                     List.of("{\"type\":\"set\",\"set\":[]}", "{\"type\":\"set\",\"set\":null}", "{\"type\":\"set\"}")) {
                 shared.clear();
@@ -470,13 +309,11 @@ final class UnionGeneratorTests {
                 Object alias = mapper.readValue("[]", aliasType);
                 shared.clear();
                 assertThat(new ArrayList<>((Set<?>) unionValue(union, sealed)))
-                        .describedAs(
-                                "Union ownership for %s with custom deserializer: %s",
-                                json, mapper.equals(customDeserializer))
+                        .describedAs("Union ownership for %s using %s", json, mapper.getRegisteredModuleIds())
                         .isEqualTo(List.of("original"));
                 Set<?> aliasValue = (Set<?>) aliasType.getMethod("get").invoke(alias);
                 assertThat(new ArrayList<>(aliasValue))
-                        .describedAs("Alias ownership with custom deserializer: %s", mapper.equals(customDeserializer))
+                        .describedAs("Alias ownership using %s", mapper.getRegisteredModuleIds())
                         .isEqualTo(List.of("original"));
                 assertThatThrownBy(aliasValue::clear).isInstanceOf(UnsupportedOperationException.class);
             }
@@ -526,15 +363,8 @@ final class UnionGeneratorTests {
             throws Exception {
         SharedSet shared = new SharedSet();
         shared.add("original");
-        SimpleModule module = new SimpleModule();
+        SimpleModule module = sharedDeserializer(SharedSet.class, shared);
         module.registerSubtypes(new NamedType(SharedSet.class, "shared"));
-        module.setDeserializers(new SimpleDeserializers(Map.of(SharedSet.class, new JsonDeserializer<Set<?>>() {
-            @Override
-            public Set<?> deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
-                parser.skipChildren();
-                return shared;
-            }
-        })));
         ObjectMapper mapper = ObjectMappers.newServerObjectMapper()
                 .addMixIn(Set.class, TypedSet.class)
                 .registerModule(module);
@@ -546,6 +376,93 @@ final class UnionGeneratorTests {
                 .isEqualTo(List.of("original"));
     }
 
+    private static <T> SimpleModule sharedDeserializer(Class<?> type, T shared) {
+        SimpleModule module = new SimpleModule("shared-deserializer");
+        module.setDeserializers(new SimpleDeserializers(Map.of(type, new JsonDeserializer<T>() {
+            @Override
+            public T deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
+                parser.skipChildren();
+                return shared;
+            }
+
+            @Override
+            public T getEmptyValue(DeserializationContext _context) {
+                return shared;
+            }
+        })));
+        return module;
+    }
+
+    private static <T> List<ObjectMapper> customMappers(Class<?> binding, T shared) {
+        SimpleModule constructor = new SimpleModule("shared-constructor")
+                .addValueInstantiator(shared.getClass(), new ValueInstantiator.Base(shared.getClass()) {
+                    @Override
+                    public boolean canCreateUsingDefault() {
+                        return true;
+                    }
+
+                    @Override
+                    public Object createUsingDefault(DeserializationContext _context) {
+                        return shared;
+                    }
+                });
+        return List.of(
+                ObjectMappers.newServerObjectMapper().registerModule(sharedDeserializer(binding, shared)),
+                ObjectMappers.newServerObjectMapper().registerModule(constructor));
+    }
+
+    private URLClassLoader generateCollections(boolean sealed, boolean defensive, boolean nonNull) throws IOException {
+        Type string = Type.primitive(PrimitiveType.STRING);
+        Type map = Type.map(MapType.of(string, string));
+        Type set = Type.set(SetType.of(string));
+        ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
+        Map.ofEntries(
+                        entry("MapAlias", map),
+                        entry("SetAlias", set),
+                        entry("ListAlias", Type.list(ListType.of(string))),
+                        entry("UnionAlias", Type.reference(TypeName.of("SetUnion", "ownership"))))
+                .forEach((name, type) -> definition.types(TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(TypeName.of(name, "ownership"))
+                        .alias(type)
+                        .build())));
+        definition.types(unionDefinition(
+                "MapUnion",
+                field("map", map),
+                field("fromJson", map),
+                field("fromJson_", map),
+                field("mapOptional", Type.map(MapType.of(string, Type.optional(OptionalType.of(string))))),
+                field("alias", Type.reference(TypeName.of("MapAlias", "ownership")))));
+        definition.types(unionDefinition(
+                "SetUnion",
+                field("set", set),
+                field("fromJson", set),
+                field("fromJson_", set),
+                field("setOptional", Type.set(SetType.of(Type.optional(OptionalType.of(string))))),
+                field("numbers", Type.set(SetType.of(Type.primitive(PrimitiveType.INTEGER)))),
+                field("alias", Type.reference(TypeName.of("SetAlias", "ownership")))));
+        return generate(
+                definition.build(),
+                Options.builder()
+                        .sealedUnions(sealed)
+                        .defensiveCollections(defensive)
+                        .nonNullCollections(nonNull)
+                        .build());
+    }
+
+    private static TypeDefinition unionDefinition(String name, FieldDefinition... fields) {
+        return TypeDefinition.union(UnionDefinition.builder()
+                .typeName(TypeName.of(name, "ownership"))
+                .union(List.of(fields))
+                .build());
+    }
+
+    private static FieldDefinition field(String name, Type type) {
+        return FieldDefinition.builder()
+                .fieldName(FieldName.of(name))
+                .type(type)
+                .build();
+    }
+
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_ARRAY)
     private interface TypedSet {}
 
@@ -555,7 +472,11 @@ final class UnionGeneratorTests {
         private static final long serialVersionUID = 1L;
     }
 
-    private void compile(List<JavaFileObject> sources) throws IOException {
+    private URLClassLoader generate(ConjureDefinition definition, Options options) throws IOException {
+        List<JavaFileObject> sources = new ObjectGenerator(options)
+                .generate(definition)
+                .map(JavaFile::toJavaFileObject)
+                .toList();
         List<String> classpath = new ArrayList<>();
         classpath.add(System.getProperty("java.class.path"));
         for (ClassLoader loader = getClass().getClassLoader(); loader != null; loader = loader.getParent()) {
@@ -567,24 +488,15 @@ final class UnionGeneratorTests {
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         try (StandardJavaFileManager fileManager =
                 compiler.getStandardFileManager(diagnostics, Locale.ROOT, StandardCharsets.UTF_8)) {
-            boolean succeeded = compiler.getTask(
-                            null,
-                            fileManager,
-                            diagnostics,
-                            List.of(
-                                    "--release",
-                                    "17",
-                                    "-proc:none",
-                                    "-d",
-                                    output.toString(),
-                                    "-classpath",
-                                    String.join(File.pathSeparator, classpath)),
-                            null,
-                            sources)
+            List<String> compilerOptions = new ArrayList<>(List.of("--release", "17", "-proc:none"));
+            compilerOptions.addAll(
+                    List.of("-d", output.toString(), "-classpath", String.join(File.pathSeparator, classpath)));
+            boolean succeeded = compiler.getTask(null, fileManager, diagnostics, compilerOptions, null, sources)
                     .call();
             assertThat(succeeded)
                     .describedAs("Generated sources must compile: %s", diagnostics.getDiagnostics())
                     .isTrue();
         }
+        return new URLClassLoader(new URL[] {output.toUri().toURL()}, getClass().getClassLoader());
     }
 }
