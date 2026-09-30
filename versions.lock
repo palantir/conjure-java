@@ -92,13 +92,13 @@ com.palantir.safe-logging:logger-slf4j:3.20.0 (1 constraints: 300e8b50)
 
 com.palantir.safe-logging:logger-spi:3.20.0 (2 constraints: 6f1e0cb0)
 
-com.palantir.safe-logging:preconditions:3.20.0 (32 constraints: ed2cafec)
+com.palantir.safe-logging:preconditions:3.20.0 (32 constraints: e62c02e3)
 
-com.palantir.safe-logging:safe-logging:3.20.0 (29 constraints: a5ff7f27)
+com.palantir.safe-logging:safe-logging:3.20.0 (29 constraints: 9eff6021)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
-com.palantir.syntactic-paths:syntactic-paths:0.21.0 (2 constraints: f4136b81)
+com.palantir.syntactic-paths:syntactic-paths:0.22.0 (2 constraints: f5139981)
 
 com.palantir.tokens:auth-tokens:4.10.0 (5 constraints: b0538785)
 
