@@ -127,6 +127,10 @@ types:
         alias: StringAliasExample
       DoubleAliasExample:
         alias: double
+      AliasOfDoubleAliasExample:
+        alias: DoubleAliasExample
+      AliasOfAliasOfDoubleAliasExample:
+        alias: AliasOfDoubleAliasExample
       SafeDoubleAliasExample:
         alias: double
         safety: safe
@@ -134,6 +138,8 @@ types:
         alias: integer
       BooleanAliasExample:
         alias: boolean
+      AliasOfBooleanAliasExample:
+        alias: BooleanAliasExample
       SafeLongAliasExample:
         alias: safelong
         safety: safe
@@ -143,6 +149,8 @@ types:
         alias: bearertoken
       UuidAliasExample:
         alias: uuid
+      AliasOfUuidAliasExample:
+        alias: UuidAliasExample
       MapAliasExample:
         alias: map<string, any>
       OptionalMapAliasExample:

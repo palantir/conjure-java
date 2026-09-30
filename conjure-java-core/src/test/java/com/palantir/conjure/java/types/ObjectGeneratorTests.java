@@ -28,21 +28,31 @@ import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.spec.EnumDefinition;
+import com.palantir.conjure.spec.EnumValueDefinition;
 import com.palantir.conjure.spec.ErrorCode;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
+import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.ObjectDefinition;
+import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
+import com.palantir.conjure.spec.UnionDefinition;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -110,6 +120,110 @@ public final class ObjectGeneratorTests {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot use UNSAFE type com.palantir.product.UnsafeAlias "
                         + "as a SAFE parameter in error Name -> field");
+    }
+
+    @Test
+    void nestedComparator() {
+        TypeName comparableAliasName = TypeName.of("ComparableAlias", "example");
+        TypeName nonComparableAliasName = TypeName.of("NonComparableAlias", "example");
+        TypeName objectName = TypeName.of("ReferencedObject", "example");
+        TypeName enumName = TypeName.of("ReferencedEnum", "example");
+        TypeName unionName = TypeName.of("ReferencedUnion", "example");
+        FieldDefinition stringField = FieldDefinition.builder()
+                .fieldName(FieldName.of("value"))
+                .type(Type.primitive(PrimitiveType.STRING))
+                .build();
+
+        // References in the lists below must resolve to definitions in the generated schema.
+        List<TypeDefinition> referencedTypes = List.of(
+                TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(comparableAliasName)
+                        .alias(Type.primitive(PrimitiveType.DOUBLE))
+                        .build()),
+                TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(nonComparableAliasName)
+                        .alias(Type.primitive(PrimitiveType.BOOLEAN))
+                        .build()),
+                TypeDefinition.object(ObjectDefinition.builder()
+                        .typeName(objectName)
+                        .fields(stringField)
+                        .build()),
+                TypeDefinition.enum_(EnumDefinition.builder()
+                        .typeName(enumName)
+                        .values(EnumValueDefinition.builder().value("EXAMPLE").build())
+                        .build()),
+                TypeDefinition.union(UnionDefinition.builder()
+                        .typeName(unionName)
+                        .union(stringField)
+                        .build()));
+
+        List<Type> hasComparison = List.of(
+                Type.primitive(PrimitiveType.DOUBLE),
+                Type.primitive(PrimitiveType.INTEGER),
+                Type.primitive(PrimitiveType.SAFELONG),
+                Type.primitive(PrimitiveType.STRING),
+                Type.primitive(PrimitiveType.DATETIME),
+                Type.primitive(PrimitiveType.UUID),
+                Type.reference(comparableAliasName));
+        List<Type> noComparison = List.of(
+                Type.primitive(PrimitiveType.BOOLEAN),
+                Type.primitive(PrimitiveType.BINARY),
+                Type.primitive(PrimitiveType.ANY),
+                Type.primitive(PrimitiveType.RID),
+                Type.primitive(PrimitiveType.BEARERTOKEN),
+                Type.optional(OptionalType.of(Type.primitive(PrimitiveType.DOUBLE))),
+                Type.list(ListType.of(Type.primitive(PrimitiveType.STRING))),
+                Type.set(SetType.of(Type.primitive(PrimitiveType.STRING))),
+                Type.map(MapType.of(Type.primitive(PrimitiveType.STRING), Type.primitive(PrimitiveType.DOUBLE))),
+                Type.reference(nonComparableAliasName),
+                Type.reference(objectName),
+                Type.reference(enumName),
+                Type.reference(unionName),
+                Type.external(ExternalReference.builder()
+                        .externalReference(TypeName.of("Long", "java.lang"))
+                        .fallback(Type.primitive(PrimitiveType.STRING))
+                        .build()));
+
+        for (Type type : hasComparison) {
+            String outerSource = generateNestedAliasSource(type, referencedTypes);
+            assertThat(outerSource)
+                    .as("An alias of an alias of %s should support comparison", type)
+                    .contains(
+                            "implements Comparable<OuterExample>",
+                            "public int compareTo(OuterExample other)",
+                            "return value.compareTo(other.get());");
+        }
+
+        for (Type type : noComparison) {
+            String outerSource = generateNestedAliasSource(type, referencedTypes);
+            assertThat(outerSource)
+                    .as("An alias of an alias of %s should not support comparison", type)
+                    .doesNotContain("compareTo(", "Comparable<");
+        }
+    }
+
+    private static String generateNestedAliasSource(Type baseType, List<TypeDefinition> referencedTypes) {
+        TypeName innerName = TypeName.of("InnerExample", "example");
+        TypeName outerName = TypeName.of("OuterExample", "example");
+        AliasDefinition inner =
+                AliasDefinition.builder().typeName(innerName).alias(baseType).build();
+        AliasDefinition outer = AliasDefinition.builder()
+                .typeName(outerName)
+                .alias(Type.reference(innerName))
+                .build();
+        ConjureDefinition definition = ConjureDefinition.builder()
+                .version(1)
+                .types(referencedTypes)
+                .types(TypeDefinition.alias(inner))
+                .types(TypeDefinition.alias(outer))
+                .build();
+
+        return new ObjectGenerator(Options.builder().build())
+                .generate(definition)
+                .filter(file -> file.typeSpec().name().equals(outerName.getName()))
+                .map(Object::toString)
+                .findFirst()
+                .orElseThrow();
     }
 
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {

@@ -10,7 +10,7 @@ import javax.annotation.processing.Generated;
 
 @Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class NestedAlias {
+public final class NestedAlias implements Comparable<NestedAlias> {
     private final StringAliasEx value;
 
     private NestedAlias(@Nonnull StringAliasEx value) {
@@ -39,6 +39,11 @@ public final class NestedAlias {
     @Override
     public int hashCode() {
         return this.value.hashCode();
+    }
+
+    @Override
+    public int compareTo(NestedAlias other) {
+        return value.compareTo(other.get());
     }
 
     public static NestedAlias valueOf(@Safe String value) {
