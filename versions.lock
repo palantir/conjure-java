@@ -74,11 +74,11 @@ com.palantir.dialogue:dialogue-serde:6.43.0 (3 constraints: b82e5ea2)
 
 com.palantir.dialogue:dialogue-target:6.43.0 (7 constraints: f17892aa)
 
-com.palantir.goethe:goethe:0.29.0 (1 constraints: 3d05423b)
+com.palantir.goethe:goethe:0.30.0 (1 constraints: 35052b3b)
 
 com.palantir.human-readable-types:human-readable-types:1.18.0 (1 constraints: 3c05413b)
 
-com.palantir.javapoet:javapoet:0.20.0 (2 constraints: 2d11d3ed)
+com.palantir.javapoet:javapoet:0.20.0 (2 constraints: 2511bced)
 
 com.palantir.nylon:nylon-threads:0.15.0 (1 constraints: 3e103ba2)
 
