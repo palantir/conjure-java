@@ -98,7 +98,7 @@ com.palantir.safe-logging:safe-logging:3.20.0 (29 constraints: 86ff14bf)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
-com.palantir.syntactic-paths:syntactic-paths:0.22.0 (2 constraints: f5139981)
+com.palantir.syntactic-paths:syntactic-paths:0.23.0 (2 constraints: f613c781)
 
 com.palantir.tokens:auth-tokens:4.10.0 (5 constraints: d853a6b7)
 
