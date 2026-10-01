@@ -111,7 +111,10 @@ final class UnclosableOutputStreams {
             bufferWritable.write(byteBuffer);
         }
 
+        // transferFrom is deprecated on the BufferWritableOutputStream interface as of undertow 2.3,
+        // but we must continue to implement it while the interface declares it.
         @Override
+        @SuppressWarnings("deprecation")
         public void transferFrom(FileChannel source) throws IOException {
             assertOpen();
             bufferWritable.transferFrom(source);
