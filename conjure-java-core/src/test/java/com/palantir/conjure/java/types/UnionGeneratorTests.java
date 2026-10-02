@@ -153,6 +153,8 @@ final class UnionGeneratorTests {
                 assertThat(wireTree(mapper, mapper.readValue(nullElement, type)))
                         .isEqualTo(mapper.readTree(nullElement));
             }
+            assertThatThrownBy(() -> type.getMethod("map", Map.class).invoke(null, new Object[] {null}))
+                    .hasCauseInstanceOf(NullPointerException.class);
             Map<String, String> callerMap = new LinkedHashMap<>(Map.of("original", "value"));
             Object publicValue = type.getMethod("map", Map.class).invoke(null, callerMap);
             callerMap.put("added", "value");
@@ -206,6 +208,14 @@ final class UnionGeneratorTests {
                     ObjectMappers.newSmileServerObjectMapper())) {
                 assertSetWireSemantics(mapper, type, sealed, defensive, nonNull);
                 assertAliasWireSemantics(mapper, loader);
+            }
+            assertThatThrownBy(() -> type.getMethod("set", Set.class).invoke(null, new Object[] {null}))
+                    .hasCauseInstanceOf(NullPointerException.class);
+            if (defensive && nonNull) {
+                Set<String> nullElement = new LinkedHashSet<>();
+                nullElement.add(null);
+                assertThatThrownBy(() -> type.getMethod("set", Set.class).invoke(null, nullElement))
+                        .hasCauseInstanceOf(NullPointerException.class);
             }
             Set<String> callerSet = new LinkedHashSet<>(List.of("original"));
             Object publicValue = type.getMethod("set", Set.class).invoke(null, callerSet);

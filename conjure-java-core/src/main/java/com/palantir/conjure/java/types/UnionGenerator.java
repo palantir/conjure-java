@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -128,25 +130,21 @@ public final class UnionGenerator {
                         entry -> ConjureAnnotations.withSafety(
                                 typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
 
-        NameAllocator helperNames = new NameAllocator();
-        helperNames.newName(unionClass.simpleName());
-        helperNames.newName("Base");
-        helperNames.newName("Visitor");
-        helperNames.newName("VisitorBuilder");
-        helperNames.newName(UNKNOWN_WRAPPER_CLASS_NAME);
-        helperNames.newName(SEALED_KNOWN_INTERFACE);
-        helperNames.newName(SEALED_UNKNOWN_VARIANT_NAME);
-        for (FieldDefinition member : typeDef.getUnion()) {
-            helperNames.newName(
-                    options.sealedUnions()
-                            ? sealedVariantClass(unionClass, member.getFieldName())
-                                    .simpleName()
-                            : wrapperClass(unionClass, sanitizeUnknown(member.getFieldName()))
-                                    .simpleName());
-        }
-        ClassName deserializerClass = unionClass.nestedClass(helperNames.newName(DESERIALIZER_CLASS_NAME));
-
         if (options.sealedUnions()) {
+            NameAllocator helperNames = new NameAllocator();
+            helperNames.newName(unionClass.simpleName());
+            helperNames.newName("Base");
+            helperNames.newName("Visitor");
+            helperNames.newName("VisitorBuilder");
+            helperNames.newName(UNKNOWN_WRAPPER_CLASS_NAME);
+            helperNames.newName(SEALED_KNOWN_INTERFACE);
+            helperNames.newName(SEALED_UNKNOWN_VARIANT_NAME);
+            for (FieldDefinition member : typeDef.getUnion()) {
+                helperNames.newName(
+                        sealedVariantClass(unionClass, member.getFieldName()).simpleName());
+            }
+            ClassName deserializerClass = unionClass.nestedClass(helperNames.newName(DESERIALIZER_CLASS_NAME));
+
             ClassName unknownVariant = unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME);
             List<AnnotationSpec> safety =
                     ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
@@ -170,7 +168,7 @@ public final class UnionGenerator {
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
                     .addType(generateUnknownWrapper(unionClass, visitorClass, options))
-                    .addType(generateDeserializer(unionClass, deserializerClass, typeDef.getUnion(), options));
+                    .addType(generateDeserializer(unionClass, deserializerClass, typeDef.getUnion()));
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -205,7 +203,6 @@ public final class UnionGenerator {
                         typeDef.getTypeName().getName())
                 .addAnnotations(safety)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
-                .addAnnotation(generateJsonDeserialize(deserializerClass))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
                 .addMethod(generateConstructor(baseClass))
@@ -224,7 +221,6 @@ public final class UnionGenerator {
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
-                .addType(generateDeserializer(unionClass, deserializerClass, typeDef.getUnion(), options))
                 .addMethod(MethodSpecs.createEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
@@ -363,18 +359,31 @@ public final class UnionGenerator {
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(ParameterSpec.builder(memberType, variableName)
                                     .build())
-                            .addStatement(
-                                    options.sealedUnions()
-                                            ? CodeBlock.of(
-                                                    "return new $T($L)",
-                                                    sealedVariantClass(unionClass, memberName),
-                                                    variableName)
-                                            : CodeBlock.of(
-                                                    "return new $T(new $T($L))",
-                                                    unionClass,
-                                                    wrapperClass(unionClass, memberName),
-                                                    variableName))
                             .returns(unionClass);
+                    CodeBlock value = CodeBlock.of("$L", variableName);
+                    if (hasOwnedCollection(memberTypeDef.getType(), options)) {
+                        builder.addStatement(
+                                "$L",
+                                Expressions.requireNonNull(
+                                        variableName, String.format("%s cannot be null", memberName.get())));
+                        value = memberTypeDef.getType().accept(TypeVisitor.IS_MAP)
+                                ? CodeBlock.of("new $T<>($L)", LinkedHashMap.class, variableName)
+                                : CodeBlock.of(
+                                        "$T.$L($L)",
+                                        ConjureCollections.class,
+                                        CollectionType.from(memberTypeDef.getType(), options)
+                                                .getConjureCollectionStaticFactoryMethod(),
+                                        variableName);
+                    }
+                    builder.addStatement(
+                            options.sealedUnions()
+                                    ? CodeBlock.of(
+                                            "return new $T($L)", sealedVariantClass(unionClass, memberName), value)
+                                    : CodeBlock.of(
+                                            "return new $T(new $T($L))",
+                                            unionClass,
+                                            wrapperClass(unionClass, memberName),
+                                            value));
                     Javadoc.render(memberTypeDef.getDocs(), memberTypeDef.getDeprecated())
                             .ifPresent(javadoc -> builder.addJavadoc("$L", javadoc));
                     memberTypeDef.getDeprecated().ifPresent(_deprecated -> builder.addAnnotation(Deprecated.class));
@@ -845,28 +854,25 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateDeserializer(
-            ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs, Options options) {
+            ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
         return TypeSpec.classBuilder(deserializerClass)
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(ClassName.get(ConjureUnionDeserializer.class), unionClass))
-                .addField(generateVariantTypesField(unionClass, memberTypeDefs, options))
+                .addField(generateVariantTypesField(unionClass, memberTypeDefs))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addStatement("super($T.class, VARIANT_TYPES)", unionClass)
                         .build())
-                .addMethod(generateDeserializeSelectedMethod(unionClass, memberTypeDefs, options))
+                .addMethod(generateDeserializeSelectedMethod(unionClass, memberTypeDefs))
                 .build();
     }
 
-    private static FieldSpec generateVariantTypesField(
-            ClassName unionClass, List<FieldDefinition> memberTypeDefs, Options options) {
+    private static FieldSpec generateVariantTypesField(ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
         TypeName classType =
                 ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class));
         CodeBlock.Builder initializer = CodeBlock.builder().add("new $T<?>[] {$>", Class.class);
         for (int index = 0; index < memberTypeDefs.size(); index++) {
             FieldDefinition memberTypeDef = memberTypeDefs.get(index);
-            ClassName wrapperClass = options.sealedUnions()
-                    ? sealedVariantClass(unionClass, memberTypeDef.getFieldName())
-                    : wrapperClass(unionClass, sanitizeUnknown(memberTypeDef.getFieldName()));
+            ClassName wrapperClass = sealedVariantClass(unionClass, memberTypeDef.getFieldName());
             if (index > 0) {
                 initializer.add(",");
             }
@@ -880,7 +886,7 @@ public final class UnionGenerator {
     }
 
     private static MethodSpec generateDeserializeSelectedMethod(
-            ClassName unionClass, List<FieldDefinition> memberTypeDefs, Options options) {
+            ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("deserializeSelected")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PROTECTED)
@@ -894,26 +900,12 @@ public final class UnionGenerator {
             builder.addStatement("case $S -> $L", memberTypeDefs.get(index).getFieldName(), index);
         }
         builder.addStatement("default -> -1").addCode("};\n");
-        builder.beginControlFlow("if (variantIndex < 0)");
-        if (options.sealedUnions()) {
-            builder.addStatement(
-                    "return new $T(type, deserializeUnknown(parser, context))",
-                    unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME));
-        } else {
-            builder.addStatement(
-                    "return new $T(new $T(type, deserializeUnknown(parser, context)))",
-                    unionClass,
-                    unionClass.nestedClass(UNKNOWN_WRAPPER_CLASS_NAME));
-        }
-        builder.endControlFlow();
-        if (options.sealedUnions()) {
-            builder.addStatement("return ($T) deserializeVariant(parser, context, variantIndex)", unionClass);
-        } else {
-            builder.addStatement(
-                    "return new $T(($T) deserializeVariant(parser, context, variantIndex))",
-                    unionClass,
-                    unionClass.nestedClass("Base"));
-        }
+        builder.beginControlFlow("if (variantIndex < 0)")
+                .addStatement(
+                        "return new $T(type, deserializeUnknown(parser, context))",
+                        unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME))
+                .endControlFlow()
+                .addStatement("return ($T) deserializeVariant(parser, context, variantIndex)", unionClass);
         return builder.build();
     }
 
@@ -943,7 +935,34 @@ public final class UnionGenerator {
 
     private static TypeSpec generateBase(
             ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes) {
-        TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass).addModifiers(Modifier.PRIVATE);
+        ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
+        TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
+                .addModifiers(Modifier.PRIVATE)
+                .addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
+                        .addMember("use", "JsonTypeInfo.Id.NAME")
+                        .addMember("include", "JsonTypeInfo.As.EXISTING_PROPERTY")
+                        .addMember("property", "\"type\"")
+                        .addMember("visible", "$L", true)
+                        .addMember("defaultImpl", "$T.class", unknownWrapperClass)
+                        .build());
+        if (!memberTypes.isEmpty()) {
+            List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
+                    .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
+                            .addMember(
+                                    "value",
+                                    "$T.class",
+                                    peerWrapperClass(
+                                            baseClass,
+                                            sanitizeUnknown(entry.getKey().getFieldName())))
+                            .build())
+                    .collect(Collectors.toList());
+            AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
+            subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
+            baseBuilder.addAnnotation(annotationBuilder.build());
+        }
+        baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                .addMember("ignoreUnknown", "$L", true)
+                .build());
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
         ParameterSpec visitor =
                 ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
@@ -989,8 +1008,6 @@ public final class UnionGenerator {
                             .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
                                     .addMember("value", "$S", memberTypeDef.getFieldName())
                                     .build())
-                            .addAnnotation(ignoreUnknownAnnotation())
-                            .addAnnotation(typeFirstAnnotation())
                             .addFields(fields)
                             .addMethods(generateWrapperConstructors(
                                     wrapperClass,
@@ -1022,6 +1039,8 @@ public final class UnionGenerator {
                     if (options.sealedUnions()) {
                         // Prevent the custom union serializer and deserializer on the sealed base class from being
                         // inherited by concrete variants when delegating directly to a known wrapper.
+                        typeBuilder.addAnnotation(ignoreUnknownAnnotation());
+                        typeBuilder.addAnnotation(typeFirstAnnotation());
                         typeBuilder.addAnnotation(JsonDeserialize.class);
                         typeBuilder.addAnnotation(JsonSerialize.class);
                     }
@@ -1077,31 +1096,37 @@ public final class UnionGenerator {
         CodeBlock checkNotNull =
                 Expressions.requireNonNull(VALUE_FIELD_NAME, String.format("%s cannot be null", memberName.get()));
         Type type = memberTypeDef.getType();
-        if (options.defensiveCollections() && (type.accept(TypeVisitor.IS_MAP) || type.accept(TypeVisitor.IS_SET))) {
+        if (hasOwnedCollection(type, options)) {
             if (type.accept(TypeVisitor.IS_MAP)) {
                 jsonParameter.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
                         .addMember("using", "$T.class", ConjureMapDeserializer.class)
                         .build());
             }
+            MethodSpec.Builder jsonFactory = MethodSpec.methodBuilder(jsonFactoryName)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
+                    .addParameter(jsonParameter.build())
+                    .returns(wrapperClass)
+                    .addStatement("$L", checkNotNull);
+            if (type.accept(TypeVisitor.IS_SET) && options.nonNullCollections()) {
+                jsonFactory
+                        .beginControlFlow("for ($T element : $L)", Object.class, VALUE_FIELD_NAME)
+                        .addStatement(
+                                "$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
+                        .endControlFlow();
+            }
             return List.of(
                     MethodSpec.constructorBuilder()
                             .addModifiers(Modifier.PRIVATE)
                             .addParameter(memberType, VALUE_FIELD_NAME)
-                            .addStatement("this($L, false)", VALUE_FIELD_NAME)
+                            .addStatement(
+                                    "this.$1L = $2T.$3L($1L)",
+                                    VALUE_FIELD_NAME,
+                                    Collections.class,
+                                    type.accept(TypeVisitor.IS_MAP) ? "unmodifiableMap" : "unmodifiableSet")
                             .build(),
-                    MethodSpec.methodBuilder(jsonFactoryName)
-                            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                            .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
-                            .addParameter(jsonParameter.build())
-                            .returns(wrapperClass)
-                            .addStatement("return new $T($L, true)", wrapperClass, VALUE_FIELD_NAME)
-                            .build(),
-                    MethodSpec.constructorBuilder()
-                            .addModifiers(Modifier.PRIVATE)
-                            .addParameter(memberType, VALUE_FIELD_NAME)
-                            .addParameter(TypeName.BOOLEAN, "owned")
-                            .addStatement("$L", checkNotNull)
-                            .addCode(createOwnedConstructor(type, options))
+                    jsonFactory
+                            .addStatement("return new $T($L)", wrapperClass, VALUE_FIELD_NAME)
                             .build());
         }
         return List.of(MethodSpec.constructorBuilder()
@@ -1113,31 +1138,10 @@ public final class UnionGenerator {
                 .build());
     }
 
-    private static CodeBlock createOwnedConstructor(Type type, Options options) {
-        if (type.accept(TypeVisitor.IS_MAP)) {
-            return CodeBlock.builder()
-                    .addStatement(
-                            "this.$1L = $2T.unmodifiableMap(owned ? $1L : new $3T<>($1L))",
-                            VALUE_FIELD_NAME,
-                            Collections.class,
-                            LinkedHashMap.class)
-                    .build();
-        }
-        CodeBlock.Builder body = CodeBlock.builder();
-        if (options.nonNullCollections()) {
-            body.beginControlFlow("if (owned)")
-                    .beginControlFlow("for ($T element : $L)", Object.class, VALUE_FIELD_NAME)
-                    .addStatement("$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
-                    .endControlFlow()
-                    .endControlFlow();
-        }
-        return body.addStatement(
-                        "this.$1L = $2T.unmodifiableSet(owned ? $1L : $3T.$4L($1L))",
-                        VALUE_FIELD_NAME,
-                        Collections.class,
-                        ConjureCollections.class,
-                        CollectionType.from(type, options).getConjureCollectionStaticFactoryMethod())
-                .build();
+    private static boolean hasOwnedCollection(Type type, Options options) {
+        return options.sealedUnions()
+                && options.defensiveCollections()
+                && (type.accept(TypeVisitor.IS_MAP) || type.accept(TypeVisitor.IS_SET));
     }
 
     private static AnnotationSpec typeFirstAnnotation() {
@@ -1158,7 +1162,7 @@ public final class UnionGenerator {
         if (field.getType().accept(TypeVisitor.IS_SET)) {
             AnnotationSpec.Builder annotation =
                     AnnotationSpec.builder(JsonDeserialize.class).addMember("as", "$T.class", LinkedHashSet.class);
-            if (options.defensiveCollections()) {
+            if (options.sealedUnions() && options.defensiveCollections()) {
                 annotation.addMember("using", "$T.class", ConjureSetDeserializer.class);
             }
             return List.of(annotation.build());
@@ -1212,7 +1216,6 @@ public final class UnionGenerator {
                 FieldSpec.builder(genericMapType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
-                .addAnnotation(typeFirstAnnotation())
                 .addModifiers(
                         options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addFields(fields)
@@ -1260,6 +1263,7 @@ public final class UnionGenerator {
                         .build());
 
         if (options.sealedUnions()) {
+            typeBuilder.addAnnotation(typeFirstAnnotation());
             typeBuilder.addAnnotation(JsonDeserialize.class);
             typeBuilder.addAnnotation(JsonSerialize.class);
         }
