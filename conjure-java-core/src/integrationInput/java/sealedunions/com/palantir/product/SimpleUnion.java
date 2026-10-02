@@ -297,13 +297,12 @@ public abstract sealed class SimpleUnion
         @Override
         protected SimpleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
-            int variantIndex =
-                    switch (type) {
-                        case "foo" -> 0;
-                        case "bar" -> 1;
-                        case "baz" -> 2;
-                        default -> -1;
-                    };
+            int variantIndex = switch (type) {
+                case "foo" -> 0;
+                case "bar" -> 1;
+                case "baz" -> 2;
+                default -> -1;
+            };
             if (variantIndex < 0) {
                 return new Unknown(type, deserializeUnknown(parser, context));
             }

@@ -1014,25 +1014,24 @@ public abstract sealed class UnionReservedNames
         @Override
         protected UnionReservedNames deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
-            int variantIndex =
-                    switch (type) {
-                        case "known" -> 0;
-                        case "unknown" -> 1;
-                        case "if" -> 2;
-                        case "new" -> 3;
-                        case "interface" -> 4;
-                        case "void" -> 5;
-                        case "return" -> 6;
-                        case "private" -> 7;
-                        case "public" -> 8;
-                        case "int" -> 9;
-                        case "import" -> 10;
-                        case "final" -> 11;
-                        case "throws" -> 12;
-                        case "static" -> 13;
-                        case "unionReservedNames" -> 14;
-                        default -> -1;
-                    };
+            int variantIndex = switch (type) {
+                case "known" -> 0;
+                case "unknown" -> 1;
+                case "if" -> 2;
+                case "new" -> 3;
+                case "interface" -> 4;
+                case "void" -> 5;
+                case "return" -> 6;
+                case "private" -> 7;
+                case "public" -> 8;
+                case "int" -> 9;
+                case "import" -> 10;
+                case "final" -> 11;
+                case "throws" -> 12;
+                case "static" -> 13;
+                case "unionReservedNames" -> 14;
+                default -> -1;
+            };
             if (variantIndex < 0) {
                 return new Unknown(type, deserializeUnknown(parser, context));
             }

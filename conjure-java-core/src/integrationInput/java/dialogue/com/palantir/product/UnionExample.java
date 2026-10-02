@@ -420,15 +420,14 @@ public abstract sealed class UnionExample
         @Override
         protected UnionExample deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
-            int variantIndex =
-                    switch (type) {
-                        case "stringVariant" -> 0;
-                        case "intVariant" -> 1;
-                        case "objectVariant" -> 2;
-                        case "collectionVariant" -> 3;
-                        case "optionalVariant" -> 4;
-                        default -> -1;
-                    };
+            int variantIndex = switch (type) {
+                case "stringVariant" -> 0;
+                case "intVariant" -> 1;
+                case "objectVariant" -> 2;
+                case "collectionVariant" -> 3;
+                case "optionalVariant" -> 4;
+                default -> -1;
+            };
             if (variantIndex < 0) {
                 return new Unknown(type, deserializeUnknown(parser, context));
             }

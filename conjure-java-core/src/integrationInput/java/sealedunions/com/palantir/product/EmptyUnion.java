@@ -113,10 +113,9 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
         @Override
         protected EmptyUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
-            int variantIndex =
-                    switch (type) {
-                        default -> -1;
-                    };
+            int variantIndex = switch (type) {
+                default -> -1;
+            };
             if (variantIndex < 0) {
                 return new Unknown(type, deserializeUnknown(parser, context));
             }
