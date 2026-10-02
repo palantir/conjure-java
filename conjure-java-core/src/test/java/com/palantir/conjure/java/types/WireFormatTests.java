@@ -53,9 +53,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.google.common.collect.ImmutableList;
@@ -92,6 +94,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import sealedunions.com.palantir.product.CamelCaseUnion;
 import sealedunions.com.palantir.product.EmptyObject;
 import sealedunions.com.palantir.product.NestedEmptyUnion;
@@ -884,6 +887,26 @@ public final class WireFormatTests {
     void testSealedUnionType_deserialize() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnion.class))
                 .isEqualTo(SimpleUnion.foo("test"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testSealedUnionType_discriminatorFirst(boolean sortAlphabetically) throws JsonProcessingException {
+        ObjectMapper configured = JsonMapper.builder()
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, sortAlphabetically)
+                .build();
+        for (SimpleUnion union :
+                List.of(SimpleUnion.foo("test"), SimpleUnion.bar(42), SimpleUnion.unknown("future", "value"))) {
+            String json = configured.writerFor(SimpleUnion.class).writeValueAsString(union);
+            assertThat(json).startsWith("{\"type\":");
+            assertThat(configured.writeValueAsString(union)).isEqualTo(json);
+            assertThat(configured.writerFor(union.getClass()).writeValueAsString(union))
+                    .isEqualTo(json);
+            SimpleUnionAlias alias = SimpleUnionAlias.of(union);
+            assertThat(configured.writerFor(SimpleUnionAlias.class).writeValueAsString(alias))
+                    .isEqualTo(json);
+            assertThat(configured.readValue(json, SimpleUnionAlias.class)).isEqualTo(alias);
+        }
     }
 
     @Test
