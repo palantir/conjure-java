@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -206,6 +207,7 @@ public abstract sealed class UnionReservedNames
                     UnionReservedNames_ {}
 
     @JsonTypeName("known")
+    @JsonPropertyOrder("type")
     public static final class Known_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -251,6 +253,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("unknown")
+    @JsonPropertyOrder("type")
     public static final class Unknown_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -296,6 +299,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("if")
+    @JsonPropertyOrder("type")
     public static final class If extends UnionReservedNames implements Known {
         private final String value;
 
@@ -341,6 +345,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("new")
+    @JsonPropertyOrder("type")
     public static final class New extends UnionReservedNames implements Known {
         private final String value;
 
@@ -386,6 +391,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("interface")
+    @JsonPropertyOrder("type")
     public static final class Interface extends UnionReservedNames implements Known {
         private final String value;
 
@@ -431,6 +437,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("void")
+    @JsonPropertyOrder("type")
     public static final class Void extends UnionReservedNames implements Known {
         private final String value;
 
@@ -476,6 +483,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("return")
+    @JsonPropertyOrder("type")
     public static final class Return extends UnionReservedNames implements Known {
         private final String value;
 
@@ -521,6 +529,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("private")
+    @JsonPropertyOrder("type")
     public static final class Private extends UnionReservedNames implements Known {
         private final String value;
 
@@ -566,6 +575,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("public")
+    @JsonPropertyOrder("type")
     public static final class Public extends UnionReservedNames implements Known {
         private final String value;
 
@@ -611,6 +621,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("int")
+    @JsonPropertyOrder("type")
     public static final class Int extends UnionReservedNames implements Known {
         private final String value;
 
@@ -656,6 +667,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("import")
+    @JsonPropertyOrder("type")
     public static final class Import extends UnionReservedNames implements Known {
         private final String value;
 
@@ -701,6 +713,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("final")
+    @JsonPropertyOrder("type")
     public static final class Final extends UnionReservedNames implements Known {
         private final String value;
 
@@ -746,6 +759,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("throws")
+    @JsonPropertyOrder("type")
     public static final class Throws extends UnionReservedNames implements Known {
         private final String value;
 
@@ -791,6 +805,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("static")
+    @JsonPropertyOrder("type")
     public static final class Static extends UnionReservedNames implements Known {
         private final String value;
 
@@ -836,6 +851,7 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("unionReservedNames")
+    @JsonPropertyOrder("type")
     public static final class UnionReservedNames_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -880,6 +896,7 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    @JsonPropertyOrder("type")
     public static final class Unknown extends UnionReservedNames {
         private final String type;
 
