@@ -52,8 +52,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -85,10 +87,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import sealedunions.com.palantir.product.CamelCaseUnion;
 import sealedunions.com.palantir.product.EmptyObject;
 import sealedunions.com.palantir.product.NestedEmptyUnion;
 import sealedunions.com.palantir.product.SimpleUnion;
+import sealedunions.com.palantir.product.SimpleUnionAlias;
 import sealedunions.com.palantir.product.UnionReservedNames;
 
 @Execution(ExecutionMode.CONCURRENT)
@@ -876,6 +881,44 @@ public final class WireFormatTests {
     void testSealedUnionType_deserialize() throws JsonProcessingException {
         assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnion.class))
                 .isEqualTo(SimpleUnion.foo("test"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testSealedUnionType_discriminatorFirst(boolean sortAlphabetically) throws JsonProcessingException {
+        ObjectMapper configured = JsonMapper.builder()
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, sortAlphabetically)
+                .build();
+        for (SimpleUnion union :
+                List.of(SimpleUnion.foo("test"), SimpleUnion.bar(42), SimpleUnion.unknown("future", "value"))) {
+            String json = configured.writerFor(SimpleUnion.class).writeValueAsString(union);
+            assertThat(json).startsWith("{\"type\":");
+            assertThat(configured.writeValueAsString(union)).isEqualTo(json);
+            assertThat(configured.writerFor(union.getClass()).writeValueAsString(union))
+                    .isEqualTo(json);
+            SimpleUnionAlias alias = SimpleUnionAlias.of(union);
+            assertThat(configured.writerFor(SimpleUnionAlias.class).writeValueAsString(alias))
+                    .isEqualTo(json);
+            assertThat(configured.readValue(json, SimpleUnionAlias.class)).isEqualTo(alias);
+        }
+    }
+
+    @Test
+    void testSealedUnionAlias_wireFormat() throws JsonProcessingException {
+        SimpleUnionAlias alias = SimpleUnionAlias.of(SimpleUnion.foo("test"));
+        assertThat(mapper.writeValueAsString(alias)).isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+        assertThat(mapper.writerFor(SimpleUnionAlias.class).writeValueAsString(alias))
+                .isEqualTo("{\"type\":\"foo\",\"foo\":\"test\"}");
+        assertThat(mapper.writeValueAsString(Map.of("key", alias)))
+                .isEqualTo("{\"key\":{\"type\":\"foo\",\"foo\":\"test\"}}");
+        assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"test\"}", SimpleUnionAlias.class))
+                .isEqualTo(alias);
+        assertThat(mapper.readValue("{\"foo\":\"test\",\"type\":\"foo\"}", SimpleUnionAlias.class))
+                .isEqualTo(alias);
+        assertThat(mapper.readValue(
+                        "{\"key\":{\"type\":\"foo\",\"foo\":\"test\"}}",
+                        new TypeReference<Map<String, SimpleUnionAlias>>() {}))
+                .containsExactly(Map.entry("key", alias));
     }
 
     @Test
