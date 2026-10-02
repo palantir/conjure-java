@@ -1,24 +1,22 @@
-package dialogue.com.palantir.product;
+package template.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.Safe;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class NestedStringAliasExample implements Comparable<NestedStringAliasExample> {
-    private final StringAliasExample value;
+public final class AliasOfAliasOfDoubleAliasExample implements Comparable<AliasOfAliasOfDoubleAliasExample> {
+    private final AliasOfDoubleAliasExample value;
 
-    private NestedStringAliasExample(@Nonnull StringAliasExample value) {
+    private AliasOfAliasOfDoubleAliasExample(@Nonnull AliasOfDoubleAliasExample value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    public StringAliasExample get() {
+    public AliasOfDoubleAliasExample get() {
         return value;
     }
 
@@ -30,10 +28,11 @@ public final class NestedStringAliasExample implements Comparable<NestedStringAl
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof NestedStringAliasExample && equalTo((NestedStringAliasExample) other));
+                || (other instanceof AliasOfAliasOfDoubleAliasExample
+                        && equalTo((AliasOfAliasOfDoubleAliasExample) other));
     }
 
-    private boolean equalTo(NestedStringAliasExample other) {
+    private boolean equalTo(AliasOfAliasOfDoubleAliasExample other) {
         return this.value.equals(other.value);
     }
 
@@ -43,16 +42,16 @@ public final class NestedStringAliasExample implements Comparable<NestedStringAl
     }
 
     @Override
-    public int compareTo(NestedStringAliasExample other) {
+    public int compareTo(AliasOfAliasOfDoubleAliasExample other) {
         return value.compareTo(other.get());
     }
 
-    public static NestedStringAliasExample valueOf(@Safe String value) {
-        return of(StringAliasExample.valueOf(value));
+    public static AliasOfAliasOfDoubleAliasExample valueOf(String value) {
+        return of(AliasOfDoubleAliasExample.valueOf(value));
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static NestedStringAliasExample of(@Nonnull StringAliasExample value) {
-        return new NestedStringAliasExample(value);
+    public static AliasOfAliasOfDoubleAliasExample of(@Nonnull AliasOfDoubleAliasExample value) {
+        return new AliasOfAliasOfDoubleAliasExample(value);
     }
 }

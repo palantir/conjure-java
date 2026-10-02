@@ -36,7 +36,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-/** Internal Jackson support for transferring ownership of sets to generated values. */
+/**
+ * Property deserializer that gives generated code ownership of sets. Standard Jackson containers with standard scalar
+ * entries may be transferred directly; other results are defensively copied. Generated code remains responsible for
+ * null validation and exposing an unmodifiable view.
+ *
+ * <p>Public for use by generated code; not intended for application use.
+ */
 public final class ConjureSetDeserializer extends JsonDeserializer<Object> implements ContextualDeserializer {
     @Override
     public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)

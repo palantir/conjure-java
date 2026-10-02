@@ -1,24 +1,22 @@
-package dialogue.com.palantir.product;
+package allexamples.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.Safe;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
-@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class NestedAlias implements Comparable<NestedAlias> {
-    private final StringAliasEx value;
+public final class AliasOfUuidAliasExample implements Comparable<AliasOfUuidAliasExample> {
+    private final UuidAliasExample value;
 
-    private NestedAlias(@Nonnull StringAliasEx value) {
+    private AliasOfUuidAliasExample(@Nonnull UuidAliasExample value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    public StringAliasEx get() {
+    public UuidAliasExample get() {
         return value;
     }
 
@@ -29,10 +27,10 @@ public final class NestedAlias implements Comparable<NestedAlias> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof NestedAlias && equalTo((NestedAlias) other));
+        return this == other || (other instanceof AliasOfUuidAliasExample && equalTo((AliasOfUuidAliasExample) other));
     }
 
-    private boolean equalTo(NestedAlias other) {
+    private boolean equalTo(AliasOfUuidAliasExample other) {
         return this.value.equals(other.value);
     }
 
@@ -42,16 +40,16 @@ public final class NestedAlias implements Comparable<NestedAlias> {
     }
 
     @Override
-    public int compareTo(NestedAlias other) {
+    public int compareTo(AliasOfUuidAliasExample other) {
         return value.compareTo(other.get());
     }
 
-    public static NestedAlias valueOf(@Safe String value) {
-        return of(StringAliasEx.valueOf(value));
+    public static AliasOfUuidAliasExample valueOf(String value) {
+        return of(UuidAliasExample.valueOf(value));
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static NestedAlias of(@Nonnull StringAliasEx value) {
-        return new NestedAlias(value);
+    public static AliasOfUuidAliasExample of(@Nonnull UuidAliasExample value) {
+        return new AliasOfUuidAliasExample(value);
     }
 }

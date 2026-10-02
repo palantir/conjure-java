@@ -29,12 +29,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-/** Internal Jackson support shared by generated union deserializers. */
+/**
+ * Jackson support for generated sealed unions. Subclasses dispatch discriminator values to concrete variant classes,
+ * whose annotations must mask the custom deserializer inherited from the union base class.
+ *
+ * <p>Public for use by generated code; not intended for application use.
+ */
 public abstract class ConjureUnionDeserializer<T> extends JsonDeserializer<T> {
     private final Class<T> unionClass;
     private final Class<?>[] variantTypes;
     private final AtomicReferenceArray<JsonDeserializer<?>> variantDeserializers;
 
+    /** Variant indexes passed to {@link #deserializeVariant} correspond to the order of {@code variantTypes}. */
     protected ConjureUnionDeserializer(Class<T> unionClass, Class<?>[] variantTypes) {
         this.unionClass = unionClass;
         this.variantTypes = variantTypes;
@@ -104,6 +110,10 @@ public abstract class ConjureUnionDeserializer<T> extends JsonDeserializer<T> {
         return "type".equals(fieldName) || (acceptCaseInsensitiveProperties && "type".equalsIgnoreCase(fieldName));
     }
 
+    /**
+     * Reads the remaining union object after consuming its discriminator. The parser may be positioned at START_OBJECT,
+     * FIELD_NAME, or END_OBJECT, and must be left at the matching END_OBJECT.
+     */
     protected abstract T deserializeSelected(JsonParser parser, DeserializationContext context, String type)
             throws IOException;
 

@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyMetadata;
 import com.fasterxml.jackson.databind.PropertyName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer;
 import com.fasterxml.jackson.databind.deser.std.MapDeserializer;
@@ -97,6 +98,36 @@ final class ConjureMapDeserializerTest {
                 copying("attached key type handler", mapper, attachedKeys, keyJson, Map.of(new UUID(0, 0), "value")),
                 copying("attached content type handler", mapper, attachedValues, valueJson, Map.of("key", 1)));
     }
+
+    @Test
+    void copiesCustomMapResultsIncludingNullAndAbsentValues() throws IOException {
+        Map<String, Integer> shared = new LinkedHashMap<>(Map.of("original", 1));
+        ObjectMapper custom = new ObjectMapper()
+                .registerModule(new SimpleModule().addDeserializer(Map.class, new JsonDeserializer<>() {
+                    @Override
+                    public Map<String, Integer> deserialize(JsonParser parser, DeserializationContext _context)
+                            throws IOException {
+                        parser.skipChildren();
+                        return shared;
+                    }
+
+                    @Override
+                    public Map<String, Integer> getNullValue(DeserializationContext _context) {
+                        return shared;
+                    }
+                }));
+        for (String json : List.of("{\"values\":{}}", "{\"values\":null}", "{}")) {
+            Map<String, Integer> result = custom.readValue(json, Value.class).values();
+            assertThat(result).isEqualTo(shared).isNotSameAs(shared);
+            shared.put("added", 2);
+            assertThat(result).containsExactlyEntriesOf(Map.of("original", 1));
+            shared.remove("added");
+        }
+    }
+
+    record Value(
+            @JsonDeserialize(using = ConjureMapDeserializer.class)
+            Map<String, Integer> values) {}
 
     private MapType mapType(Class<?> key, Class<?> value) {
         return mapper.getTypeFactory().constructMapType(LinkedHashMap.class, key, value);
