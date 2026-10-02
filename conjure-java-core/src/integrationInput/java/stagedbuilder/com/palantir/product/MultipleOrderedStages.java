@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -246,6 +247,8 @@ public final class MultipleOrderedStages {
 
         private Set<SafeLong> items = ConjureCollections.newSet();
 
+        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private Optional<OneField> optionalItem = Optional.empty();
@@ -302,7 +305,6 @@ public final class MultipleOrderedStages {
         }
 
         @Override
-        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));

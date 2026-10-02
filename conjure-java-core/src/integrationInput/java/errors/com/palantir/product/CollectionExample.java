@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -132,6 +133,8 @@ public final class CollectionExample {
 
         private Set<String> stringSet = ConjureCollections.newSet();
 
+        @JsonSetter(value = "stringMap", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, String> stringMap = new LinkedHashMap<>();
 
         private Builder() {}
@@ -186,7 +189,6 @@ public final class CollectionExample {
             return this;
         }
 
-        @JsonSetter(value = "stringMap", nulls = Nulls.SKIP)
         public Builder stringMap(@Nonnull Map<String, String> stringMap) {
             checkNotBuilt();
             this.stringMap = new LinkedHashMap<>(Preconditions.checkNotNull(stringMap, "stringMap cannot be null"));

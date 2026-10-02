@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -287,6 +288,8 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         private Optional<@Unsafe String> optionalItem = Optional.empty();
 
+        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private StrictFourFields strictFourFieldsObject;
@@ -365,7 +368,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         @Override
-        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));

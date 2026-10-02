@@ -119,6 +119,8 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     With `--sealedUnions`, Jackson writes the `type` discriminator first. Readers accept the discriminator in any position.
 
+    With `--defensiveCollections`, public union factories continue to copy input maps and sets. Sealed unions and Set aliases can take ownership of standard Jackson-created containers with scalar entries, avoiding a redundant copy. Bean map fields use the same ownership checks when Jackson populates their builders directly. Custom collection, key, or element deserializers, custom constructors, recovery handlers, and polymorphic values use a copying fallback. Encounter order, deduplication, and configured null-element validation are preserved.
+
     ```java
     Foo output = unionTypeExample.accept(new Visitor<Foo>() {
 
