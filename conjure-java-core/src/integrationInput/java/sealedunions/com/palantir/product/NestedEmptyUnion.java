@@ -183,11 +183,10 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         @Override
         protected NestedEmptyUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
-            int variantIndex =
-                    switch (type) {
-                        case "empty" -> 0;
-                        default -> -1;
-                    };
+            int variantIndex = switch (type) {
+                case "empty" -> 0;
+                default -> -1;
+            };
             if (variantIndex < 0) {
                 return new Unknown(type, deserializeUnknown(parser, context));
             }
