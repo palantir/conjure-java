@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import allexamples.com.palantir.product.ManyFieldExample;
 import allexamples.com.palantir.product.Union;
-import allexamples.com.palantir.product.UnionTypeExample;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -144,17 +143,15 @@ final class JacksonPerformanceTests {
         ObjectMapper mapper = JsonMapper.builder()
                 .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, sortAlphabetically)
                 .build();
-        assertTypeFirst(mapper, UnionTypeExample.thisFieldIsAnInteger(42), UnionTypeExample.class);
         assertTypeFirst(mapper, SimpleUnion.foo("value"), SimpleUnion.class);
         assertTypeFirst(mapper, SimpleUnion.foo("value"), SimpleUnion.Foo.class);
         assertTypeFirst(mapper, SimpleUnionAlias.of(SimpleUnion.foo("value")), SimpleUnionAlias.class);
-        assertTypeFirst(mapper, UnionTypeExample.unknown("future", 42), UnionTypeExample.class);
         assertTypeFirst(mapper, SimpleUnion.unknown("future", 42), SimpleUnion.class);
         assertTypeFirst(mapper, SimpleUnionAlias.of(SimpleUnion.unknown("future", 42)), SimpleUnionAlias.class);
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class, SimpleUnionAlias.class})
+    @ValueSource(classes = {SimpleUnion.class, SimpleUnionAlias.class})
     void unknownDeserializerIsResolvedLazilyOncePerUnion(Class<?> unionType) throws IOException {
         AtomicInteger resolutions = new AtomicInteger();
         ObjectMapper mapper = new ObjectMapper()
@@ -183,7 +180,7 @@ final class JacksonPerformanceTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class, SimpleUnionAlias.class})
+    @ValueSource(classes = {SimpleUnion.class, SimpleUnionAlias.class})
     void unknownPayloadsRetainRootTyping(Class<?> unionType) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerSubtypes(new NamedType(LinkedHashMap.class, "map"));
@@ -249,11 +246,9 @@ final class JacksonPerformanceTests {
         if (caseInsensitive) {
             mapper.setConfig(mapper.getDeserializationConfig().with(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
         }
-        boolean sealed = type != UnionTypeExample.class;
-        String discriminator =
-                "\"%s\":\"%s\"".formatted(caseInsensitive ? "TYPE" : "type", sealed ? "foo" : "thisFieldIsAnInteger");
-        String payload = sealed ? "\"foo\":\"value\"" : "\"thisFieldIsAnInteger\":42";
-        String ignored = sealed ? "[1,2]" : "{\"nested\":[1,2]}";
+        String discriminator = "\"%s\":\"%s\"".formatted(caseInsensitive ? "TYPE" : "type", "foo");
+        String payload = "\"foo\":\"value\"";
+        String ignored = "{\"nested\":[1,2]}";
         for (String json : List.of(
                 "{" + discriminator + "," + payload + "}",
                 "{" + payload + "," + discriminator + "}",
@@ -271,8 +266,6 @@ final class JacksonPerformanceTests {
     private static Stream<Arguments> knownUnionCases() {
         return Stream.of(false, true)
                 .flatMap(caseInsensitive -> Stream.of(
-                        Arguments.of(
-                                UnionTypeExample.class, UnionTypeExample.thisFieldIsAnInteger(42), caseInsensitive),
                         Arguments.of(SimpleUnion.class, SimpleUnion.foo("value"), caseInsensitive),
                         Arguments.of(
                                 SimpleUnionAlias.class,
@@ -281,7 +274,7 @@ final class JacksonPerformanceTests {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = {UnionTypeExample.class, SimpleUnion.class, SimpleUnionAlias.class})
+    @ValueSource(classes = {SimpleUnion.class, SimpleUnionAlias.class})
     void unknownUnionsPreserveAllPropertiesOnBothPaths(Class<?> type) throws IOException {
         for (String json : List.of(
                 "{\"type\":\"future\",\"extra\":\"value\",\"future\":42}",

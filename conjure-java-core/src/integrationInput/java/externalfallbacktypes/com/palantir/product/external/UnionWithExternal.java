@@ -5,19 +5,15 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +25,6 @@ import javax.annotation.processing.Generated;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonDeserialize(using = UnionWithExternal.Deserializer.class)
 public final class UnionWithExternal {
     private final Base value;
 
@@ -160,13 +155,19 @@ public final class UnionWithExternal {
         Visitor<T> build();
     }
 
+    @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type",
+            visible = true,
+            defaultImpl = UnknownWrapper.class)
+    @JsonSubTypes(@JsonSubTypes.Type(FieldWrapper.class))
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
     }
 
     @JsonTypeName("field")
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonPropertyOrder("type")
     private static final class FieldWrapper implements Base {
         private final String value;
 
@@ -211,7 +212,6 @@ public final class UnionWithExternal {
         }
     }
 
-    @JsonPropertyOrder("type")
     private static final class UnknownWrapper implements Base {
         private final String type;
 
@@ -269,28 +269,6 @@ public final class UnionWithExternal {
         @Override
         public String toString() {
             return "UnknownWrapper{type: " + type + ", value: " + value + '}';
-        }
-    }
-
-    static final class Deserializer extends ConjureUnionDeserializer<UnionWithExternal> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {FieldWrapper.class};
-
-        Deserializer() {
-            super(UnionWithExternal.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected UnionWithExternal deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex =
-                    switch (type) {
-                        case "field" -> 0;
-                        default -> -1;
-                    };
-            if (variantIndex < 0) {
-                return new UnionWithExternal(new UnknownWrapper(type, deserializeUnknown(parser, context)));
-            }
-            return new UnionWithExternal((Base) deserializeVariant(parser, context, variantIndex));
         }
     }
 }
