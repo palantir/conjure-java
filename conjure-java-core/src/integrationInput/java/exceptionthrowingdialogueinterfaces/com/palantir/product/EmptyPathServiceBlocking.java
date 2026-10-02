@@ -28,7 +28,7 @@ public interface EmptyPathServiceBlocking {
     /** Creates a synchronous/blocking client for a EmptyPathService service. */
     static EmptyPathServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EmptyPathServiceBlocking() {
-            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+            private static final TypeMarker<Boolean> booleanTypeMarker = TypeMarker.of(Boolean.class);
 
             private static final ExceptionDeserializerArgs<Boolean> booleanExceptionArgs =
                     createExceptionDeserializerArgs(booleanTypeMarker);

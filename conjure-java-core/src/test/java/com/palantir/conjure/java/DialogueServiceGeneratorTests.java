@@ -99,7 +99,7 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                 .containsOnlyOnce("private final Serializer<String> stringSerializer");
         assertThat(testService)
                 .as("A type used in both requests and responses shares a TypeMarker")
-                .containsOnlyOnce("new TypeMarker<Optional<String>>() {}")
+                .containsOnlyOnce("TypeMarker.optionalOf(String.class)")
                 .contains(
                         "_runtime.bodySerDe().deserializer(optionalStringTypeMarker)",
                         "_runtime.bodySerDe().serializer(optionalStringTypeMarker)");
@@ -134,7 +134,7 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                 generateExampleTestService(errorParameterFormatRespecting, "error-respecting-empty-response");
         assertThat(errorRespectingService)
                 .as("Error-respecting empty responses need shared exception deserialization fields")
-                .containsOnlyOnce("new TypeMarker<Void>() {}")
+                .containsOnlyOnce("TypeMarker.of(Void.class)")
                 .containsOnlyOnce("private static final ExceptionDeserializerArgs<Void> voidExceptionArgs")
                 .containsOnlyOnce("private final Deserializer<Void> voidDeserializer")
                 .contains("_runtime.bodySerDe().emptyBodyDeserializer(voidExceptionArgs)");

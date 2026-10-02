@@ -56,10 +56,10 @@ public interface EteBinaryServiceAsync {
     /** Creates an asynchronous/non-blocking client for a EteBinaryService service. */
     static EteBinaryServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
-            private static final TypeMarker<InputStream> inputStreamTypeMarker = new TypeMarker<InputStream>() {};
+            private static final TypeMarker<InputStream> inputStreamTypeMarker = TypeMarker.of(InputStream.class);
 
             private static final TypeMarker<Optional<InputStream>> optionalInputStreamTypeMarker =
-                    new TypeMarker<Optional<InputStream>>() {};
+                    TypeMarker.optionalOf(InputStream.class);
 
             private static final ExceptionDeserializerArgs<InputStream> inputStreamExceptionArgs =
                     createExceptionDeserializerArgs(inputStreamTypeMarker);

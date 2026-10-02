@@ -179,30 +179,30 @@ public interface TestServiceBlocking {
     static TestServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestServiceBlocking() {
             private static final TypeMarker<Map<String, BackingFileSystem>> mapStringBackingFileSystemTypeMarker =
-                    new TypeMarker<Map<String, BackingFileSystem>>() {};
+                    TypeMarker.mapOf(String.class, BackingFileSystem.class);
 
-            private static final TypeMarker<Dataset> datasetTypeMarker = new TypeMarker<Dataset>() {};
+            private static final TypeMarker<Dataset> datasetTypeMarker = TypeMarker.of(Dataset.class);
 
             private static final TypeMarker<Optional<Dataset>> optionalDatasetTypeMarker =
-                    new TypeMarker<Optional<Dataset>>() {};
+                    TypeMarker.optionalOf(Dataset.class);
 
-            private static final TypeMarker<AliasedString> aliasedStringTypeMarker = new TypeMarker<AliasedString>() {};
+            private static final TypeMarker<AliasedString> aliasedStringTypeMarker = TypeMarker.of(AliasedString.class);
 
-            private static final TypeMarker<Set<String>> setStringTypeMarker = new TypeMarker<Set<String>>() {};
+            private static final TypeMarker<Set<String>> setStringTypeMarker = TypeMarker.setOf(String.class);
 
             private static final TypeMarker<Optional<String>> optionalStringTypeMarker =
-                    new TypeMarker<Optional<String>>() {};
+                    TypeMarker.optionalOf(String.class);
 
-            private static final TypeMarker<Integer> integerTypeMarker = new TypeMarker<Integer>() {};
+            private static final TypeMarker<Integer> integerTypeMarker = TypeMarker.of(Integer.class);
 
-            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+            private static final TypeMarker<Boolean> booleanTypeMarker = TypeMarker.of(Boolean.class);
 
-            private static final TypeMarker<Double> doubleTypeMarker = new TypeMarker<Double>() {};
+            private static final TypeMarker<Double> doubleTypeMarker = TypeMarker.of(Double.class);
 
             private static final TypeMarker<CreateDatasetRequest> createDatasetRequestTypeMarker =
-                    new TypeMarker<CreateDatasetRequest>() {};
+                    TypeMarker.of(CreateDatasetRequest.class);
 
-            private static final TypeMarker<String> stringTypeMarker = new TypeMarker<String>() {};
+            private static final TypeMarker<String> stringTypeMarker = TypeMarker.of(String.class);
 
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 

@@ -49,7 +49,7 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
         TestDangerousLongEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Long>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Long.class), this);
         }
 
         @Override
@@ -96,7 +96,7 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
         TestSafeExternalLongEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Long>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Long.class), this);
         }
 
         @Override
@@ -143,7 +143,7 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
         TestLongEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Long>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(Long.class), this);
         }
 
         @Override
@@ -190,7 +190,7 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
         TestDangerousLongAliasEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<DangerousLongAlias>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(DangerousLongAlias.class), this);
         }
 
         @Override
@@ -237,7 +237,7 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
         TestSafeExternalLongAliasEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<SafeLongAlias>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(SafeLongAlias.class), this);
         }
 
         @Override
@@ -284,7 +284,7 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
         TestLongAliasEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ExternalLongAlias>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(TypeMarker.of(ExternalLongAlias.class), this);
         }
 
         @Override

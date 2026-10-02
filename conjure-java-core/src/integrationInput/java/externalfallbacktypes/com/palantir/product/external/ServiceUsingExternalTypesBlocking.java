@@ -32,9 +32,9 @@ public interface ServiceUsingExternalTypesBlocking {
             EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ServiceUsingExternalTypesBlocking() {
             private static final TypeMarker<Map<String, String>> mapStringStringTypeMarker =
-                    new TypeMarker<Map<String, String>>() {};
+                    TypeMarker.mapOf(String.class, String.class);
 
-            private static final TypeMarker<List<String>> listStringTypeMarker = new TypeMarker<List<String>>() {};
+            private static final TypeMarker<List<String>> listStringTypeMarker = TypeMarker.listOf(String.class);
 
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 

@@ -32,7 +32,7 @@ public interface CookieServiceAsync {
     /** Creates an asynchronous/non-blocking client for a CookieService service. */
     static CookieServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
-            private static final TypeMarker<Void> voidTypeMarker = new TypeMarker<Void>() {};
+            private static final TypeMarker<Void> voidTypeMarker = TypeMarker.of(Void.class);
 
             private static final ExceptionDeserializerArgs<Void> voidExceptionArgs =
                     createExceptionDeserializerArgs(voidTypeMarker);
