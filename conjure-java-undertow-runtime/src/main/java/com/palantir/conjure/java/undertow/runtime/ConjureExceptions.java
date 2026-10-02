@@ -67,6 +67,13 @@ public enum ConjureExceptions implements ExceptionHandler {
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
+        if (DialogueRetries.isRetriesExhausted(throwable)) {
+            DialogueRetries.encodeToResponse(
+                    true,
+                    exchange,
+                    (response, name, value) ->
+                            response.getResponseHeaders().put(HttpString.tryFromString(name), value));
+        }
         setFailure(exchange, throwable);
         if (throwable instanceof EndpointServiceException endpointServiceException) {
             endpointServiceException(exchange, endpointServiceException);
