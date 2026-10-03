@@ -124,7 +124,7 @@ public final class EnumNameTestExample {
     private static final class VisitorBuilder<T>
             implements IncompleteStageVisitorBuilder<T>,
                     CompletedStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
+                    Unknown_StageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private Supplier<T> incompleteVisitor;
 
@@ -140,7 +140,7 @@ public final class EnumNameTestExample {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> visitCompleted(@Nonnull Supplier<T> completedVisitor) {
+        public Unknown_StageVisitorBuilder<T> visitCompleted(@Nonnull Supplier<T> completedVisitor) {
             Preconditions.checkNotNull(completedVisitor, "completedVisitor cannot be null");
             this.completedVisitor = completedVisitor;
             return this;
@@ -191,10 +191,10 @@ public final class EnumNameTestExample {
     }
 
     public interface CompletedStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> visitCompleted(@Nonnull Supplier<T> completedVisitor);
+        Unknown_StageVisitorBuilder<T> visitCompleted(@Nonnull Supplier<T> completedVisitor);
     }
 
-    public interface UnknownStageVisitorBuilder<T> {
+    public interface Unknown_StageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
