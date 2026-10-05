@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.palantir.logsafe.Preconditions;
@@ -39,7 +38,6 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
 
     public abstract <T> T accept(Visitor<T> visitor);
 
-    @JsonPropertyOrder("type")
     public static final class Unknown extends EmptyUnion {
         private final String type;
 

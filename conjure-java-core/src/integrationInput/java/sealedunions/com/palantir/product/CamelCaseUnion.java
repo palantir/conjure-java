@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -62,7 +61,6 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
     public sealed interface Known permits CamelCasedField {}
 
     @JsonTypeName("camelCasedField")
-    @JsonPropertyOrder("type")
     public static final class CamelCasedField extends CamelCaseUnion implements Known {
         private final String value;
 
@@ -107,7 +105,6 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         }
     }
 
-    @JsonPropertyOrder("type")
     public static final class Unknown extends CamelCaseUnion {
         private final String type;
 

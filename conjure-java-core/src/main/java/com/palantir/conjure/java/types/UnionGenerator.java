@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -970,7 +969,6 @@ public final class UnionGenerator {
                     }
 
                     if (options.sealedUnions()) {
-                        typeBuilder.addAnnotation(typeFirstAnnotation());
                         typeBuilder
                                 .superclass(baseClass)
                                 .addSuperinterface(baseClass.nestedClass(SEALED_KNOWN_INTERFACE));
@@ -994,12 +992,6 @@ public final class UnionGenerator {
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
-    }
-
-    private static AnnotationSpec typeFirstAnnotation() {
-        return AnnotationSpec.builder(JsonPropertyOrder.class)
-                .addMember("value", "$S", "type")
-                .build();
     }
 
     private static AnnotationSpec getTypeJsonPropertyAnnotation(Options options) {
@@ -1117,7 +1109,6 @@ public final class UnionGenerator {
         }
 
         if (options.sealedUnions()) {
-            typeBuilder.addAnnotation(typeFirstAnnotation());
             typeBuilder.superclass(baseClass);
         } else {
             typeBuilder.addSuperinterface(baseClass);

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -82,7 +81,6 @@ public abstract sealed class SimpleUnion
     public sealed interface Known permits Foo, Bar, Baz {}
 
     @JsonTypeName("foo")
-    @JsonPropertyOrder("type")
     public static final class Foo extends SimpleUnion implements Known {
         private final String value;
 
@@ -128,7 +126,6 @@ public abstract sealed class SimpleUnion
     }
 
     @JsonTypeName("bar")
-    @JsonPropertyOrder("type")
     public static final class Bar extends SimpleUnion implements Known {
         private final int value;
 
@@ -174,7 +171,6 @@ public abstract sealed class SimpleUnion
     }
 
     @JsonTypeName("baz")
-    @JsonPropertyOrder("type")
     public static final class Baz extends SimpleUnion implements Known {
         private final SafeLong value;
 
@@ -219,7 +215,6 @@ public abstract sealed class SimpleUnion
         }
     }
 
-    @JsonPropertyOrder("type")
     public static final class Unknown extends SimpleUnion {
         private final String type;
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -62,7 +61,6 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
     public sealed interface Known permits Empty {}
 
     @JsonTypeName("empty")
-    @JsonPropertyOrder("type")
     public static final class Empty extends NestedEmptyUnion implements Known {
         private final EmptyObject value;
 
@@ -107,7 +105,6 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         }
     }
 
-    @JsonPropertyOrder("type")
     public static final class Unknown extends NestedEmptyUnion {
         private final String type;
 
