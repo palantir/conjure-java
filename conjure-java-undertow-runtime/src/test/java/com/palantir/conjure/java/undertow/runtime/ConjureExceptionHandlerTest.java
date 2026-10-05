@@ -38,6 +38,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
+import com.palantir.dialogue.RetriesExhaustedException;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -64,6 +65,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public final class ConjureExceptionHandlerTest {
 
@@ -346,13 +348,30 @@ public final class ConjureExceptionHandlerTest {
         assertThat(connection.getErrorStream()).isNull();
     }
 
-    @Test
-    public void handlesQosExceptionUnavailable() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void handlesQosExceptionUnavailable(boolean retriesExhausted) throws IOException {
         exception = QosException.unavailable();
+        if (retriesExhausted) {
+            exception.addSuppressed(RetriesExhaustedException.INSTANCE);
+        }
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(503);
         assertThat(connection.getErrorStream()).isNull();
+        assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo(retriesExhausted ? "true" : null);
+    }
+
+    @Test
+    public void propagatesRetriesExhaustedMarkerFromCause() throws IOException {
+        IOException cause = new IOException("Socket failed");
+        cause.addSuppressed(RetriesExhaustedException.INSTANCE);
+        exception = new ServiceException(ErrorType.CONFLICT, cause);
+
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(409);
+        assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo("true");
     }
 
     @Test
