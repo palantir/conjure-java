@@ -33,6 +33,8 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.deadlines.DeadlineExpiredReasons;
+import com.palantir.dialogue.RetriesExhaustedException;
+import com.palantir.dialogue.core.DialogueRetries;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -45,8 +47,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.xnio.IoUtils;
 
 /**
@@ -57,6 +62,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     INSTANCE;
 
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
+    private static final int MAX_CAUSE_CHAIN_LENGTH = 100;
     // Exceptions should always be serialized using JSON
     private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
@@ -67,7 +73,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
-        if (DialogueRetries.isRetriesExhausted(throwable)) {
+        if (isRetriesExhausted(throwable)) {
             DialogueRetries.encodeToResponse(
                     true,
                     exchange,
@@ -107,6 +113,20 @@ public enum ConjureExceptions implements ExceptionHandler {
                     Optional.of(ConjureError.fromServiceException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
+    }
+
+    private static boolean isRetriesExhausted(Throwable throwable) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        @Nullable Throwable current = throwable;
+        while (current != null && visited.size() < MAX_CAUSE_CHAIN_LENGTH && visited.add(current)) {
+            for (Throwable suppressed : current.getSuppressed()) {
+                if (suppressed instanceof RetriesExhaustedException) {
+                    return true;
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
