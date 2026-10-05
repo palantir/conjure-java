@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -104,6 +105,7 @@ public abstract sealed class UnionExample
             permits StringVariant, IntVariant, ObjectVariant, CollectionVariant, OptionalVariant {}
 
     @JsonTypeName("stringVariant")
+    @JsonPropertyOrder("type")
     public static final class StringVariant extends UnionExample implements Known {
         private final String value;
 
@@ -149,6 +151,7 @@ public abstract sealed class UnionExample
     }
 
     @JsonTypeName("intVariant")
+    @JsonPropertyOrder("type")
     public static final class IntVariant extends UnionExample implements Known {
         private final int value;
 
@@ -194,6 +197,7 @@ public abstract sealed class UnionExample
     }
 
     @JsonTypeName("objectVariant")
+    @JsonPropertyOrder("type")
     public static final class ObjectVariant extends UnionExample implements Known {
         private final ObjectReference value;
 
@@ -239,6 +243,7 @@ public abstract sealed class UnionExample
     }
 
     @JsonTypeName("collectionVariant")
+    @JsonPropertyOrder("type")
     public static final class CollectionVariant extends UnionExample implements Known {
         private final List<String> value;
 
@@ -285,6 +290,7 @@ public abstract sealed class UnionExample
     }
 
     @JsonTypeName("optionalVariant")
+    @JsonPropertyOrder("type")
     public static final class OptionalVariant extends UnionExample implements Known {
         private final Optional<String> value;
 
@@ -330,6 +336,7 @@ public abstract sealed class UnionExample
         }
     }
 
+    @JsonPropertyOrder("type")
     public static final class Unknown extends UnionExample {
         private final String type;
 
