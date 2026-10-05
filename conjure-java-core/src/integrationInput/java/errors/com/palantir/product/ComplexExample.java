@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -142,6 +143,8 @@ public final class ComplexExample {
     public static final class Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "metadata", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<StringAliasEx, Optional<List<ObjectReference>>> metadata = new LinkedHashMap<>();
 
         private EnumExample status;
@@ -161,7 +164,6 @@ public final class ComplexExample {
             return this;
         }
 
-        @JsonSetter(value = "metadata", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder metadata(@Nonnull Map<StringAliasEx, Optional<List<ObjectReference>>> metadata) {
             checkNotBuilt();
             this.metadata = new LinkedHashMap<>(Preconditions.checkNotNull(metadata, "metadata cannot be null"));

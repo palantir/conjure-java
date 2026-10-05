@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -207,6 +208,8 @@ public final class MultipleFieldsOnlyFinalStage {
 
         private List<String> items = ConjureCollections.newList();
 
+        @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
@@ -215,6 +218,8 @@ public final class MultipleFieldsOnlyFinalStage {
 
         private List<String> itemsOld = ConjureCollections.newList();
 
+        @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, Integer> itemsMapOld = new LinkedHashMap<>();
 
         private Optional<String> optionalItemOld = Optional.empty();
@@ -255,7 +260,6 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
         public Builder itemsMap(@Nonnull Map<String, Integer> itemsMap) {
             checkNotBuilt();
             this.itemsMap = new LinkedHashMap<>(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
@@ -333,7 +337,6 @@ public final class MultipleFieldsOnlyFinalStage {
 
         /** @deprecated this map is deprecated */
         @Deprecated
-        @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
         public Builder itemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
             checkNotBuilt();
             this.itemsMapOld =

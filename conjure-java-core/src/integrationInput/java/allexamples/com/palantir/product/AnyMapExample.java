@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -95,6 +96,8 @@ public final class AnyMapExample {
     public static final class Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, Object> items = new LinkedHashMap<>();
 
         private Builder() {}
@@ -105,7 +108,6 @@ public final class AnyMapExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Map<String, Object> items) {
             checkNotBuilt();
             this.items = new LinkedHashMap<>(Preconditions.checkNotNull(items, "items cannot be null"));

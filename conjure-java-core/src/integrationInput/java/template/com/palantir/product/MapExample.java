@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -123,10 +124,16 @@ public final class MapExample {
     public static final class Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, String> items = new LinkedHashMap<>();
 
+        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, Optional<String>> optionalItems = new LinkedHashMap<>();
 
+        @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, OptionalAlias> aliasOptionalItems = new LinkedHashMap<>();
 
         private Builder() {}
@@ -139,7 +146,6 @@ public final class MapExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Map<String, String> items) {
             checkNotBuilt();
             this.items = new LinkedHashMap<>(Preconditions.checkNotNull(items, "items cannot be null"));
@@ -158,7 +164,6 @@ public final class MapExample {
             return this;
         }
 
-        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
             checkNotBuilt();
             this.optionalItems =
@@ -178,7 +183,6 @@ public final class MapExample {
             return this;
         }
 
-        @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             checkNotBuilt();
             this.aliasOptionalItems = new LinkedHashMap<>(

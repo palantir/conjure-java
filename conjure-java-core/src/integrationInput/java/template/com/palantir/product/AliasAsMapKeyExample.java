@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.internal.ConjureMapDeserializer;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -178,18 +179,32 @@ public final class AliasAsMapKeyExample {
     public static final class Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "strings", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<StringAliasExample, ManyFieldExample> strings = new LinkedHashMap<>();
 
+        @JsonSetter(value = "rids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<RidAliasExample, ManyFieldExample> rids = new LinkedHashMap<>();
 
+        @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<BearerTokenAliasExample, ManyFieldExample> bearertokens = new LinkedHashMap<>();
 
+        @JsonSetter(value = "integers", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<IntegerAliasExample, ManyFieldExample> integers = new LinkedHashMap<>();
 
+        @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<SafeLongAliasExample, ManyFieldExample> safelongs = new LinkedHashMap<>();
 
+        @JsonSetter(value = "datetimes", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<DateTimeAliasExample, ManyFieldExample> datetimes = new LinkedHashMap<>();
 
+        @JsonSetter(value = "uuids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<UuidAliasExample, ManyFieldExample> uuids = new LinkedHashMap<>();
 
         private Builder() {}
@@ -206,7 +221,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "strings", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder strings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
             checkNotBuilt();
             this.strings = new LinkedHashMap<>(Preconditions.checkNotNull(strings, "strings cannot be null"));
@@ -225,7 +239,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "rids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder rids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
             checkNotBuilt();
             this.rids = new LinkedHashMap<>(Preconditions.checkNotNull(rids, "rids cannot be null"));
@@ -244,7 +257,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             checkNotBuilt();
             this.bearertokens =
@@ -264,7 +276,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "integers", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder integers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
             checkNotBuilt();
             this.integers = new LinkedHashMap<>(Preconditions.checkNotNull(integers, "integers cannot be null"));
@@ -283,7 +294,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             checkNotBuilt();
             this.safelongs = new LinkedHashMap<>(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
@@ -302,7 +312,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "datetimes", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder datetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             checkNotBuilt();
             this.datetimes = new LinkedHashMap<>(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
@@ -321,7 +330,6 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter(value = "uuids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder uuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
             checkNotBuilt();
             this.uuids = new LinkedHashMap<>(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
