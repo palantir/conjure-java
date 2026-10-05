@@ -28,14 +28,17 @@ import com.palantir.conjure.java.api.errors.QosReasons;
 import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.deadlines.DeadlineExpiredReasons;
-import com.palantir.dialogue.RetriesExhaustedException;
 import com.palantir.dialogue.core.DialogueRetries;
+import com.palantir.dialogue.core.Responses;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.SafeLoggable;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
@@ -47,11 +50,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.xnio.IoUtils;
 
 /**
@@ -62,7 +63,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     INSTANCE;
 
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
-    private static final int MAX_CAUSE_CHAIN_LENGTH = 100;
+    private static final int MAX_CAUSE_DEPTH = 100;
     // Exceptions should always be serialized using JSON
     private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
@@ -115,16 +116,30 @@ public enum ConjureExceptions implements ExceptionHandler {
         }
     }
 
-    private static boolean isRetriesExhausted(Throwable throwable) {
-        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
-        @Nullable Throwable current = throwable;
-        while (current != null && visited.size() < MAX_CAUSE_CHAIN_LENGTH && visited.add(current)) {
-            for (Throwable suppressed : current.getSuppressed()) {
-                if (suppressed instanceof RetriesExhaustedException) {
-                    return true;
+    private static boolean isRetriesExhausted(Throwable failure) {
+        @Nullable Throwable current = failure;
+        for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
+            if (current instanceof QosException
+                    || current instanceof RemoteException
+                    || current instanceof UnknownRemoteException
+                    || current instanceof IOException) {
+                for (Throwable suppressed : current.getSuppressed()) {
+                    if (suppressed instanceof SafeLoggable loggable && hasRetriesExhaustedArg(loggable)) {
+                        return true;
+                    }
                 }
             }
             current = current.getCause();
+        }
+        return false;
+    }
+
+    private static boolean hasRetriesExhaustedArg(SafeLoggable loggable) {
+        for (Arg<?> arg : loggable.getArgs()) {
+            if (Responses.RETRIES_EXHAUSTED.equals(arg.getName())
+                    && "true".equalsIgnoreCase(String.valueOf(arg.getValue()))) {
+                return true;
+            }
         }
         return false;
     }
