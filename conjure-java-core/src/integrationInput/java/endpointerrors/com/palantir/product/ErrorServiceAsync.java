@@ -55,22 +55,22 @@ public interface ErrorServiceAsync {
     /** Creates an asynchronous/non-blocking client for a ErrorService service. */
     static ErrorServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new ErrorServiceAsync() {
-            private static final TypeMarker<String> stringTypeMarker = new TypeMarker<String>() {};
+            private static final TypeMarker<String> stringTypeMarker = TypeMarker.of(String.class);
 
-            private static final TypeMarker<Void> voidTypeMarker = new TypeMarker<Void>() {};
+            private static final TypeMarker<Void> voidTypeMarker = TypeMarker.of(Void.class);
 
-            private static final TypeMarker<InputStream> inputStreamTypeMarker = new TypeMarker<InputStream>() {};
+            private static final TypeMarker<InputStream> inputStreamTypeMarker = TypeMarker.of(InputStream.class);
 
             private static final TypeMarker<Optional<InputStream>> optionalInputStreamTypeMarker =
-                    new TypeMarker<Optional<InputStream>>() {};
+                    TypeMarker.optionalOf(InputStream.class);
 
-            private static final TypeMarker<Boolean> booleanTypeMarker = new TypeMarker<Boolean>() {};
+            private static final TypeMarker<Boolean> booleanTypeMarker = TypeMarker.of(Boolean.class);
 
             private static final TypeMarker<Optional<String>> optionalStringTypeMarker =
-                    new TypeMarker<Optional<String>>() {};
+                    TypeMarker.optionalOf(String.class);
 
             private static final TypeMarker<OptionalBinaryResponseMode> optionalBinaryResponseModeTypeMarker =
-                    new TypeMarker<OptionalBinaryResponseMode>() {};
+                    TypeMarker.of(OptionalBinaryResponseMode.class);
 
             private static final ExceptionDeserializerArgs<String> stringExceptionArgs =
                     createExceptionDeserializerArgs(stringTypeMarker);

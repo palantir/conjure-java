@@ -27,6 +27,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.codegen.lib.TypeMarkers;
 import com.palantir.conjure.java.services.UndertowTypeFunctions.AsyncRequestProcessingMetadata;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.SafetyEvaluator;
@@ -287,10 +288,10 @@ final class UndertowServiceHandlerGenerator {
                             FieldSpec.builder(type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                                     .build());
                     ctorBuilder.addStatement(
-                            "this.$1N = $2N.bodySerDe().deserializer(new $3T() {}, this)",
+                            "this.$1N = $2N.bodySerDe().deserializer($3L, this)",
                             DESERIALIZER_VAR_NAME,
                             RUNTIME_VAR_NAME,
-                            ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
+                            typeMarker(typeName));
                 });
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
@@ -301,10 +302,10 @@ final class UndertowServiceHandlerGenerator {
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
                 ctorBuilder.addStatement(
-                        "this.$1N = $2N.bodySerDe().serializer(new $3T() {}, this)",
+                        "this.$1N = $2N.bodySerDe().serializer($3L, this)",
                         SERIALIZER_VAR_NAME,
                         RUNTIME_VAR_NAME,
-                        ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
+                        typeMarker(typeName));
             }
         });
 
@@ -404,6 +405,11 @@ final class UndertowServiceHandlerGenerator {
     private static final ClassName IMMUTABLE_LIST_NAME = ClassName.get(ImmutableList.class);
     private static final ClassName SET_NAME = ClassName.get(Set.class);
     private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
+    private static final ClassName TYPE_MARKER = ClassName.get(TypeMarker.class);
+
+    private static CodeBlock typeMarker(TypeName type) {
+        return TypeMarkers.typeMarker(TYPE_MARKER, type);
+    }
 
     private TypeName immutableCollection(TypeName input) {
         // Note that only the outermost collection is considered for replacement to avoid

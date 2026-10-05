@@ -1,0 +1,146 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.io.IOException;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class NestedGenericBodyParamEndpoints implements UndertowService {
+    private final NestedGenericBodyParam delegate;
+
+    private NestedGenericBodyParamEndpoints(NestedGenericBodyParam delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(NestedGenericBodyParam delegate) {
+        return new NestedGenericBodyParamEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(
+                new NestedListEndpoint(runtime, delegate), new NestedMapValueEndpoint(runtime, delegate));
+    }
+
+    private static final class NestedListEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final NestedGenericBodyParam delegate;
+
+        private final Deserializer<ImmutableList<List<String>>> valuesDeserializer;
+
+        NestedListEndpoint(UndertowRuntime runtime, NestedGenericBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableList<List<String>>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableList<List<String>> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.nestedList(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/nestedList";
+        }
+
+        @Override
+        public String serviceName() {
+            return "NestedGenericBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "nestedList";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class NestedMapValueEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<Map<String, List<String>>> {
+        private final UndertowRuntime runtime;
+
+        private final NestedGenericBodyParam delegate;
+
+        private final Deserializer<ImmutableMap<String, List<String>>> valuesDeserializer;
+
+        private final Serializer<Map<String, List<String>>> nestedMapValueSerializer;
+
+        NestedMapValueEndpoint(UndertowRuntime runtime, NestedGenericBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    new TypeMarker<ImmutableMap<String, List<String>>>() {}, runtime, this);
+            this.nestedMapValueSerializer =
+                    DefaultSerDe.INSTANCE.serializer(new TypeMarker<Map<String, List<String>>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableMap<String, List<String>> values = valuesDeserializer.deserialize(exchange);
+            write(this.delegate.nestedMapValue(values), exchange);
+        }
+
+        @Override
+        public void write(Map<String, List<String>> returnValue, HttpServerExchange exchange) throws IOException {
+            this.nestedMapValueSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/nestedMapValue";
+        }
+
+        @Override
+        public String serviceName() {
+            return "NestedGenericBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "nestedMapValue";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

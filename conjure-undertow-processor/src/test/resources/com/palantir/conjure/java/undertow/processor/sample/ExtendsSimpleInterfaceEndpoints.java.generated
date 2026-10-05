@@ -89,7 +89,7 @@ public final class ExtendsSimpleInterfaceEndpoints implements UndertowService {
         GreetEndpoint(UndertowRuntime runtime, ExtendsSimpleInterface delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.greetSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+            this.greetSerializer = DefaultSerDe.INSTANCE.serializer(TypeMarker.of(String.class), runtime, this);
         }
 
         @Override

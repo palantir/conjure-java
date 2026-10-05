@@ -46,7 +46,7 @@ public final class PrimitiveBodyParamEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.countDeserializer = PrimitiveBodyParam.IntParamDeserializerFactory.INSTANCE.deserializer(
-                    new TypeMarker<Integer>() {}, runtime, this);
+                    TypeMarker.of(Integer.class), runtime, this);
         }
 
         @Override

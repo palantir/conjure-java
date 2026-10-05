@@ -12,11 +12,11 @@ import javax.annotation.processing.Generated;
 public final class ConjureErrorsTypeMarkers {
     private static final TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrSerializableError>
             CONFLICTING_CAUSE_SAFE_ARG_ERR_SERIALIZABLE_ERROR =
-                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrSerializableError>() {};
+                    TypeMarker.of(ConjureErrors.ConflictingCauseSafeArgErrSerializableError.class);
 
     private static final TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrException>
             CONFLICTING_CAUSE_SAFE_ARG_ERR_EXCEPTION =
-                    new TypeMarker<ConjureErrors.ConflictingCauseSafeArgErrException>() {};
+                    TypeMarker.of(ConjureErrors.ConflictingCauseSafeArgErrException.class);
 
     private ConjureErrorsTypeMarkers() {}
 
