@@ -17,8 +17,6 @@
 package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
-import com.palantir.conjure.java.api.errors.QosException;
-import com.palantir.conjure.java.api.errors.QosReason;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -313,12 +311,6 @@ public final class UndertowEteResource implements UndertowEteService {
                             .build());
         }
         return "hello!";
-    }
-
-    @Override
-    public String receiveQosException(AuthHeader authHeader, String headerParameter) {
-        throw QosException.unavailable(
-                QosReason.of("test-qos"), UUID.fromString("3b522d5f-9975-4e08-843a-2fb05538e734"));
     }
 
     @Override

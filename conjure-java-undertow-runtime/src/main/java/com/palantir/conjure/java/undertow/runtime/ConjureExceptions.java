@@ -197,7 +197,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
-        QosReasons.encodeToResponse(qosException, exchange, UndertowQosResponseEncodingAdapter.INSTANCE);
+        QosReasons.encodeToResponse(qosException.getReason(), exchange, UndertowQosResponseEncodingAdapter.INSTANCE);
 
         if (log.isDebugEnabled()) {
             log.debug("Quality-of-Service error handling request", qosException);
