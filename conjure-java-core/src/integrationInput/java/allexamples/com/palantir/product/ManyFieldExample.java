@@ -220,6 +220,8 @@ public final class ManyFieldExample {
 
         private Set<String> set = ConjureCollections.newNonNullSet();
 
+        @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureMapDeserializer.class)
         private Map<String, String> map = new LinkedHashMap<>();
 
         private StringAliasExample alias;
@@ -343,7 +345,6 @@ public final class ManyFieldExample {
 
         /** @deprecated deprecation documentation. */
         @Deprecated
-        @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
             checkNotBuilt();
             this.map = new LinkedHashMap<>(Preconditions.checkNotNull(map, "map cannot be null"));

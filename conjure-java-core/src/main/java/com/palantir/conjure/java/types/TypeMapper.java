@@ -16,17 +16,21 @@
 
 package com.palantir.conjure.java.types;
 
+import com.google.common.base.Suppliers;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class TypeMapper {
 
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
     private final ClassNameVisitor classNameVisitor;
+    private final Supplier<JacksonSupportGenerator> jacksonSupport;
 
     public TypeMapper(Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types, Options options) {
         this(types, new DefaultClassNameVisitor(types.keySet(), options));
@@ -36,6 +40,13 @@ public final class TypeMapper {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types, ClassNameVisitor classNameVisitor) {
         this.types = types;
         this.classNameVisitor = classNameVisitor;
+        this.jacksonSupport = Suppliers.memoize(() -> new JacksonSupportGenerator(types.keySet().stream()
+                .map(name -> (ClassName) getClassName(Type.reference(name)))
+                .toList()));
+    }
+
+    JacksonSupportGenerator jacksonSupport() {
+        return jacksonSupport.get();
     }
 
     public Optional<TypeDefinition> getType(com.palantir.conjure.spec.TypeName typeName) {
