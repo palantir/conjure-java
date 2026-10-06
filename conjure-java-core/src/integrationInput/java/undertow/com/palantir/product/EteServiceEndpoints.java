@@ -74,7 +74,6 @@ public final class EteServiceEndpoints implements UndertowService {
                 new EnumHeaderEndpoint(runtime, delegate),
                 new JsonErrorsHeaderEndpoint(runtime, delegate),
                 new ErrorParameterSerializationEndpoint(runtime, delegate),
-                new ReceiveQosExceptionEndpoint(runtime, delegate),
                 new HitOtherServiceEndpoint(runtime, delegate),
                 new InternalServerErrorEndpoint(runtime, delegate),
                 new AliasLongEndpointEndpoint(runtime, delegate),
@@ -1476,55 +1475,6 @@ public final class EteServiceEndpoints implements UndertowService {
         }
     }
 
-    private static final class ReceiveQosExceptionEndpoint implements HttpHandler, Endpoint {
-        private final UndertowRuntime runtime;
-
-        private final UndertowEteService delegate;
-
-        private final Serializer<String> serializer;
-
-        ReceiveQosExceptionEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            HeaderMap headerParams = exchange.getRequestHeaders();
-            String headerParameter =
-                    runtime.plainSerDe().deserializeString(headerParams.get("Accept-Conjure-Error-Qos-Exception"));
-            String result = delegate.receiveQosException(authHeader, headerParameter);
-            serializer.serialize(result, exchange);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.GET;
-        }
-
-        @Override
-        public String template() {
-            return "/base/errors/qosexception";
-        }
-
-        @Override
-        public String serviceName() {
-            return "EteService";
-        }
-
-        @Override
-        public String name() {
-            return "receiveQosException";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
-    }
-
     private static final class HitOtherServiceEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
@@ -1535,7 +1485,7 @@ public final class EteServiceEndpoints implements UndertowService {
         HitOtherServiceEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override
@@ -1581,7 +1531,7 @@ public final class EteServiceEndpoints implements UndertowService {
         InternalServerErrorEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(TypeMarker.of(String.class), this);
         }
 
         @Override

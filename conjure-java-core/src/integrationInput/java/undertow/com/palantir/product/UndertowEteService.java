@@ -134,13 +134,6 @@ public interface UndertowEteService {
     String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
 
     /**
-     * This endpoint is used to test that QosExceptions can be returned and their fields can be inspected.
-     *
-     * @apiNote {@code GET /base/errors/qosexception}
-     */
-    String receiveQosException(AuthHeader authHeader, String headerParameter);
-
-    /**
      * This endpoint hits another service
      *
      * @apiNote {@code GET /base/otherservice}
