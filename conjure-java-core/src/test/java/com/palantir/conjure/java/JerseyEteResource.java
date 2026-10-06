@@ -16,6 +16,10 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
@@ -31,6 +35,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import jersey.com.palantir.product.EteService;
 import jersey.com.palantir.product.LongAlias;
 import jersey.com.palantir.product.NestedStringAliasExample;
@@ -184,6 +189,22 @@ public class JerseyEteResource implements EteService {
     public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
         // Conjure-Java has not supported Jersey for a while. We are not testing the error serialization feature here.
         throw new UnsupportedOperationException("Conjure-Java does not support Jersey any longer.");
+    }
+
+    @Override
+    public String receiveQosException(AuthHeader authHeader, String headerParameter) {
+        throw QosException.unavailable(
+                QosReason.of("test-qos"), UUID.fromString("3b522d5f-9975-4e08-843a-2fb05538e734"));
+    }
+
+    @Override
+    public String hitOtherService(AuthHeader authHeader) {
+        return "";
+    }
+
+    @Override
+    public String internalServerError(AuthHeader _authHeader) {
+        throw new ServiceException(ErrorType.INTERNAL);
     }
 
     @Override
