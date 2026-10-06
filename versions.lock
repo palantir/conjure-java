@@ -64,15 +64,15 @@ com.palantir.dialogue:dialogue-apache-hc5-client:6.45.0 (2 constraints: 7e29fa01
 
 com.palantir.dialogue:dialogue-blocking-channels:6.45.0 (2 constraints: dd23d9b3)
 
-com.palantir.dialogue:dialogue-clients:6.45.0 (1 constraints: 4105623b)
+com.palantir.dialogue:dialogue-clients:6.45.0 (1 constraints: 74066753)
 
-com.palantir.dialogue:dialogue-core:6.45.0 (4 constraints: c04256b4)
+com.palantir.dialogue:dialogue-core:6.45.0 (4 constraints: f343479e)
 
 com.palantir.dialogue:dialogue-futures:6.45.0 (3 constraints: d43336bf)
 
-com.palantir.dialogue:dialogue-serde:6.45.0 (3 constraints: be2ebaa3)
+com.palantir.dialogue:dialogue-serde:6.45.0 (3 constraints: f12f1d48)
 
-com.palantir.dialogue:dialogue-target:6.45.0 (7 constraints: ff78f6b2)
+com.palantir.dialogue:dialogue-target:6.45.0 (7 constraints: 327a9458)
 
 com.palantir.goethe:goethe:0.30.0 (1 constraints: 35052b3b)
 
