@@ -920,40 +920,6 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
-    /** This endpoint is used to test that QosExceptions can be returned and their fields can be inspected. */
-    receiveQosException {
-        private final PathTemplate pathTemplate = PathTemplate.builder()
-                .fixed("base")
-                .fixed("errors")
-                .fixed("qosexception")
-                .build();
-
-        @Override
-        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
-            pathTemplate.fill(params, url);
-        }
-
-        @Override
-        public HttpMethod httpMethod() {
-            return HttpMethod.GET;
-        }
-
-        @Override
-        public String serviceName() {
-            return "EteService";
-        }
-
-        @Override
-        public String endpointName() {
-            return "receiveQosException";
-        }
-
-        @Override
-        public String version() {
-            return "1.2.3";
-        }
-    },
-
     /** This endpoint hits another service */
     hitOtherService {
         private final PathTemplate pathTemplate =
