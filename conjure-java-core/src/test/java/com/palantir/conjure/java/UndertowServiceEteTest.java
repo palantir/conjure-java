@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
@@ -29,6 +30,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -61,6 +63,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -91,6 +94,7 @@ public final class UndertowServiceEteTest extends TestBase {
     public static File folder;
 
     private static Undertow server;
+    private static UndertowEteResource eteResource;
 
     private final EteServiceBlocking client;
     private final EteServiceAsync asyncClient;
@@ -110,9 +114,16 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeAll
     public static void before() {
+        eteResource = new UndertowEteResource(Suppliers.memoize(() -> DialogueClients.create(
+                EteServiceBlocking.class,
+                ClientConfiguration.builder()
+                        .from(clientConfiguration(port))
+                        .maxNumRetries(2)
+                        .backoffSlotSize(Duration.ZERO)
+                        .build())));
 
         HttpHandler handler = ConjureHandler.builder()
-                .services(EteServiceEndpoints.of(new UndertowEteResource()))
+                .services(EteServiceEndpoints.of(eteResource))
                 .services(EmptyPathServiceEndpoints.of(() -> true))
                 .services(EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
                 .build();

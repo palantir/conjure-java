@@ -40,6 +40,7 @@ dependencies {
     implementation 'io.undertow:undertow-core'
     implementation 'org.checkerframework:checker-qual'
     implementation 'org.jboss.xnio:xnio-api'
+    implementation 'org.jspecify:jspecify'
     implementation 'org.slf4j:slf4j-api'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
 

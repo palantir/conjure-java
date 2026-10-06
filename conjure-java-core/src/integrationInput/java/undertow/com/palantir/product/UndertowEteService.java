@@ -133,6 +133,20 @@ public interface UndertowEteService {
      */
     String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
 
+    /**
+     * This endpoint hits another service
+     *
+     * @apiNote {@code GET /base/otherservice}
+     */
+    String hitOtherService(AuthHeader authHeader);
+
+    /**
+     * Always returns an internal server error to exercise downstream retries.
+     *
+     * @apiNote {@code GET /base/errors/internal}
+     */
+    String internalServerError(AuthHeader authHeader);
+
     /** @apiNote {@code GET /base/alias-long} */
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 

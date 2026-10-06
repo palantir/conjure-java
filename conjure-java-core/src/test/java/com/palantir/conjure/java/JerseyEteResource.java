@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
@@ -184,6 +186,16 @@ public class JerseyEteResource implements EteService {
     public String errorParameterSerialization(AuthHeader authHeader, String headerParameter) {
         // Conjure-Java has not supported Jersey for a while. We are not testing the error serialization feature here.
         throw new UnsupportedOperationException("Conjure-Java does not support Jersey any longer.");
+    }
+
+    @Override
+    public String hitOtherService(AuthHeader authHeader) {
+        return "";
+    }
+
+    @Override
+    public String internalServerError(AuthHeader _authHeader) {
+        throw new ServiceException(ErrorType.INTERNAL);
     }
 
     @Override

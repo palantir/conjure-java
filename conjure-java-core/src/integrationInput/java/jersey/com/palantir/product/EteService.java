@@ -223,6 +223,18 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
 
+    /** This endpoint hits another service */
+    @GET
+    @Path("base/otherservice")
+    @ClientEndpoint(method = "GET", path = "/base/otherservice")
+    String hitOtherService(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
+    /** Always returns an internal server error to exercise downstream retries. */
+    @GET
+    @Path("base/errors/internal")
+    @ClientEndpoint(method = "GET", path = "/base/errors/internal")
+    String internalServerError(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
     @GET
     @Path("base/alias-long")
     @ClientEndpoint(method = "GET", path = "/base/alias-long")

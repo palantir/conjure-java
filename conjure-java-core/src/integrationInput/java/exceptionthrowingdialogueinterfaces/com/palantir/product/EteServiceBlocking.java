@@ -186,6 +186,22 @@ public interface EteServiceBlocking {
     @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
     String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
 
+    /**
+     * This endpoint hits another service
+     *
+     * @apiNote {@code GET /base/otherservice}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/otherservice")
+    String hitOtherService(AuthHeader authHeader);
+
+    /**
+     * Always returns an internal server error to exercise downstream retries.
+     *
+     * @apiNote {@code GET /base/errors/internal}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/internal")
+    String internalServerError(AuthHeader authHeader);
+
     /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
@@ -522,6 +538,12 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
+
+            private final EndpointChannel hitOtherServiceChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.hitOtherService);
+
+            private final EndpointChannel internalServerErrorChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.internalServerError);
 
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
@@ -940,6 +962,31 @@ public interface EteServiceBlocking {
                 }
                 return _runtime.clients()
                         .callBlocking(errorParameterSerializationChannel, _request.build(), stringDeserializer);
+            }
+
+            @Override
+            public String hitOtherService(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
+                }
+                return _runtime.clients().callBlocking(hitOtherServiceChannel, _request.build(), stringDeserializer);
+            }
+
+            @Override
+            public String internalServerError(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
+                    _request.putHeaderParams(
+                            "Accept-Conjure-Error-Parameter-Format",
+                            _runtime.bodySerDe().errorParameterFormat().get().toString());
+                }
+                return _runtime.clients()
+                        .callBlocking(internalServerErrorChannel, _request.build(), stringDeserializer);
             }
 
             @Override

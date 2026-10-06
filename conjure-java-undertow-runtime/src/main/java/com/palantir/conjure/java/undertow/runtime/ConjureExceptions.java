@@ -28,12 +28,15 @@ import com.palantir.conjure.java.api.errors.QosReasons;
 import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.deadlines.DeadlineExpiredReasons;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.SafeLoggable;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
@@ -47,6 +50,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 import org.xnio.IoUtils;
 
 /**
@@ -57,6 +61,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     INSTANCE;
 
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
+    private static final int MAX_CAUSE_DEPTH = 100;
     // Exceptions should always be serialized using JSON
     private static final Serializer<ConjureError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
@@ -64,9 +69,16 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
+    // Exhausted retries logic
+    private static final String RETRIES_EXHAUSTED = "Dialogue-Retries-Exhausted";
+    private static final HttpString RETRIES_EXHAUSTED_HEADER = new HttpString(RETRIES_EXHAUSTED);
+
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
+        if (isRetriesExhausted(throwable)) {
+            exchange.getResponseHeaders().put(RETRIES_EXHAUSTED_HEADER, "true");
+        }
         setFailure(exchange, throwable);
         if (throwable instanceof EndpointServiceException endpointServiceException) {
             endpointServiceException(exchange, endpointServiceException);
@@ -100,6 +112,33 @@ public enum ConjureExceptions implements ExceptionHandler {
                     Optional.of(ConjureError.fromServiceException(exception)),
                     exception.getErrorType().httpErrorCode());
         }
+    }
+
+    private static boolean isRetriesExhausted(Throwable failure) {
+        @Nullable Throwable current = failure;
+        for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
+            if (current instanceof QosException
+                    || current instanceof RemoteException
+                    || current instanceof UnknownRemoteException
+                    || current instanceof IOException) {
+                for (Throwable suppressed : current.getSuppressed()) {
+                    if (suppressed instanceof SafeLoggable loggable && hasRetriesExhaustedArg(loggable)) {
+                        return true;
+                    }
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private static boolean hasRetriesExhaustedArg(SafeLoggable loggable) {
+        for (Arg<?> arg : loggable.getArgs()) {
+            if (RETRIES_EXHAUSTED.equals(arg.getName()) && "true".equalsIgnoreCase(String.valueOf(arg.getValue()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
