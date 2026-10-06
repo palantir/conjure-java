@@ -16,12 +16,17 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import dialogue.com.palantir.product.EteServiceBlocking;
 import errors.com.palantir.product.AnyExample;
 import errors.com.palantir.product.CollectionAlias;
 import errors.com.palantir.product.CollectionExample;
@@ -51,6 +56,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import undertow.com.palantir.product.LongAlias;
 import undertow.com.palantir.product.NestedStringAliasExample;
 import undertow.com.palantir.product.SimpleEnum;
@@ -59,6 +66,13 @@ import undertow.com.palantir.product.StringAliasExample;
 import undertow.com.palantir.product.UndertowEteService;
 
 public final class UndertowEteResource implements UndertowEteService {
+    private final Supplier<EteServiceBlocking> downstreamClient;
+    private final AtomicInteger internalServerErrorAttempts = new AtomicInteger();
+
+    public UndertowEteResource(Supplier<EteServiceBlocking> downstreamClient) {
+        this.downstreamClient = downstreamClient;
+    }
+
     @Override
     public String string(AuthHeader _authHeader) {
         return "Hello, world!";
@@ -299,6 +313,27 @@ public final class UndertowEteResource implements UndertowEteService {
                             .build());
         }
         return "hello!";
+    }
+
+    @Override
+    public String receiveQosException(AuthHeader authHeader, String headerParameter) {
+        throw QosException.unavailable(
+                QosReason.of("test-qos"), UUID.fromString("3b522d5f-9975-4e08-843a-2fb05538e734"));
+    }
+
+    @Override
+    public String hitOtherService(AuthHeader authHeader) {
+        return downstreamClient.get().internalServerError(authHeader);
+    }
+
+    @Override
+    public String internalServerError(AuthHeader _authHeader) {
+        internalServerErrorAttempts.incrementAndGet();
+        throw new ServiceException(ErrorType.INTERNAL);
+    }
+
+    int getInternalServerErrorAttempts() {
+        return internalServerErrorAttempts.get();
     }
 
     @Override

@@ -185,6 +185,30 @@ public interface EteServiceBlocking {
     @ClientEndpoint(method = "GET", path = "/base/errors/serialization")
     String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
 
+    /**
+     * This endpoint is used to test that QosExceptions can be returned and their fields can be inspected.
+     *
+     * @apiNote {@code GET /base/errors/qosexception}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/qosexception")
+    String receiveQosException(AuthHeader authHeader, String headerParameter);
+
+    /**
+     * This endpoint hits another service
+     *
+     * @apiNote {@code GET /base/otherservice}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/otherservice")
+    String hitOtherService(AuthHeader authHeader);
+
+    /**
+     * Always returns an internal server error to exercise downstream retries.
+     *
+     * @apiNote {@code GET /base/errors/internal}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/errors/internal")
+    String internalServerError(AuthHeader authHeader);
+
     /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
@@ -444,6 +468,15 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
+
+            private final EndpointChannel receiveQosExceptionChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveQosException);
+
+            private final EndpointChannel hitOtherServiceChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.hitOtherService);
+
+            private final EndpointChannel internalServerErrorChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.internalServerError);
 
             private final EndpointChannel aliasLongEndpointChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
@@ -716,6 +749,31 @@ public interface EteServiceBlocking {
                         "Accept-Conjure-Error-Parameter-Format", _plainSerDe.serializeString(headerParameter));
                 return _runtime.clients()
                         .callBlocking(errorParameterSerializationChannel, _request.build(), stringDeserializer);
+            }
+
+            @Override
+            public String receiveQosException(AuthHeader authHeader, String headerParameter) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putHeaderParams(
+                        "Accept-Conjure-Error-Qos-Exception", _plainSerDe.serializeString(headerParameter));
+                return _runtime.clients()
+                        .callBlocking(receiveQosExceptionChannel, _request.build(), stringDeserializer);
+            }
+
+            @Override
+            public String hitOtherService(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().callBlocking(hitOtherServiceChannel, _request.build(), stringDeserializer);
+            }
+
+            @Override
+            public String internalServerError(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(internalServerErrorChannel, _request.build(), stringDeserializer);
             }
 
             @Override

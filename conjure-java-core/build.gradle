@@ -81,6 +81,8 @@ dependencies {
     testImplementation 'com.palantir.dialogue:dialogue-clients'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'com.palantir.tracing:tracing'
+    testImplementation 'com.palantir.tritium:tritium-registry'
+    testImplementation 'io.dropwizard.metrics:metrics-core'
     testImplementation 'io.dropwizard:dropwizard-core'
     testImplementation 'io.dropwizard:dropwizard-jersey'
     testImplementation 'io.dropwizard:dropwizard-jetty'

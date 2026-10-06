@@ -235,6 +235,29 @@ services:
             type: string
         returns: string
 
+      receiveQosException:
+        http: GET /errors/qosexception
+        docs: |
+          This endpoint is used to test that QosExceptions can be returned and their fields can be inspected.
+        args:
+          headerParameter:
+            param-type: header
+            param-id: Accept-Conjure-Error-Qos-Exception
+            type: string
+        returns: string
+
+      hitOtherService:
+        http: GET /otherservice
+        docs: |
+          This endpoint hits another service
+        returns: string
+
+      internalServerError:
+        http: GET /errors/internal
+        docs: |
+          Always returns an internal server error to exercise downstream retries.
+        returns: string
+
       aliasLongEndpoint:
         http: GET /alias-long
         args:

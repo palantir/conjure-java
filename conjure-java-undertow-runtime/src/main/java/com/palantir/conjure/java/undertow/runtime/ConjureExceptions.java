@@ -34,8 +34,6 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.deadlines.DeadlineExpiredReasons;
-import com.palantir.dialogue.core.DialogueRetries;
-import com.palantir.dialogue.core.Responses;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.SafeLoggable;
@@ -71,15 +69,15 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
+    // Exhausted retries logic
+    private static final String RETRIES_EXHAUSTED = "Dialogue-Retries-Exhausted";
+    private static final HttpString RETRIES_EXHAUSTED_HEADER = new HttpString(RETRIES_EXHAUSTED);
+
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         if (isRetriesExhausted(throwable)) {
-            DialogueRetries.encodeToResponse(
-                    true,
-                    exchange,
-                    (response, name, value) ->
-                            response.getResponseHeaders().put(HttpString.tryFromString(name), value));
+            exchange.getResponseHeaders().put(RETRIES_EXHAUSTED_HEADER, "true");
         }
         setFailure(exchange, throwable);
         if (throwable instanceof EndpointServiceException endpointServiceException) {
@@ -136,8 +134,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static boolean hasRetriesExhaustedArg(SafeLoggable loggable) {
         for (Arg<?> arg : loggable.getArgs()) {
-            if (Responses.RETRIES_EXHAUSTED.equals(arg.getName())
-                    && "true".equalsIgnoreCase(String.valueOf(arg.getValue()))) {
+            if (RETRIES_EXHAUSTED.equals(arg.getName()) && "true".equalsIgnoreCase(String.valueOf(arg.getValue()))) {
                 return true;
             }
         }
@@ -200,7 +197,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
-        QosReasons.encodeToResponse(qosException.getReason(), exchange, UndertowQosResponseEncodingAdapter.INSTANCE);
+        QosReasons.encodeToResponse(qosException, exchange, UndertowQosResponseEncodingAdapter.INSTANCE);
 
         if (log.isDebugEnabled()) {
             log.debug("Quality-of-Service error handling request", qosException);
