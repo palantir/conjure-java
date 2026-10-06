@@ -223,14 +223,6 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Accept-Conjure-Error-Parameter-Format") String headerParameter);
 
-    /** This endpoint is used to test that QosExceptions can be returned and their fields can be inspected. */
-    @GET
-    @Path("base/errors/qosexception")
-    @ClientEndpoint(method = "GET", path = "/base/errors/qosexception")
-    String receiveQosException(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @HeaderParam("Accept-Conjure-Error-Qos-Exception") String headerParameter);
-
     /** This endpoint hits another service */
     @GET
     @Path("base/otherservice")

@@ -187,14 +187,6 @@ public interface EteServiceBlocking {
     String errorParameterSerialization(AuthHeader authHeader, String headerParameter);
 
     /**
-     * This endpoint is used to test that QosExceptions can be returned and their fields can be inspected.
-     *
-     * @apiNote {@code GET /base/errors/qosexception}
-     */
-    @ClientEndpoint(method = "GET", path = "/base/errors/qosexception")
-    String receiveQosException(AuthHeader authHeader, String headerParameter);
-
-    /**
      * This endpoint hits another service
      *
      * @apiNote {@code GET /base/otherservice}
@@ -546,9 +538,6 @@ public interface EteServiceBlocking {
 
             private final EndpointChannel errorParameterSerializationChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.errorParameterSerialization);
-
-            private final EndpointChannel receiveQosExceptionChannel =
-                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveQosException);
 
             private final EndpointChannel hitOtherServiceChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.hitOtherService);
@@ -973,21 +962,6 @@ public interface EteServiceBlocking {
                 }
                 return _runtime.clients()
                         .callBlocking(errorParameterSerializationChannel, _request.build(), stringDeserializer);
-            }
-
-            @Override
-            public String receiveQosException(AuthHeader authHeader, String headerParameter) {
-                Request.Builder _request = Request.builder();
-                _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.putHeaderParams(
-                        "Accept-Conjure-Error-Qos-Exception", _plainSerDe.serializeString(headerParameter));
-                if (_runtime.bodySerDe().errorParameterFormat().isPresent()) {
-                    _request.putHeaderParams(
-                            "Accept-Conjure-Error-Parameter-Format",
-                            _runtime.bodySerDe().errorParameterFormat().get().toString());
-                }
-                return _runtime.clients()
-                        .callBlocking(receiveQosExceptionChannel, _request.build(), stringDeserializer);
             }
 
             @Override
