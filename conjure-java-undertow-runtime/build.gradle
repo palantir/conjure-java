@@ -29,8 +29,6 @@ dependencies {
     implementation 'com.palantir.conjure.java.api:errors'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     implementation 'com.palantir.deadlines:deadlines'
-    implementation 'com.palantir.dialogue:dialogue-core'
-    implementation 'com.palantir.dialogue:dialogue-target'
     implementation 'com.palantir.ri:resource-identifier'
     implementation 'com.palantir.safe-logging:logger'
     implementation 'com.palantir.safe-logging:preconditions'
@@ -42,6 +40,7 @@ dependencies {
     implementation 'io.undertow:undertow-core'
     implementation 'org.checkerframework:checker-qual'
     implementation 'org.jboss.xnio:xnio-api'
+    implementation 'org.jspecify:jspecify'
     implementation 'org.slf4j:slf4j-api'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
 
