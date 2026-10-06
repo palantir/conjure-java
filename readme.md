@@ -117,8 +117,6 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     Union types can be one of a few variants. To interact with a union value, users should use the `.accept` method and define a Visitor that handles each of the possible variants, including the possibility of an unknown variant.
 
-    With `--sealedUnions`, Jackson writes the `type` discriminator first. Readers accept the discriminator in any position.
-
     ```java
     Foo output = unionTypeExample.accept(new Visitor<Foo>() {
 
