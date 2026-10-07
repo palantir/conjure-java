@@ -74,6 +74,10 @@ public abstract sealed class SimpleUnion
 
     public sealed interface Known permits Foo, Bar, Baz {}
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("foo")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -123,6 +127,10 @@ public abstract sealed class SimpleUnion
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("bar")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -172,6 +180,10 @@ public abstract sealed class SimpleUnion
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("baz")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -221,6 +233,10 @@ public abstract sealed class SimpleUnion
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize

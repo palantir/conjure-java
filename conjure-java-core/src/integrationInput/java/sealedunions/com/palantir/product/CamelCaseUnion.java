@@ -59,6 +59,10 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
 
     public sealed interface Known permits CamelCasedField {}
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("camelCasedField")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -108,6 +112,10 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize

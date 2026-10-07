@@ -59,6 +59,10 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
 
     public sealed interface Known permits Empty {}
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("empty")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -108,6 +112,10 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize

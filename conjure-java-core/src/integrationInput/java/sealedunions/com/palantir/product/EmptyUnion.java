@@ -38,6 +38,10 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
 
     public abstract <T> T accept(Visitor<T> visitor);
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
