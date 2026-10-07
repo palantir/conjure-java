@@ -188,6 +188,10 @@ public abstract sealed class UnionReservedNames
                     Static,
                     UnionReservedNames_ {}
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("known")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -237,6 +241,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("unknown")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -286,6 +294,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("if")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -335,6 +347,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("new")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -384,6 +400,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("interface")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -433,6 +453,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("void")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -482,6 +506,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("return")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -531,6 +559,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("private")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -580,6 +612,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("public")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -629,6 +665,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("int")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -678,6 +718,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("import")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -727,6 +771,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("final")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -776,6 +824,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("throws")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -825,6 +877,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("static")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -874,6 +930,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("unionReservedNames")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -923,6 +983,10 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize

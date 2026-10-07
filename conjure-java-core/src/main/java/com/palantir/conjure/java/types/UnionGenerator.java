@@ -1041,12 +1041,9 @@ public final class UnionGenerator {
                                     .build());
 
                     if (options.sealedUnions()) {
-                        // Prevent the custom union serializer and deserializer on the sealed base class from being
-                        // inherited by concrete variants when delegating directly to a known wrapper.
                         typeBuilder.addAnnotation(ignoreUnknownAnnotation());
                         typeBuilder.addAnnotation(typeFirstAnnotation());
-                        typeBuilder.addAnnotation(JsonDeserialize.class);
-                        typeBuilder.addAnnotation(JsonSerialize.class);
+                        addDefaultJacksonAnnotations(typeBuilder);
                     }
 
                     if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
@@ -1082,6 +1079,17 @@ public final class UnionGenerator {
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static void addDefaultJacksonAnnotations(TypeSpec.Builder typeBuilder) {
+        typeBuilder
+                .addJavadoc("""
+                    The empty {@link $T} and {@link $T} annotations override the custom
+                    serializer and deserializer inherited from the superclass, allowing Jackson to handle
+                    this variant directly.
+                    """, JsonDeserialize.class, JsonSerialize.class)
+                .addAnnotation(JsonDeserialize.class)
+                .addAnnotation(JsonSerialize.class);
     }
 
     private static List<MethodSpec> generateWrapperConstructors(
@@ -1277,8 +1285,7 @@ public final class UnionGenerator {
 
         if (options.sealedUnions()) {
             typeBuilder.addAnnotation(typeFirstAnnotation());
-            typeBuilder.addAnnotation(JsonDeserialize.class);
-            typeBuilder.addAnnotation(JsonSerialize.class);
+            addDefaultJacksonAnnotations(typeBuilder);
         }
 
         if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
