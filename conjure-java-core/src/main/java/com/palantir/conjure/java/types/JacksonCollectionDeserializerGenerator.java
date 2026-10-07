@@ -32,8 +32,8 @@ import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.util.ClassUtil;
-import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
@@ -50,10 +50,9 @@ import javax.lang.model.element.Modifier;
 final class JacksonCollectionDeserializerGenerator {
     private JacksonCollectionDeserializerGenerator() {}
 
-    static TypeSpec mapDeserializer(ClassName className) {
+    static TypeSpec containerDeserializer(ClassName className) {
         return TypeSpec.classBuilder(className)
-                .addModifiers(Modifier.FINAL)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JacksonSupportGenerator.class))
+                .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .superclass(
                         ParameterizedTypeName.get(ClassName.get(JsonDeserializer.class), ClassName.get(Object.class)))
                 .addSuperinterface(ContextualDeserializer.class)
@@ -65,31 +64,24 @@ final class JacksonCollectionDeserializerGenerator {
                         .addParameter(DeserializationContext.class, "context")
                         .addParameter(BeanProperty.class, "property")
                         .addException(JsonMappingException.class)
-                        .addCode(
-                                """
-                                $T type = property.getType();
-                                $T<?> delegate = context.findContextualValueDeserializer(type, property);
-                                // Custom constructors and problem handlers can return shared maps.
-                                if (delegate.getClass() == $T.class
-                                        && context.getConfig().getProblemHandlers() == null
-                                        && (($T) delegate).getValueInstantiator().getClass()
-                                                == $T.findStdValueInstantiator(context.getConfig(), $T.class)
-                                                        .getClass()
-                                        && hasStandardEntries(($T) delegate, context, property)
-                                        && !hasTypeDeserializer(context, type)
-                                        && !hasTypeDeserializer(context, type.getKeyType())
-                                        && !hasTypeDeserializer(context, type.getContentType())) {
-                                    return delegate;
-                                }
-                                return new CopyingDeserializer(delegate);
-                                """,
-                                JavaType.class,
-                                JsonDeserializer.class,
-                                MapDeserializer.class,
-                                MapDeserializer.class,
-                                JDKValueInstantiators.class,
-                                LinkedHashMap.class,
-                                MapDeserializer.class)
+                        .addCode("""
+                            $T type = property.getType();
+                            boolean map = type.isMapLikeType();
+                            if (!map) {
+                                // Jackson skips `as` refinement on delegating creators that also specify `using`.
+                                type = context.constructSpecializedType(type, $T.class);
+                            }
+                            $T<?> delegate = context.findContextualValueDeserializer(type, property);
+                            // Custom constructors, entries, and problem handlers can expose shared containers.
+                            if (context.getConfig().getProblemHandlers() == null
+                                    && !hasTypeDeserializer(context, type)
+                                    && !hasTypeDeserializer(context, type.getContentType())
+                                    && (map ? isStandardMap(delegate, context, property)
+                                            : isStandardSet(delegate, context))) {
+                                return delegate;
+                            }
+                            return new CopyingDeserializer(delegate, map);
+                            """, JavaType.class, LinkedHashSet.class, JsonDeserializer.class)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("hasTypeDeserializer")
                         .returns(TypeName.BOOLEAN)
@@ -101,88 +93,64 @@ final class JacksonCollectionDeserializerGenerator {
                             return type.getTypeHandler() != null || context.getConfig().findTypeDeserializer(type) != null;
                             """)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("hasStandardEntries")
+                .addMethod(MethodSpec.methodBuilder("isStandardMap")
                         .returns(TypeName.BOOLEAN)
                         .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                        .addParameter(MapDeserializer.class, "deserializer")
+                        .addParameter(
+                                ParameterizedTypeName.get(
+                                        ClassName.get(JsonDeserializer.class),
+                                        WildcardTypeName.subtypeOf(Object.class)),
+                                "delegate")
                         .addParameter(DeserializationContext.class, "context")
                         .addParameter(BeanProperty.class, "property")
                         .addException(JsonMappingException.class)
                         .addCode(
                                 """
-                                // Custom key/value deserializers can retain the map exposed by JsonParser.currentValue().
-                                $T<?> content = deserializer.getContentDeserializer();
+                                if (delegate.getClass() != $T.class) {
+                                    return false;
+                                }
+                                $T deserializer = ($T) delegate;
                                 $T keyType = property.getType().getKeyType();
-                                return (content == null || (content instanceof $T<?> && $T.isJacksonStdImpl(content)))
+                                return deserializer.getValueInstantiator().getClass()
+                                                == $T.findStdValueInstantiator(context.getConfig(), $T.class).getClass()
+                                        && hasStandardElements(deserializer)
                                         && keyType.getValueHandler() == null
-                                        && $T.isJacksonStdImpl(context.findKeyDeserializer(keyType, property));
+                                        && $T.isJacksonStdImpl(context.findKeyDeserializer(keyType, property))
+                                        && !hasTypeDeserializer(context, keyType);
                                 """,
-                                JsonDeserializer.class,
+                                MapDeserializer.class,
+                                MapDeserializer.class,
+                                MapDeserializer.class,
                                 JavaType.class,
-                                StdScalarDeserializer.class,
-                                ClassUtil.class,
+                                JDKValueInstantiators.class,
+                                LinkedHashMap.class,
                                 ClassUtil.class)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("deserialize")
-                        .returns(Object.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(JsonParser.class, "_parser")
-                        .addParameter(DeserializationContext.class, "_context")
-                        .addCode("""
-                            throw new $T("Map deserializer must be contextualized");
-                            """, SafeIllegalStateException.class)
-                        .build())
-                .addType(copyingDeserializer(false))
-                .build();
-    }
-
-    static TypeSpec setDeserializer(ClassName className) {
-        return TypeSpec.classBuilder(className)
-                .addModifiers(Modifier.FINAL)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JacksonSupportGenerator.class))
-                .superclass(
-                        ParameterizedTypeName.get(ClassName.get(JsonDeserializer.class), ClassName.get(Object.class)))
-                .addSuperinterface(ContextualDeserializer.class)
-                .addMethod(MethodSpec.methodBuilder("createContextual")
-                        .returns(ParameterizedTypeName.get(
-                                ClassName.get(JsonDeserializer.class), WildcardTypeName.subtypeOf(Object.class)))
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
+                .addMethod(MethodSpec.methodBuilder("isStandardSet")
+                        .returns(TypeName.BOOLEAN)
+                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                        .addParameter(
+                                ParameterizedTypeName.get(
+                                        ClassName.get(JsonDeserializer.class),
+                                        WildcardTypeName.subtypeOf(Object.class)),
+                                "delegate")
                         .addParameter(DeserializationContext.class, "context")
-                        .addParameter(BeanProperty.class, "property")
-                        .addException(JsonMappingException.class)
                         .addCode(
                                 """
-                                // Jackson skips `as` refinement on delegating creators that also specify `using`.
-                                $T type = context.constructSpecializedType(property.getType(), $T.class);
-                                $T<?> delegate = context.findContextualValueDeserializer(type, property);
-                                if ((delegate.getClass() == $T.class
-                                                || delegate.getClass() == $T.class)
-                                        && context.getConfig().getProblemHandlers() == null
-                                        && (($T<?>) delegate)
-                                                        .getValueInstantiator()
-                                                        .getClass()
-                                                == $T.findStdValueInstantiator(context.getConfig(), $T.class)
-                                                        .getClass()
-                                        && hasStandardElements(($T<?>) delegate)
-                                        && type.getTypeHandler() == null
-                                        && context.getConfig().findTypeDeserializer(type) == null
-                                        && type.getContentType().getTypeHandler() == null
-                                        && context.getConfig().findTypeDeserializer(type.getContentType()) == null) {
-                                    return delegate;
+                                if (delegate.getClass() != $T.class && delegate.getClass() != $T.class) {
+                                    return false;
                                 }
-                                return new CopyingDeserializer(delegate);
+                                $T<?> deserializer = ($T<?>) delegate;
+                                return deserializer.getValueInstantiator().getClass()
+                                                == $T.findStdValueInstantiator(context.getConfig(), $T.class).getClass()
+                                        && hasStandardElements(deserializer);
                                 """,
-                                JavaType.class,
-                                LinkedHashSet.class,
-                                JsonDeserializer.class,
                                 CollectionDeserializer.class,
                                 StringCollectionDeserializer.class,
                                 ContainerDeserializerBase.class,
+                                ContainerDeserializerBase.class,
                                 JDKValueInstantiators.class,
-                                LinkedHashSet.class,
-                                ContainerDeserializerBase.class)
+                                LinkedHashSet.class)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("hasStandardElements")
                         .returns(TypeName.BOOLEAN)
@@ -193,7 +161,7 @@ final class JacksonCollectionDeserializerGenerator {
                                         WildcardTypeName.subtypeOf(Object.class)),
                                 "deserializer")
                         .addCode("""
-                            // Custom element deserializers can retain the set exposed by JsonParser.currentValue().
+                            // Custom element deserializers can retain the container exposed by JsonParser.currentValue().
                             $T<?> content = deserializer.getContentDeserializer();
                             return content == null || (content instanceof $T<?> && $T.isJacksonStdImpl(content));
                             """, JsonDeserializer.class, StdScalarDeserializer.class, ClassUtil.class)
@@ -205,25 +173,29 @@ final class JacksonCollectionDeserializerGenerator {
                         .addParameter(JsonParser.class, "_parser")
                         .addParameter(DeserializationContext.class, "_context")
                         .addCode("""
-                            throw new $T("Set deserializer must be contextualized");
+                            throw new $T("Container deserializer must be contextualized");
                             """, SafeIllegalStateException.class)
                         .build())
-                .addType(copyingDeserializer(true))
+                .addType(copyingDeserializer())
                 .build();
     }
 
-    private static TypeSpec copyingDeserializer(boolean set) {
+    private static TypeSpec copyingDeserializer() {
         return TypeSpec.classBuilder("CopyingDeserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .superclass(DelegatingDeserializer.class)
+                .addField(FieldSpec.builder(TypeName.BOOLEAN, "map", Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
                 .addMethod(MethodSpec.constructorBuilder()
                         .addParameter(
                                 ParameterizedTypeName.get(
                                         ClassName.get(JsonDeserializer.class),
                                         WildcardTypeName.subtypeOf(Object.class)),
                                 "delegate")
+                        .addParameter(TypeName.BOOLEAN, "map")
                         .addCode("""
                             super(delegate);
+                            this.map = map;
                             """)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("newDelegatingInstance")
@@ -237,7 +209,7 @@ final class JacksonCollectionDeserializerGenerator {
                                         WildcardTypeName.subtypeOf(Object.class)),
                                 "delegate")
                         .addCode("""
-                            return new CopyingDeserializer(delegate);
+                            return new CopyingDeserializer(delegate, map);
                             """)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("deserialize")
@@ -295,19 +267,14 @@ final class JacksonCollectionDeserializerGenerator {
                         .build())
                 .addMethod(MethodSpec.methodBuilder("copy")
                         .returns(Object.class)
-                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                        .addModifiers(Modifier.PRIVATE)
                         .addParameter(Object.class, "value")
-                        .addStatement(
-                                "return value == null ? null : new $T<>(($T) value)",
-                                set ? LinkedHashSet.class : LinkedHashMap.class,
-                                set
-                                        ? ParameterizedTypeName.get(
-                                                ClassName.get(Collection.class),
-                                                WildcardTypeName.subtypeOf(Object.class))
-                                        : ParameterizedTypeName.get(
-                                                ClassName.get(Map.class),
-                                                WildcardTypeName.subtypeOf(Object.class),
-                                                WildcardTypeName.subtypeOf(Object.class)))
+                        .addCode("""
+                            if (value == null) {
+                                return null;
+                            }
+                            return map ? new $T<>(($T<?, ?>) value) : new $T<>(($T<?>) value);
+                            """, LinkedHashMap.class, Map.class, LinkedHashSet.class, Collection.class)
                         .build())
                 .build();
     }

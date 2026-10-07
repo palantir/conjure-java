@@ -51,7 +51,6 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.javapoet.AnnotationSpec;
-import com.palantir.javapoet.ArrayTypeName;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
@@ -63,7 +62,6 @@ import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.javapoet.TypeVariableName;
-import com.palantir.javapoet.WildcardTypeName;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -104,7 +102,7 @@ public final class UnionGenerator {
 
     private static final String SEALED_KNOWN_INTERFACE = "Known";
     private static final String SEALED_UNKNOWN_VARIANT_NAME = "Unknown";
-    private static final String DESERIALIZER_CLASS_NAME = "Deserializer";
+    private static final String DESERIALIZE_UNION_METHOD_NAME = "deserializeUnion";
 
     public static JavaFile generateUnionType(
             TypeMapper typeMapper,
@@ -127,19 +125,14 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
 
         if (options.sealedUnions()) {
-            NameAllocator helperNames = new NameAllocator();
-            helperNames.newName(unionClass.simpleName());
-            helperNames.newName("Base");
-            helperNames.newName("Visitor");
-            helperNames.newName("VisitorBuilder");
-            helperNames.newName(UNKNOWN_WRAPPER_CLASS_NAME);
-            helperNames.newName(SEALED_KNOWN_INTERFACE);
-            helperNames.newName(SEALED_UNKNOWN_VARIANT_NAME);
-            for (FieldDefinition member : typeDef.getUnion()) {
-                helperNames.newName(
-                        sealedVariantClass(unionClass, member.getFieldName()).simpleName());
-            }
-            ClassName deserializerClass = unionClass.nestedClass(helperNames.newName(DESERIALIZER_CLASS_NAME));
+            ClassName deserializerClass = typeMapper
+                    .jacksonSupport()
+                    .registerUnion(
+                            unionClass,
+                            typeDef.getUnion().stream()
+                                    .map(member -> sealedVariantClass(unionClass, member.getFieldName()))
+                                    .toList(),
+                            DESERIALIZE_UNION_METHOD_NAME);
 
             ClassName unknownVariant = unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME);
             List<AnnotationSpec> safety =
@@ -164,7 +157,7 @@ public final class UnionGenerator {
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
                     .addType(generateUnknownWrapper(unionClass, visitorClass, options))
-                    .addType(generateDeserializer(typeMapper, unionClass, deserializerClass, typeDef.getUnion()));
+                    .addMethod(generateDeserializeSelectedMethod(unionClass, deserializerClass, typeDef.getUnion()));
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -852,52 +845,15 @@ public final class UnionGenerator {
                 Stream.of(NameTypeMetadata.UNKNOWN));
     }
 
-    private static TypeSpec generateDeserializer(
-            TypeMapper typeMapper,
-            ClassName unionClass,
-            ClassName deserializerClass,
-            List<FieldDefinition> memberTypeDefs) {
-        return TypeSpec.classBuilder(deserializerClass)
-                .addModifiers(Modifier.STATIC, Modifier.FINAL)
-                .superclass(ParameterizedTypeName.get(
-                        typeMapper.jacksonSupport().get(unionClass, JacksonSupportGenerator.Helper.UNION_DESERIALIZER),
-                        unionClass))
-                .addField(generateVariantTypesField(unionClass, memberTypeDefs))
-                .addMethod(MethodSpec.constructorBuilder()
-                        .addStatement("super($T.class, VARIANT_TYPES)", unionClass)
-                        .build())
-                .addMethod(generateDeserializeSelectedMethod(unionClass, memberTypeDefs))
-                .build();
-    }
-
-    private static FieldSpec generateVariantTypesField(ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
-        TypeName classType =
-                ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class));
-        CodeBlock.Builder initializer = CodeBlock.builder().add("new $T<?>[] {$>", Class.class);
-        for (int index = 0; index < memberTypeDefs.size(); index++) {
-            FieldDefinition memberTypeDef = memberTypeDefs.get(index);
-            ClassName wrapperClass = sealedVariantClass(unionClass, memberTypeDef.getFieldName());
-            if (index > 0) {
-                initializer.add(",");
-            }
-            initializer.add("\n$T.class", wrapperClass);
-        }
-        initializer.add("$<\n}");
-        return FieldSpec.builder(
-                        ArrayTypeName.of(classType), "VARIANT_TYPES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .initializer("$L", initializer.build())
-                .build();
-    }
-
     private static MethodSpec generateDeserializeSelectedMethod(
-            ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("deserializeSelected")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PROTECTED)
+            ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(DESERIALIZE_UNION_METHOD_NAME)
+                .addModifiers(Modifier.STATIC)
                 .returns(unionClass)
                 .addParameter(JsonParser.class, "parser")
                 .addParameter(DeserializationContext.class, "context")
                 .addParameter(String.class, "type")
+                .addParameter(deserializerClass, "deserializer")
                 .addException(IOException.class)
                 .addCode("int variantIndex = switch (type) {\n");
         for (int index = 0; index < memberTypeDefs.size(); index++) {
@@ -906,10 +862,10 @@ public final class UnionGenerator {
         builder.addStatement("default -> -1").addCode("};\n");
         builder.beginControlFlow("if (variantIndex < 0)")
                 .addStatement(
-                        "return new $T(type, deserializeUnknown(parser, context))",
+                        "return new $T(type, deserializer.deserializeUnknown(parser, context))",
                         unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME))
                 .endControlFlow()
-                .addStatement("return ($T) deserializeVariant(parser, context, variantIndex)", unionClass);
+                .addStatement("return ($T) deserializer.deserializeVariant(parser, context, variantIndex)", unionClass);
         return builder.build();
     }
 
@@ -1116,7 +1072,7 @@ public final class UnionGenerator {
                                 "$T.class",
                                 typeMapper
                                         .jacksonSupport()
-                                        .get(wrapperClass, JacksonSupportGenerator.Helper.MAP_DESERIALIZER))
+                                        .get(wrapperClass, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
                         .build());
             }
             MethodSpec.Builder jsonFactory = MethodSpec.methodBuilder(jsonFactoryName)
@@ -1184,7 +1140,9 @@ public final class UnionGenerator {
                 annotation.addMember(
                         "using",
                         "$T.class",
-                        typeMapper.jacksonSupport().get(wrapperClass, JacksonSupportGenerator.Helper.SET_DESERIALIZER));
+                        typeMapper
+                                .jacksonSupport()
+                                .get(wrapperClass, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER));
             }
             return List.of(annotation.build());
         }

@@ -112,7 +112,7 @@ public final class AnyExample {
         private Object anyValue;
 
         @JsonSetter(value = "anyMap", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Object> anyMap = new LinkedHashMap<>();
 
         private Builder() {}

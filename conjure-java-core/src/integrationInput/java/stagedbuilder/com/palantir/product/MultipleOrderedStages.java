@@ -247,7 +247,7 @@ public final class MultipleOrderedStages {
         private Set<SafeLong> items = ConjureCollections.newSet();
 
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private Optional<OneField> optionalItem = Optional.empty();

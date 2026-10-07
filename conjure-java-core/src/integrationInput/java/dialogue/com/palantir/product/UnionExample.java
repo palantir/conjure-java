@@ -30,8 +30,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonDeserialize(using = UnionExample.Deserializer.class)
-@JsonSerialize(using = ConjureUnionSerializer.class)
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class UnionExample
         permits UnionExample.StringVariant,
@@ -89,6 +89,26 @@ public abstract sealed class UnionExample
         } else {
             return (Known) this;
         }
+    }
+
+    static UnionExample deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            case "stringVariant" -> 0;
+            case "intVariant" -> 1;
+            case "objectVariant" -> 2;
+            case "collectionVariant" -> 3;
+            case "optionalVariant" -> 4;
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (UnionExample) deserializer.deserializeVariant(parser, context, variantIndex);
     }
 
     public abstract <T> T accept(Visitor<T> visitor);
@@ -427,33 +447,6 @@ public abstract sealed class UnionExample
         @Override
         public String toString() {
             return "UnionExample{value: UnknownWrapper{value: " + value + "}}";
-        }
-    }
-
-    static final class Deserializer extends ConjureUnionDeserializer<UnionExample> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {
-            StringVariant.class, IntVariant.class, ObjectVariant.class, CollectionVariant.class, OptionalVariant.class
-        };
-
-        Deserializer() {
-            super(UnionExample.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected UnionExample deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex = switch (type) {
-                case "stringVariant" -> 0;
-                case "intVariant" -> 1;
-                case "objectVariant" -> 2;
-                case "collectionVariant" -> 3;
-                case "optionalVariant" -> 4;
-                default -> -1;
-            };
-            if (variantIndex < 0) {
-                return new Unknown(type, deserializeUnknown(parser, context));
-            }
-            return (UnionExample) deserializeVariant(parser, context, variantIndex);
         }
     }
 

@@ -208,7 +208,7 @@ public final class MultipleFieldsOnlyFinalStage {
         private List<String> items = ConjureCollections.newList();
 
         @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
@@ -218,7 +218,7 @@ public final class MultipleFieldsOnlyFinalStage {
         private List<String> itemsOld = ConjureCollections.newList();
 
         @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Integer> itemsMapOld = new LinkedHashMap<>();
 
         private Optional<String> optionalItemOld = Optional.empty();

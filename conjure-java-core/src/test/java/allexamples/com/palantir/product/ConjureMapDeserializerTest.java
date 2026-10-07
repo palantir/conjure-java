@@ -126,7 +126,7 @@ final class ConjureMapDeserializerTest {
     }
 
     record Value(
-            @JsonDeserialize(using = ConjureMapDeserializer.class)
+            @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
             Map<String, Integer> values) {}
 
     private MapType mapType(Class<?> key, Class<?> value) {
@@ -136,7 +136,7 @@ final class ConjureMapDeserializerTest {
     private static JsonDeserializer<?> contextualize(DeserializationContext context, JavaType type) throws IOException {
         BeanProperty property =
                 new BeanProperty.Std(PropertyName.construct("map"), type, null, null, PropertyMetadata.STD_OPTIONAL);
-        return new ConjureMapDeserializer().createContextual(context, property);
+        return new ConjureJacksonSupport.ContainerDeserializer().createContextual(context, property);
     }
 
     private static DeserializationContext context(ObjectMapper mapper, JsonParser parser) {

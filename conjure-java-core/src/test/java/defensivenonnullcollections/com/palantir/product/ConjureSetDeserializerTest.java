@@ -87,6 +87,6 @@ final class ConjureSetDeserializerTest {
     }
 
     record Value(
-            @JsonDeserialize(using = ConjureSetDeserializer.class)
+            @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
             Set<Integer> values) {}
 }

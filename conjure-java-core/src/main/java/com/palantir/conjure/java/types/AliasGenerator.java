@@ -160,7 +160,9 @@ public final class AliasGenerator {
                                             "$T.class",
                                             typeMapper
                                                     .jacksonSupport()
-                                                    .get(thisClass, JacksonSupportGenerator.Helper.SET_DESERIALIZER))
+                                                    .get(
+                                                            thisClass,
+                                                            JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
                                     .build())
                             .build())
                     .returns(thisClass)

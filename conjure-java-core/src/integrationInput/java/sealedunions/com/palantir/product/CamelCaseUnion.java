@@ -27,8 +27,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonDeserialize(using = CamelCaseUnion.Deserializer.class)
-@JsonSerialize(using = ConjureUnionSerializer.class)
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedField, CamelCaseUnion.Unknown {
     public static CamelCaseUnion camelCasedField(String value) {
@@ -53,6 +53,22 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         } else {
             return (Known) this;
         }
+    }
+
+    static CamelCaseUnion deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            case "camelCasedField" -> 0;
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (CamelCaseUnion) deserializer.deserializeVariant(parser, context, variantIndex);
     }
 
     public abstract <T> T accept(Visitor<T> visitor);
@@ -176,27 +192,6 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         @Override
         public String toString() {
             return "CamelCaseUnion{value: UnknownWrapper{value: " + value + "}}";
-        }
-    }
-
-    static final class Deserializer extends ConjureUnionDeserializer<CamelCaseUnion> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {CamelCasedField.class};
-
-        Deserializer() {
-            super(CamelCaseUnion.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected CamelCaseUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex = switch (type) {
-                case "camelCasedField" -> 0;
-                default -> -1;
-            };
-            if (variantIndex < 0) {
-                return new Unknown(type, deserializeUnknown(parser, context));
-            }
-            return (CamelCaseUnion) deserializeVariant(parser, context, variantIndex);
         }
     }
 

@@ -28,8 +28,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonDeserialize(using = SimpleUnion.Deserializer.class)
-@JsonSerialize(using = ConjureUnionSerializer.class)
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class SimpleUnion
         permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
@@ -68,6 +68,24 @@ public abstract sealed class SimpleUnion
         } else {
             return (Known) this;
         }
+    }
+
+    static SimpleUnion deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            case "foo" -> 0;
+            case "bar" -> 1;
+            case "baz" -> 2;
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (SimpleUnion) deserializer.deserializeVariant(parser, context, variantIndex);
     }
 
     public abstract <T> T accept(Visitor<T> visitor);
@@ -297,29 +315,6 @@ public abstract sealed class SimpleUnion
         @Override
         public String toString() {
             return "SimpleUnion{value: UnknownWrapper{value: " + value + "}}";
-        }
-    }
-
-    static final class Deserializer extends ConjureUnionDeserializer<SimpleUnion> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {Foo.class, Bar.class, Baz.class};
-
-        Deserializer() {
-            super(SimpleUnion.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected SimpleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex = switch (type) {
-                case "foo" -> 0;
-                case "bar" -> 1;
-                case "baz" -> 2;
-                default -> -1;
-            };
-            if (variantIndex < 0) {
-                return new Unknown(type, deserializeUnknown(parser, context));
-            }
-            return (SimpleUnion) deserializeVariant(parser, context, variantIndex);
         }
     }
 

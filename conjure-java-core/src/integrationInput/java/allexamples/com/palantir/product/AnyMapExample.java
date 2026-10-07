@@ -96,7 +96,7 @@ public final class AnyMapExample {
         boolean _buildInvoked;
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Object> items = new LinkedHashMap<>();
 
         private Builder() {}

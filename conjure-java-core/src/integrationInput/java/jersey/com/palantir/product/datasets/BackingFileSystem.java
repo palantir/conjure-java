@@ -132,7 +132,7 @@ public final class BackingFileSystem {
         private String baseUri;
 
         @JsonSetter(value = "configuration", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, String> configuration = new LinkedHashMap<>();
 
         private Builder() {}

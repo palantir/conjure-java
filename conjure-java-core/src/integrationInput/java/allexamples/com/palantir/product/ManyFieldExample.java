@@ -221,7 +221,7 @@ public final class ManyFieldExample {
         private Set<String> set = ConjureCollections.newNonNullSet();
 
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, String> map = new LinkedHashMap<>();
 
         private StringAliasExample alias;
