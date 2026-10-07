@@ -98,7 +98,9 @@ public final class AliasGenerator {
                         .addAnnotation(Override.class)
                         .addAnnotations(safetyAnnotations)
                         .returns(String.class)
-                        .addCode(primitiveSafeToString(aliasTypeName))
+                        .addCode(primitiveSafeToString(
+                                aliasTypeName,
+                                options.redactToStringDoNotLog() && safety.equals(Optional.of(LogSafety.DO_NOT_LOG))))
                         .build());
 
         if (typeDef.getAlias().accept(BeanGenerator.FieldRequiresMemoizedHashCode.INSTANCE)) {
@@ -486,7 +488,10 @@ public final class AliasGenerator {
         return builder.build();
     }
 
-    private static CodeBlock primitiveSafeToString(TypeName aliasTypeName) {
+    private static CodeBlock primitiveSafeToString(TypeName aliasTypeName, boolean redact) {
+        if (redact) {
+            return CodeBlocks.statement("return $S", "REDACTED");
+        }
         if (Primitives.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement("return $T.valueOf(value)", String.class);
         }
