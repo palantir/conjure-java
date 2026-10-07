@@ -435,7 +435,7 @@ public final class BeanBuilderGenerator {
                                                         .jacksonSupport()
                                                         .get(
                                                                 objectClass,
-                                                                JacksonSupportGenerator.Helper.MAP_DESERIALIZER))
+                                                                JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
                                         .build())
                                 .build()
                         : field.poetSpec())

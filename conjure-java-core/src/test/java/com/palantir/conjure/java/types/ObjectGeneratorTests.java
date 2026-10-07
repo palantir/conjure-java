@@ -106,10 +106,21 @@ public final class ObjectGeneratorTests {
                     .filter(file -> file.packageName().equals(packageName))
                     .filter(file -> file.typeSpec().name().startsWith("Conjure"))
                     .toList();
-            assertThat(helpers).hasSize(1 + (defensive ? 1 : 0) + (sealed ? 2 : 0));
+            assertThat(helpers).hasSize(1);
             assertThat(helpers).allSatisfy(file -> {
                 assertThat(file.typeSpec().modifiers()).doesNotContain(Modifier.PUBLIC);
                 assertThat(file.toString()).doesNotContain("com.palantir.conjure.java.lib.internal");
+                assertThat(file.typeSpec().name()).isEqualTo("ConjureJacksonSupport");
+                assertThat(file.toString())
+                        .containsOnlyOnce("class ContainerDeserializer")
+                        .containsOnlyOnce("class CopyingDeserializer");
+                if (sealed) {
+                    assertThat(file.toString())
+                            .containsOnlyOnce("class UnionDeserializer")
+                            .containsOnlyOnce("class UnionSerializer");
+                } else {
+                    assertThat(file.toString()).doesNotContain("class UnionDeserializer", "class UnionSerializer");
+                }
             });
         }
         assertThat(generator.generate(ConjureDefinition.builder().version(1).build()))

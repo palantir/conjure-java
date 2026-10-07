@@ -117,7 +117,7 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     Union types can be one of a few variants. To interact with a union value, users should use the `.accept` method and define a Visitor that handles each of the possible variants, including the possibility of an unknown variant.
 
-    With `--sealedUnions`, Jackson writes the `type` discriminator first. Readers accept the discriminator in any position. Shared Jackson serializers and deserializers are generated alongside the models, once per Java package when needed, rather than supplied by `conjure-lib`. These helpers are package-private implementation details.
+    Jackson writes the `type` discriminator first for both sealed and non-sealed unions. Readers accept the discriminator in any position. Jackson helpers are nested in one package-private `ConjureJacksonSupport` class per Java package when needed, rather than supplied by `conjure-lib`. Maps and sets share a container deserializer and copying wrapper. Sealed unions share one contextual deserializer per package, with no per-union deserializer classes.
 
     With `--defensiveCollections`, public union factories continue to copy input maps and sets. Sealed unions and Set aliases can take ownership of standard Jackson-created containers with scalar entries, avoiding a redundant copy. Bean map fields use the same ownership checks when Jackson populates their builders directly. Custom collection, key, or element deserializers, custom constructors, recovery handlers, and polymorphic values use a copying fallback. Encounter order, deduplication, and configured null-element validation are preserved.
 

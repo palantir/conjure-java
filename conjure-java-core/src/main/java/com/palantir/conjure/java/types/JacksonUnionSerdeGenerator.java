@@ -20,26 +20,29 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.util.JsonParserSequence;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.javapoet.ArrayTypeName;
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
-import com.palantir.javapoet.TypeVariableName;
 import com.palantir.javapoet.WildcardTypeName;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import javax.lang.model.element.Modifier;
@@ -49,8 +52,7 @@ final class JacksonUnionSerdeGenerator {
 
     static TypeSpec unionSerializer(ClassName className) {
         return TypeSpec.classBuilder(className)
-                .addModifiers(Modifier.FINAL)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JacksonSupportGenerator.class))
+                .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(ClassName.get(JsonSerializer.class), ClassName.get(Object.class)))
                 .addMethod(MethodSpec.methodBuilder("serialize")
                         .returns(TypeName.VOID)
@@ -82,14 +84,17 @@ final class JacksonUnionSerdeGenerator {
                 .build();
     }
 
-    static TypeSpec unionDeserializer(ClassName className) {
+    static TypeSpec unionDeserializer(ClassName className, List<JacksonSupportGenerator.Union> unions) {
         return TypeSpec.classBuilder(className)
-                .addModifiers(Modifier.ABSTRACT)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JacksonSupportGenerator.class))
-                .superclass(ParameterizedTypeName.get(ClassName.get(JsonDeserializer.class), TypeVariableName.get("T")))
-                .addTypeVariable(TypeVariableName.get("T"))
+                .addModifiers(Modifier.STATIC, Modifier.FINAL)
+                .superclass(
+                        ParameterizedTypeName.get(ClassName.get(JsonDeserializer.class), ClassName.get(Object.class)))
+                .addSuperinterface(ContextualDeserializer.class)
+                .addField(FieldSpec.builder(TypeName.INT, "unionIndex", Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
                 .addField(FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Class.class), TypeVariableName.get("T")),
+                                ParameterizedTypeName.get(
+                                        ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class)),
                                 "unionClass",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL)
@@ -112,23 +117,30 @@ final class JacksonUnionSerdeGenerator {
                                 Modifier.FINAL)
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
-                        .addModifiers(Modifier.PROTECTED)
+                        .addStatement("this($T.class, new $T<?>[0], -1)", Object.class, Class.class)
+                        .build())
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PRIVATE)
                         .addParameter(
-                                ParameterizedTypeName.get(ClassName.get(Class.class), TypeVariableName.get("T")),
+                                ParameterizedTypeName.get(
+                                        ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class)),
                                 "unionClass")
                         .addParameter(
                                 ArrayTypeName.of(ParameterizedTypeName.get(
                                         ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class))),
                                 "variantTypes")
+                        .addParameter(TypeName.INT, "unionIndex")
                         .addCode("""
+                            this.unionIndex = unionIndex;
                             this.unionClass = unionClass;
                             this.variantTypes = variantTypes;
                             this.variantDeserializers = new $T<>(variantTypes.length);
                             """, AtomicReferenceArray.class)
                         .build())
+                .addMethod(generateCreateContextual(className, unions))
                 .addMethod(MethodSpec.methodBuilder("isCachable")
                         .returns(TypeName.BOOLEAN)
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .addCode("""
                             return true;
@@ -145,17 +157,9 @@ final class JacksonUnionSerdeGenerator {
                             return "type".equals(fieldName) || (acceptCaseInsensitiveProperties && "type".equalsIgnoreCase(fieldName));
                             """)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("deserializeSelected")
-                        .returns(TypeVariableName.get("T"))
-                        .addModifiers(Modifier.PROTECTED, Modifier.ABSTRACT)
-                        .addParameter(JsonParser.class, "parser")
-                        .addParameter(DeserializationContext.class, "context")
-                        .addParameter(String.class, "type")
-                        .addException(IOException.class)
-                        .build())
+                .addMethod(generateDeserializeSelected(unions))
                 .addMethod(MethodSpec.methodBuilder("deserializeVariant")
                         .returns(Object.class)
-                        .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
                         .addParameter(JsonParser.class, "parser")
                         .addParameter(DeserializationContext.class, "context")
                         .addParameter(TypeName.INT, "variantIndex")
@@ -188,10 +192,67 @@ final class JacksonUnionSerdeGenerator {
                 .build();
     }
 
+    private static MethodSpec generateCreateContextual(
+            ClassName className, List<JacksonSupportGenerator.Union> unions) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("createContextual")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(
+                        ClassName.get(JsonDeserializer.class), WildcardTypeName.subtypeOf(Object.class)))
+                .addParameter(DeserializationContext.class, "context")
+                .addParameter(BeanProperty.class, "_property")
+                .addException(JsonMappingException.class)
+                .addStatement("$T type = context.getContextualType()", JavaType.class)
+                .beginControlFlow("if (type == null)")
+                .addStatement(
+                        "return context.reportBadDefinition($T.class, $S)",
+                        Object.class,
+                        "Union deserializer requires a contextual type")
+                .endControlFlow();
+        for (int index = 0; index < unions.size(); index++) {
+            JacksonSupportGenerator.Union union = unions.get(index);
+            CodeBlock.Builder variants = CodeBlock.builder().add("new $T<?>[] {", Class.class);
+            for (int variant = 0; variant < union.variants().size(); variant++) {
+                if (variant > 0) {
+                    variants.add(", ");
+                }
+                variants.add("$T.class", union.variants().get(variant));
+            }
+            variants.add("}");
+            builder.beginControlFlow("if (type.hasRawClass($T.class))", union.className())
+                    .addStatement(
+                            "return new $T($T.class, $L, $L)", className, union.className(), variants.build(), index)
+                    .endControlFlow();
+        }
+        return builder.addStatement("return context.reportBadDefinition(type, $S)", "Unsupported union type")
+                .build();
+    }
+
+    private static MethodSpec generateDeserializeSelected(List<JacksonSupportGenerator.Union> unions) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("deserializeSelected")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(Object.class)
+                .addParameter(JsonParser.class, "parser")
+                .addParameter(DeserializationContext.class, "context")
+                .addParameter(String.class, "type")
+                .addException(IOException.class)
+                .addCode("return switch (unionIndex) {\n");
+        for (int index = 0; index < unions.size(); index++) {
+            JacksonSupportGenerator.Union union = unions.get(index);
+            builder.addStatement(
+                    "case $L -> $T.$L(parser, context, type, this)", index, union.className(), union.dispatchMethod());
+        }
+        return builder.addStatement(
+                        "default -> context.reportBadDefinition(unionClass, $S)",
+                        "Union deserializer must be contextualized")
+                .addCode("};\n")
+                .build();
+    }
+
     private static MethodSpec generateDeserialize() {
         return MethodSpec.methodBuilder("deserialize")
-                .returns(TypeVariableName.get("T"))
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .returns(ClassName.get(Object.class))
+                .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addParameter(JsonParser.class, "parser")
                 .addParameter(DeserializationContext.class, "context")
@@ -228,7 +289,7 @@ final class JacksonUnionSerdeGenerator {
 
     private static MethodSpec generateDeserializeBuffered() {
         return MethodSpec.methodBuilder("deserializeBuffered")
-                .returns(TypeVariableName.get("T"))
+                .returns(ClassName.get(Object.class))
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(JsonParser.class, "parser")
                 .addParameter(DeserializationContext.class, "context")
@@ -283,7 +344,6 @@ final class JacksonUnionSerdeGenerator {
         return MethodSpec.methodBuilder("deserializeUnknown")
                 .returns(ParameterizedTypeName.get(
                         ClassName.get(Map.class), ClassName.get(String.class), ClassName.get(Object.class)))
-                .addModifiers(Modifier.PROTECTED, Modifier.FINAL)
                 .addParameter(JsonParser.class, "parser")
                 .addParameter(DeserializationContext.class, "context")
                 .addException(IOException.class)

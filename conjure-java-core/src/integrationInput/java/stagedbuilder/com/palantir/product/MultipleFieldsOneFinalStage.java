@@ -196,7 +196,7 @@ public final class MultipleFieldsOneFinalStage {
         boolean _buildInvoked;
 
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private OneField token;

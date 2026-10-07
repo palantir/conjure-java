@@ -27,8 +27,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonDeserialize(using = NestedEmptyUnion.Deserializer.class)
-@JsonSerialize(using = ConjureUnionSerializer.class)
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, NestedEmptyUnion.Unknown {
     public static NestedEmptyUnion empty(EmptyObject value) {
@@ -53,6 +53,22 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         } else {
             return (Known) this;
         }
+    }
+
+    static NestedEmptyUnion deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            case "empty" -> 0;
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (NestedEmptyUnion) deserializer.deserializeVariant(parser, context, variantIndex);
     }
 
     public abstract <T> T accept(Visitor<T> visitor);
@@ -176,27 +192,6 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         @Override
         public String toString() {
             return "NestedEmptyUnion{value: UnknownWrapper{value: " + value + "}}";
-        }
-    }
-
-    static final class Deserializer extends ConjureUnionDeserializer<NestedEmptyUnion> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {Empty.class};
-
-        Deserializer() {
-            super(NestedEmptyUnion.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected NestedEmptyUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex = switch (type) {
-                case "empty" -> 0;
-                default -> -1;
-            };
-            if (variantIndex < 0) {
-                return new Unknown(type, deserializeUnknown(parser, context));
-            }
-            return (NestedEmptyUnion) deserializeVariant(parser, context, variantIndex);
         }
     }
 

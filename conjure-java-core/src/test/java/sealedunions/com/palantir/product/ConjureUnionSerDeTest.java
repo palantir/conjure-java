@@ -19,11 +19,7 @@ package sealedunions.com.palantir.product;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -31,8 +27,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -54,13 +48,13 @@ final class ConjureUnionSerDeTest {
     @Test
     void readsKnownVariantsWithDiscriminatorInAnyPosition() throws IOException {
         for (String json : List.of(
-                "{\"type\":\"known\",\"value\":\"hello\"}",
-                "{\"value\":\"hello\",\"type\":\"known\"}",
-                "{\"ignored\":{\"nested\":[1,2]},\"type\":\"known\",\"value\":\"hello\",\"after\":true}")) {
-            assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
-            assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(new Known("hello")));
+                "{\"type\":\"foo\",\"foo\":\"hello\"}",
+                "{\"foo\":\"hello\",\"type\":\"foo\"}",
+                "{\"ignored\":{\"nested\":[1,2]},\"type\":\"foo\",\"foo\":\"hello\",\"after\":true}")) {
+            assertThat(mapper.readValue(json, SimpleUnion.class)).isEqualTo(SimpleUnion.foo("hello"));
+            assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(SimpleUnion.foo("hello")));
             assertThat(mapper.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
-                    .isEqualTo(new Holder(List.of(new Known("hello"), new Known("hello"))));
+                    .isEqualTo(new Holder(List.of(SimpleUnion.foo("hello"), SimpleUnion.foo("hello"))));
         }
     }
 
@@ -71,9 +65,9 @@ final class ConjureUnionSerDeTest {
                 "{\"future\":{\"nested\":[1,2]},\"type\":\"future\",\"extra\":null}",
                 "{\"future\":{\"nested\":[1,2]},\"extra\":null,\"type\":\"future\"}",
                 "{\"type\":\"future\"}")) {
-            SampleUnion union = mapper.readValue(json, SampleUnion.class);
-            assertThat(union).isInstanceOf(Unknown.class);
-            assertThat(mapper.readTree(mapper.writerFor(SampleUnion.class).writeValueAsBytes(union)))
+            SimpleUnion union = mapper.readValue(json, SimpleUnion.class);
+            assertThat(union).isInstanceOf(SimpleUnion.Unknown.class);
+            assertThat(mapper.readTree(mapper.writerFor(SimpleUnion.class).writeValueAsBytes(union)))
                     .isEqualTo(mapper.readTree(json));
         }
     }
@@ -81,8 +75,8 @@ final class ConjureUnionSerDeTest {
     @Test
     void rejectsMissingOrNonStringDiscriminators() {
         for (String json : List.of(
-                "{}", "[]", "1", "{\"value\":1}", "{\"type\":null}", "{\"type\":1}", "{\"value\":1,\"type\":false}")) {
-            assertThatThrownBy(() -> mapper.readValue(json, SampleUnion.class))
+                "{}", "[]", "1", "{\"foo\":1}", "{\"type\":null}", "{\"type\":1}", "{\"foo\":1,\"type\":false}")) {
+            assertThatThrownBy(() -> mapper.readValue(json, SimpleUnion.class))
                     .isInstanceOf(JsonMappingException.class);
         }
     }
@@ -92,10 +86,9 @@ final class ConjureUnionSerDeTest {
         ObjectMapper insensitive = JsonMapper.builder()
                 .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
                 .build();
-        for (String json :
-                List.of("{\"TYPE\":\"known\",\"VALUE\":\"hello\"}", "{\"VALUE\":\"hello\",\"TYPE\":\"known\"}")) {
-            assertThat(insensitive.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
-            assertThatThrownBy(() -> mapper.readValue(json, SampleUnion.class))
+        for (String json : List.of("{\"TYPE\":\"foo\",\"FOO\":\"hello\"}", "{\"FOO\":\"hello\",\"TYPE\":\"foo\"}")) {
+            assertThat(insensitive.readValue(json, SimpleUnion.class)).isEqualTo(SimpleUnion.foo("hello"));
+            assertThatThrownBy(() -> mapper.readValue(json, SimpleUnion.class))
                     .isInstanceOf(JsonMappingException.class);
         }
     }
@@ -105,10 +98,10 @@ final class ConjureUnionSerDeTest {
         ObjectMapper first = prefixedMapper("first:");
         ObjectMapper second = prefixedMapper("second:");
         for (int i = 0; i < 2; i++) {
-            assertThat(first.readValue("{\"type\":\"known\",\"value\":\"hello\"}", SampleUnion.class))
-                    .isEqualTo(new Known("first:hello"));
-            assertThat(second.readValue("{\"type\":\"known\",\"value\":\"hello\"}", SampleUnion.class))
-                    .isEqualTo(new Known("second:hello"));
+            assertThat(first.readValue("{\"type\":\"foo\",\"foo\":\"hello\"}", SimpleUnion.class))
+                    .isEqualTo(SimpleUnion.foo("first:hello"));
+            assertThat(second.readValue("{\"type\":\"foo\",\"foo\":\"hello\"}", SimpleUnion.class))
+                    .isEqualTo(SimpleUnion.foo("second:hello"));
         }
     }
 
@@ -121,8 +114,12 @@ final class ConjureUnionSerDeTest {
                     .<Callable<Void>>mapToObj(_index -> () -> {
                         start.await(30, TimeUnit.SECONDS);
                         for (int i = 0; i < 100; i++) {
-                            assertThat(mapper.readValue("{\"type\":\"known\",\"value\":\"hello\"}", SampleUnion.class))
-                                    .isEqualTo(new Known("hello"));
+                            assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"hello\"}", SimpleUnion.class))
+                                    .isEqualTo(SimpleUnion.foo("hello"));
+                            assertThat(mapper.readValue(
+                                            "{\"type\":\"camelCasedField\",\"camelCasedField\":\"hello\"}",
+                                            CamelCaseUnion.class))
+                                    .isEqualTo(CamelCaseUnion.camelCasedField("hello"));
                         }
                         return null;
                     })
@@ -137,11 +134,11 @@ final class ConjureUnionSerDeTest {
 
     @Test
     void serializesStaticAndDynamicUnionTypes() throws IOException {
-        for (SampleUnion value : List.of(new Known("hello"), new Unknown("future", Map.of("future", 42)))) {
-            String json = mapper.writerFor(SampleUnion.class).writeValueAsString(value);
+        for (SimpleUnion value : List.of(SimpleUnion.foo("hello"), SimpleUnion.unknown("future", 42))) {
+            String json = mapper.writerFor(SimpleUnion.class).writeValueAsString(value);
             assertThat(json).startsWith("{\"type\":");
             assertThat(mapper.writeValueAsString(value)).isEqualTo(json);
-            assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(value);
+            assertThat(mapper.readValue(json, SimpleUnion.class)).isEqualTo(value);
         }
     }
 
@@ -151,13 +148,13 @@ final class ConjureUnionSerDeTest {
         ObjectMapper typed = new ObjectMapper()
                 .activateDefaultTyping(
                         BasicPolymorphicTypeValidator.builder()
-                                .allowIfSubType(SampleUnion.class)
+                                .allowIfSubType(SimpleUnion.class)
                                 .build(),
                         ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
-        Known value = new Known("hello");
-        String json = typed.writerFor(SampleUnion.class).writeValueAsString(value);
-        assertThat(json).contains(Known.class.getName());
-        assertThat(typed.readValue(json, SampleUnion.class)).isEqualTo(value);
+        SimpleUnion value = SimpleUnion.foo("hello");
+        String json = typed.writerFor(SimpleUnion.class).writeValueAsString(value);
+        assertThat(json).contains(SimpleUnion.Foo.class.getName());
+        assertThat(typed.readValue(json, SimpleUnion.class)).isEqualTo(value);
     }
 
     private static ObjectMapper prefixedMapper(String prefix) {
@@ -170,45 +167,33 @@ final class ConjureUnionSerDeTest {
                 }));
     }
 
-    @JsonDeserialize(using = SampleDeserializer.class)
-    @JsonSerialize(using = ConjureUnionSerializer.class)
-    sealed interface SampleUnion permits Known, Unknown {}
-
-    @JsonDeserialize
-    @JsonSerialize
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonPropertyOrder("type")
-    record Known(String value) implements SampleUnion {
-        @JsonProperty("type")
-        String type() {
-            return "known";
-        }
-    }
-
-    @JsonDeserialize
-    @JsonSerialize
-    @JsonPropertyOrder("type")
-    record Unknown(String type, @JsonAnyGetter Map<String, Object> values) implements SampleUnion {}
-
-    record Alias(@JsonValue SampleUnion value) {
+    record Alias(@JsonValue SimpleUnion value) {
         @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
         Alias {}
     }
 
-    record Holder(List<SampleUnion> values) {}
+    record Holder(List<SimpleUnion> values) {}
 
-    static final class SampleDeserializer extends ConjureUnionDeserializer<SampleUnion> {
-        SampleDeserializer() {
-            super(SampleUnion.class, new Class<?>[] {Known.class});
-        }
+    record MixedHolder(SimpleUnion first, CamelCaseUnion second, Map<String, SimpleUnion> values) {}
 
-        @Override
-        protected SampleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            return switch (type) {
-                case "known" -> (SampleUnion) deserializeVariant(parser, context, 0);
-                default -> new Unknown(type, deserializeUnknown(parser, context));
-            };
+    @Test
+    void contextualizesEachUnionInPropertiesAndContainers() throws IOException {
+        String json = """
+            {"first":{"type":"foo","foo":"first"},
+             "second":{"type":"camelCasedField","camelCasedField":"second"},
+             "values":{"third":{"type":"bar","bar":3}}}
+            """;
+        MixedHolder expected = new MixedHolder(
+                SimpleUnion.foo("first"),
+                CamelCaseUnion.camelCasedField("second"),
+                Map.of("third", SimpleUnion.bar(3)));
+        for (int i = 0; i < 2; i++) {
+            assertThat(mapper.readValue(json, MixedHolder.class)).isEqualTo(expected);
+            assertThat(mapper.readValue(
+                            "{\"type\":\"camelCasedField\",\"camelCasedField\":\"root\"}", CamelCaseUnion.class))
+                    .isEqualTo(CamelCaseUnion.camelCasedField("root"));
+            assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"root\"}", SimpleUnion.class))
+                    .isEqualTo(SimpleUnion.foo("root"));
         }
     }
 }

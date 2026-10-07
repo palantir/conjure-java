@@ -25,8 +25,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonDeserialize(using = EmptyUnion.Deserializer.class)
-@JsonSerialize(using = ConjureUnionSerializer.class)
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
     public static EmptyUnion unknown(@Safe String type, Object value) {
@@ -34,6 +34,21 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
             default:
                 return new Unknown(type, Collections.singletonMap(type, value));
         }
+    }
+
+    static EmptyUnion deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (EmptyUnion) deserializer.deserializeVariant(parser, context, variantIndex);
     }
 
     public abstract <T> T accept(Visitor<T> visitor);
@@ -102,26 +117,6 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
         @Override
         public String toString() {
             return "EmptyUnion{value: UnknownWrapper{value: " + value + "}}";
-        }
-    }
-
-    static final class Deserializer extends ConjureUnionDeserializer<EmptyUnion> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {};
-
-        Deserializer() {
-            super(EmptyUnion.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected EmptyUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex = switch (type) {
-                default -> -1;
-            };
-            if (variantIndex < 0) {
-                return new Unknown(type, deserializeUnknown(parser, context));
-            }
-            return (EmptyUnion) deserializeVariant(parser, context, variantIndex);
         }
     }
 

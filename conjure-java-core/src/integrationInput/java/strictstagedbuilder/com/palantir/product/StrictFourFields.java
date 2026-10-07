@@ -207,7 +207,7 @@ public final class StrictFourFields {
         private Optional<String> optionalItem = Optional.empty();
 
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private DefaultBuilder() {}

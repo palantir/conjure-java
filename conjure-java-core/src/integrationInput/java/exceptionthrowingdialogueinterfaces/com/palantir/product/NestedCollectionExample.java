@@ -139,11 +139,11 @@ public final class NestedCollectionExample {
         private List<List<String>> nestedList = ConjureCollections.newList();
 
         @JsonSetter(value = "nestedMap", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Map<String, String>> nestedMap = new LinkedHashMap<>();
 
         @JsonSetter(value = "mixedCollection", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, List<ObjectReference>> mixedCollection = new LinkedHashMap<>();
 
         private Builder() {}

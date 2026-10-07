@@ -72,6 +72,7 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -95,10 +96,16 @@ final class UnionGeneratorTests {
                 "ConjureUnionSerializer",
                 "ConjureUnionSerializer_",
                 "ConjureUnionDeserializer",
-                "ConjureUnionDeserializer_")) {
+                "ConjureUnionDeserializer_",
+                "ConjureJacksonSupport",
+                "ConjureJacksonSupport_",
+                "ContainerDeserializer",
+                "CopyingDeserializer",
+                "UnionDeserializer",
+                "UnionSerializer")) {
             UnionDefinition.Builder union = UnionDefinition.builder().typeName(TypeName.of(name, "collision"));
             for (String field : name.equals("Named")
-                    ? List.of("serializer", "deserializer", "serializer_", "deserializer_")
+                    ? List.of("serializer", "deserializer", "serializer_", "deserializer_", "deserializeUnion")
                     : List.of("value")) {
                 union.union(field(field, Type.primitive(PrimitiveType.STRING)));
             }
@@ -122,10 +129,18 @@ final class UnionGeneratorTests {
                     "ConjureUnionSerializer",
                     "ConjureUnionSerializer_",
                     "ConjureUnionDeserializer",
-                    "ConjureUnionDeserializer_")) {
+                    "ConjureUnionDeserializer_",
+                    "ConjureJacksonSupport",
+                    "ConjureJacksonSupport_",
+                    "ContainerDeserializer",
+                    "CopyingDeserializer",
+                    "UnionDeserializer",
+                    "UnionSerializer")) {
                 Class<?> type = loader.loadClass("collision." + name);
+                assertThat(Arrays.stream(type.getDeclaredClasses()).filter(JsonDeserializer.class::isAssignableFrom))
+                        .isEmpty();
                 for (String field : name.equals("Named")
-                        ? List.of("serializer", "deserializer", "serializer_", "deserializer_")
+                        ? List.of("serializer", "deserializer", "serializer_", "deserializer_", "deserializeUnion")
                         : List.of("value")) {
                     String json = "{\"type\":\"" + field + "\",\"" + field + "\":\"test\"}";
                     Object value = type.getMethod(field, String.class).invoke(null, "test");
@@ -136,6 +151,30 @@ final class UnionGeneratorTests {
                                 .isEqualTo(Character.toUpperCase(field.charAt(0)) + field.substring(1));
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    void contextualizesNestedUnionsAndPreservesUnknownProperties() throws Exception {
+        ConjureDefinition definition = ConjureDefinition.builder()
+                .version(1)
+                .types(unionDefinition("InnerUnion", field("value", Type.primitive(PrimitiveType.STRING))))
+                .types(unionDefinition(
+                        "OuterUnion", field("inner", Type.reference(TypeName.of("InnerUnion", "ownership")))))
+                .build();
+        try (URLClassLoader loader =
+                generate(definition, Options.builder().sealedUnions(true).build())) {
+            Class<?> type = loader.loadClass("ownership.OuterUnion");
+            ObjectMapper mapper = new ObjectMapper();
+            for (String json : List.of(
+                    "{\"type\":\"inner\",\"inner\":{\"type\":\"value\",\"value\":\"known\"}}",
+                    "{\"inner\":{\"value\":\"known\",\"type\":\"value\"},\"type\":\"inner\"}",
+                    "{\"type\":\"inner\",\"inner\":{\"type\":\"future\",\"future\":[1,2],\"extra\":true}}",
+                    "{\"inner\":{\"future\":[1,2],\"extra\":true,\"type\":\"future\"},\"type\":\"inner\"}")) {
+                Object value = mapper.readValue(json, type);
+                assertThat(mapper.readTree(mapper.writerFor(type).writeValueAsString(value)))
+                        .isEqualTo(mapper.readTree(json));
             }
         }
     }
@@ -446,7 +485,9 @@ final class UnionGeneratorTests {
                 "ConjureMapDeserializer",
                 "ConjureMapDeserializer_",
                 "ConjureSetDeserializer",
-                "ConjureSetDeserializer_")) {
+                "ConjureSetDeserializer_",
+                "ConjureJacksonSupport",
+                "ConjureJacksonSupport_")) {
             definition.types(TypeDefinition.alias(AliasDefinition.builder()
                     .typeName(TypeName.of(helperName, "ownership"))
                     .alias(string)

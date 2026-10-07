@@ -189,7 +189,7 @@ public final class CollectionsTestObject {
         private List<String> items = ConjureCollections.newList();
 
         @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();

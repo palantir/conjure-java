@@ -133,7 +133,7 @@ public final class CollectionExample {
         private Set<String> stringSet = ConjureCollections.newSet();
 
         @JsonSetter(value = "stringMap", nulls = Nulls.SKIP)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, String> stringMap = new LinkedHashMap<>();
 
         private Builder() {}

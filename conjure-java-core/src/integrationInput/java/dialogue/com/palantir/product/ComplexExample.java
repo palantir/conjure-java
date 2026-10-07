@@ -141,7 +141,7 @@ public final class ComplexExample {
         boolean _buildInvoked;
 
         @JsonSetter(value = "metadata", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<StringAliasEx, Optional<List<ObjectReference>>> metadata = new LinkedHashMap<>();
 
         private EnumExample status;

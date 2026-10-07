@@ -124,15 +124,15 @@ public final class MapExample {
         boolean _buildInvoked;
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, String> items = new LinkedHashMap<>();
 
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Optional<String>> optionalItems = new LinkedHashMap<>();
 
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        @JsonDeserialize(using = ConjureMapDeserializer.class)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, OptionalAlias> aliasOptionalItems = new LinkedHashMap<>();
 
         private Builder() {}
