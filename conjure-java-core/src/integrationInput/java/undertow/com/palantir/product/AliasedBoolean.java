@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class AliasedBoolean {
+public final class AliasedBoolean implements Comparable<AliasedBoolean> {
     private final boolean value;
 
     private AliasedBoolean(boolean value) {
@@ -35,6 +35,11 @@ public final class AliasedBoolean {
     @Override
     public int hashCode() {
         return Boolean.hashCode(this.value);
+    }
+
+    @Override
+    public int compareTo(AliasedBoolean other) {
+        return Boolean.compare(value, other.get());
     }
 
     public static AliasedBoolean valueOf(String value) {
