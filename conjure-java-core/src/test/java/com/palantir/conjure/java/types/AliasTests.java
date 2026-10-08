@@ -24,6 +24,7 @@ import allexamples.com.palantir.product.AliasOfAliasOfDoubleAliasExample;
 import allexamples.com.palantir.product.AliasOfDoubleAliasExample;
 import allexamples.com.palantir.product.AliasOfUuidAliasExample;
 import allexamples.com.palantir.product.DoubleAliasExample;
+import allexamples.com.palantir.product.ExternalFloatAliasExample;
 import allexamples.com.palantir.product.ExternalLongAliasOne;
 import allexamples.com.palantir.product.ExternalLongAliasTwo;
 import allexamples.com.palantir.product.SafeDoubleAliasExample;
@@ -214,5 +215,16 @@ public class AliasTests {
                 AliasOfAliasOfDoubleAliasExample.of(AliasOfDoubleAliasExample.of(DoubleAliasExample.of(right)));
 
         assertThat(leftAlias.compareTo(rightAlias)).isEqualTo(expectedComparison);
+    }
+
+    @Test
+    public void testExternalFloatAliasEqualityMatchesHashCode() {
+        assertThat(ExternalFloatAliasExample.of(1.5f))
+                .isEqualTo(ExternalFloatAliasExample.of(1.5f))
+                .hasSameHashCodeAs(ExternalFloatAliasExample.of(1.5f));
+        assertThat(ExternalFloatAliasExample.of(Float.NaN))
+                .isEqualTo(ExternalFloatAliasExample.of(Float.NaN))
+                .hasSameHashCodeAs(ExternalFloatAliasExample.of(Float.NaN));
+        assertThat(ExternalFloatAliasExample.of(-0.0f)).isNotEqualTo(ExternalFloatAliasExample.of(0.0f));
     }
 }

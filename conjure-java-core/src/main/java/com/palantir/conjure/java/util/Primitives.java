@@ -50,6 +50,10 @@ public final class Primitives {
         return type.withoutAnnotations().equals(TypeName.DOUBLE);
     }
 
+    public static boolean isFloat(TypeName type) {
+        return type.withoutAnnotations().equals(TypeName.FLOAT);
+    }
+
     public static boolean isPrimitive(TypeName type) {
         return getPrimitiveType(type).isPresent();
     }
