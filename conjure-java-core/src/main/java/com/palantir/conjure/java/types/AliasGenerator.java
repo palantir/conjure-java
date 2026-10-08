@@ -539,8 +539,14 @@ public final class AliasGenerator {
             com.palantir.conjure.spec.TypeName externalName = value.getExternalReference();
             // External types are opaque, so only these well-known JDK types are treated as comparable
             return switch (externalName.getPackage() + '.' + externalName.getName()) {
-                // java.lang.Long is stored unboxed
+                // Boxed primitives are stored unboxed
+                case "java.lang.Boolean" -> Optional.of(createCompareTo(aliasName, Boolean.class));
+                case "java.lang.Byte" -> Optional.of(createCompareTo(aliasName, Byte.class));
+                case "java.lang.Character" -> Optional.of(createCompareTo(aliasName, Character.class));
+                case "java.lang.Double" -> Optional.of(createCompareTo(aliasName, Double.class));
+                case "java.lang.Integer" -> Optional.of(createCompareTo(aliasName, Integer.class));
                 case "java.lang.Long" -> Optional.of(createCompareTo(aliasName, Long.class));
+                case "java.lang.Short" -> Optional.of(createCompareTo(aliasName, Short.class));
                 case "java.time.Instant" -> Optional.of(createCompareTo(aliasName));
                 default -> Optional.empty();
             };
