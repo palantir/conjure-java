@@ -173,6 +173,7 @@ public final class ObjectGeneratorTests {
                 external("java.lang", "Byte", PrimitiveType.INTEGER),
                 external("java.lang", "Character", PrimitiveType.STRING),
                 external("java.lang", "Double", PrimitiveType.DOUBLE),
+                external("java.lang", "Float", PrimitiveType.DOUBLE),
                 external("java.lang", "Integer", PrimitiveType.INTEGER),
                 external("java.lang", "Long", PrimitiveType.SAFELONG),
                 external("java.lang", "Short", PrimitiveType.INTEGER),
@@ -189,7 +190,6 @@ public final class ObjectGeneratorTests {
                 Type.reference(objectName),
                 Type.reference(enumName),
                 Type.reference(unionName),
-                external("java.lang", "Float", PrimitiveType.DOUBLE),
                 external("java.lang", "String", PrimitiveType.STRING),
                 external("com.palantir.product", "ExampleId", PrimitiveType.STRING));
 
@@ -217,6 +217,7 @@ public final class ObjectGeneratorTests {
         "Byte, INTEGER",
         "Character, STRING",
         "Double, DOUBLE",
+        "Float, DOUBLE",
         "Integer, INTEGER",
         "Long, SAFELONG",
         "Short, INTEGER"

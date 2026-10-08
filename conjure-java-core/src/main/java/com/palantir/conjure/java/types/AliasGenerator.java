@@ -544,6 +544,7 @@ public final class AliasGenerator {
                 case "java.lang.Byte" -> Optional.of(createCompareTo(aliasName, Byte.class));
                 case "java.lang.Character" -> Optional.of(createCompareTo(aliasName, Character.class));
                 case "java.lang.Double" -> Optional.of(createCompareTo(aliasName, Double.class));
+                case "java.lang.Float" -> Optional.of(createCompareTo(aliasName, Float.class));
                 case "java.lang.Integer" -> Optional.of(createCompareTo(aliasName, Integer.class));
                 case "java.lang.Long" -> Optional.of(createCompareTo(aliasName, Long.class));
                 case "java.lang.Short" -> Optional.of(createCompareTo(aliasName, Short.class));
