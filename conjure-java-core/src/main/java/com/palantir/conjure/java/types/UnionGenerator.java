@@ -20,13 +20,17 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -52,6 +56,7 @@ import com.palantir.javapoet.CodeBlock;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.MethodSpec;
+import com.palantir.javapoet.NameAllocator;
 import com.palantir.javapoet.ParameterSpec;
 import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
@@ -60,6 +65,7 @@ import com.palantir.javapoet.TypeVariableName;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -96,6 +102,7 @@ public final class UnionGenerator {
 
     private static final String SEALED_KNOWN_INTERFACE = "Known";
     private static final String SEALED_UNKNOWN_VARIANT_NAME = "Unknown";
+    private static final String DESERIALIZE_UNION_METHOD_NAME = "deserializeUnion";
 
     public static JavaFile generateUnionType(
             TypeMapper typeMapper,
@@ -118,6 +125,15 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
 
         if (options.sealedUnions()) {
+            ClassName deserializerClass = typeMapper
+                    .jacksonSupport()
+                    .registerUnion(
+                            unionClass,
+                            typeDef.getUnion().stream()
+                                    .map(member -> sealedVariantClass(unionClass, member.getFieldName()))
+                                    .toList(),
+                            DESERIALIZE_UNION_METHOD_NAME);
+
             ClassName unknownVariant = unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME);
             List<AnnotationSpec> safety =
                     ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
@@ -126,8 +142,8 @@ public final class UnionGenerator {
                             typeDef.getTypeName().getName())
                     .addAnnotations(safety)
                     .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
-                    .addAnnotation(generateJsonTypeInfo(unknownVariant))
-                    .addAnnotation(generateJsonSubTypes(unionClass, typeDef.getUnion()))
+                    .addAnnotation(generateJsonDeserialize(deserializerClass))
+                    .addAnnotation(generateJsonSerialize(typeMapper, unionClass))
                     .addAnnotation(ignoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT, Modifier.SEALED)
                     .addPermittedSubclasses(typeDef.getUnion().stream()
@@ -140,7 +156,8 @@ public final class UnionGenerator {
                     .addMethods(generateSealedThrowOnUnknown(unionClass, unknownVariant, typeDef.getUnion()))
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
-                    .addType(generateUnknownWrapper(unionClass, visitorClass, options));
+                    .addType(generateUnknownWrapper(unionClass, visitorClass, options))
+                    .addMethod(generateDeserializeSelectedMethod(unionClass, deserializerClass, typeDef.getUnion()));
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -236,33 +253,19 @@ public final class UnionGenerator {
                 .build();
     }
 
-    private static AnnotationSpec generateJsonTypeInfo(ClassName unknownVariant) {
-        return AnnotationSpec.builder(JsonTypeInfo.class)
-                .addMember("use", "JsonTypeInfo.Id.NAME")
-                .addMember("include", "JsonTypeInfo.As.EXISTING_PROPERTY")
-                .addMember("property", "\"type\"")
-                .addMember("visible", "$L", true)
-                .addMember("defaultImpl", "$T.class", unknownVariant)
+    private static AnnotationSpec generateJsonDeserialize(ClassName deserializerClass) {
+        return AnnotationSpec.builder(JsonDeserialize.class)
+                .addMember("using", "$T.class", deserializerClass)
                 .build();
     }
 
-    private static AnnotationSpec generateJsonSubTypes(ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
-        List<AnnotationSpec> subAnnotations = memberTypeDefs.stream()
-                .map(memberTypeDef -> AnnotationSpec.builder(JsonSubTypes.Type.class)
-                        .addMember("value", "$T.class", sealedVariantClass(unionClass, memberTypeDef.getFieldName()))
-                        .addMember(
-                                "name",
-                                "$S",
-                                // "unknown" is valid here since UnknownVariant is only used as a default
-                                memberTypeDef.getFieldName().get())
-                        .build())
-                .toList();
-        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
-        subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
-        if (subAnnotations.isEmpty()) {
-            annotationBuilder.addMember("value", "{}");
-        }
-        return annotationBuilder.build();
+    private static AnnotationSpec generateJsonSerialize(TypeMapper typeMapper, ClassName unionClass) {
+        return AnnotationSpec.builder(JsonSerialize.class)
+                .addMember(
+                        "using",
+                        "$T.class",
+                        typeMapper.jacksonSupport().get(unionClass, JacksonSupportGenerator.Helper.UNION_SERIALIZER))
+                .build();
     }
 
     private static AnnotationSpec ignoreUnknownAnnotation() {
@@ -348,18 +351,31 @@ public final class UnionGenerator {
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(ParameterSpec.builder(memberType, variableName)
                                     .build())
-                            .addStatement(
-                                    options.sealedUnions()
-                                            ? CodeBlock.of(
-                                                    "return new $T($L)",
-                                                    sealedVariantClass(unionClass, memberName),
-                                                    variableName)
-                                            : CodeBlock.of(
-                                                    "return new $T(new $T($L))",
-                                                    unionClass,
-                                                    wrapperClass(unionClass, memberName),
-                                                    variableName))
                             .returns(unionClass);
+                    CodeBlock value = CodeBlock.of("$L", variableName);
+                    if (hasOwnedCollection(memberTypeDef.getType(), options)) {
+                        builder.addStatement(
+                                "$L",
+                                Expressions.requireNonNull(
+                                        variableName, String.format("%s cannot be null", memberName.get())));
+                        value = memberTypeDef.getType().accept(TypeVisitor.IS_MAP)
+                                ? CodeBlock.of("new $T<>($L)", LinkedHashMap.class, variableName)
+                                : CodeBlock.of(
+                                        "$T.$L($L)",
+                                        ConjureCollections.class,
+                                        CollectionType.from(memberTypeDef.getType(), options)
+                                                .getConjureCollectionStaticFactoryMethod(),
+                                        variableName);
+                    }
+                    builder.addStatement(
+                            options.sealedUnions()
+                                    ? CodeBlock.of(
+                                            "return new $T($L)", sealedVariantClass(unionClass, memberName), value)
+                                    : CodeBlock.of(
+                                            "return new $T(new $T($L))",
+                                            unionClass,
+                                            wrapperClass(unionClass, memberName),
+                                            value));
                     Javadoc.render(memberTypeDef.getDocs(), memberTypeDef.getDeprecated())
                             .ifPresent(javadoc -> builder.addJavadoc("$L", javadoc));
                     memberTypeDef.getDeprecated().ifPresent(_deprecated -> builder.addAnnotation(Deprecated.class));
@@ -829,6 +845,30 @@ public final class UnionGenerator {
                 Stream.of(NameTypeMetadata.UNKNOWN));
     }
 
+    private static MethodSpec generateDeserializeSelectedMethod(
+            ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(DESERIALIZE_UNION_METHOD_NAME)
+                .addModifiers(Modifier.STATIC)
+                .returns(unionClass)
+                .addParameter(JsonParser.class, "parser")
+                .addParameter(DeserializationContext.class, "context")
+                .addParameter(String.class, "type")
+                .addParameter(deserializerClass, "deserializer")
+                .addException(IOException.class)
+                .addCode("int variantIndex = switch (type) {\n");
+        for (int index = 0; index < memberTypeDefs.size(); index++) {
+            builder.addStatement("case $S -> $L", memberTypeDefs.get(index).getFieldName(), index);
+        }
+        builder.addStatement("default -> -1").addCode("};\n");
+        builder.beginControlFlow("if (variantIndex < 0)")
+                .addStatement(
+                        "return new $T(type, deserializer.deserializeUnknown(parser, context))",
+                        unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME))
+                .endControlFlow()
+                .addStatement("return ($T) deserializer.deserializeVariant(parser, context, variantIndex)", unionClass);
+        return builder.build();
+    }
+
     /**
      * Generates a prototype for a visitor builder setter that can be turned into an interface method declaration or an
      * implementation of such interface method. The signature of the returned builder is
@@ -903,6 +943,10 @@ public final class UnionGenerator {
             ClassName visitorClass,
             List<FieldDefinition> memberTypeDefs,
             Options options) {
+        NameAllocator methodNames = new NameAllocator();
+        memberTypeDefs.forEach(
+                member -> methodNames.newName(JavaNameSanitizer.sanitize(sanitizeUnknown(member.getFieldName()))));
+        String jsonFactoryName = methodNames.newName("fromJson");
         return memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
@@ -925,22 +969,15 @@ public final class UnionGenerator {
                                     .addMember("value", "$S", memberTypeDef.getFieldName())
                                     .build())
                             .addFields(fields)
-                            .addMethod(MethodSpec.constructorBuilder()
-                                    .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
-                                    .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                            .addAnnotation(wrapperConstructorParameterAnnotation(
-                                                    memberTypeDef, typeMapper, typesMap, options))
-                                            .addAnnotations(deserializationAnnotationForSets(memberTypeDef))
-                                            .addAnnotation(Nonnull.class)
-                                            .build())
-                                    .addStatement(
-                                            "$L",
-                                            Expressions.requireNonNull(
-                                                    VALUE_FIELD_NAME,
-                                                    String.format("%s cannot be null", memberName.get())))
-                                    .addStatement(createConstructor(memberTypeDef.getType(), options))
-                                    .build())
+                            .addMethods(generateWrapperConstructors(
+                                    wrapperClass,
+                                    memberType,
+                                    memberTypeDef,
+                                    memberName,
+                                    typeMapper,
+                                    typesMap,
+                                    options,
+                                    jsonFactoryName))
                             .addMethod(MethodSpec.methodBuilder(options.sealedUnions() ? "type" : "getType")
                                     .addModifiers(Modifier.PRIVATE)
                                     .addAnnotation(getTypeJsonPropertyAnnotation(options))
@@ -958,6 +995,12 @@ public final class UnionGenerator {
                                     .addStatement("return $L", VALUE_FIELD_NAME)
                                     .returns(memberType)
                                     .build());
+
+                    if (options.sealedUnions()) {
+                        typeBuilder.addAnnotation(ignoreUnknownAnnotation());
+                        typeBuilder.addAnnotation(typeFirstAnnotation());
+                        addDefaultJacksonAnnotations(typeBuilder);
+                    }
 
                     if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
                         typeBuilder.addMethod(createWrapperAcceptMethod(
@@ -994,6 +1037,92 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
+    private static void addDefaultJacksonAnnotations(TypeSpec.Builder typeBuilder) {
+        typeBuilder
+                .addJavadoc("""
+                    The empty {@link $T} and {@link $T} annotations override the custom
+                    serializer and deserializer inherited from the superclass, allowing Jackson to handle
+                    this variant directly.
+                    """, JsonDeserialize.class, JsonSerialize.class)
+                .addAnnotation(JsonDeserialize.class)
+                .addAnnotation(JsonSerialize.class);
+    }
+
+    private static List<MethodSpec> generateWrapperConstructors(
+            ClassName wrapperClass,
+            TypeName memberType,
+            FieldDefinition memberTypeDef,
+            FieldName memberName,
+            TypeMapper typeMapper,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options,
+            String jsonFactoryName) {
+        ParameterSpec.Builder jsonParameter = ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
+                .addAnnotation(wrapperConstructorParameterAnnotation(memberTypeDef, typeMapper, typesMap, options))
+                .addAnnotations(deserializationAnnotationForSets(memberTypeDef, typeMapper, wrapperClass, options))
+                .addAnnotation(Nonnull.class);
+        CodeBlock checkNotNull =
+                Expressions.requireNonNull(VALUE_FIELD_NAME, String.format("%s cannot be null", memberName.get()));
+        Type type = memberTypeDef.getType();
+        if (hasOwnedCollection(type, options)) {
+            if (type.accept(TypeVisitor.IS_MAP)) {
+                jsonParameter.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                        .addMember(
+                                "using",
+                                "$T.class",
+                                typeMapper
+                                        .jacksonSupport()
+                                        .get(wrapperClass, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
+                        .build());
+            }
+            MethodSpec.Builder jsonFactory = MethodSpec.methodBuilder(jsonFactoryName)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
+                    .addParameter(jsonParameter.build())
+                    .returns(wrapperClass)
+                    .addStatement("$L", checkNotNull);
+            if (type.accept(TypeVisitor.IS_SET) && options.nonNullCollections()) {
+                jsonFactory
+                        .beginControlFlow("for ($T element : $L)", Object.class, VALUE_FIELD_NAME)
+                        .addStatement(
+                                "$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
+                        .endControlFlow();
+            }
+            return List.of(
+                    MethodSpec.constructorBuilder()
+                            .addModifiers(Modifier.PRIVATE)
+                            .addParameter(memberType, VALUE_FIELD_NAME)
+                            .addStatement(
+                                    "this.$1L = $2T.$3L($1L)",
+                                    VALUE_FIELD_NAME,
+                                    Collections.class,
+                                    type.accept(TypeVisitor.IS_MAP) ? "unmodifiableMap" : "unmodifiableSet")
+                            .build(),
+                    jsonFactory
+                            .addStatement("return new $T($L)", wrapperClass, VALUE_FIELD_NAME)
+                            .build());
+        }
+        return List.of(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
+                .addParameter(jsonParameter.build())
+                .addStatement("$L", checkNotNull)
+                .addStatement(createConstructor(memberTypeDef.getType(), options))
+                .build());
+    }
+
+    private static boolean hasOwnedCollection(Type type, Options options) {
+        return options.sealedUnions()
+                && options.defensiveCollections()
+                && (type.accept(TypeVisitor.IS_MAP) || type.accept(TypeVisitor.IS_SET));
+    }
+
+    private static AnnotationSpec typeFirstAnnotation() {
+        return AnnotationSpec.builder(JsonPropertyOrder.class)
+                .addMember("value", "$S", "type")
+                .build();
+    }
+
     private static AnnotationSpec getTypeJsonPropertyAnnotation(Options options) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonProperty.class);
         if (!options.sealedUnions()) {
@@ -1002,11 +1131,20 @@ public final class UnionGenerator {
         return builder.addMember("index", "$L", 0).build();
     }
 
-    private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field) {
+    private static Iterable<AnnotationSpec> deserializationAnnotationForSets(
+            FieldDefinition field, TypeMapper typeMapper, ClassName wrapperClass, Options options) {
         if (field.getType().accept(TypeVisitor.IS_SET)) {
-            return List.of(AnnotationSpec.builder(JsonDeserialize.class)
-                    .addMember("as", "$T.class", LinkedHashSet.class)
-                    .build());
+            AnnotationSpec.Builder annotation =
+                    AnnotationSpec.builder(JsonDeserialize.class).addMember("as", "$T.class", LinkedHashSet.class);
+            if (options.sealedUnions() && options.defensiveCollections()) {
+                annotation.addMember(
+                        "using",
+                        "$T.class",
+                        typeMapper
+                                .jacksonSupport()
+                                .get(wrapperClass, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER));
+            }
+            return List.of(annotation.build());
         }
         return List.of();
     }
@@ -1102,6 +1240,11 @@ public final class UnionGenerator {
                                 AnnotationSpec.builder(JsonAnySetter.class).build())
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build());
+
+        if (options.sealedUnions()) {
+            typeBuilder.addAnnotation(typeFirstAnnotation());
+            addDefaultJacksonAnnotations(typeBuilder);
+        }
 
         if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
             typeBuilder.addMethod(createWrapperAcceptMethod(

@@ -63,11 +63,21 @@ public final class ExampleDefensiveAliasedSet {
         return result;
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExampleDefensiveAliasedSet of(
             @Nonnull @JsonDeserialize(as = LinkedHashSet.class) Set<Integer> value) {
         return new ExampleDefensiveAliasedSet(
                 ConjureCollections.newSet(Preconditions.checkNotNull(value, "value cannot be null")));
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    private static ExampleDefensiveAliasedSet fromJson(
+            @Nonnull
+                    @JsonDeserialize(
+                            as = LinkedHashSet.class,
+                            using = ConjureJacksonSupport.ContainerDeserializer.class)
+                    Set<Integer> value) {
+        Preconditions.checkNotNull(value, "value cannot be null");
+        return new ExampleDefensiveAliasedSet(value);
     }
 
     public static ExampleDefensiveAliasedSet empty() {

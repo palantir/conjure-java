@@ -138,8 +138,12 @@ public final class NestedCollectionExample {
 
         private List<List<String>> nestedList = ConjureCollections.newList();
 
+        @JsonSetter(value = "nestedMap", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Map<String, String>> nestedMap = new LinkedHashMap<>();
 
+        @JsonSetter(value = "mixedCollection", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, List<ObjectReference>> mixedCollection = new LinkedHashMap<>();
 
         private Builder() {}
@@ -173,7 +177,6 @@ public final class NestedCollectionExample {
             return this;
         }
 
-        @JsonSetter(value = "nestedMap", nulls = Nulls.SKIP)
         public Builder nestedMap(@Nonnull Map<String, Map<String, String>> nestedMap) {
             checkNotBuilt();
             this.nestedMap = new LinkedHashMap<>(Preconditions.checkNotNull(nestedMap, "nestedMap cannot be null"));
@@ -192,7 +195,6 @@ public final class NestedCollectionExample {
             return this;
         }
 
-        @JsonSetter(value = "mixedCollection", nulls = Nulls.SKIP)
         public Builder mixedCollection(@Nonnull Map<String, List<ObjectReference>> mixedCollection) {
             checkNotBuilt();
             this.mixedCollection =

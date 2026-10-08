@@ -47,19 +47,103 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.javapoet.JavaFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public final class ObjectGeneratorTests {
 
     @TempDir
     public File tempDir;
+
+    @ParameterizedTest
+    @CsvSource({"false,false", "false,true", "true,false", "true,true"})
+    void jacksonHelpersAreSharedWithinEachPrefixedPackage(boolean sealed, boolean defensive) {
+        ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
+        Type string = Type.primitive(PrimitiveType.STRING);
+        for (String packageName : List.of("first.api", "second.api")) {
+            for (String name : List.of("First", "Second")) {
+                definition.types(TypeDefinition.object(ObjectDefinition.builder()
+                        .typeName(TypeName.of(name + "Object", packageName))
+                        .fields(FieldDefinition.builder()
+                                .fieldName(FieldName.of("values"))
+                                .type(Type.map(MapType.of(string, string)))
+                                .build())
+                        .build()));
+                definition.types(TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(TypeName.of(name + "Set", packageName))
+                        .alias(Type.set(SetType.of(string)))
+                        .build()));
+                definition.types(TypeDefinition.union(UnionDefinition.builder()
+                        .typeName(TypeName.of(name + "Union", packageName))
+                        .union(FieldDefinition.builder()
+                                .fieldName(FieldName.of("value"))
+                                .type(string)
+                                .build())
+                        .build()));
+            }
+        }
+        ObjectGenerator generator = new ObjectGenerator(Options.builder()
+                .packagePrefix("prefix")
+                .sealedUnions(sealed)
+                .defensiveCollections(defensive)
+                .build());
+        List<JavaFile> files = generator.generate(definition.build()).toList();
+        assertThat(files.stream()
+                        .map(file -> file.packageName() + "." + file.typeSpec().name()))
+                .doesNotHaveDuplicates();
+        for (String packageName : List.of("prefix.first.api", "prefix.second.api")) {
+            List<JavaFile> helpers = files.stream()
+                    .filter(file -> file.packageName().equals(packageName))
+                    .filter(file -> file.typeSpec().name().startsWith("Conjure"))
+                    .toList();
+            assertThat(helpers).hasSize(1);
+            assertThat(helpers).allSatisfy(file -> {
+                assertThat(file.typeSpec().modifiers()).doesNotContain(Modifier.PUBLIC);
+                assertThat(file.toString()).doesNotContain("com.palantir.conjure.java.lib.internal");
+                assertThat(file.typeSpec().name()).isEqualTo("ConjureJacksonSupport");
+                assertThat(file.toString())
+                        .containsOnlyOnce("class ContainerDeserializer")
+                        .containsOnlyOnce("class CopyingDeserializer");
+                if (sealed) {
+                    assertThat(file.toString())
+                            .containsOnlyOnce("class UnionDeserializer")
+                            .containsOnlyOnce("class UnionSerializer");
+                } else {
+                    assertThat(file.toString()).doesNotContain("class UnionDeserializer", "class UnionSerializer");
+                }
+            });
+        }
+        assertThat(generator.generate(ConjureDefinition.builder().version(1).build()))
+                .isEmpty();
+    }
+
+    @Test
+    void scalarModelsDoNotGenerateJacksonHelpers() {
+        ConjureDefinition definition = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(TypeName.of("Scalar", "example"))
+                        .alias(Type.primitive(PrimitiveType.STRING))
+                        .build()))
+                .build();
+        assertThat(new ObjectGenerator(Options.builder()
+                                .sealedUnions(true)
+                                .defensiveCollections(true)
+                                .build())
+                        .generate(definition))
+                .singleElement()
+                .satisfies(file -> assertThat(file.typeSpec().name()).isEqualTo("Scalar"));
+    }
 
     @Test
     public void testConjureImports() throws IOException {

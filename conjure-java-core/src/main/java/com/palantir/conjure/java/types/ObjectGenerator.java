@@ -41,7 +41,10 @@ public final class ObjectGenerator implements Generator {
         Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
         TypeMapper typeMapper = new TypeMapper(typesMap, options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(typesMap);
-        return types.stream().map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef));
+        return Stream.concat(
+                types.stream().map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef)),
+                // Generate helpers after all models have registered their requirements.
+                Stream.of(typeMapper.jacksonSupport()).flatMap(JacksonSupportGenerator::generate));
     }
 
     private JavaFile generateInner(

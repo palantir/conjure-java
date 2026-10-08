@@ -91,6 +91,8 @@ public final class AnyMapExample {
     public static final class Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Object> items = new LinkedHashMap<>();
 
         private Builder() {}
@@ -101,7 +103,6 @@ public final class AnyMapExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Map<String, Object> items) {
             checkNotBuilt();
             this.items = new LinkedHashMap<>(Preconditions.checkNotNull(items, "items cannot be null"));
