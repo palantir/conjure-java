@@ -13,6 +13,10 @@ types:
       base-type: string
       external:
         java: java.lang.String
+    ExternalFloat:
+      base-type: double
+      external:
+        java: java.lang.Float
     SafeExternalLong:
       base-type: safelong
       external:
@@ -321,6 +325,8 @@ types:
         alias: ExternalLongAliasOne
       SafeExternalLongAlias:
         alias: SafeExternalLong
+      ExternalFloatAliasExample:
+        alias: ExternalFloat
       OptionalAlias:
         alias: optional<string>
         safety: safe

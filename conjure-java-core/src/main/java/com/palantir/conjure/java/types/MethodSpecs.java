@@ -93,6 +93,9 @@ public final class MethodSpecs {
         if (Primitives.isDouble(field.type())) {
             return CodeBlock.of(
                     "$1T.doubleToLongBits($2L) == $1T.doubleToLongBits($3L)", Double.class, thisField, otherField);
+        } else if (Primitives.isFloat(field.type())) {
+            return CodeBlock.of(
+                    "$1T.floatToIntBits($2L) == $1T.floatToIntBits($3L)", Float.class, thisField, otherField);
         } else if (Primitives.isPrimitive(field.type())) {
             return CodeBlock.of("$L == $L", thisField, otherField);
         } else if (field.type().equals(ClassName.get(OffsetDateTime.class))) {
