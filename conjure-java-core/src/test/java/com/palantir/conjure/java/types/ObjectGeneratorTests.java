@@ -172,8 +172,12 @@ public final class ObjectGeneratorTests {
                         .fallback(Type.primitive(PrimitiveType.SAFELONG))
                         .build()),
                 Type.external(ExternalReference.builder()
-                        .externalReference(TypeName.of("String", "java.lang"))
-                        .fallback(Type.primitive(PrimitiveType.STRING))
+                        .externalReference(TypeName.of("Double", "java.lang"))
+                        .fallback(Type.primitive(PrimitiveType.DOUBLE))
+                        .build()),
+                Type.external(ExternalReference.builder()
+                        .externalReference(TypeName.of("Instant", "java.time"))
+                        .fallback(Type.primitive(PrimitiveType.DATETIME))
                         .build()));
         List<Type> noComparison = List.of(
                 Type.primitive(PrimitiveType.BINARY),
@@ -188,11 +192,11 @@ public final class ObjectGeneratorTests {
                 Type.reference(enumName),
                 Type.reference(unionName),
                 Type.external(ExternalReference.builder()
-                        .externalReference(TypeName.of("Object", "java.lang"))
-                        .fallback(Type.primitive(PrimitiveType.ANY))
+                        .externalReference(TypeName.of("String", "java.lang"))
+                        .fallback(Type.primitive(PrimitiveType.STRING))
                         .build()),
                 Type.external(ExternalReference.builder()
-                        .externalReference(TypeName.of("DoesNotExist", "com.palantir.missing"))
+                        .externalReference(TypeName.of("ExampleId", "com.palantir.product"))
                         .fallback(Type.primitive(PrimitiveType.STRING))
                         .build()));
 

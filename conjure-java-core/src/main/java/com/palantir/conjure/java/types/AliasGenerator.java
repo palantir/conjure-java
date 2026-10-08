@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
@@ -54,6 +55,7 @@ import com.palantir.javapoet.TypeSpec;
 import com.palantir.logsafe.Safe;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -494,6 +496,18 @@ public final class AliasGenerator {
     }
 
     private static final class ComparableVisitor implements Type.Visitor<Optional<MethodSpec>> {
+        // External types are opaque, so only these well-known JDK types are treated as comparable
+        private static final ImmutableSet<Class<?>> COMPARABLE_EXTERNAL_TYPES = ImmutableSet.of(
+                Boolean.class,
+                Byte.class,
+                Character.class,
+                Double.class,
+                Float.class,
+                Integer.class,
+                Long.class,
+                Short.class,
+                Instant.class);
+
         private final TypeName aliasName;
         private final TypeMapper typeMapper;
         private final Type conjureType;
@@ -537,19 +551,12 @@ public final class AliasGenerator {
         @Override
         public Optional<MethodSpec> visitExternal(ExternalReference value) {
             com.palantir.conjure.spec.TypeName externalName = value.getExternalReference();
-            Class<?> clazz;
-            try {
-                clazz = Class.forName(externalName.getPackage() + '.' + externalName.getName());
-            } catch (ClassNotFoundException e) {
-                // Class doesn't exist on the code-gen classpath
-                return Optional.empty();
-            }
-            if (!Comparable.class.isAssignableFrom(clazz)) {
-                return Optional.empty();
-            }
-            // Boxed primitive external types (e.g. java.lang.Long) are stored unboxed
-            return Optional.of(
-                    Primitives.isPrimitive(typeMapper.getClassName(conjureType))
+            String className = externalName.getPackage() + '.' + externalName.getName();
+            return COMPARABLE_EXTERNAL_TYPES.stream()
+                    .filter(clazz -> clazz.getName().equals(className))
+                    .findFirst()
+                    // Boxed primitive external types (e.g. java.lang.Long) are stored unboxed
+                    .map(clazz -> Primitives.isPrimitive(typeMapper.getClassName(conjureType))
                             ? createCompareTo(aliasName, clazz)
                             : createCompareTo(aliasName));
         }

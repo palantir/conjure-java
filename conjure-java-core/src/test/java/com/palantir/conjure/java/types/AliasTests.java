@@ -26,7 +26,6 @@ import allexamples.com.palantir.product.AliasOfUuidAliasExample;
 import allexamples.com.palantir.product.DoubleAliasExample;
 import allexamples.com.palantir.product.ExternalLongAliasOne;
 import allexamples.com.palantir.product.ExternalLongAliasTwo;
-import allexamples.com.palantir.product.ExternalStringAliasExample;
 import allexamples.com.palantir.product.SafeDoubleAliasExample;
 import allexamples.com.palantir.product.UuidAliasExample;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -236,15 +235,5 @@ public class AliasTests {
         assertThat(higher.compareTo(lower)).isPositive();
         assertThat(lower.compareTo(ExternalLongAliasTwo.of(ExternalLongAliasOne.of(1L))))
                 .isZero();
-    }
-
-    @Test
-    public void testExternalStringAliasComparison() {
-        ExternalStringAliasExample lower = ExternalStringAliasExample.of("a");
-        ExternalStringAliasExample higher = ExternalStringAliasExample.of("b");
-
-        assertThat(lower.compareTo(higher)).isNegative();
-        assertThat(higher.compareTo(lower)).isPositive();
-        assertThat(lower.compareTo(ExternalStringAliasExample.of("a"))).isZero();
     }
 }

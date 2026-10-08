@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ExternalStringAliasExample implements Comparable<ExternalStringAliasExample> {
+public final class ExternalStringAliasExample {
     private final String value;
 
     private ExternalStringAliasExample(@Nonnull String value) {
@@ -38,11 +38,6 @@ public final class ExternalStringAliasExample implements Comparable<ExternalStri
     @Override
     public int hashCode() {
         return this.value.hashCode();
-    }
-
-    @Override
-    public int compareTo(ExternalStringAliasExample other) {
-        return value.compareTo(other.get());
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
