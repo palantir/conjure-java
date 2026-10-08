@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class AliasOfBooleanAliasExample {
+public final class AliasOfBooleanAliasExample implements Comparable<AliasOfBooleanAliasExample> {
     private final BooleanAliasExample value;
 
     private AliasOfBooleanAliasExample(@Nonnull BooleanAliasExample value) {
@@ -38,6 +38,11 @@ public final class AliasOfBooleanAliasExample {
     @Override
     public int hashCode() {
         return this.value.hashCode();
+    }
+
+    @Override
+    public int compareTo(AliasOfBooleanAliasExample other) {
+        return value.compareTo(other.get());
     }
 
     public static AliasOfBooleanAliasExample valueOf(String value) {

@@ -138,11 +138,11 @@ public final class ObjectGeneratorTests {
         List<TypeDefinition> referencedTypes = List.of(
                 TypeDefinition.alias(AliasDefinition.builder()
                         .typeName(comparableAliasName)
-                        .alias(Type.primitive(PrimitiveType.DOUBLE))
+                        .alias(Type.primitive(PrimitiveType.STRING))
                         .build()),
                 TypeDefinition.alias(AliasDefinition.builder()
                         .typeName(nonComparableAliasName)
-                        .alias(Type.primitive(PrimitiveType.BOOLEAN))
+                        .alias(Type.primitive(PrimitiveType.BINARY))
                         .build()),
                 TypeDefinition.object(ObjectDefinition.builder()
                         .typeName(objectName)
@@ -158,18 +158,18 @@ public final class ObjectGeneratorTests {
                         .build()));
 
         List<Type> hasComparison = List.of(
-                Type.primitive(PrimitiveType.DOUBLE),
-                Type.primitive(PrimitiveType.INTEGER),
-                Type.primitive(PrimitiveType.SAFELONG),
                 Type.primitive(PrimitiveType.STRING),
                 Type.primitive(PrimitiveType.DATETIME),
+                Type.primitive(PrimitiveType.INTEGER),
+                Type.primitive(PrimitiveType.DOUBLE),
+                Type.primitive(PrimitiveType.SAFELONG),
+                Type.primitive(PrimitiveType.BOOLEAN),
                 Type.primitive(PrimitiveType.UUID),
+                Type.primitive(PrimitiveType.RID),
                 Type.reference(comparableAliasName));
         List<Type> noComparison = List.of(
-                Type.primitive(PrimitiveType.BOOLEAN),
                 Type.primitive(PrimitiveType.BINARY),
                 Type.primitive(PrimitiveType.ANY),
-                Type.primitive(PrimitiveType.RID),
                 Type.primitive(PrimitiveType.BEARERTOKEN),
                 Type.optional(OptionalType.of(Type.primitive(PrimitiveType.DOUBLE))),
                 Type.list(ListType.of(Type.primitive(PrimitiveType.STRING))),

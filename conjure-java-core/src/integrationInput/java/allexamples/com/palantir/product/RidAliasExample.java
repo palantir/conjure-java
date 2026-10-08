@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class RidAliasExample {
+public final class RidAliasExample implements Comparable<RidAliasExample> {
     private final ResourceIdentifier value;
 
     private RidAliasExample(@Nonnull ResourceIdentifier value) {
@@ -38,6 +38,11 @@ public final class RidAliasExample {
     @Override
     public int hashCode() {
         return this.value.hashCode();
+    }
+
+    @Override
+    public int compareTo(RidAliasExample other) {
+        return value.compareTo(other.get());
     }
 
     public static RidAliasExample valueOf(String value) {
