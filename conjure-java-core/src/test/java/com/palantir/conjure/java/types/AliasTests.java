@@ -218,6 +218,27 @@ public class AliasTests {
     }
 
     @Test
+    public void testExternalLongAliasComparison() {
+        ExternalLongAliasOne lower = ExternalLongAliasOne.of(1L);
+        ExternalLongAliasOne higher = ExternalLongAliasOne.of(2L);
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(ExternalLongAliasOne.of(1L))).isZero();
+    }
+
+    @Test
+    public void testAliasOfExternalLongAliasComparison() {
+        ExternalLongAliasTwo lower = ExternalLongAliasTwo.of(ExternalLongAliasOne.of(1L));
+        ExternalLongAliasTwo higher = ExternalLongAliasTwo.of(ExternalLongAliasOne.of(2L));
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(ExternalLongAliasTwo.of(ExternalLongAliasOne.of(1L))))
+                .isZero();
+    }
+
+    @Test
     public void testExternalFloatAliasEqualityMatchesHashCode() {
         assertThat(ExternalFloatAliasExample.of(1.5f))
                 .isEqualTo(ExternalFloatAliasExample.of(1.5f))
@@ -226,5 +247,13 @@ public class AliasTests {
                 .isEqualTo(ExternalFloatAliasExample.of(Float.NaN))
                 .hasSameHashCodeAs(ExternalFloatAliasExample.of(Float.NaN));
         assertThat(ExternalFloatAliasExample.of(-0.0f)).isNotEqualTo(ExternalFloatAliasExample.of(0.0f));
+    }
+
+    @Test
+    public void testExternalFloatAliasComparisonMatchesEquality() {
+        assertThat(ExternalFloatAliasExample.of(1.0f)).isLessThan(ExternalFloatAliasExample.of(2.0f));
+        assertThat(ExternalFloatAliasExample.of(Float.NaN))
+                .isEqualByComparingTo(ExternalFloatAliasExample.of(Float.NaN));
+        assertThat(ExternalFloatAliasExample.of(-0.0f)).isLessThan(ExternalFloatAliasExample.of(0.0f));
     }
 }

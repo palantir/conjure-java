@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ExternalFloatAliasExample {
+public final class ExternalFloatAliasExample implements Comparable<ExternalFloatAliasExample> {
     private final float value;
 
     private ExternalFloatAliasExample(float value) {
@@ -36,6 +36,11 @@ public final class ExternalFloatAliasExample {
     @Override
     public int hashCode() {
         return Float.hashCode(this.value);
+    }
+
+    @Override
+    public int compareTo(ExternalFloatAliasExample other) {
+        return Float.compare(value, other.get());
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

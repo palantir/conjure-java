@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ExternalLongAliasTwo {
+public final class ExternalLongAliasTwo implements Comparable<ExternalLongAliasTwo> {
     private final ExternalLongAliasOne value;
 
     private ExternalLongAliasTwo(@Nonnull ExternalLongAliasOne value) {
@@ -37,6 +37,11 @@ public final class ExternalLongAliasTwo {
     @Override
     public int hashCode() {
         return this.value.hashCode();
+    }
+
+    @Override
+    public int compareTo(ExternalLongAliasTwo other) {
+        return value.compareTo(other.get());
     }
 
     public static ExternalLongAliasTwo valueOf(String value) {

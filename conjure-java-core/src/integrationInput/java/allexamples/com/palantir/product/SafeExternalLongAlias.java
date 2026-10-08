@@ -8,7 +8,7 @@ import javax.annotation.processing.Generated;
 
 @Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class SafeExternalLongAlias {
+public final class SafeExternalLongAlias implements Comparable<SafeExternalLongAlias> {
     private final @Safe long value;
 
     private SafeExternalLongAlias(@Safe long value) {
@@ -38,6 +38,11 @@ public final class SafeExternalLongAlias {
     @Override
     public int hashCode() {
         return Long.hashCode(this.value);
+    }
+
+    @Override
+    public int compareTo(SafeExternalLongAlias other) {
+        return Long.compare(value, other.get());
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

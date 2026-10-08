@@ -55,6 +55,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public final class ObjectGeneratorTests {
 
@@ -166,7 +168,16 @@ public final class ObjectGeneratorTests {
                 Type.primitive(PrimitiveType.BOOLEAN),
                 Type.primitive(PrimitiveType.UUID),
                 Type.primitive(PrimitiveType.RID),
-                Type.reference(comparableAliasName));
+                Type.reference(comparableAliasName),
+                external("java.lang", "Boolean", PrimitiveType.BOOLEAN),
+                external("java.lang", "Byte", PrimitiveType.INTEGER),
+                external("java.lang", "Character", PrimitiveType.STRING),
+                external("java.lang", "Double", PrimitiveType.DOUBLE),
+                external("java.lang", "Float", PrimitiveType.DOUBLE),
+                external("java.lang", "Integer", PrimitiveType.INTEGER),
+                external("java.lang", "Long", PrimitiveType.SAFELONG),
+                external("java.lang", "Short", PrimitiveType.INTEGER),
+                external("java.time", "Instant", PrimitiveType.DATETIME));
         List<Type> noComparison = List.of(
                 Type.primitive(PrimitiveType.BINARY),
                 Type.primitive(PrimitiveType.ANY),
@@ -179,10 +190,8 @@ public final class ObjectGeneratorTests {
                 Type.reference(objectName),
                 Type.reference(enumName),
                 Type.reference(unionName),
-                Type.external(ExternalReference.builder()
-                        .externalReference(TypeName.of("Long", "java.lang"))
-                        .fallback(Type.primitive(PrimitiveType.STRING))
-                        .build()));
+                external("java.lang", "String", PrimitiveType.STRING),
+                external("com.palantir.product", "ExampleId", PrimitiveType.STRING));
 
         for (Type type : hasComparison) {
             String outerSource = generateNestedAliasSource(type, referencedTypes);
@@ -200,6 +209,44 @@ public final class ObjectGeneratorTests {
                     .as("An alias of an alias of %s should not support comparison", type)
                     .doesNotContain("compareTo(", "Comparable<");
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "Boolean, BOOLEAN",
+        "Byte, INTEGER",
+        "Character, STRING",
+        "Double, DOUBLE",
+        "Float, DOUBLE",
+        "Integer, INTEGER",
+        "Long, SAFELONG",
+        "Short, INTEGER"
+    })
+    void externalBoxedPrimitiveAliasUsesStaticCompare(String boxedName, PrimitiveType fallback) {
+        TypeName aliasName = TypeName.of("Example", "example");
+        ConjureDefinition definition = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(aliasName)
+                        .alias(external("java.lang", boxedName, fallback))
+                        .build()))
+                .build();
+
+        String source = new ObjectGenerator(Options.builder().build())
+                .generate(definition)
+                .map(Object::toString)
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(source)
+                .contains("implements Comparable<Example>", "return " + boxedName + ".compare(value, other.get());");
+    }
+
+    private static Type external(String packageName, String name, PrimitiveType fallback) {
+        return Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of(name, packageName))
+                .fallback(Type.primitive(fallback))
+                .build());
     }
 
     private static String generateNestedAliasSource(Type baseType, List<TypeDefinition> referencedTypes) {
