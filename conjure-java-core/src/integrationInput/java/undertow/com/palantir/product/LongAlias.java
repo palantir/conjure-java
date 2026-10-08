@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class LongAlias {
+public final class LongAlias implements Comparable<LongAlias> {
     private final long value;
 
     private LongAlias(long value) {
@@ -35,6 +35,11 @@ public final class LongAlias {
     @Override
     public int hashCode() {
         return Long.hashCode(this.value);
+    }
+
+    @Override
+    public int compareTo(LongAlias other) {
+        return Long.compare(value, other.get());
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

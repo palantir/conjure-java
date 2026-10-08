@@ -26,6 +26,7 @@ import allexamples.com.palantir.product.AliasOfUuidAliasExample;
 import allexamples.com.palantir.product.DoubleAliasExample;
 import allexamples.com.palantir.product.ExternalLongAliasOne;
 import allexamples.com.palantir.product.ExternalLongAliasTwo;
+import allexamples.com.palantir.product.ExternalStringAliasExample;
 import allexamples.com.palantir.product.SafeDoubleAliasExample;
 import allexamples.com.palantir.product.UuidAliasExample;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -214,5 +215,36 @@ public class AliasTests {
                 AliasOfAliasOfDoubleAliasExample.of(AliasOfDoubleAliasExample.of(DoubleAliasExample.of(right)));
 
         assertThat(leftAlias.compareTo(rightAlias)).isEqualTo(expectedComparison);
+    }
+
+    @Test
+    public void testExternalLongAliasComparison() {
+        ExternalLongAliasOne lower = ExternalLongAliasOne.of(1L);
+        ExternalLongAliasOne higher = ExternalLongAliasOne.of(2L);
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(ExternalLongAliasOne.of(1L))).isZero();
+    }
+
+    @Test
+    public void testAliasOfExternalLongAliasComparison() {
+        ExternalLongAliasTwo lower = ExternalLongAliasTwo.of(ExternalLongAliasOne.of(1L));
+        ExternalLongAliasTwo higher = ExternalLongAliasTwo.of(ExternalLongAliasOne.of(2L));
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(ExternalLongAliasTwo.of(ExternalLongAliasOne.of(1L))))
+                .isZero();
+    }
+
+    @Test
+    public void testExternalStringAliasComparison() {
+        ExternalStringAliasExample lower = ExternalStringAliasExample.of("a");
+        ExternalStringAliasExample higher = ExternalStringAliasExample.of("b");
+
+        assertThat(lower.compareTo(higher)).isNegative();
+        assertThat(higher.compareTo(lower)).isPositive();
+        assertThat(lower.compareTo(ExternalStringAliasExample.of("a"))).isZero();
     }
 }

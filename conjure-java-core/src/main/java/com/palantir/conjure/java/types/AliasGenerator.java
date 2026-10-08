@@ -506,7 +506,7 @@ public final class AliasGenerator {
 
         @Override
         public Optional<MethodSpec> visitPrimitive(PrimitiveType value) {
-            return value.accept(new PrimitiveComparableVisitor(aliasName));
+            return primitiveCompareTo(aliasName, value);
         }
 
         @Override
@@ -535,8 +535,23 @@ public final class AliasGenerator {
         }
 
         @Override
-        public Optional<MethodSpec> visitExternal(ExternalReference _value) {
-            return Optional.empty();
+        public Optional<MethodSpec> visitExternal(ExternalReference value) {
+            com.palantir.conjure.spec.TypeName externalName = value.getExternalReference();
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(externalName.getPackage() + '.' + externalName.getName());
+            } catch (ClassNotFoundException e) {
+                // Class doesn't exist on the code-gen classpath
+                return Optional.empty();
+            }
+            if (!Comparable.class.isAssignableFrom(clazz)) {
+                return Optional.empty();
+            }
+            // Boxed primitive external types (e.g. java.lang.Long) are stored unboxed
+            return Optional.of(
+                    Primitives.isPrimitive(typeMapper.getClassName(conjureType))
+                            ? createCompareTo(aliasName, clazz)
+                            : createCompareTo(aliasName));
         }
 
         @Override
@@ -562,72 +577,15 @@ public final class AliasGenerator {
         }
     }
 
-    private static final class PrimitiveComparableVisitor implements PrimitiveType.Visitor<Optional<MethodSpec>> {
-        private final TypeName aliasName;
-
-        PrimitiveComparableVisitor(TypeName aliasName) {
-            this.aliasName = aliasName;
-        }
-
-        @Override
-        public Optional<MethodSpec> visitString() {
-            return Optional.of(createCompareTo(aliasName));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitDatetime() {
-            return Optional.of(createCompareTo(aliasName));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitInteger() {
-            return Optional.of(createCompareTo(aliasName, Integer.class));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitDouble() {
-            return Optional.of(createCompareTo(aliasName, Double.class));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitSafelong() {
-            return Optional.of(createCompareTo(aliasName));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitBinary() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<MethodSpec> visitAny() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<MethodSpec> visitBoolean() {
-            return Optional.of(createCompareTo(aliasName, Boolean.class));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitUuid() {
-            return Optional.of(createCompareTo(aliasName));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitRid() {
-            return Optional.of(createCompareTo(aliasName));
-        }
-
-        @Override
-        public Optional<MethodSpec> visitBearertoken() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<MethodSpec> visitUnknown(String unknownValue) {
-            throw new IllegalStateException("Unknown type: " + unknownValue);
-        }
+    private static Optional<MethodSpec> primitiveCompareTo(TypeName aliasName, PrimitiveType primitiveType) {
+        return switch (primitiveType.get()) {
+            case STRING, DATETIME, SAFELONG, UUID, RID -> Optional.of(createCompareTo(aliasName));
+            case INTEGER -> Optional.of(createCompareTo(aliasName, Integer.class));
+            case DOUBLE -> Optional.of(createCompareTo(aliasName, Double.class));
+            case BOOLEAN -> Optional.of(createCompareTo(aliasName, Boolean.class));
+            case BINARY, ANY, BEARERTOKEN -> Optional.empty();
+            case UNKNOWN -> throw new IllegalStateException("Unknown type: " + primitiveType);
+        };
     }
 
     private static MethodSpec createCompareTo(TypeName aliasType) {
