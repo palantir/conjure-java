@@ -172,10 +172,6 @@ public final class ObjectGeneratorTests {
                         .fallback(Type.primitive(PrimitiveType.SAFELONG))
                         .build()),
                 Type.external(ExternalReference.builder()
-                        .externalReference(TypeName.of("Double", "java.lang"))
-                        .fallback(Type.primitive(PrimitiveType.DOUBLE))
-                        .build()),
-                Type.external(ExternalReference.builder()
                         .externalReference(TypeName.of("Instant", "java.time"))
                         .fallback(Type.primitive(PrimitiveType.DATETIME))
                         .build()));
@@ -191,6 +187,10 @@ public final class ObjectGeneratorTests {
                 Type.reference(objectName),
                 Type.reference(enumName),
                 Type.reference(unionName),
+                Type.external(ExternalReference.builder()
+                        .externalReference(TypeName.of("Double", "java.lang"))
+                        .fallback(Type.primitive(PrimitiveType.DOUBLE))
+                        .build()),
                 Type.external(ExternalReference.builder()
                         .externalReference(TypeName.of("String", "java.lang"))
                         .fallback(Type.primitive(PrimitiveType.STRING))
