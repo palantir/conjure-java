@@ -1066,14 +1066,8 @@ public final class UnionGenerator {
         Type type = memberTypeDef.getType();
         if (hasOwnedCollection(type, options)) {
             if (type.accept(TypeVisitor.IS_MAP)) {
-                jsonParameter.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                        .addMember(
-                                "using",
-                                "$T.class",
-                                typeMapper
-                                        .jacksonSupport()
-                                        .get(wrapperClass, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
-                        .build());
+                jsonParameter.addAnnotation(JacksonCollectionDeserializerGenerator.ownedContainerAnnotation(
+                        type, typeMapper, wrapperClass));
             }
             MethodSpec.Builder jsonFactory = MethodSpec.methodBuilder(jsonFactoryName)
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
@@ -1082,11 +1076,7 @@ public final class UnionGenerator {
                     .returns(wrapperClass)
                     .addStatement("$L", checkNotNull);
             if (type.accept(TypeVisitor.IS_SET) && options.nonNullCollections()) {
-                jsonFactory
-                        .beginControlFlow("for ($T element : $L)", Object.class, VALUE_FIELD_NAME)
-                        .addStatement(
-                                "$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
-                        .endControlFlow();
+                jsonFactory.addCode(Expressions.requireNonNullElements(VALUE_FIELD_NAME));
             }
             return List.of(
                     MethodSpec.constructorBuilder()
@@ -1134,17 +1124,13 @@ public final class UnionGenerator {
     private static Iterable<AnnotationSpec> deserializationAnnotationForSets(
             FieldDefinition field, TypeMapper typeMapper, ClassName wrapperClass, Options options) {
         if (field.getType().accept(TypeVisitor.IS_SET)) {
-            AnnotationSpec.Builder annotation =
-                    AnnotationSpec.builder(JsonDeserialize.class).addMember("as", "$T.class", LinkedHashSet.class);
             if (options.sealedUnions() && options.defensiveCollections()) {
-                annotation.addMember(
-                        "using",
-                        "$T.class",
-                        typeMapper
-                                .jacksonSupport()
-                                .get(wrapperClass, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER));
+                return List.of(JacksonCollectionDeserializerGenerator.ownedContainerAnnotation(
+                        field.getType(), typeMapper, wrapperClass));
             }
-            return List.of(annotation.build());
+            return List.of(AnnotationSpec.builder(JsonDeserialize.class)
+                    .addMember("as", "$T.class", LinkedHashSet.class)
+                    .build());
         }
         return List.of();
     }

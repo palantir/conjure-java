@@ -427,16 +427,8 @@ public final class BeanBuilderGenerator {
                 .map(field -> field.conjureDef().getType().accept(TypeVisitor.IS_MAP)
                         ? field.poetSpec().toBuilder()
                                 .addAnnotation(createJacksonSetterAnnotation(field, typesMap))
-                                .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                                        .addMember(
-                                                "using",
-                                                "$T.class",
-                                                typeMapper
-                                                        .jacksonSupport()
-                                                        .get(
-                                                                objectClass,
-                                                                JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
-                                        .build())
+                                .addAnnotation(JacksonCollectionDeserializerGenerator.ownedContainerAnnotation(
+                                        field.conjureDef().getType(), typeMapper, objectClass))
                                 .build()
                         : field.poetSpec())
                 .toList();

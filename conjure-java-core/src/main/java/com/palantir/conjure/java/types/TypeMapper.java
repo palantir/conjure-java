@@ -22,9 +22,11 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class TypeMapper {
 
@@ -33,15 +35,31 @@ public final class TypeMapper {
     private final Supplier<JacksonSupportGenerator> jacksonSupport;
 
     public TypeMapper(Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types, Options options) {
-        this(types, new DefaultClassNameVisitor(types.keySet(), options));
+        this(types, options, List.of());
+    }
+
+    TypeMapper(
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
+            Options options,
+            List<ClassName> additionalClasses) {
+        this(types, new DefaultClassNameVisitor(types.keySet(), options), additionalClasses);
     }
 
     public TypeMapper(
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types, ClassNameVisitor classNameVisitor) {
+        this(types, classNameVisitor, List.of());
+    }
+
+    private TypeMapper(
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
+            ClassNameVisitor classNameVisitor,
+            List<ClassName> additionalClasses) {
         this.types = types;
         this.classNameVisitor = classNameVisitor;
-        this.jacksonSupport = Suppliers.memoize(() -> new JacksonSupportGenerator(types.keySet().stream()
-                .map(name -> (ClassName) getClassName(Type.reference(name)))
+        this.jacksonSupport = Suppliers.memoize(() -> new JacksonSupportGenerator(Stream.concat(
+                        types.keySet().stream().map(name -> (ClassName) getClassName(Type.reference(name))),
+                        additionalClasses.stream())
+                .distinct()
                 .toList()));
     }
 

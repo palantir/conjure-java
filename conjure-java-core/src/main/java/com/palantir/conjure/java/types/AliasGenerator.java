@@ -153,25 +153,13 @@ public final class AliasGenerator {
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(Parameters.nonnullParameter(aliasTypeName, "value").toBuilder()
-                            .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                                    .addMember("as", "$T.class", LinkedHashSet.class)
-                                    .addMember(
-                                            "using",
-                                            "$T.class",
-                                            typeMapper
-                                                    .jacksonSupport()
-                                                    .get(
-                                                            thisClass,
-                                                            JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
-                                    .build())
+                            .addAnnotation(JacksonCollectionDeserializerGenerator.ownedContainerAnnotation(
+                                    typeDef.getAlias(), typeMapper, thisClass))
                             .build())
                     .returns(thisClass)
                     .addStatement("$L", Expressions.requireNonNull("value", "value cannot be null"));
             if (options.nonNullCollections()) {
-                factory.beginControlFlow("for ($T element : value)", Object.class)
-                        .addStatement(
-                                "$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
-                        .endControlFlow();
+                factory.addCode(Expressions.requireNonNullElements("value"));
             }
             spec.addMethod(
                     factory.addStatement("return new $T(value)", thisClass).build());

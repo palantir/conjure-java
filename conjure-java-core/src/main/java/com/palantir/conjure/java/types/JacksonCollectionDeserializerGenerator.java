@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.impl.JDKValueInstantiators;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
@@ -32,6 +33,9 @@ import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.util.ClassUtil;
+import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.MethodSpec;
@@ -49,6 +53,19 @@ import javax.lang.model.element.Modifier;
 
 final class JacksonCollectionDeserializerGenerator {
     private JacksonCollectionDeserializerGenerator() {}
+
+    static AnnotationSpec ownedContainerAnnotation(Type type, TypeMapper typeMapper, ClassName model) {
+        AnnotationSpec.Builder annotation = AnnotationSpec.builder(JsonDeserialize.class);
+        if (type.accept(TypeVisitor.IS_SET)) {
+            annotation.addMember("as", "$T.class", LinkedHashSet.class);
+        }
+        return annotation
+                .addMember(
+                        "using",
+                        "$T.class",
+                        typeMapper.jacksonSupport().get(model, JacksonSupportGenerator.Helper.CONTAINER_DESERIALIZER))
+                .build();
+    }
 
     static TypeSpec containerDeserializer(ClassName className) {
         return TypeSpec.classBuilder(className)
@@ -235,36 +252,9 @@ final class JacksonCollectionDeserializerGenerator {
                             return copy(super.deserializeWithType(parser, context, typeDeserializer));
                             """)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("getNullValue")
-                        .returns(Object.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(DeserializationContext.class, "context")
-                        .addException(JsonMappingException.class)
-                        .addCode("""
-                            return copy(super.getNullValue(context));
-                            """)
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("getEmptyValue")
-                        .returns(Object.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(DeserializationContext.class, "context")
-                        .addException(JsonMappingException.class)
-                        .addCode("""
-                            return copy(super.getEmptyValue(context));
-                            """)
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("getAbsentValue")
-                        .returns(Object.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(DeserializationContext.class, "context")
-                        .addException(JsonMappingException.class)
-                        .addCode("""
-                            return copy(super.getAbsentValue(context));
-                            """)
-                        .build())
+                .addMethod(copyingValueMethod("getNullValue"))
+                .addMethod(copyingValueMethod("getEmptyValue"))
+                .addMethod(copyingValueMethod("getAbsentValue"))
                 .addMethod(MethodSpec.methodBuilder("copy")
                         .returns(Object.class)
                         .addModifiers(Modifier.PRIVATE)
@@ -276,6 +266,17 @@ final class JacksonCollectionDeserializerGenerator {
                             return map ? new $T<>(($T<?, ?>) value) : new $T<>(($T<?>) value);
                             """, LinkedHashMap.class, Map.class, LinkedHashSet.class, Collection.class)
                         .build())
+                .build();
+    }
+
+    private static MethodSpec copyingValueMethod(String name) {
+        return MethodSpec.methodBuilder(name)
+                .returns(Object.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(DeserializationContext.class, "context")
+                .addException(JsonMappingException.class)
+                .addStatement("return copy(super.$L(context))", name)
                 .build();
     }
 }
