@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
-import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -154,18 +153,12 @@ public final class AliasGenerator {
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(Parameters.nonnullParameter(aliasTypeName, "value").toBuilder()
-                            .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                                    .addMember("as", "$T.class", LinkedHashSet.class)
-                                    .addMember("using", "$T.class", ConjureJacksonSupport.ContainerDeserializer.class)
-                                    .build())
+                            .addAnnotation(JacksonAnnotations.ownedContainer(typeDef.getAlias()))
                             .build())
                     .returns(thisClass)
                     .addStatement("$L", Expressions.requireNonNull("value", "value cannot be null"));
             if (options.nonNullCollections()) {
-                factory.beginControlFlow("for ($T element : value)", Object.class)
-                        .addStatement(
-                                "$L", Expressions.requireNonNull("element", "iterable cannot contain null elements"))
-                        .endControlFlow();
+                factory.addCode(Expressions.requireNonNullElements("value"));
             }
             spec.addMethod(
                     factory.addStatement("return new $T(value)", thisClass).build());
