@@ -37,6 +37,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -61,6 +63,10 @@ final class ConjureUnionSerDeTest {
             assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(new Known("hello")));
             assertThat(mapper.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
                     .isEqualTo(new Holder(List.of(new Known("hello"), new Known("hello"))));
+        }
+        for (String json : List.of("{\"type\":\"number\",\"value\":42}", "{\"value\":42,\"type\":\"number\"}")) {
+            assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new NumberVariant(42));
+            assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(new NumberVariant(42)));
         }
     }
 
@@ -139,7 +145,8 @@ final class ConjureUnionSerDeTest {
 
     @Test
     void serializesStaticAndDynamicUnionTypes() throws IOException {
-        for (SampleUnion value : List.of(new Known("hello"), new Unknown("future", Map.of("future", 42)))) {
+        for (SampleUnion value :
+                List.of(new Known("hello"), new NumberVariant(42), new Unknown("future", Map.of("future", 42)))) {
             String json = mapper.writerFor(SampleUnion.class).writeValueAsString(value);
             assertThat(json).startsWith("{\"type\":");
             assertThat(mapper.writeValueAsString(value)).isEqualTo(json);
@@ -180,6 +187,48 @@ final class ConjureUnionSerDeTest {
         }
     }
 
+    @Test
+    void readsUnknownVariantsOfEmptyUnions() throws IOException {
+        for (String json : List.of(
+                "{\"type\":\"known\",\"payload\":[1,2]}",
+                "{\"payload\":[1,2],\"type\":\"known\"}",
+                "{\"type\":\"future\"}")) {
+            EmptyUnion result = mapper.readValue(json, EmptyUnion.class);
+            assertThat(mapper.readTree(mapper.writerFor(EmptyUnion.class).writeValueAsBytes(result)))
+                    .isEqualTo(mapper.readTree(json));
+        }
+    }
+
+    @Test
+    void snapshotsVariantTypes() throws IOException {
+        List<Class<? extends SampleUnion>> variants =
+                new ArrayList<>(List.of(Known.class, NumberVariant.class, NestedVariant.class));
+        SampleDeserializer deserializer = new SampleDeserializer(variants);
+        variants.clear();
+        variants.add(NumberVariant.class);
+        ObjectMapper configured = new ObjectMapper()
+                .addMixIn(SampleUnion.class, DefaultDeserializer.class)
+                .registerModule(new SimpleModule().addDeserializer(SampleUnion.class, deserializer));
+        assertThat(configured.readValue("{\"type\":\"known\",\"value\":\"hello\"}", SampleUnion.class))
+                .isEqualTo(new Known("hello"));
+        assertThat(configured.readValue("{\"type\":\"number\",\"value\":42}", SampleUnion.class))
+                .isEqualTo(new NumberVariant(42));
+    }
+
+    @Test
+    void readsRecursiveVariantsWithDiscriminatorInAnyPosition() throws IOException {
+        for (String json : List.of(
+                "{\"type\":\"nested\",\"values\":[{\"value\":\"hello\",\"type\":\"known\"},{\"type\":\"number\",\"value\":42}]}",
+                "{\"values\":[{\"type\":\"known\",\"value\":\"hello\"},{\"value\":42,\"type\":\"number\"}],\"type\":\"nested\"}")) {
+            NestedVariant expected = new NestedVariant(List.of(new Known("hello"), new NumberVariant(42)));
+            assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(expected);
+            assertThat(mapper.readValue(json.getBytes(StandardCharsets.UTF_8), SampleUnion.class))
+                    .isEqualTo(expected);
+            assertThat(mapper.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
+                    .isEqualTo(new Holder(List.of(expected, expected)));
+        }
+    }
+
     private static ObjectMapper prefixedMapper(String prefix) {
         return new ObjectMapper()
                 .registerModule(new SimpleModule().addDeserializer(String.class, new JsonDeserializer<>() {
@@ -192,7 +241,7 @@ final class ConjureUnionSerDeTest {
 
     @JsonDeserialize(using = SampleDeserializer.class)
     @JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
-    sealed interface SampleUnion permits Known, Unknown {}
+    sealed interface SampleUnion permits Known, NumberVariant, NestedVariant, Unknown {}
 
     @JsonDeserialize
     @JsonSerialize
@@ -202,6 +251,16 @@ final class ConjureUnionSerDeTest {
         @JsonProperty("type")
         String type() {
             return "known";
+        }
+    }
+
+    @JsonDeserialize
+    @JsonSerialize
+    @JsonPropertyOrder("type")
+    record NestedVariant(List<SampleUnion> values) implements SampleUnion {
+        @JsonProperty("type")
+        String type() {
+            return "nested";
         }
     }
 
@@ -221,45 +280,67 @@ final class ConjureUnionSerDeTest {
 
     @JsonDeserialize(using = OtherDeserializer.class)
     @JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
-    sealed interface OtherUnion permits NumberVariant {}
+    sealed interface OtherUnion permits NumberVariant, OtherUnknown {}
 
     @JsonDeserialize
     @JsonSerialize
     @JsonPropertyOrder("type")
-    record NumberVariant(int value) implements OtherUnion {
+    record NumberVariant(int value) implements SampleUnion, OtherUnion {
         @JsonProperty("type")
         String type() {
             return "number";
         }
     }
 
+    @JsonDeserialize
+    @JsonSerialize
+    @JsonPropertyOrder("type")
+    record OtherUnknown(String type, @JsonAnyGetter Map<String, Object> values) implements OtherUnion {}
+
     static final class OtherDeserializer extends ConjureJacksonSupport.UnionDeserializer<OtherUnion> {
         OtherDeserializer() {
-            super(OtherUnion.class, new Class<?>[] {NumberVariant.class});
-        }
-
-        @Override
-        protected OtherUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            return switch (type) {
-                case "number" -> (OtherUnion) deserializeVariant(parser, context, 0);
-                default -> context.reportInputMismatch(OtherUnion.class, "Unexpected union discriminator");
-            };
+            super(
+                    OtherUnion.class,
+                    List.of(NumberVariant.class),
+                    type -> "number".equals(type) ? 0 : -1,
+                    OtherUnknown::new);
         }
     }
 
     static final class SampleDeserializer extends ConjureJacksonSupport.UnionDeserializer<SampleUnion> {
         SampleDeserializer() {
-            super(SampleUnion.class, new Class<?>[] {Known.class});
+            this(List.of(Known.class, NumberVariant.class, NestedVariant.class));
         }
 
-        @Override
-        protected SampleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            return switch (type) {
-                case "known" -> (SampleUnion) deserializeVariant(parser, context, 0);
-                default -> new Unknown(type, deserializeUnknown(parser, context));
-            };
+        SampleDeserializer(List<Class<? extends SampleUnion>> variants) {
+            super(
+                    SampleUnion.class,
+                    variants,
+                    type -> switch (type) {
+                        case "known" -> 0;
+                        case "number" -> 1;
+                        case "nested" -> 2;
+                        default -> -1;
+                    },
+                    Unknown::new);
+        }
+    }
+
+    @JsonDeserialize
+    private interface DefaultDeserializer {}
+
+    @JsonDeserialize(using = EmptyDeserializer.class)
+    @JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
+    sealed interface EmptyUnion permits EmptyUnknown {}
+
+    @JsonDeserialize
+    @JsonSerialize
+    @JsonPropertyOrder("type")
+    record EmptyUnknown(String type, @JsonAnyGetter Map<String, Object> values) implements EmptyUnion {}
+
+    static final class EmptyDeserializer extends ConjureJacksonSupport.UnionDeserializer<EmptyUnion> {
+        EmptyDeserializer() {
+            super(EmptyUnion.class, List.of(), _type -> -1, EmptyUnknown::new);
         }
     }
 }
