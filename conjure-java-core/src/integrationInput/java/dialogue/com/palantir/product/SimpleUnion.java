@@ -8,20 +8,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.lib.internal.ConjureUnionDeserializer;
-import com.palantir.conjure.java.lib.internal.ConjureUnionSerializer;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -31,7 +28,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 @JsonDeserialize(using = SimpleUnion.Deserializer.class)
-@JsonSerialize(using = ConjureUnionSerializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class SimpleUnion
         permits SimpleUnion.Foo, SimpleUnion.Bar, SimpleUnion.Baz, SimpleUnion.Unknown {
@@ -286,26 +283,18 @@ public abstract sealed class SimpleUnion
         }
     }
 
-    static final class Deserializer extends ConjureUnionDeserializer<SimpleUnion> {
-        private static final Class<?>[] VARIANT_TYPES = new Class<?>[] {Foo.class, Bar.class, Baz.class};
-
+    static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<SimpleUnion> {
         Deserializer() {
-            super(SimpleUnion.class, VARIANT_TYPES);
-        }
-
-        @Override
-        protected SimpleUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            int variantIndex = switch (type) {
-                case "foo" -> 0;
-                case "bar" -> 1;
-                case "baz" -> 2;
-                default -> -1;
-            };
-            if (variantIndex < 0) {
-                return new Unknown(type, deserializeUnknown(parser, context));
-            }
-            return (SimpleUnion) deserializeVariant(parser, context, variantIndex);
+            super(
+                    SimpleUnion.class,
+                    List.of(Foo.class, Bar.class, Baz.class),
+                    type -> switch (type) {
+                        case "foo" -> 0;
+                        case "bar" -> 1;
+                        case "baz" -> 2;
+                        default -> -1;
+                    },
+                    Unknown::new);
         }
     }
 

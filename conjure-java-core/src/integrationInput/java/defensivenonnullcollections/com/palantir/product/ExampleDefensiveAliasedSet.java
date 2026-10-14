@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
-import com.palantir.conjure.java.lib.internal.ConjureSetDeserializer;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -72,7 +72,10 @@ public final class ExampleDefensiveAliasedSet {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private static ExampleDefensiveAliasedSet fromJson(
-            @Nonnull @JsonDeserialize(as = LinkedHashSet.class, using = ConjureSetDeserializer.class)
+            @Nonnull
+                    @JsonDeserialize(
+                            as = LinkedHashSet.class,
+                            using = ConjureJacksonSupport.ContainerDeserializer.class)
                     Set<Integer> value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         for (Object element : value) {
