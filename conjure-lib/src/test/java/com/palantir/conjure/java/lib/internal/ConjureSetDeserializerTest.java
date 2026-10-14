@@ -18,21 +18,49 @@ package com.palantir.conjure.java.lib.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyMetadata;
+import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
+import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 final class ConjureSetDeserializerTest {
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @Test
+    void transfersStandardScalarSets() throws IOException {
+        DeserializationContext context = ((DefaultDeserializationContext) mapper.getDeserializationContext())
+                .createInstance(mapper.getDeserializationConfig(), null, mapper.getInjectableValues());
+        for (Class<?> element : List.of(Integer.class, String.class)) {
+            JavaType type = mapper.getTypeFactory().constructCollectionType(Set.class, element);
+            BeanProperty property = new BeanProperty.Std(
+                    PropertyName.construct("set"), type, null, null, PropertyMetadata.STD_OPTIONAL);
+            JsonDeserializer<?> deserializer =
+                    new ConjureJacksonSupport.ContainerDeserializer().createContextual(context, property);
+            assertThat(deserializer)
+                    .isExactlyInstanceOf(
+                            element == String.class
+                                    ? StringCollectionDeserializer.class
+                                    : CollectionDeserializer.class);
+        }
+    }
 
     @Test
     void preservesOrderDeduplicationAndNulls() throws IOException {
@@ -86,7 +114,47 @@ final class ConjureSetDeserializerTest {
         assertThat(result).containsExactly(1, 2);
     }
 
+    @Test
+    void readsDelegatingSetAliases() throws IOException {
+        Alias value = mapper.readValue("[2,1,2]", Alias.class);
+        assertThat(value.value()).containsExactly(2, 1);
+        assertThat(mapper.readValue("[]", Alias.class).value()).isEmpty();
+    }
+
+    @Test
+    void contextualizesMapsAndSetsIndependently() throws IOException {
+        String json = """
+            {"map":{"first":1,"second":2},"integers":[2,1,2],"strings":["b","a","b"]}
+            """;
+        for (int i = 0; i < 2; i++) {
+            MixedContainers value = mapper.readValue(json, MixedContainers.class);
+            assertThat(value.map()).isEqualTo(Map.of("first", 1, "second", 2));
+            assertThat(value.map().keySet()).containsExactly("first", "second");
+            assertThat(value.integers()).containsExactly(2, 1);
+            assertThat(value.strings()).containsExactly("b", "a");
+        }
+    }
+
     record Value(
-            @JsonDeserialize(using = ConjureSetDeserializer.class)
+            @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
             Set<Integer> values) {}
+
+    record Alias(@JsonValue Set<Integer> value) {
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        static Alias fromJson(
+                @JsonDeserialize(as = LinkedHashSet.class, using = ConjureJacksonSupport.ContainerDeserializer.class)
+                        Set<Integer> value) {
+            return new Alias(value);
+        }
+    }
+
+    record MixedContainers(
+            @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+            Map<String, Integer> map,
+
+            @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+            Set<Integer> integers,
+
+            @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+            Set<String> strings) {}
 }

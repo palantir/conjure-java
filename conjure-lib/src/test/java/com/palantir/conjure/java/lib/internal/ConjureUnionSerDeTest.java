@@ -123,6 +123,8 @@ final class ConjureUnionSerDeTest {
                         for (int i = 0; i < 100; i++) {
                             assertThat(mapper.readValue("{\"type\":\"known\",\"value\":\"hello\"}", SampleUnion.class))
                                     .isEqualTo(new Known("hello"));
+                            assertThat(mapper.readValue("{\"type\":\"number\",\"value\":42}", OtherUnion.class))
+                                    .isEqualTo(new NumberVariant(42));
                         }
                         return null;
                     })
@@ -160,6 +162,24 @@ final class ConjureUnionSerDeTest {
         assertThat(typed.readValue(json, SampleUnion.class)).isEqualTo(value);
     }
 
+    @Test
+    void resolvesEachUnionInPropertiesAndContainers() throws IOException {
+        String json = """
+            {"first":{"type":"known","value":"first"},
+             "second":{"type":"number","value":2},
+             "values":{"third":{"type":"known","value":"third"}}}
+            """;
+        MixedHolder expected =
+                new MixedHolder(new Known("first"), new NumberVariant(2), Map.of("third", new Known("third")));
+        for (int i = 0; i < 2; i++) {
+            assertThat(mapper.readValue(json, MixedHolder.class)).isEqualTo(expected);
+            assertThat(mapper.readValue("{\"type\":\"number\",\"value\":42}", OtherUnion.class))
+                    .isEqualTo(new NumberVariant(42));
+            assertThat(mapper.readValue("{\"type\":\"known\",\"value\":\"root\"}", SampleUnion.class))
+                    .isEqualTo(new Known("root"));
+        }
+    }
+
     private static ObjectMapper prefixedMapper(String prefix) {
         return new ObjectMapper()
                 .registerModule(new SimpleModule().addDeserializer(String.class, new JsonDeserializer<>() {
@@ -171,7 +191,7 @@ final class ConjureUnionSerDeTest {
     }
 
     @JsonDeserialize(using = SampleDeserializer.class)
-    @JsonSerialize(using = ConjureUnionSerializer.class)
+    @JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
     sealed interface SampleUnion permits Known, Unknown {}
 
     @JsonDeserialize
@@ -197,7 +217,38 @@ final class ConjureUnionSerDeTest {
 
     record Holder(List<SampleUnion> values) {}
 
-    static final class SampleDeserializer extends ConjureUnionDeserializer<SampleUnion> {
+    record MixedHolder(SampleUnion first, OtherUnion second, Map<String, SampleUnion> values) {}
+
+    @JsonDeserialize(using = OtherDeserializer.class)
+    @JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
+    sealed interface OtherUnion permits NumberVariant {}
+
+    @JsonDeserialize
+    @JsonSerialize
+    @JsonPropertyOrder("type")
+    record NumberVariant(int value) implements OtherUnion {
+        @JsonProperty("type")
+        String type() {
+            return "number";
+        }
+    }
+
+    static final class OtherDeserializer extends ConjureJacksonSupport.UnionDeserializer<OtherUnion> {
+        OtherDeserializer() {
+            super(OtherUnion.class, new Class<?>[] {NumberVariant.class});
+        }
+
+        @Override
+        protected OtherUnion deserializeSelected(JsonParser parser, DeserializationContext context, String type)
+                throws IOException {
+            return switch (type) {
+                case "number" -> (OtherUnion) deserializeVariant(parser, context, 0);
+                default -> context.reportInputMismatch(OtherUnion.class, "Unexpected union discriminator");
+            };
+        }
+    }
+
+    static final class SampleDeserializer extends ConjureJacksonSupport.UnionDeserializer<SampleUnion> {
         SampleDeserializer() {
             super(SampleUnion.class, new Class<?>[] {Known.class});
         }
