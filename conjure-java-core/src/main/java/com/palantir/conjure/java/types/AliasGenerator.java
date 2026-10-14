@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
-import com.palantir.conjure.java.lib.internal.ConjureSetDeserializer;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.Primitives;
@@ -156,7 +156,7 @@ public final class AliasGenerator {
                     .addParameter(Parameters.nonnullParameter(aliasTypeName, "value").toBuilder()
                             .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
                                     .addMember("as", "$T.class", LinkedHashSet.class)
-                                    .addMember("using", "$T.class", ConjureSetDeserializer.class)
+                                    .addMember("using", "$T.class", ConjureJacksonSupport.ContainerDeserializer.class)
                                     .build())
                             .build())
                     .returns(thisClass)
