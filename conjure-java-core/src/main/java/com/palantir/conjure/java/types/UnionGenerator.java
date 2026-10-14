@@ -42,6 +42,7 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
@@ -69,6 +70,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -139,7 +141,13 @@ public final class UnionGenerator {
                             typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator, options))
                     .addMethods(generateSealedThrowOnUnknown(unionClass, unknownVariant, typeDef.getUnion()))
                     .addTypes(generateWrapperClasses(
-                            typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
+                            typeMapper,
+                            safetyEvaluator,
+                            typesMap,
+                            unionClass,
+                            visitorClass,
+                            typeDef.getUnion(),
+                            options))
                     .addType(generateUnknownWrapper(unionClass, visitorClass, options));
 
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
@@ -191,7 +199,7 @@ public final class UnionGenerator {
         typeBuilder
                 .addType(generateBase(baseClass, visitorClass, memberTypes))
                 .addTypes(generateWrapperClasses(
-                        typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
+                        typeMapper, safetyEvaluator, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
                 .addMethod(MethodSpecs.createEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
@@ -220,19 +228,19 @@ public final class UnionGenerator {
      * future Conjure-Java change, we can update the toString method here to better represent the variant in the
      * sealedUnions implementation.
      */
-    private static MethodSpec createLegacyToStringForSealedUnions(ClassName baseClassName, ClassName wrapperClassName) {
+    private static MethodSpec createLegacyToStringForSealedUnions(
+            ClassName baseClassName, ClassName wrapperClassName, boolean redactValue) {
+        String prefix = baseClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": " + wrapperClassName.simpleName() + '{'
+                + VALUE_FIELD_NAME + ": ";
+        CodeBlock.Builder body = CodeBlock.builder().add("return $S\n", prefix + (redactValue ? "REDACTED" : ""));
+        if (!redactValue) {
+            body.add(" + $N", VALUE_FIELD_NAME);
+        }
         return MethodSpec.methodBuilder("toString")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(String.class))
-                .addCode(CodeBlock.builder()
-                        .add(
-                                "return $S\n",
-                                baseClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": "
-                                        + wrapperClassName.simpleName() + '{' + VALUE_FIELD_NAME + ": ")
-                        .add(" + $N", VALUE_FIELD_NAME)
-                        .add(" + \"}}\";")
-                        .build())
+                .addCode(body.add(" + \"}}\";").build())
                 .build();
     }
 
@@ -898,6 +906,7 @@ public final class UnionGenerator {
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private static List<TypeSpec> generateWrapperClasses(
             TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             ClassName baseClass,
             ClassName visitorClass,
@@ -907,6 +916,10 @@ public final class UnionGenerator {
                 .map(memberTypeDef -> {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
+                    boolean redactValue = options.redactToStringDoNotLog()
+                            && safetyEvaluator
+                                    .getUsageTimeSafety(memberTypeDef)
+                                    .equals(Optional.of(LogSafety.DO_NOT_LOG));
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
                     ClassName wrapperClass = options.sealedUnions()
                             ? sealedVariantClass(baseClass, memberTypeDef.getFieldName())
@@ -976,6 +989,9 @@ public final class UnionGenerator {
                         typeBuilder.addSuperinterface(baseClass);
                     }
 
+                    List<FieldName> wrapperFieldNames = fields.stream()
+                            .map(fieldSpec -> FieldName.of(fieldSpec.name()))
+                            .toList();
                     typeBuilder
                             .addMethod(MethodSpecs.createEquals(wrapperClass))
                             .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
@@ -983,12 +999,11 @@ public final class UnionGenerator {
                             .addMethod(
                                     options.sealedUnions()
                                             ? createLegacyToStringForSealedUnions(
-                                                    baseClass, peerWrapperClass(baseClass, memberName))
+                                                    baseClass, peerWrapperClass(baseClass, memberName), redactValue)
                                             : MethodSpecs.createToString(
                                                     wrapperClass.simpleName(),
-                                                    fields.stream()
-                                                            .map(fieldSpec -> FieldName.of(fieldSpec.name()))
-                                                            .toList()));
+                                                    wrapperFieldNames,
+                                                    redactValue ? Set.copyOf(wrapperFieldNames) : Set.of()));
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
@@ -1121,7 +1136,7 @@ public final class UnionGenerator {
                 .addMethod(
                         options.sealedUnions()
                                 ? createLegacyToStringForSealedUnions(
-                                        baseClass, baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME))
+                                        baseClass, baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME), false)
                                 : MethodSpecs.createToString(
                                         wrapperClass.simpleName(),
                                         fields.stream()

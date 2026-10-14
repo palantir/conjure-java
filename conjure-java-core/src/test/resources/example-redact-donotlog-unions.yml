@@ -1,0 +1,15 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      # Union with a do-not-log variant. The wrapper toString for the sensitive
+      # variant should redact the value. Exercised with both the non-sealed and
+      # sealed-union code paths.
+      UnionWithDoNotLogVariant:
+        union:
+          safeValue:
+            type: string
+            safety: safe
+          secretValue:
+            type: string
+            safety: do-not-log
