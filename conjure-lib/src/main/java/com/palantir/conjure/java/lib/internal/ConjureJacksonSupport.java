@@ -40,14 +40,18 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.util.ClassUtil;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.function.BiFunction;
+import java.util.function.ToIntFunction;
 
 /** Jackson support for generated code; not intended for application use. */
 public final class ConjureJacksonSupport {
@@ -174,19 +178,37 @@ public final class ConjureJacksonSupport {
     }
 
     /**
-     * Jackson support for generated sealed unions. Subclasses dispatch discriminator values to concrete variant classes,
-     * whose annotations must mask the custom deserializer inherited from the union base class.
+     * Deserializes generated sealed unions using constructor-supplied metadata. Subclasses only provide a no-argument
+     * constructor for Jackson; parsing, variant resolution, and caching are handled by the runtime.
+     *
+     * <p>Concrete variants must override inherited Jackson serializer and deserializer annotations. Let Jackson create
+     * instances for each mapper; do not share deserializer instances between mappers.
      */
     public abstract static class UnionDeserializer<T> extends JsonDeserializer<T> {
         private final Class<T> unionClass;
-        private final Class<?>[] variantTypes;
-        private final AtomicReferenceArray<JsonDeserializer<?>> variantDeserializers;
+        private final List<Class<? extends T>> variantTypes;
+        private final AtomicReferenceArray<JsonDeserializer<? extends T>> variantDeserializers;
+        private final ToIntFunction<String> variantIndex;
+        private final BiFunction<String, Map<String, Object>, ? extends T> unknownFactory;
 
-        /** Variant indexes passed to {@link #deserializeVariant} correspond to the order of {@code variantTypes}. */
-        protected UnionDeserializer(Class<T> unionClass, Class<?>[] variantTypes) {
-            this.unionClass = unionClass;
-            this.variantTypes = variantTypes;
-            this.variantDeserializers = new AtomicReferenceArray<>(variantTypes.length);
+        /**
+         * @param unionClass the generated union's base type
+         * @param variantTypes concrete variant classes in selector order; the runtime copies this list
+         * @param variantIndex maps a discriminator to its variant's index, or a negative value for an unknown variant;
+         *     must be thread-safe and stable for the lifetime of this deserializer
+         * @param unknownFactory constructs an unknown variant from its discriminator and an owned map of payload fields;
+         *     must be thread-safe and may retain the map
+         */
+        protected UnionDeserializer(
+                Class<T> unionClass,
+                List<Class<? extends T>> variantTypes,
+                ToIntFunction<String> variantIndex,
+                BiFunction<String, Map<String, Object>, ? extends T> unknownFactory) {
+            this.unionClass = Preconditions.checkNotNull(unionClass, "unionClass");
+            this.variantTypes = List.copyOf(Preconditions.checkNotNull(variantTypes, "variantTypes"));
+            this.variantDeserializers = new AtomicReferenceArray<>(this.variantTypes.size());
+            this.variantIndex = Preconditions.checkNotNull(variantIndex, "variantIndex");
+            this.unknownFactory = Preconditions.checkNotNull(unknownFactory, "unknownFactory");
         }
 
         @Override
@@ -221,7 +243,7 @@ public final class ConjureJacksonSupport {
                 JsonParser parser, DeserializationContext context, boolean acceptCaseInsensitiveProperties)
                 throws IOException {
             try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
-                buffer.writeStartObject();
+                // Replay fields directly, matching the parser position on the discriminator-first path.
                 JsonToken token = parser.currentToken();
                 while (token == JsonToken.FIELD_NAME) {
                     String fieldName = parser.currentName();
@@ -256,33 +278,31 @@ public final class ConjureJacksonSupport {
             return "type".equals(fieldName) || (acceptCaseInsensitiveProperties && "type".equalsIgnoreCase(fieldName));
         }
 
-        /**
-         * Reads the remaining union object after consuming its discriminator. The parser may be positioned at START_OBJECT,
-         * FIELD_NAME, or END_OBJECT, and must be left at the matching END_OBJECT.
-         */
-        protected abstract T deserializeSelected(JsonParser parser, DeserializationContext context, String type)
-                throws IOException;
-
-        protected final Object deserializeVariant(JsonParser parser, DeserializationContext context, int variantIndex)
+        private T deserializeSelected(JsonParser parser, DeserializationContext context, String type)
                 throws IOException {
-            JsonDeserializer<?> deserializer = variantDeserializers.get(variantIndex);
+            int index = variantIndex.applyAsInt(type);
+            if (index < 0) {
+                return unknownFactory.apply(type, deserializeUnknown(parser, context));
+            }
+            JsonDeserializer<? extends T> deserializer = variantDeserializers.get(index);
             if (deserializer == null) {
-                deserializer = resolveDeserializer(context, variantIndex);
+                deserializer = resolveDeserializer(context, index);
             }
             return deserializer.deserialize(parser, context);
         }
 
-        private JsonDeserializer<?> resolveDeserializer(DeserializationContext context, int variantIndex)
+        @SuppressWarnings("unchecked") // The constructor restricts variant classes to subtypes of T.
+        private JsonDeserializer<? extends T> resolveDeserializer(DeserializationContext context, int index)
                 throws JsonMappingException {
-            JsonDeserializer<?> deserializer =
-                    context.findContextualValueDeserializer(context.constructType(variantTypes[variantIndex]), null);
-            if (variantDeserializers.compareAndSet(variantIndex, null, deserializer)) {
+            JsonDeserializer<? extends T> deserializer = (JsonDeserializer<? extends T>)
+                    context.findContextualValueDeserializer(context.constructType(variantTypes.get(index)), null);
+            if (variantDeserializers.compareAndSet(index, null, deserializer)) {
                 return deserializer;
             }
-            return variantDeserializers.get(variantIndex);
+            return variantDeserializers.get(index);
         }
 
-        protected final Map<String, Object> deserializeUnknown(JsonParser parser, DeserializationContext context)
+        private Map<String, Object> deserializeUnknown(JsonParser parser, DeserializationContext context)
                 throws IOException {
             Map<String, Object> values = new HashMap<>();
             JsonDeserializer<Object> valueDeserializer = null;
