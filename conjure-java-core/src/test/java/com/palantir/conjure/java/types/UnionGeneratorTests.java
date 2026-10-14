@@ -85,8 +85,19 @@ final class UnionGeneratorTests {
     @ParameterizedTest
     @CsvSource({"false,false", "true,false", "true,true"})
     void jacksonHelperNamesDoNotCollide(boolean sealed, boolean visitors) throws Exception {
+        List<String> names = List.of(
+                "Serializer",
+                "Deserializer",
+                "Serializer_",
+                "Deserializer_",
+                "Named",
+                "ConjureJacksonSupport",
+                "ContainerDeserializer",
+                "UnionDeserializer",
+                "UnionSerializer",
+                "List");
         ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
-        for (String name : List.of("Serializer", "Deserializer", "Serializer_", "Deserializer_", "Named")) {
+        for (String name : names) {
             UnionDefinition.Builder union = UnionDefinition.builder().typeName(TypeName.of(name, "collision"));
             for (String field : name.equals("Named")
                     ? List.of("serializer", "deserializer", "serializer_", "deserializer_")
@@ -104,7 +115,7 @@ final class UnionGeneratorTests {
                         .sealedUnionVisitors(visitors)
                         .build())) {
             ObjectMapper mapper = new ObjectMapper();
-            for (String name : List.of("Serializer", "Deserializer", "Serializer_", "Deserializer_", "Named")) {
+            for (String name : names) {
                 Class<?> type = loader.loadClass("collision." + name);
                 for (String field : name.equals("Named")
                         ? List.of("serializer", "deserializer", "serializer_", "deserializer_")
@@ -113,6 +124,8 @@ final class UnionGeneratorTests {
                     Object value = type.getMethod(field, String.class).invoke(null, "test");
                     assertThat(mapper.writerFor(type).writeValueAsString(value)).isEqualTo(json);
                     assertThat(mapper.readValue(json, type)).isEqualTo(value);
+                    assertThat(mapper.readValue("{\"" + field + "\":\"test\",\"type\":\"" + field + "\"}", type))
+                            .isEqualTo(value);
                     if (sealed) {
                         assertThat(value.getClass().getSimpleName())
                                 .isEqualTo(Character.toUpperCase(field.charAt(0)) + field.substring(1));
