@@ -16,6 +16,9 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.QosReason.AttributionQos;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
@@ -152,6 +155,14 @@ public class JerseyEteResource implements EteService {
     @Override
     public void noReturn(AuthHeader _authHeader) {
         // nop
+    }
+
+    @Override
+    public void qosWithAttribution(AuthHeader _authHeader) {
+        throw QosException.unavailable(QosReason.builder()
+                .reason("ete-qos-attribution")
+                .attributionQos(AttributionQos.of("rejection-policy", "rejection-attribute", "error-message"))
+                .build());
     }
 
     @Override

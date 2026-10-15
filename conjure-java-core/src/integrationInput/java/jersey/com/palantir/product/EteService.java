@@ -172,6 +172,12 @@ public interface EteService {
     @ClientEndpoint(method = "POST", path = "/base/no-return")
     void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    /** Throws a QoS exception with rejection attribution. */
+    @GET
+    @Path("base/qos-attribution")
+    @ClientEndpoint(method = "GET", path = "/base/qos-attribution")
+    void qosWithAttribution(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
     @GET
     @Path("base/enum/query")
     @ClientEndpoint(method = "GET", path = "/base/enum/query")

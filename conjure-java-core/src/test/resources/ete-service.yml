@@ -177,6 +177,10 @@ services:
       noReturn:
         http: POST /no-return
 
+      qosWithAttribution:
+        http: GET /qos-attribution
+        docs: Throws a QoS exception with rejection attribution.
+
       enumQuery:
         http: GET /enum/query
         args:

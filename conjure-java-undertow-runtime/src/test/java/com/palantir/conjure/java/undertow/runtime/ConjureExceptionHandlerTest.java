@@ -29,6 +29,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.QosReason.AttributionQos;
 import com.palantir.conjure.java.api.errors.QosReason.DueTo;
 import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -361,12 +362,18 @@ public final class ConjureExceptionHandlerTest {
                 .reason("reason")
                 .retryHint(RetryHint.DO_NOT_RETRY)
                 .dueTo(DueTo.CUSTOM)
+                .attributionQos(AttributionQos.of("rejection-policy", "rejection-attribute", "error-message"))
                 .build());
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(503);
         assertThat(connection.getHeaderFields()).containsEntry("Qos-Retry-Hint", ImmutableList.of("do-not-retry"));
         assertThat(connection.getHeaderFields()).containsEntry("Qos-Due-To", ImmutableList.of("custom"));
+        assertThat(connection.getHeaderFields())
+                .containsEntry("Rejection-Policy", ImmutableList.of("rejection-policy"));
+        assertThat(connection.getHeaderFields())
+                .containsEntry("Rejection-Attribute", ImmutableList.of("rejection-attribute"));
+        assertThat(connection.getHeaderFields()).containsEntry("Error-Message", ImmutableList.of("error-message"));
         assertThat(connection.getErrorStream()).isNull();
     }
 

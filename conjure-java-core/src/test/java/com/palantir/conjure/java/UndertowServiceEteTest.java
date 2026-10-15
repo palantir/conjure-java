@@ -26,6 +26,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason.AttributionQos;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.SerializableErrorProvider;
@@ -553,6 +555,15 @@ public final class UndertowServiceEteTest extends TestBase {
                         client.receiveListOfStrings(AuthHeader.valueOf("authHeader"), Collections.singletonList(null)))
                 .isInstanceOfSatisfying(RemoteException.class, re -> {
                     assertThat(re.getStatus()).isEqualTo(422);
+                });
+    }
+
+    @Test
+    public void client_preserves_qos_attribution_from_server() {
+        assertThatThrownBy(() -> client.qosWithAttribution(AuthHeader.valueOf("authHeader")))
+                .isInstanceOfSatisfying(QosException.Unavailable.class, exception -> {
+                    assertThat(exception.getReason().attributionQos())
+                            .contains(AttributionQos.of("rejection-policy", "rejection-attribute", "error-message"));
                 });
     }
 

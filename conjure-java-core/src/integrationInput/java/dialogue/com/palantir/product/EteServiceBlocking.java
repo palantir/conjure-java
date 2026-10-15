@@ -150,6 +150,14 @@ public interface EteServiceBlocking {
     @ClientEndpoint(method = "POST", path = "/base/no-return")
     void noReturn(AuthHeader authHeader);
 
+    /**
+     * Throws a QoS exception with rejection attribution.
+     *
+     * @apiNote {@code GET /base/qos-attribution}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/qos-attribution")
+    void qosWithAttribution(AuthHeader authHeader);
+
     /** @apiNote {@code GET /base/enum/query} */
     @ClientEndpoint(method = "GET", path = "/base/enum/query")
     SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
@@ -427,6 +435,9 @@ public interface EteServiceBlocking {
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
+            private final EndpointChannel qosWithAttributionChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.qosWithAttribution);
+
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
 
@@ -659,6 +670,13 @@ public interface EteServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _runtime.clients().callBlocking(noReturnChannel, _request.build(), voidDeserializer);
+            }
+
+            @Override
+            public void qosWithAttribution(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _runtime.clients().callBlocking(qosWithAttributionChannel, _request.build(), voidDeserializer);
             }
 
             @Override

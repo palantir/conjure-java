@@ -711,6 +711,37 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
+    /** Throws a QoS exception with rejection attribution. */
+    qosWithAttribution {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("base").fixed("qos-attribution").build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "qosWithAttribution";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
     enumQuery {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("base")

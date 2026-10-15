@@ -16,6 +16,9 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.QosReason.AttributionQos;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
@@ -171,6 +174,14 @@ public final class UndertowEteResource implements UndertowEteService {
     @Override
     public void noReturn(AuthHeader _authHeader) {
         // nop
+    }
+
+    @Override
+    public void qosWithAttribution(AuthHeader _authHeader) {
+        throw QosException.unavailable(QosReason.builder()
+                .reason("ete-qos-attribution")
+                .attributionQos(AttributionQos.of("rejection-policy", "rejection-attribute", "error-message"))
+                .build());
     }
 
     @Override

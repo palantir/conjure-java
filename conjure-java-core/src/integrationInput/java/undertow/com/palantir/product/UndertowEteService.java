@@ -104,6 +104,13 @@ public interface UndertowEteService {
     /** @apiNote {@code POST /base/no-return} */
     void noReturn(AuthHeader authHeader);
 
+    /**
+     * Throws a QoS exception with rejection attribution.
+     *
+     * @apiNote {@code GET /base/qos-attribution}
+     */
+    void qosWithAttribution(AuthHeader authHeader);
+
     /** @apiNote {@code GET /base/enum/query} */
     SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
 

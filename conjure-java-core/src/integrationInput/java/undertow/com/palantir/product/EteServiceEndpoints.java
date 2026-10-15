@@ -68,6 +68,7 @@ public final class EteServiceEndpoints implements UndertowService {
                 new OptionalBodyExternalImportEndpoint(runtime, delegate),
                 new OptionalQueryExternalImportEndpoint(runtime, delegate),
                 new NoReturnEndpoint(runtime, delegate),
+                new QosWithAttributionEndpoint(runtime, delegate),
                 new EnumQueryEndpoint(runtime, delegate),
                 new EnumListQueryEndpoint(runtime, delegate),
                 new OptionalEnumQueryEndpoint(runtime, delegate),
@@ -1159,6 +1160,49 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "noReturn";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class QosWithAttributionEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        QosWithAttributionEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            delegate.qosWithAttribution(authHeader);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/qos-attribution";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "qosWithAttribution";
         }
 
         @Override

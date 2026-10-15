@@ -150,6 +150,14 @@ public interface EteServiceAsync {
     @ClientEndpoint(method = "POST", path = "/base/no-return")
     ListenableFuture<Void> noReturn(AuthHeader authHeader);
 
+    /**
+     * Throws a QoS exception with rejection attribution.
+     *
+     * @apiNote {@code GET /base/qos-attribution}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/qos-attribution")
+    ListenableFuture<Void> qosWithAttribution(AuthHeader authHeader);
+
     /** @apiNote {@code GET /base/enum/query} */
     @ClientEndpoint(method = "GET", path = "/base/enum/query")
     ListenableFuture<SimpleEnum> enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
@@ -428,6 +436,9 @@ public interface EteServiceAsync {
             private final EndpointChannel noReturnChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.noReturn);
 
+            private final EndpointChannel qosWithAttributionChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.qosWithAttribution);
+
             private final EndpointChannel enumQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.enumQuery);
 
@@ -661,6 +672,13 @@ public interface EteServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients().call(noReturnChannel, _request.build(), voidDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Void> qosWithAttribution(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().call(qosWithAttributionChannel, _request.build(), voidDeserializer);
             }
 
             @Override
