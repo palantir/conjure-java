@@ -288,14 +288,14 @@ public abstract sealed class SimpleUnion
         Deserializer() {
             super(
                     SimpleUnion.class,
-                    List.of(Foo.class, Bar.class, Baz.class),
+                    List.of(SimpleUnion.Foo.class, SimpleUnion.Bar.class, SimpleUnion.Baz.class),
                     type -> switch (type) {
                         case "foo" -> 0;
                         case "bar" -> 1;
                         case "baz" -> 2;
                         default -> -1;
                     },
-                    Unknown::new);
+                    SimpleUnion.Unknown::new);
         }
     }
 

@@ -1048,22 +1048,22 @@ public abstract sealed class UnionReservedNames
             super(
                     UnionReservedNames.class,
                     List.of(
-                            Known_.class,
-                            Unknown_.class,
-                            If.class,
-                            New.class,
-                            Interface.class,
-                            Void.class,
-                            Return.class,
-                            Private.class,
-                            Public.class,
-                            Int.class,
-                            Import.class,
-                            Final.class,
-                            Throws.class,
-                            Static.class,
-                            None.class,
-                            UnionReservedNames_.class),
+                            UnionReservedNames.Known_.class,
+                            UnionReservedNames.Unknown_.class,
+                            UnionReservedNames.If.class,
+                            UnionReservedNames.New.class,
+                            UnionReservedNames.Interface.class,
+                            UnionReservedNames.Void.class,
+                            UnionReservedNames.Return.class,
+                            UnionReservedNames.Private.class,
+                            UnionReservedNames.Public.class,
+                            UnionReservedNames.Int.class,
+                            UnionReservedNames.Import.class,
+                            UnionReservedNames.Final.class,
+                            UnionReservedNames.Throws.class,
+                            UnionReservedNames.Static.class,
+                            UnionReservedNames.None.class,
+                            UnionReservedNames.UnionReservedNames_.class),
                     type -> switch (type) {
                         case "known" -> 0;
                         case "unknown" -> 1;
@@ -1083,7 +1083,7 @@ public abstract sealed class UnionReservedNames
                         case "unionReservedNames" -> 15;
                         default -> -1;
                     },
-                    Unknown::new);
+                    UnionReservedNames.Unknown::new);
         }
     }
 

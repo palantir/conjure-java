@@ -409,11 +409,11 @@ public abstract sealed class UnionExample
             super(
                     UnionExample.class,
                     List.of(
-                            StringVariant.class,
-                            IntVariant.class,
-                            ObjectVariant.class,
-                            CollectionVariant.class,
-                            OptionalVariant.class),
+                            UnionExample.StringVariant.class,
+                            UnionExample.IntVariant.class,
+                            UnionExample.ObjectVariant.class,
+                            UnionExample.CollectionVariant.class,
+                            UnionExample.OptionalVariant.class),
                     type -> switch (type) {
                         case "stringVariant" -> 0;
                         case "intVariant" -> 1;
@@ -422,7 +422,7 @@ public abstract sealed class UnionExample
                         case "optionalVariant" -> 4;
                         default -> -1;
                     },
-                    Unknown::new);
+                    UnionExample.Unknown::new);
         }
     }
 
