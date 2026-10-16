@@ -44,6 +44,7 @@ public abstract sealed class UnionReservedNames
                 UnionReservedNames.Final,
                 UnionReservedNames.Throws,
                 UnionReservedNames.Static,
+                UnionReservedNames.None,
                 UnionReservedNames.UnionReservedNames_,
                 UnionReservedNames.Unknown {
     public static UnionReservedNames known(String value) {
@@ -102,6 +103,10 @@ public abstract sealed class UnionReservedNames
         return new Static(value);
     }
 
+    public static UnionReservedNames none(String value) {
+        return new None(value);
+    }
+
     public static UnionReservedNames unionReservedNames(String value) {
         return new UnionReservedNames_(value);
     }
@@ -150,6 +155,9 @@ public abstract sealed class UnionReservedNames
             case "static":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: static");
+            case "none":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: none");
             case "unionReservedNames":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: unionReservedNames");
@@ -185,6 +193,7 @@ public abstract sealed class UnionReservedNames
                     Final,
                     Throws,
                     Static,
+                    None,
                     UnionReservedNames_ {}
 
     @JsonTypeName("known")
@@ -873,6 +882,55 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    @JsonTypeName("none")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
+    public static final class None extends UnionReservedNames implements Known {
+        private final String value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private None(@JsonSetter("none") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "none cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(index = 0)
+        private String type() {
+            return "none";
+        }
+
+        @JsonProperty("none")
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitNone(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof None && equalTo((None) other));
+        }
+
+        private boolean equalTo(None other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "UnionReservedNames{value: NoneWrapper{value: " + value + "}}";
+        }
+    }
+
     @JsonTypeName("unionReservedNames")
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
@@ -1004,6 +1062,7 @@ public abstract sealed class UnionReservedNames
                             Final.class,
                             Throws.class,
                             Static.class,
+                            None.class,
                             UnionReservedNames_.class),
                     type -> switch (type) {
                         case "known" -> 0;
@@ -1020,7 +1079,8 @@ public abstract sealed class UnionReservedNames
                         case "final" -> 11;
                         case "throws" -> 12;
                         case "static" -> 13;
-                        case "unionReservedNames" -> 14;
+                        case "none" -> 14;
+                        case "unionReservedNames" -> 15;
                         default -> -1;
                     },
                     Unknown::new);
@@ -1056,6 +1116,8 @@ public abstract sealed class UnionReservedNames
 
         T visitStatic(String value);
 
+        T visitNone(String value);
+
         T visitUnionReservedNames(String value);
 
         T visitUnknown(@Safe String unknownType, Object unknownValue);
@@ -1073,6 +1135,7 @@ public abstract sealed class UnionReservedNames
                     InterfaceStageVisitorBuilder<T>,
                     KnownStageVisitorBuilder<T>,
                     NewStageVisitorBuilder<T>,
+                    NoneStageVisitorBuilder<T>,
                     PrivateStageVisitorBuilder<T>,
                     PublicStageVisitorBuilder<T>,
                     ReturnStageVisitorBuilder<T>,
@@ -1096,6 +1159,8 @@ public abstract sealed class UnionReservedNames
         private Function<String, T> knownVisitor;
 
         private Function<String, T> newVisitor;
+
+        private Function<String, T> noneVisitor;
 
         private Function<String, T> privateVisitor;
 
@@ -1158,9 +1223,16 @@ public abstract sealed class UnionReservedNames
         }
 
         @Override
-        public PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor) {
+        public NoneStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor) {
             Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
             this.newVisitor = newVisitor;
+            return this;
+        }
+
+        @Override
+        public PrivateStageVisitorBuilder<T> none(@Nonnull Function<String, T> noneVisitor) {
+            Preconditions.checkNotNull(noneVisitor, "noneVisitor cannot be null");
+            this.noneVisitor = noneVisitor;
             return this;
         }
 
@@ -1253,6 +1325,7 @@ public abstract sealed class UnionReservedNames
             final Function<String, T> interfaceVisitor = this.interfaceVisitor;
             final Function<String, T> knownVisitor = this.knownVisitor;
             final Function<String, T> newVisitor = this.newVisitor;
+            final Function<String, T> noneVisitor = this.noneVisitor;
             final Function<String, T> privateVisitor = this.privateVisitor;
             final Function<String, T> publicVisitor = this.publicVisitor;
             final Function<String, T> returnVisitor = this.returnVisitor;
@@ -1296,6 +1369,11 @@ public abstract sealed class UnionReservedNames
                 @Override
                 public T visitNew(String value) {
                     return newVisitor.apply(value);
+                }
+
+                @Override
+                public T visitNone(String value) {
+                    return noneVisitor.apply(value);
                 }
 
                 @Override
@@ -1371,7 +1449,11 @@ public abstract sealed class UnionReservedNames
     }
 
     public interface NewStageVisitorBuilder<T> {
-        PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor);
+        NoneStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor);
+    }
+
+    public interface NoneStageVisitorBuilder<T> {
+        PrivateStageVisitorBuilder<T> none(@Nonnull Function<String, T> noneVisitor);
     }
 
     public interface PrivateStageVisitorBuilder<T> {
