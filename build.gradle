@@ -61,12 +61,6 @@ allprojects {
     group 'com.palantir.conjure.java'
 
     repositories {
-        mavenLocal {
-            content {
-                includeGroup 'com.palantir.conjure.java.api'
-                includeGroup 'com.palantir.dialogue'
-            }
-        }
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 }
