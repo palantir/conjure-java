@@ -174,12 +174,12 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         Deserializer() {
             super(
                     CamelCaseUnion.class,
-                    List.of(CamelCasedField.class),
+                    List.of(CamelCaseUnion.CamelCasedField.class),
                     type -> switch (type) {
                         case "camelCasedField" -> 0;
                         default -> -1;
                     },
-                    Unknown::new);
+                    CamelCaseUnion.Unknown::new);
         }
     }
 

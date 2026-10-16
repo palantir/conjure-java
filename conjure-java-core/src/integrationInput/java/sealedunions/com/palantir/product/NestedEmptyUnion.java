@@ -174,12 +174,12 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         Deserializer() {
             super(
                     NestedEmptyUnion.class,
-                    List.of(Empty.class),
+                    List.of(NestedEmptyUnion.Empty.class),
                     type -> switch (type) {
                         case "empty" -> 0;
                         default -> -1;
                     },
-                    Unknown::new);
+                    NestedEmptyUnion.Unknown::new);
         }
     }
 

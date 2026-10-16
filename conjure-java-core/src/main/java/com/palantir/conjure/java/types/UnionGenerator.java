@@ -847,8 +847,13 @@ public final class UnionGenerator {
 
     private static TypeSpec generateDeserializer(
             ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
+        // Variants are qualified because member types the Deserializer inherits, such as JsonDeserializer.None, would
+        // otherwise shadow variants with the same simple name.
         CodeBlock variantTypes = memberTypeDefs.stream()
-                .map(member -> CodeBlock.of("$T.class", sealedVariantClass(unionClass, member.getFieldName())))
+                .map(member -> CodeBlock.of(
+                        "$T.$L.class",
+                        unionClass,
+                        sealedVariantClass(unionClass, member.getFieldName()).simpleName()))
                 .collect(CodeBlock.joining(", "));
         CodeBlock.Builder variantIndex = CodeBlock.builder().add("type -> switch (type) {\n");
         for (int index = 0; index < memberTypeDefs.size(); index++) {
@@ -861,12 +866,13 @@ public final class UnionGenerator {
                         ClassName.get(ConjureJacksonSupport.UnionDeserializer.class), unionClass))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addStatement(
-                                "super($T.class, $T.of($L), $L, $T::new)",
+                                "super($T.class, $T.of($L), $L, $T.$L::new)",
                                 unionClass,
                                 List.class,
                                 variantTypes,
                                 variantIndex.build(),
-                                unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME))
+                                unionClass,
+                                SEALED_UNKNOWN_VARIANT_NAME)
                         .build())
                 .build();
     }

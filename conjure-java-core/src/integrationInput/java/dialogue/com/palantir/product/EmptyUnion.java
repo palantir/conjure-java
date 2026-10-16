@@ -107,7 +107,7 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
                     type -> switch (type) {
                         default -> -1;
                     },
-                    Unknown::new);
+                    EmptyUnion.Unknown::new);
         }
     }
 
