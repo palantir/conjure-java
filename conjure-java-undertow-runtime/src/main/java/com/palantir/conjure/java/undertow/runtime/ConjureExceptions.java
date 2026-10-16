@@ -76,10 +76,10 @@ public enum ConjureExceptions implements ExceptionHandler {
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
+        setFailure(exchange, throwable);
         if (isRetriesExhausted(throwable)) {
             exchange.getResponseHeaders().put(RETRIES_EXHAUSTED_HEADER, "true");
         }
-        setFailure(exchange, throwable);
         if (throwable instanceof EndpointServiceException endpointServiceException) {
             endpointServiceException(exchange, endpointServiceException);
         } else if (throwable instanceof CheckedServiceException checkedServiceException) {
@@ -114,7 +114,20 @@ public enum ConjureExceptions implements ExceptionHandler {
         }
     }
 
+    // Dialogue's ExceptionDeserializingErrorDecoder attaches response diagnostics to QosException,
+    // RemoteException, and UnknownRemoteException.
+    // RetryingChannel.handleThrowable attaches an exhaustion diagnostic directly to retryable
+    // IOExceptions when retries are exhausted.
     private static boolean isRetriesExhausted(Throwable failure) {
+        try {
+            return hasRetriesExhaustedDiagnostic(failure);
+        } catch (Throwable inspectionFailure) {
+            log.warn("Failed to inspect retry-exhaustion diagnostic", inspectionFailure);
+            return false;
+        }
+    }
+
+    private static boolean hasRetriesExhaustedDiagnostic(Throwable failure) {
         @Nullable Throwable current = failure;
         for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
             if (current instanceof QosException
