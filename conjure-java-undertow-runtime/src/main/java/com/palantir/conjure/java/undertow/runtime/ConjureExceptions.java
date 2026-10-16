@@ -69,7 +69,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
-    // Exhausted retries logic
+    // Exhausted retries logic. We should expect dialogue to populate this header when it has exhausted retries
     private static final String RETRIES_EXHAUSTED = "Dialogue-Retries-Exhausted";
     private static final HttpString RETRIES_EXHAUSTED_HEADER = new HttpString(RETRIES_EXHAUSTED);
 

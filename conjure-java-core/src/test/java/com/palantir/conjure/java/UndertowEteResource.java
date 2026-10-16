@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java;
 
-import com.palantir.conjure.java.api.errors.ErrorType;
-import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
@@ -311,17 +309,6 @@ public final class UndertowEteResource implements UndertowEteService {
                             .build());
         }
         return "hello!";
-    }
-
-    @Override
-    public String hitOtherService(AuthHeader authHeader) {
-        return downstreamClient.get().internalServerError(authHeader);
-    }
-
-    @Override
-    public String internalServerError(AuthHeader _authHeader) {
-        internalServerErrorAttempts.incrementAndGet();
-        throw new ServiceException(ErrorType.INTERNAL);
     }
 
     int getInternalServerErrorAttempts() {

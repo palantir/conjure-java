@@ -63,10 +63,6 @@ allprojects {
     // Remove this override once a final Dialogue release includes retry diagnostics.
     configurations.configureEach {
         resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'com.palantir.dialogue') {
-                details.useVersion '6.45.0-rc1'
-                details.because 'Retry-exhaustion end-to-end tests require the Dialogue feature build'
-            }
         }
     }
 
