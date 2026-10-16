@@ -50,7 +50,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.xnio.IoUtils;
 
 /**
