@@ -25,6 +25,7 @@ types:
           final: string
           throws: string
           static: string
+          none: string
           unionReservedNames: string
       EmptyUnion:
         union: {}
