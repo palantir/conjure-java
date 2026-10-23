@@ -19,7 +19,10 @@ package com.palantir.conjure.java.lib.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonMerge;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -33,6 +36,7 @@ import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.util.AccessPattern;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -133,6 +137,110 @@ final class ConjureSetDeserializerTest {
             assertThat(value.integers()).containsExactly(2, 1);
             assertThat(value.strings()).containsExactly("b", "a");
         }
+    }
+
+    @Test
+    @SuppressWarnings({"NonApiType", "checkstyle:IllegalType"}) // Jackson requires the concrete collection type.
+    void givesSuccessiveReadsIndependentEmptyAndNullValues() throws IOException {
+        LinkedHashSet<Integer> shared = new LinkedHashSet<>();
+        ObjectMapper custom = new ObjectMapper()
+                .registerModule(new SimpleModule()
+                        .addDeserializer(LinkedHashSet.class, new JsonDeserializer<LinkedHashSet<Integer>>() {
+                            @Override
+                            public LinkedHashSet<Integer> deserialize(
+                                    JsonParser parser, DeserializationContext _context) throws IOException {
+                                parser.skipChildren();
+                                return shared;
+                            }
+
+                            @Override
+                            public LinkedHashSet<Integer> getEmptyValue(DeserializationContext _context) {
+                                return shared;
+                            }
+
+                            @Override
+                            public AccessPattern getEmptyAccessPattern() {
+                                return AccessPattern.CONSTANT;
+                            }
+
+                            @Override
+                            public LinkedHashSet<Integer> getNullValue(DeserializationContext _context) {
+                                return shared;
+                            }
+
+                            @Override
+                            public AccessPattern getNullAccessPattern() {
+                                return AccessPattern.CONSTANT;
+                            }
+                        }));
+        for (Class<?> holder : List.of(EmptyValue.class, MergeValue.class)) {
+            Object first = custom.readValue("{\"values\":null}", holder);
+            Object second = custom.readValue("{\"values\":null}", holder);
+            Set<Integer> firstValues = first instanceof EmptyValue empty ? empty.values : ((MergeValue) first).values;
+            Set<Integer> secondValues =
+                    second instanceof EmptyValue empty ? empty.values : ((MergeValue) second).values;
+            assertThat(firstValues)
+                    .isNotSameAs(shared)
+                    .isNotSameAs(secondValues)
+                    .isEmpty();
+            firstValues.add(2);
+            assertThat(secondValues).isEmpty();
+            assertThat(shared).isEmpty();
+        }
+    }
+
+    @Test
+    @SuppressWarnings({"NonApiType", "checkstyle:IllegalType"}) // Jackson requires the concrete collection type.
+    void copiesMergeInputsAndReplacementResults() throws IOException {
+        for (boolean replace : List.of(false, true)) {
+            LinkedHashSet<Integer> shared = new LinkedHashSet<>(List.of(1));
+            ObjectMapper custom = new ObjectMapper()
+                    .registerModule(new SimpleModule()
+                            .addDeserializer(LinkedHashSet.class, new JsonDeserializer<LinkedHashSet<Integer>>() {
+                                @Override
+                                public LinkedHashSet<Integer> deserialize(
+                                        JsonParser parser, DeserializationContext _context) throws IOException {
+                                    parser.skipChildren();
+                                    return shared;
+                                }
+
+                                @Override
+                                public LinkedHashSet<Integer> deserialize(
+                                        JsonParser parser,
+                                        DeserializationContext _context,
+                                        LinkedHashSet<Integer> intoValue)
+                                        throws IOException {
+                                    parser.skipChildren();
+                                    assertThat(intoValue).isEqualTo(shared).isNotSameAs(shared);
+                                    intoValue.add(2);
+                                    return replace ? shared : intoValue;
+                                }
+                            }));
+            MergeValue holder = new MergeValue();
+            holder.values = shared;
+            MergeValue result = custom.readerForUpdating(holder).readValue("{\"values\":[]}");
+            assertThat(shared).containsExactly(1);
+            assertThat(result.values).isNotSameAs(shared);
+            if (replace) {
+                assertThat(result.values).containsExactly(1);
+            } else {
+                assertThat(result.values).containsExactly(1, 2);
+            }
+            result.values.clear();
+            assertThat(shared).containsExactly(1);
+        }
+    }
+
+    static final class EmptyValue {
+        @JsonSetter(nulls = Nulls.AS_EMPTY)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+        public Set<Integer> values;
+    }
+
+    static final class MergeValue {
+        @JsonMerge
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+        public Set<Integer> values;
     }
 
     record Value(

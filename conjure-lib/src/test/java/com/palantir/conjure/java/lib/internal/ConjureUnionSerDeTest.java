@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -67,6 +68,32 @@ final class ConjureUnionSerDeTest {
         for (String json : List.of("{\"type\":\"number\",\"value\":42}", "{\"value\":42,\"type\":\"number\"}")) {
             assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new NumberVariant(42));
             assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(new NumberVariant(42)));
+        }
+    }
+
+    @Test
+    void givesCustomVariantDeserializersAnObjectStart() throws IOException {
+        ObjectMapper custom = new ObjectMapper()
+                .registerModule(new SimpleModule().addDeserializer(Known.class, new JsonDeserializer<>() {
+                    @Override
+                    public Known deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+                        if (!parser.isExpectedStartObjectToken()) {
+                            return context.reportInputMismatch(Known.class, "Expected START_OBJECT");
+                        }
+                        assertThat(parser.nextToken()).isEqualTo(JsonToken.FIELD_NAME);
+                        assertThat(parser.currentName()).isEqualTo("value");
+                        assertThat(parser.nextToken()).isEqualTo(JsonToken.VALUE_STRING);
+                        Known value = new Known(parser.getText());
+                        assertThat(parser.nextToken()).isEqualTo(JsonToken.END_OBJECT);
+                        return value;
+                    }
+                }));
+        for (String json :
+                List.of("{\"type\":\"known\",\"value\":\"hello\"}", "{\"value\":\"hello\",\"type\":\"known\"}")) {
+            assertThat(custom.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
+            assertThat(custom.readValue(json, Alias.class)).isEqualTo(new Alias(new Known("hello")));
+            assertThat(custom.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
+                    .isEqualTo(new Holder(List.of(new Known("hello"), new Known("hello"))));
         }
     }
 
