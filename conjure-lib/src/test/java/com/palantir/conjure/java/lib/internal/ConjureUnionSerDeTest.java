@@ -25,19 +25,34 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.WritableTypeId;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.ContextualSerializer;
+import com.sun.management.ThreadMXBean;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.management.ManagementFactory;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +63,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 final class ConjureUnionSerDeTest {
@@ -98,11 +115,94 @@ final class ConjureUnionSerDeTest {
     }
 
     @Test
+    void supportsNextValueAndSkippingBufferedChildren() throws IOException {
+        ObjectMapper custom = new ObjectMapper()
+                .registerModule(new SimpleModule().addDeserializer(Known.class, new JsonDeserializer<>() {
+                    @Override
+                    public Known deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
+                        assertThat(parser.isExpectedStartObjectToken()).isTrue();
+                        JsonToken token = parser.nextValue();
+                        if (token == JsonToken.START_OBJECT) {
+                            parser.skipChildren();
+                            token = parser.nextValue();
+                        }
+                        assertThat(token).isEqualTo(JsonToken.VALUE_STRING);
+                        assertThat(parser.currentName()).isEqualTo("value");
+                        Known value = new Known(parser.getText());
+                        assertThat(parser.nextValue()).isEqualTo(JsonToken.END_OBJECT);
+                        return value;
+                    }
+                }));
+        for (String json : List.of(
+                "{\"type\":\"known\",\"value\":\"hello\"}",
+                "{\"value\":\"hello\",\"type\":\"known\"}",
+                "{\"ignored\":{\"type\":17,\"nested\":{\"type\":\"unused\"}},\"value\":\"hello\",\"type\":\"known\"}")) {
+            assertThat(custom.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
+            assertThat(custom.readValue(json, Alias.class)).isEqualTo(new Alias(new Known("hello")));
+            assertThat(custom.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
+                    .isEqualTo(new Holder(List.of(new Known("hello"), new Known("hello"))));
+        }
+    }
+
+    @Test
+    void reusesBufferedObjectsAfterSkippingUnrelatedObjects() throws IOException {
+        ObjectMapper ignoring = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        String json = """
+            {"ignored":{"type":17,"nested":{"type":"unused"}},
+             "values":[{"value":"hello","type":"known"},{"type":"number","value":42}],
+             "type":"nested"}
+            """;
+        assertThat(ignoring.readValue(json, SampleUnion.class))
+                .isEqualTo(new NestedVariant(List.of(new Known("hello"), new NumberVariant(42))));
+        assertThat(ignoring.readValue(json.getBytes(StandardCharsets.UTF_8), Alias.class))
+                .isEqualTo(new Alias(new NestedVariant(List.of(new Known("hello"), new NumberVariant(42)))));
+    }
+
+    @Test
+    void allocationScalesLinearlyForRecursiveDiscriminatorLastUnions() throws IOException {
+        Object management = ManagementFactory.getThreadMXBean();
+        Assumptions.assumeTrue(management instanceof ThreadMXBean);
+        ThreadMXBean allocation = (ThreadMXBean) management;
+        Assumptions.assumeTrue(
+                allocation.isThreadAllocatedMemorySupported() && allocation.isThreadAllocatedMemoryEnabled());
+        ObjectReader reader = mapper.readerFor(SampleUnion.class);
+        String smaller = recursiveJson(64);
+        String larger = recursiveJson(128);
+        for (int i = 0; i < 200; i++) {
+            reader.readValue(smaller);
+            reader.readValue(larger);
+        }
+        long smallerAllocation = allocatedBytes(allocation, reader, smaller);
+        long largerAllocation = allocatedBytes(allocation, reader, larger);
+        assertThat(largerAllocation).isLessThan(smallerAllocation * 3);
+    }
+
+    private static String recursiveJson(int depth) {
+        return "{\"values\":[".repeat(depth)
+                + "{\"type\":\"known\",\"value\":\"hello\"}"
+                + "],\"type\":\"nested\"}".repeat(depth);
+    }
+
+    private static long allocatedBytes(ThreadMXBean allocation, ObjectReader reader, String json) throws IOException {
+        long thread = Thread.currentThread().getId();
+        long before = allocation.getThreadAllocatedBytes(thread);
+        Object last = null;
+        for (int i = 0; i < 100; i++) {
+            last = reader.readValue(json);
+        }
+        long bytes = allocation.getThreadAllocatedBytes(thread) - before;
+        assertThat(last).isInstanceOf(NestedVariant.class);
+        return bytes;
+    }
+
+    @Test
     void preservesUnknownPayloadsOnBothPaths() throws IOException {
         for (String json : List.of(
                 "{\"type\":\"future\",\"future\":{\"nested\":[1,2]},\"extra\":null}",
                 "{\"future\":{\"nested\":[1,2]},\"type\":\"future\",\"extra\":null}",
                 "{\"future\":{\"nested\":[1,2]},\"extra\":null,\"type\":\"future\"}",
+                "{\"type\":\"future\",\"future\":{\"type\":17,\"nested\":{\"type\":\"known\"}}}",
+                "{\"future\":{\"type\":17,\"nested\":{\"type\":\"known\"}},\"type\":\"future\"}",
                 "{\"type\":\"future\"}")) {
             SampleUnion union = mapper.readValue(json, SampleUnion.class);
             assertThat(union).isInstanceOf(Unknown.class);
@@ -112,9 +212,33 @@ final class ConjureUnionSerDeTest {
     }
 
     @Test
+    void preservesConfiguredNumberPrecisionWhenBuffering() throws IOException {
+        ObjectMapper precise = new ObjectMapper()
+                .enable(
+                        DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS,
+                        DeserializationFeature.USE_BIG_INTEGER_FOR_INTS);
+        for (String json : List.of(
+                "{\"type\":\"future\",\"decimal\":1.234567890123456789,\"integer\":123456789012345678901234567890}",
+                "{\"decimal\":1.234567890123456789,\"integer\":123456789012345678901234567890,\"type\":\"future\"}")) {
+            Unknown result = (Unknown) precise.readValue(json, SampleUnion.class);
+            assertThat(result.values())
+                    .containsEntry("decimal", new BigDecimal("1.234567890123456789"))
+                    .containsEntry("integer", new BigInteger("123456789012345678901234567890"));
+        }
+    }
+
+    @Test
     void rejectsMissingOrNonStringDiscriminators() {
         for (String json : List.of(
-                "{}", "[]", "1", "{\"value\":1}", "{\"type\":null}", "{\"type\":1}", "{\"value\":1,\"type\":false}")) {
+                "{}",
+                "[]",
+                "1",
+                "{\"value\":1}",
+                "{\"type\":null}",
+                "{\"type\":1}",
+                "{\"value\":1,\"type\":false}",
+                "{\"values\":[{\"value\":\"missing\"}],\"type\":\"nested\"}",
+                "{\"values\":[{\"value\":\"invalid\",\"type\":null}],\"type\":\"nested\"}")) {
             assertThatThrownBy(() -> mapper.readValue(json, SampleUnion.class))
                     .isInstanceOf(JsonMappingException.class);
         }
@@ -131,6 +255,16 @@ final class ConjureUnionSerDeTest {
             assertThatThrownBy(() -> mapper.readValue(json, SampleUnion.class))
                     .isInstanceOf(JsonMappingException.class);
         }
+    }
+
+    @Test
+    void honorsCaseInsensitiveDiscriminatorsInBufferedRecursiveVariants() throws IOException {
+        ObjectMapper insensitive = JsonMapper.builder()
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+                .build();
+        String json = "{\"VALUES\":[{\"VALUE\":\"hello\",\"TYPE\":\"known\"}],\"TYPE\":\"nested\"}";
+        assertThat(insensitive.readValue(json, SampleUnion.class))
+                .isEqualTo(new NestedVariant(List.of(new Known("hello"))));
     }
 
     @Test
@@ -195,6 +329,148 @@ final class ConjureUnionSerDeTest {
         assertThat(json).contains(Known.class.getName());
         assertThat(typed.readValue(json, SampleUnion.class)).isEqualTo(value);
     }
+
+    @Test
+    void contextualizesVariantSerializersForEachMapperAndProperty() throws IOException {
+        for (String prefix : List.of("first:", "second:")) {
+            AtomicInteger contextualizations = new AtomicInteger();
+            ObjectMapper custom = contextualSerializerMapper(prefix, contextualizations);
+            Known value = new Known("hello");
+            SerializationHolder holder = new SerializationHolder(value, value, List.of(value, value));
+            int warmed = 0;
+            for (int i = 0; i < 3; i++) {
+                String root = custom.writerFor(SampleUnion.class).writeValueAsString(value);
+                assertThat(custom.readTree(root).get("value").textValue()).isEqualTo(prefix + "root:hello");
+                JsonNode properties = custom.readTree(custom.writeValueAsString(holder));
+                assertThat(properties.get("first").get("value").textValue()).isEqualTo(prefix + "first:hello");
+                assertThat(properties.get("second").get("value").textValue()).isEqualTo(prefix + "second:hello");
+                assertThat(properties.get("values").get(0).get("value").textValue())
+                        .isEqualTo(prefix + "values:hello");
+                assertThat(properties.get("values").get(1).get("value").textValue())
+                        .isEqualTo(prefix + "values:hello");
+                if (i == 0) {
+                    warmed = contextualizations.get();
+                } else {
+                    assertThat(contextualizations.get()).isEqualTo(warmed);
+                }
+            }
+        }
+    }
+
+    @Test
+    @SuppressWarnings("DangerousJsonTypeInfoUsage") // Exercise typed dispatch with an explicit subtype allowlist.
+    void contextualizesTypedVariantSerializers() throws IOException {
+        ObjectMapper typed = contextualSerializerMapper("typed:", new AtomicInteger())
+                .activateDefaultTyping(
+                        BasicPolymorphicTypeValidator.builder()
+                                .allowIfSubType(SampleUnion.class)
+                                .build(),
+                        ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
+        SerializerProvider provider = typed.getSerializerProviderInstance();
+        StringWriter output = new StringWriter();
+        try (JsonGenerator generator = typed.getFactory().createGenerator(output)) {
+            provider.findValueSerializer(SampleUnion.class, null)
+                    .serializeWithType(
+                            new Known("hello"),
+                            generator,
+                            provider,
+                            provider.findTypeSerializer(typed.constructType(SampleUnion.class)));
+        }
+        assertThat(typed.readValue(output.toString(), SampleUnion.class)).isEqualTo(new Known("typed:root:hello"));
+        String json = typed.writerFor(SampleUnion.class).writeValueAsString(new Known("hello"));
+        assertThat(typed.readValue(json, SampleUnion.class)).isEqualTo(new Known("typed:root:hello"));
+    }
+
+    @Test
+    void contextualSerializersRemainIsolatedDuringConcurrentReadsAndWrites() throws Exception {
+        ObjectMapper first = contextualSerializerMapper("first:", new AtomicInteger());
+        ObjectMapper second = contextualSerializerMapper("second:", new AtomicInteger());
+        SerializationHolder holder = new SerializationHolder(new Known("a"), new Known("b"), List.of(new Known("c")));
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        try {
+            CyclicBarrier start = new CyclicBarrier(4);
+            List<Callable<Void>> tasks = IntStream.range(0, 4)
+                    .<Callable<Void>>mapToObj(_index -> () -> {
+                        start.await(30, TimeUnit.SECONDS);
+                        for (int i = 0; i < 50; i++) {
+                            for (ObjectMapper configured : List.of(first, second)) {
+                                String prefix = configured.equals(first) ? "first:" : "second:";
+                                JsonNode json = configured.readTree(configured.writeValueAsString(holder));
+                                assertThat(json.get("first").get("value").textValue())
+                                        .isEqualTo(prefix + "first:a");
+                                assertThat(json.get("second").get("value").textValue())
+                                        .isEqualTo(prefix + "second:b");
+                                assertThat(json.get("values")
+                                                .get(0)
+                                                .get("value")
+                                                .textValue())
+                                        .isEqualTo(prefix + "values:c");
+                                assertThat(configured.readValue(
+                                                "{\"values\":[{\"type\":\"known\",\"value\":\"a\"},{\"value\":\"b\",\"type\":\"known\"}],\"type\":\"nested\"}",
+                                                SampleUnion.class))
+                                        .isEqualTo(new NestedVariant(List.of(new Known("a"), new Known("b"))));
+                            }
+                        }
+                        return null;
+                    })
+                    .toList();
+            for (Future<Void> result : executor.invokeAll(tasks, 30, TimeUnit.SECONDS)) {
+                result.get();
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    private static ObjectMapper contextualSerializerMapper(String prefix, AtomicInteger contextualizations) {
+        return new ObjectMapper()
+                .registerModule(new SimpleModule()
+                        .addSerializer(Known.class, new ContextualKnownSerializer(prefix, null, contextualizations)));
+    }
+
+    private static final class ContextualKnownSerializer extends JsonSerializer<Known> implements ContextualSerializer {
+        private final String prefix;
+        private final String property;
+        private final AtomicInteger contextualizations;
+
+        ContextualKnownSerializer(String prefix, String property, AtomicInteger contextualizations) {
+            this.prefix = prefix;
+            this.property = property;
+            this.contextualizations = contextualizations;
+        }
+
+        @Override
+        public JsonSerializer<?> createContextual(SerializerProvider _provider, BeanProperty beanProperty) {
+            contextualizations.incrementAndGet();
+            return new ContextualKnownSerializer(
+                    prefix, beanProperty == null ? "root" : beanProperty.getName(), contextualizations);
+        }
+
+        @Override
+        public void serialize(Known value, JsonGenerator generator, SerializerProvider _provider) throws IOException {
+            generator.writeStartObject();
+            writeFields(value, generator);
+            generator.writeEndObject();
+        }
+
+        @Override
+        public void serializeWithType(
+                Known value, JsonGenerator generator, SerializerProvider _provider, TypeSerializer typeSerializer)
+                throws IOException {
+            WritableTypeId id =
+                    typeSerializer.writeTypePrefix(generator, typeSerializer.typeId(value, JsonToken.START_OBJECT));
+            writeFields(value, generator);
+            typeSerializer.writeTypeSuffix(generator, id);
+        }
+
+        private void writeFields(Known value, JsonGenerator generator) throws IOException {
+            assertThat(property).isNotNull();
+            generator.writeStringField("type", "known");
+            generator.writeStringField("value", prefix + property + ":" + value.value());
+        }
+    }
+
+    record SerializationHolder(SampleUnion first, SampleUnion second, List<SampleUnion> values) {}
 
     @Test
     void resolvesEachUnionInPropertiesAndContainers() throws IOException {

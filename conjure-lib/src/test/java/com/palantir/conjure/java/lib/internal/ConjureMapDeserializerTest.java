@@ -46,6 +46,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -187,6 +188,7 @@ final class ConjureMapDeserializerTest {
     @Test
     void copiesMergeInputsAndReplacementResults() throws IOException {
         for (boolean replace : List.of(false, true)) {
+            AtomicReference<Map<String, Integer>> retained = new AtomicReference<>();
             Map<String, Integer> shared = new LinkedHashMap<>(Map.of("original", 1));
             ObjectMapper custom = new ObjectMapper()
                     .registerModule(new SimpleModule()
@@ -206,6 +208,7 @@ final class ConjureMapDeserializerTest {
                                         throws IOException {
                                     parser.skipChildren();
                                     assertThat(intoValue).isEqualTo(shared).isNotSameAs(shared);
+                                    retained.set(intoValue);
                                     intoValue.put("added", 2);
                                     return replace ? shared : intoValue;
                                 }
@@ -214,7 +217,8 @@ final class ConjureMapDeserializerTest {
             holder.values = shared;
             MergeValue result = custom.readerForUpdating(holder).readValue("{\"values\":{}}");
             assertThat(shared).containsExactlyEntriesOf(Map.of("original", 1));
-            assertThat(result.values).isNotSameAs(shared);
+            assertThat(result.values).isNotSameAs(shared).isNotSameAs(retained.get());
+            retained.get().clear();
             if (replace) {
                 assertThat(result.values).containsExactlyEntriesOf(Map.of("original", 1));
             } else {
