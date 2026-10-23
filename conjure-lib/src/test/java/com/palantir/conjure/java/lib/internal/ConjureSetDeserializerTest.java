@@ -193,6 +193,7 @@ final class ConjureSetDeserializerTest {
     @SuppressWarnings({"NonApiType", "checkstyle:IllegalType"}) // Jackson requires the concrete collection type.
     void copiesMergeInputsAndReplacementResults() throws IOException {
         for (boolean replace : List.of(false, true)) {
+            AtomicReference<Set<Integer>> retained = new AtomicReference<>();
             LinkedHashSet<Integer> shared = new LinkedHashSet<>(List.of(1));
             ObjectMapper custom = new ObjectMapper()
                     .registerModule(new SimpleModule()
@@ -212,6 +213,7 @@ final class ConjureSetDeserializerTest {
                                         throws IOException {
                                     parser.skipChildren();
                                     assertThat(intoValue).isEqualTo(shared).isNotSameAs(shared);
+                                    retained.set(intoValue);
                                     intoValue.add(2);
                                     return replace ? shared : intoValue;
                                 }
@@ -220,7 +222,8 @@ final class ConjureSetDeserializerTest {
             holder.values = shared;
             MergeValue result = custom.readerForUpdating(holder).readValue("{\"values\":[]}");
             assertThat(shared).containsExactly(1);
-            assertThat(result.values).isNotSameAs(shared);
+            assertThat(result.values).isNotSameAs(shared).isNotSameAs(retained.get());
+            retained.get().clear();
             if (replace) {
                 assertThat(result.values).containsExactly(1);
             } else {
