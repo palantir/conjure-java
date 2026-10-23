@@ -24,10 +24,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.defs.ConjureArgs;
 import com.palantir.conjure.defs.SafetyDeclarationRequirements;
+import com.palantir.conjure.defs.validator.ConjureDefinitionValidator;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
 import com.palantir.conjure.spec.ErrorCode;
@@ -36,32 +40,174 @@ import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.HttpMethod;
+import com.palantir.conjure.spec.HttpPath;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.javapoet.JavaFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
+import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public final class ObjectGeneratorTests {
 
     @TempDir
     public File tempDir;
+
+    @ParameterizedTest
+    @CsvSource({"false,false", "false,true", "true,false", "true,true"})
+    @SuppressWarnings("DangerousParallelStreamUsage") // Verify callers can consume the output stream in parallel.
+    void jacksonHelpersAreSharedWithinEachPrefixedPackage(boolean sealed, boolean defensive) {
+        ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
+        Type string = Type.primitive(PrimitiveType.STRING);
+        for (String packageName : List.of("first.api", "second.api")) {
+            for (String name : List.of("First", "Second")) {
+                definition.types(TypeDefinition.object(ObjectDefinition.builder()
+                        .typeName(TypeName.of(name + "Object", packageName))
+                        .fields(FieldDefinition.builder()
+                                .fieldName(FieldName.of("values"))
+                                .type(Type.map(MapType.of(string, string)))
+                                .build())
+                        .build()));
+                definition.types(TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(TypeName.of(name + "Set", packageName))
+                        .alias(Type.set(SetType.of(string)))
+                        .build()));
+                definition.types(TypeDefinition.union(UnionDefinition.builder()
+                        .typeName(TypeName.of(name + "Union", packageName))
+                        .union(FieldDefinition.builder()
+                                .fieldName(FieldName.of("value"))
+                                .type(string)
+                                .build())
+                        .build()));
+            }
+        }
+        ObjectGenerator generator = new ObjectGenerator(Options.builder()
+                .packagePrefix("prefix")
+                .sealedUnions(sealed)
+                .defensiveCollections(defensive)
+                .build());
+        ConjureDefinition conjure = definition.build();
+        List<JavaFile> files = generator.generate(conjure).toList();
+        assertThat(generator
+                        .generate(conjure)
+                        .parallel()
+                        .map(JavaFile::toString)
+                        .toList())
+                .containsExactlyElementsOf(
+                        files.stream().map(JavaFile::toString).toList());
+        assertThat(files.stream()
+                        .map(file -> file.packageName() + "." + file.typeSpec().name()))
+                .doesNotHaveDuplicates();
+        for (String packageName : List.of("prefix.first.api", "prefix.second.api")) {
+            List<JavaFile> helpers = files.stream()
+                    .filter(file -> file.packageName().equals(packageName))
+                    .filter(file -> file.typeSpec().name().startsWith("Conjure"))
+                    .toList();
+            assertThat(helpers).hasSize(1);
+            assertThat(helpers).allSatisfy(file -> {
+                assertThat(file.typeSpec().modifiers()).doesNotContain(Modifier.PUBLIC);
+                assertThat(file.toString()).doesNotContain("com.palantir.conjure.java.lib.internal");
+                assertThat(file.typeSpec().name()).isEqualTo("ConjureJacksonSupport");
+                assertThat(file.toString())
+                        .containsOnlyOnce("class ContainerDeserializer")
+                        .containsOnlyOnce("class CopyingDeserializer");
+                if (sealed) {
+                    assertThat(file.toString())
+                            .containsOnlyOnce("class UnionDeserializer")
+                            .containsOnlyOnce("class UnionSerializer");
+                } else {
+                    assertThat(file.toString()).doesNotContain("class UnionDeserializer", "class UnionSerializer");
+                }
+            });
+        }
+        assertThat(generator.generate(ConjureDefinition.builder().version(1).build()))
+                .isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "prefix"})
+    void jacksonHelperNamesDoNotCollideWithServices(String packagePrefix) {
+        Type string = Type.primitive(PrimitiveType.STRING);
+        ConjureDefinition.Builder definition = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.object(ObjectDefinition.builder()
+                        .typeName(TypeName.of("ConjureJacksonSupport", "example"))
+                        .fields(FieldDefinition.builder()
+                                .fieldName(FieldName.of("values"))
+                                .type(Type.map(MapType.of(string, string)))
+                                .build())
+                        .build()));
+        for (String serviceName : List.of("ConjureJacksonSupport_", "ConjureJacksonSupport__")) {
+            definition.services(ServiceDefinition.builder()
+                    .serviceName(TypeName.of(serviceName, "example"))
+                    .endpoints(EndpointDefinition.builder()
+                            .endpointName(EndpointName.of("get"))
+                            .httpMethod(HttpMethod.GET)
+                            .httpPath(HttpPath.of("/"))
+                            .build())
+                    .build());
+        }
+        ConjureDefinition conjure = definition.build();
+        ConjureDefinitionValidator.validateAll(conjure, SafetyDeclarationRequirements.ALLOWED);
+        Options.Builder optionsBuilder = Options.builder();
+        if (!packagePrefix.isEmpty()) {
+            optionsBuilder.packagePrefix(packagePrefix);
+        }
+        Options options = optionsBuilder.build();
+        List<JavaFile> files = Stream.concat(
+                        new ObjectGenerator(options).generate(conjure),
+                        new JerseyServiceGenerator(options).generate(conjure))
+                .toList();
+        assertThat(files.stream()
+                        .map(file -> file.packageName() + "." + file.typeSpec().name()))
+                .doesNotHaveDuplicates();
+        assertThat(files.stream().map(file -> file.typeSpec().name()))
+                .containsExactly(
+                        "ConjureJacksonSupport",
+                        "ConjureJacksonSupport___",
+                        "ConjureJacksonSupport_",
+                        "ConjureJacksonSupport__");
+        assertThat(files.get(0).toString()).contains("using = ConjureJacksonSupport___.ContainerDeserializer.class");
+    }
+
+    @Test
+    void scalarModelsDoNotGenerateJacksonHelpers() {
+        ConjureDefinition definition = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.alias(AliasDefinition.builder()
+                        .typeName(TypeName.of("Scalar", "example"))
+                        .alias(Type.primitive(PrimitiveType.STRING))
+                        .build()))
+                .build();
+        assertThat(new ObjectGenerator(Options.builder()
+                                .sealedUnions(true)
+                                .defensiveCollections(true)
+                                .build())
+                        .generate(definition))
+                .singleElement()
+                .satisfies(file -> assertThat(file.typeSpec().name()).isEqualTo("Scalar"));
+    }
 
     @Test
     public void testConjureImports() throws IOException {

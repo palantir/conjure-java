@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +27,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true,
-        defaultImpl = NestedEmptyUnion.Unknown.class)
-@JsonSubTypes(@JsonSubTypes.Type(value = NestedEmptyUnion.Empty.class, name = "empty"))
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, NestedEmptyUnion.Unknown {
     public static NestedEmptyUnion empty(EmptyObject value) {
@@ -56,11 +55,35 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         }
     }
 
+    static NestedEmptyUnion deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            case "empty" -> 0;
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (NestedEmptyUnion) deserializer.deserializeVariant(parser, context, variantIndex);
+    }
+
     public abstract <T> T accept(Visitor<T> visitor);
 
     public sealed interface Known permits Empty {}
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("empty")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Empty extends NestedEmptyUnion implements Known {
         private final EmptyObject value;
 
@@ -105,6 +128,13 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown extends NestedEmptyUnion {
         private final String type;
 

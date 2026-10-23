@@ -18,11 +18,13 @@ package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
+import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.JavaFile;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +41,18 @@ public final class ObjectGenerator implements Generator {
     public Stream<JavaFile> generate(ConjureDefinition definition) {
         List<TypeDefinition> types = definition.getTypes();
         Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
-        TypeMapper typeMapper = new TypeMapper(typesMap, options);
+        List<ClassName> serviceClasses = definition.getServices().stream()
+                .map(service -> ClassName.get(
+                        Packages.getPrefixedPackage(service.getServiceName().getPackage(), options.packagePrefix()),
+                        service.getServiceName().getName()))
+                .toList();
+        TypeMapper typeMapper = new TypeMapper(typesMap, options, serviceClasses);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(typesMap);
-        return types.stream().map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef));
+        // Finish registering helper requirements before exposing the output stream to callers.
+        List<JavaFile> models = types.stream()
+                .map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef))
+                .toList();
+        return Stream.concat(models.stream(), typeMapper.jacksonSupport().generate());
     }
 
     private JavaFile generateInner(

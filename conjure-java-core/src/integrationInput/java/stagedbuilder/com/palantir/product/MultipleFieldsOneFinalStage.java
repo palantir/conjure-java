@@ -195,6 +195,8 @@ public final class MultipleFieldsOneFinalStage {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private OneField token;
@@ -213,7 +215,6 @@ public final class MultipleFieldsOneFinalStage {
         }
 
         @Override
-        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));

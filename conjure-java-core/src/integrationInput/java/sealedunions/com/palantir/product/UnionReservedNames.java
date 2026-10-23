@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,29 +27,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true,
-        defaultImpl = UnionReservedNames.Unknown.class)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = UnionReservedNames.Known_.class, name = "known"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Unknown_.class, name = "unknown"),
-    @JsonSubTypes.Type(value = UnionReservedNames.If.class, name = "if"),
-    @JsonSubTypes.Type(value = UnionReservedNames.New.class, name = "new"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Interface.class, name = "interface"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Void.class, name = "void"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Return.class, name = "return"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Private.class, name = "private"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Public.class, name = "public"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Int.class, name = "int"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Import.class, name = "import"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Final.class, name = "final"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Throws.class, name = "throws"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Static.class, name = "static"),
-    @JsonSubTypes.Type(value = UnionReservedNames.UnionReservedNames_.class, name = "unionReservedNames")
-})
+@JsonDeserialize(using = ConjureJacksonSupport.UnionDeserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class UnionReservedNames
         permits UnionReservedNames.Known_,
@@ -186,6 +169,36 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    static UnionReservedNames deserializeUnion(
+            JsonParser parser,
+            DeserializationContext context,
+            String type,
+            ConjureJacksonSupport.UnionDeserializer deserializer)
+            throws IOException {
+        int variantIndex = switch (type) {
+            case "known" -> 0;
+            case "unknown" -> 1;
+            case "if" -> 2;
+            case "new" -> 3;
+            case "interface" -> 4;
+            case "void" -> 5;
+            case "return" -> 6;
+            case "private" -> 7;
+            case "public" -> 8;
+            case "int" -> 9;
+            case "import" -> 10;
+            case "final" -> 11;
+            case "throws" -> 12;
+            case "static" -> 13;
+            case "unionReservedNames" -> 14;
+            default -> -1;
+        };
+        if (variantIndex < 0) {
+            return new Unknown(type, deserializer.deserializeUnknown(parser, context));
+        }
+        return (UnionReservedNames) deserializer.deserializeVariant(parser, context, variantIndex);
+    }
+
     public abstract <T> T accept(Visitor<T> visitor);
 
     public sealed interface Known
@@ -205,7 +218,15 @@ public abstract sealed class UnionReservedNames
                     Static,
                     UnionReservedNames_ {}
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("known")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Known_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -250,7 +271,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("unknown")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -295,7 +324,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("if")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class If extends UnionReservedNames implements Known {
         private final String value;
 
@@ -340,7 +377,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("new")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class New extends UnionReservedNames implements Known {
         private final String value;
 
@@ -385,7 +430,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("interface")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Interface extends UnionReservedNames implements Known {
         private final String value;
 
@@ -430,7 +483,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("void")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Void extends UnionReservedNames implements Known {
         private final String value;
 
@@ -475,7 +536,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("return")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Return extends UnionReservedNames implements Known {
         private final String value;
 
@@ -520,7 +589,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("private")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Private extends UnionReservedNames implements Known {
         private final String value;
 
@@ -565,7 +642,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("public")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Public extends UnionReservedNames implements Known {
         private final String value;
 
@@ -610,7 +695,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("int")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Int extends UnionReservedNames implements Known {
         private final String value;
 
@@ -655,7 +748,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("import")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Import extends UnionReservedNames implements Known {
         private final String value;
 
@@ -700,7 +801,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("final")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Final extends UnionReservedNames implements Known {
         private final String value;
 
@@ -745,7 +854,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("throws")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Throws extends UnionReservedNames implements Known {
         private final String value;
 
@@ -790,7 +907,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("static")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Static extends UnionReservedNames implements Known {
         private final String value;
 
@@ -835,7 +960,15 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
     @JsonTypeName("unionReservedNames")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class UnionReservedNames_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -880,6 +1013,13 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    /**
+     * The empty {@link JsonDeserialize} and {@link JsonSerialize} annotations override the custom serializer and
+     * deserializer inherited from the superclass, allowing Jackson to handle this variant directly.
+     */
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown extends UnionReservedNames {
         private final String type;
 
