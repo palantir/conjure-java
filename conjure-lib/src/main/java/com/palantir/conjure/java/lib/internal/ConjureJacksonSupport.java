@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.util.AccessPattern;
 import com.fasterxml.jackson.databind.util.ClassUtil;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.palantir.logsafe.Preconditions;
@@ -147,6 +148,15 @@ public final class ConjureJacksonSupport {
             }
 
             @Override
+            @SuppressWarnings("ReferenceEquality") // Only the owned instance can be returned without another copy.
+            public Object deserialize(JsonParser parser, DeserializationContext context, Object intoValue)
+                    throws IOException {
+                Object owned = copy(intoValue);
+                Object result = super.deserialize(parser, context, owned);
+                return result == owned ? owned : copy(result);
+            }
+
+            @Override
             public Object deserializeWithType(
                     JsonParser parser, DeserializationContext context, TypeDeserializer typeDeserializer)
                     throws IOException {
@@ -168,6 +178,20 @@ public final class ConjureJacksonSupport {
                 return copy(super.getAbsentValue(context));
             }
 
+            @Override
+            public AccessPattern getNullAccessPattern() {
+                return copyingAccessPattern(super.getNullAccessPattern());
+            }
+
+            @Override
+            public AccessPattern getEmptyAccessPattern() {
+                return copyingAccessPattern(super.getEmptyAccessPattern());
+            }
+
+            private static AccessPattern copyingAccessPattern(AccessPattern delegatePattern) {
+                return delegatePattern == AccessPattern.ALWAYS_NULL ? AccessPattern.ALWAYS_NULL : AccessPattern.DYNAMIC;
+            }
+
             private Object copy(Object value) {
                 if (value == null) {
                     return null;
@@ -182,7 +206,8 @@ public final class ConjureJacksonSupport {
      * constructor for Jackson; parsing, variant resolution, and caching are handled by the runtime.
      *
      * <p>Concrete variants must override inherited Jackson serializer and deserializer annotations. Let Jackson create
-     * instances for each mapper; do not share deserializer instances between mappers.
+     * instances for each mapper; do not share deserializer instances between mappers. Variant deserializers receive
+     * an object starting at START_OBJECT with the discriminator removed.
      */
     public abstract static class UnionDeserializer<T> extends JsonDeserializer<T> {
         private final Class<T> unionClass;
@@ -234,7 +259,10 @@ public final class ConjureJacksonSupport {
                 }
                 String type = parser.getText();
                 parser.nextToken();
-                return deserializeSelected(parser, context, type);
+                try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
+                    buffer.writeStartObject();
+                    return deserializePrefixed(parser, context, type, buffer);
+                }
             }
             return deserializeBuffered(parser, context, acceptCaseInsensitiveProperties);
         }
@@ -243,7 +271,7 @@ public final class ConjureJacksonSupport {
                 JsonParser parser, DeserializationContext context, boolean acceptCaseInsensitiveProperties)
                 throws IOException {
             try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
-                // Replay fields directly, matching the parser position on the discriminator-first path.
+                buffer.writeStartObject();
                 JsonToken token = parser.currentToken();
                 while (token == JsonToken.FIELD_NAME) {
                     String fieldName = parser.currentName();
@@ -255,12 +283,7 @@ public final class ConjureJacksonSupport {
                         }
                         String type = parser.getText();
                         parser.nextToken();
-                        try (JsonParser bufferedParser = buffer.asParser(parser)) {
-                            JsonParser combinedParser =
-                                    JsonParserSequence.createFlattened(true, bufferedParser, parser);
-                            combinedParser.nextToken();
-                            return deserializeSelected(combinedParser, context, type);
-                        }
+                        return deserializePrefixed(parser, context, type, buffer);
                     }
                     buffer.writeFieldName(fieldName);
                     buffer.copyCurrentStructure(parser);
@@ -272,6 +295,15 @@ public final class ConjureJacksonSupport {
                 }
             }
             return context.reportInputMismatch(unionClass, "Union discriminator 'type' is required");
+        }
+
+        private T deserializePrefixed(
+                JsonParser parser, DeserializationContext context, String type, TokenBuffer buffer) throws IOException {
+            try (JsonParser bufferedParser = buffer.asParser(parser)) {
+                JsonParser combinedParser = JsonParserSequence.createFlattened(true, bufferedParser, parser);
+                combinedParser.nextToken();
+                return deserializeSelected(combinedParser, context, type);
+            }
         }
 
         private static boolean isTypeField(String fieldName, boolean acceptCaseInsensitiveProperties) {

@@ -19,7 +19,10 @@ package com.palantir.conjure.java.lib.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+import com.fasterxml.jackson.annotation.JsonMerge;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -37,6 +40,7 @@ import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.MapType;
+import com.fasterxml.jackson.databind.util.AccessPattern;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,6 +127,114 @@ final class ConjureMapDeserializerTest {
             assertThat(result).containsExactlyEntriesOf(Map.of("original", 1));
             shared.remove("added");
         }
+    }
+
+    @Test
+    void givesSuccessiveReadsIndependentEmptyAndNullValues() throws IOException {
+        Map<String, Integer> shared = new LinkedHashMap<>();
+        ObjectMapper custom = new ObjectMapper()
+                .registerModule(new SimpleModule()
+                        .addDeserializer(Map.class, new JsonDeserializer<Map<String, Integer>>() {
+                            @Override
+                            public Map<String, Integer> deserialize(JsonParser parser, DeserializationContext _context)
+                                    throws IOException {
+                                parser.skipChildren();
+                                return shared;
+                            }
+
+                            @Override
+                            public Map<String, Integer> getEmptyValue(DeserializationContext _context) {
+                                return shared;
+                            }
+
+                            @Override
+                            public AccessPattern getEmptyAccessPattern() {
+                                return AccessPattern.CONSTANT;
+                            }
+
+                            @Override
+                            public Map<String, Integer> getNullValue(DeserializationContext _context) {
+                                return shared;
+                            }
+
+                            @Override
+                            public AccessPattern getNullAccessPattern() {
+                                return AccessPattern.CONSTANT;
+                            }
+                        }));
+        JsonDeserializer<?> deserializer = contextualize(
+                context(custom, null),
+                custom.getTypeFactory().constructMapType(Map.class, String.class, Integer.class));
+        assertThat(deserializer.getEmptyAccessPattern()).isEqualTo(AccessPattern.DYNAMIC);
+        assertThat(deserializer.getNullAccessPattern()).isEqualTo(AccessPattern.DYNAMIC);
+        for (Class<?> holder : List.of(EmptyValue.class, MergeValue.class)) {
+            Object first = custom.readValue("{\"values\":null}", holder);
+            Object second = custom.readValue("{\"values\":null}", holder);
+            Map<String, Integer> firstValues =
+                    first instanceof EmptyValue empty ? empty.values : ((MergeValue) first).values;
+            Map<String, Integer> secondValues =
+                    second instanceof EmptyValue empty ? empty.values : ((MergeValue) second).values;
+            assertThat(firstValues)
+                    .isNotSameAs(shared)
+                    .isNotSameAs(secondValues)
+                    .isEmpty();
+            firstValues.put("added", 2);
+            assertThat(secondValues).isEmpty();
+            assertThat(shared).isEmpty();
+        }
+    }
+
+    @Test
+    void copiesMergeInputsAndReplacementResults() throws IOException {
+        for (boolean replace : List.of(false, true)) {
+            Map<String, Integer> shared = new LinkedHashMap<>(Map.of("original", 1));
+            ObjectMapper custom = new ObjectMapper()
+                    .registerModule(new SimpleModule()
+                            .addDeserializer(Map.class, new JsonDeserializer<Map<String, Integer>>() {
+                                @Override
+                                public Map<String, Integer> deserialize(
+                                        JsonParser parser, DeserializationContext _context) throws IOException {
+                                    parser.skipChildren();
+                                    return shared;
+                                }
+
+                                @Override
+                                public Map<String, Integer> deserialize(
+                                        JsonParser parser,
+                                        DeserializationContext _context,
+                                        Map<String, Integer> intoValue)
+                                        throws IOException {
+                                    parser.skipChildren();
+                                    assertThat(intoValue).isEqualTo(shared).isNotSameAs(shared);
+                                    intoValue.put("added", 2);
+                                    return replace ? shared : intoValue;
+                                }
+                            }));
+            MergeValue holder = new MergeValue();
+            holder.values = shared;
+            MergeValue result = custom.readerForUpdating(holder).readValue("{\"values\":{}}");
+            assertThat(shared).containsExactlyEntriesOf(Map.of("original", 1));
+            assertThat(result.values).isNotSameAs(shared);
+            if (replace) {
+                assertThat(result.values).containsExactlyEntriesOf(Map.of("original", 1));
+            } else {
+                assertThat(result.values).isEqualTo(Map.of("original", 1, "added", 2));
+            }
+            result.values.clear();
+            assertThat(shared).containsExactlyEntriesOf(Map.of("original", 1));
+        }
+    }
+
+    static final class EmptyValue {
+        @JsonSetter(nulls = Nulls.AS_EMPTY)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+        public Map<String, Integer> values;
+    }
+
+    static final class MergeValue {
+        @JsonMerge
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
+        public Map<String, Integer> values;
     }
 
     record Value(
