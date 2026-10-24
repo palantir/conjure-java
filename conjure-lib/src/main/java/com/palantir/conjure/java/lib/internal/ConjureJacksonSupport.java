@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.BeanDeserializer;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.UnresolvedForwardReference;
 import com.fasterxml.jackson.databind.deser.impl.JDKValueInstantiators;
@@ -265,16 +266,19 @@ public final class ConjureJacksonSupport {
      * constructor for Jackson; parsing, variant resolution, and caching are handled by the runtime.
      *
      * <p>Concrete variants must override inherited Jackson serializer and deserializer annotations. Let Jackson create
-     * instances for each mapper; do not share deserializer instances between mappers. Variant deserializers receive
+     * instances for each mapper; do not share deserializer instances between mappers. Custom variant deserializers receive
      * an object starting at START_OBJECT with the discriminator removed.
      */
     public abstract static class UnionDeserializer<T> extends JsonDeserializer<T> implements ContextualDeserializer {
+        private static final int MAX_CACHED_TYPE_LENGTH = 64;
+
         private final Class<T> unionClass;
         private final List<Class<? extends T>> variantTypes;
         private final AtomicReferenceArray<JsonDeserializer<? extends T>> variantDeserializers;
         private final ToIntFunction<String> variantIndex;
         private final BiFunction<String, Map<String, Object>, ? extends T> unknownFactory;
         private final BeanProperty property;
+        private volatile String cachedType;
         private volatile JsonDeserializer<Object> unknownValueDeserializer;
 
         /**
@@ -338,11 +342,27 @@ public final class ConjureJacksonSupport {
                 if (parser.nextToken() != JsonToken.VALUE_STRING) {
                     return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
                 }
-                String type = parser.getText();
+                String type = readType(parser);
                 parser.nextToken();
                 return deserializeSelected(parser, context, type, true);
             }
             return deserializeBufferedPrefix(parser, context, acceptCaseInsensitiveProperties);
+        }
+
+        private String readType(JsonParser parser) throws IOException {
+            String cached = cachedType;
+            if (cached != null && parser.hasTextCharacters() && parser.getTextLength() == cached.length()) {
+                char[] characters = parser.getTextCharacters();
+                int offset = parser.getTextOffset();
+                for (int i = 0; i < cached.length(); i++) {
+                    if (characters[offset + i] != cached.charAt(i)) {
+                        return parser.getText();
+                    }
+                }
+                parser.streamReadConstraints().validateStringLength(cached.length());
+                return cached;
+            }
+            return parser.getText();
         }
 
         private T deserializeBufferedPrefix(
@@ -460,8 +480,13 @@ public final class ConjureJacksonSupport {
             JsonDeserializer<? extends T> deserializer = variantDeserializers.get(index);
             if (deserializer == null) {
                 deserializer = resolveDeserializer(context, index);
+                // Retain one bounded discriminator to avoid String allocation on repeated reads.
+                if (cachedType == null && type.length() <= MAX_CACHED_TYPE_LENGTH) {
+                    cachedType = type;
+                }
             }
-            if (prefixObject) {
+            // Jackson's standard bean deserializer accepts FIELD_NAME/END_OBJECT directly.
+            if (prefixObject && deserializer.getClass() != BeanDeserializer.class) {
                 try (JsonParser prefix = ObjectStartParser.OBJECT_START.asParser(parser)) {
                     JsonParser combined = new ObjectStartParser(prefix, parser);
                     combined.nextToken();

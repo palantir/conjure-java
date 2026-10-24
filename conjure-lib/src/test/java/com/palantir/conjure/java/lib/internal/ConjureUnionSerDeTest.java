@@ -93,6 +93,78 @@ final class ConjureUnionSerDeTest {
             assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new NumberVariant(42));
             assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(new NumberVariant(42)));
         }
+        assertThat(mapper.readValue("{\"type\":\"number\"}", SampleUnion.class)).isEqualTo(new NumberVariant(0));
+        assertThat(mapper.readValue("{\"type\":\"number\"}", Alias.class)).isEqualTo(new Alias(new NumberVariant(0)));
+    }
+
+    @Test
+    void preservesDelegatingVariantCreators() throws IOException {
+        DelegatingVariant expected = new DelegatingVariant(new DelegateValue("hello"));
+        assertThat(mapper.readValue("{\"value\":\"hello\"}", DelegatingVariant.class))
+                .isEqualTo(expected);
+        for (String json : List.of(
+                "{\"type\":\"delegating\",\"value\":\"hello\"}",
+                "{\"value\":\"hello\",\"type\":\"delegating\"}",
+                "{\"before\":0,\"type\":\"delegating\",\"value\":\"hello\"}")) {
+            assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(expected);
+            assertThat(mapper.readValue(json, Alias.class)).isEqualTo(new Alias(expected));
+        }
+        assertThat(mapper.readValue("{\"type\":\"delegating\"}", SampleUnion.class))
+                .isEqualTo(new DelegatingVariant(new DelegateValue("empty")));
+    }
+
+    @Test
+    void preservesDiscriminatorSelectionAfterWarming() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"known\",\"value\":\"hello\"}", SampleUnion.class))
+                .isEqualTo(new Known("hello"));
+        for (int i = 0; i < 3; i++) {
+            for (String json : List.of(
+                    "{\"type\":\"known\",\"value\":\"hello\"}", "{\"type\":\"kn\\u006fwn\",\"value\":\"hello\"}")) {
+                assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
+                assertThat(mapper.readValue(json.getBytes(StandardCharsets.UTF_8), SampleUnion.class))
+                        .isEqualTo(new Known("hello"));
+                assertThat(mapper.treeToValue(mapper.readTree(json), SampleUnion.class))
+                        .isEqualTo(new Known("hello"));
+            }
+            assertThat(mapper.readValue("{\"type\":\"number\",\"value\":42}", SampleUnion.class))
+                    .isEqualTo(new NumberVariant(42));
+            for (String type : List.of("knows", "KNOWN", "known-future")) {
+                assertThat(mapper.readValue("{\"type\":\"" + type + "\",\"value\":\"hello\"}", SampleUnion.class))
+                        .isEqualTo(new Unknown(type, Map.of("value", "hello")));
+            }
+        }
+    }
+
+    @Test
+    void enforcesStringLimitsOnCachedDiscriminators() throws IOException {
+        String json = "{\"type\":\"known\",\"value\":\"ok\"}";
+        assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new Known("ok"));
+        JsonFactory constrained = JsonFactory.builder()
+                .streamReadConstraints(
+                        StreamReadConstraints.builder().maxStringLength(4).build())
+                .build();
+        try (JsonParser parser = constrained.createParser(json)) {
+            assertThatThrownBy(() -> mapper.readValue(parser, SampleUnion.class))
+                    .isInstanceOf(JsonProcessingException.class)
+                    .hasMessageContaining("String value length");
+        }
+        try (JsonParser parser = constrained.createParser(json.getBytes(StandardCharsets.UTF_8))) {
+            assertThatThrownBy(() -> mapper.readValue(parser, SampleUnion.class))
+                    .isInstanceOf(JsonProcessingException.class)
+                    .hasMessageContaining("String value length");
+        }
+    }
+
+    @JsonDeserialize(using = ObjectValueDeserializer.class)
+    record DelegateValue(String value) {}
+
+    static final class ObjectValueDeserializer extends JsonDeserializer<DelegateValue> {
+        @Override
+        public DelegateValue deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
+            assertThat(parser.currentToken()).isIn(JsonToken.FIELD_NAME, JsonToken.END_OBJECT);
+            JsonNode value = parser.readValueAsTree();
+            return new DelegateValue(value.has("value") ? value.get("value").textValue() : "empty");
+        }
     }
 
     @Test
@@ -850,7 +922,8 @@ final class ConjureUnionSerDeTest {
 
     @JsonDeserialize(using = SampleDeserializer.class)
     @JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
-    sealed interface SampleUnion permits Known, NumberVariant, NestedVariant, AliasVariant, Unknown {}
+    sealed interface SampleUnion
+            permits Known, NumberVariant, NestedVariant, AliasVariant, DelegatingVariant, Unknown {}
 
     @JsonDeserialize
     @JsonSerialize
@@ -887,6 +960,13 @@ final class ConjureUnionSerDeTest {
     @JsonSerialize
     record AliasVariant(List<Alias> values) implements SampleUnion {}
 
+    @JsonDeserialize
+    @JsonSerialize
+    record DelegatingVariant(DelegateValue value) implements SampleUnion {
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        DelegatingVariant {}
+    }
+
     record Holder(List<SampleUnion> values) {}
 
     record MixedHolder(SampleUnion first, OtherUnion second, Map<String, SampleUnion> values) {}
@@ -922,7 +1002,12 @@ final class ConjureUnionSerDeTest {
 
     static final class SampleDeserializer extends ConjureJacksonSupport.UnionDeserializer<SampleUnion> {
         SampleDeserializer() {
-            this(List.of(Known.class, NumberVariant.class, NestedVariant.class, AliasVariant.class));
+            this(List.of(
+                    Known.class,
+                    NumberVariant.class,
+                    NestedVariant.class,
+                    AliasVariant.class,
+                    DelegatingVariant.class));
         }
 
         SampleDeserializer(List<Class<? extends SampleUnion>> variants) {
@@ -934,6 +1019,7 @@ final class ConjureUnionSerDeTest {
                         case "number" -> 1;
                         case "nested" -> 2;
                         case "aliases" -> 3;
+                        case "delegating" -> 4;
                         default -> -1;
                     },
                     Unknown::new);
