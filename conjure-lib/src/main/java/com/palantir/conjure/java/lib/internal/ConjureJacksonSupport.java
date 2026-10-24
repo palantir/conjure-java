@@ -49,6 +49,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -367,49 +368,73 @@ public final class ConjureJacksonSupport {
                 JsonParser parser, DeserializationContext context, boolean acceptCaseInsensitiveProperties)
                 throws IOException {
             try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
-                List<BufferedObject> objects = bufferPrefix(parser, context, buffer, acceptCaseInsensitiveProperties);
-                try (BufferedUnionParser buffered = new BufferedUnionParser(buffer.asParser(parser), parser, objects)) {
-                    buffered.nextToken();
-                    return deserializeBufferedObject(buffered, context);
+                int tokenIndex = 0;
+                JsonToken token = parser.currentToken();
+                while (token != null) {
+                    if (token == JsonToken.FIELD_NAME
+                            && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties)) {
+                        return deserializeBufferedValue(parser, context, buffer, null);
+                    }
+                    if (token == JsonToken.START_OBJECT) {
+                        return deserializeNestedPrefix(
+                                parser, context, buffer, acceptCaseInsensitiveProperties, tokenIndex);
+                    } else if (token == JsonToken.END_OBJECT) {
+                        return context.reportInputMismatch(unionClass, "Union discriminator 'type' is required");
+                    }
+                    copyBufferedEvent(parser, buffer);
+                    token = parser.nextToken();
+                    tokenIndex++;
                 }
+                return context.reportInputMismatch(
+                        unionClass, "Expected the end of a JSON object while deserializing a union");
             }
         }
 
-        private List<BufferedObject> bufferPrefix(
+        private T deserializeBufferedValue(
+                JsonParser parser, DeserializationContext context, TokenBuffer buffer, BufferedPrefixIndex index)
+                throws IOException {
+            if (parser.nextToken() != JsonToken.VALUE_STRING) {
+                return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
+            }
+            String type = readType(parser);
+            parser.nextToken();
+            try (JsonParser prefix = buffer.asParser(parser)) {
+                JsonParser combined = index == null || index.objects == null
+                        ? new BufferedPrefixParser(prefix, parser)
+                        : new BufferedUnionParser(prefix, parser, index);
+                combined.nextToken();
+                return deserializeSelected(combined, context, type, true);
+            }
+        }
+
+        private T deserializeNestedPrefix(
                 JsonParser parser,
                 DeserializationContext context,
                 TokenBuffer buffer,
-                boolean acceptCaseInsensitiveProperties)
+                boolean acceptCaseInsensitiveProperties,
+                int firstTokenIndex)
                 throws IOException {
-            buffer.writeStartObject();
-            List<BufferedObject> objects = new ArrayList<>();
-            BufferedObject object = new BufferedObject(null);
-            objects.add(object);
+            BufferedPrefixIndex index = new BufferedPrefixIndex();
+            int tokenIndex = firstTokenIndex;
             BufferedObject discriminatorValue = null;
-            int tokenIndex = 1;
             JsonToken token = parser.currentToken();
             while (token != null) {
                 if (discriminatorValue != null) {
-                    if (bufferDiscriminatorValue(parser, context, buffer, discriminatorValue)) {
-                        return objects;
-                    }
+                    discriminatorValue.readType(parser);
                     discriminatorValue = null;
                 }
                 if (token == JsonToken.START_OBJECT) {
-                    object = new BufferedObject(object);
-                    objects.add(object);
-                } else if (token == JsonToken.END_OBJECT) {
-                    object = object.parent;
+                    index.startObject();
+                } else if (token == JsonToken.END_OBJECT && !index.endObject()) {
+                    return context.reportInputMismatch(unionClass, "Union discriminator 'type' is required");
                 } else if (token == JsonToken.FIELD_NAME
-                        && object.typeFieldIndex < 0
                         && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties)) {
-                    object.typeFieldIndex = tokenIndex;
-                    discriminatorValue = object;
+                    if (index.depth == 0) {
+                        return deserializeBufferedValue(parser, context, buffer, index);
+                    }
+                    discriminatorValue = index.typeField(tokenIndex);
                 }
                 copyBufferedEvent(parser, buffer);
-                if (object == null) {
-                    return objects;
-                }
                 token = parser.nextToken();
                 tokenIndex++;
             }
@@ -425,21 +450,6 @@ public final class ConjureJacksonSupport {
             buffer.copyCurrentEvent(parser);
         }
 
-        private boolean bufferDiscriminatorValue(
-                JsonParser parser, DeserializationContext context, TokenBuffer buffer, BufferedObject object)
-                throws IOException {
-            object.readType(parser);
-            if (object.parent != null) {
-                return false;
-            }
-            if (object.typeToken != JsonToken.VALUE_STRING) {
-                return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
-            }
-            buffer.copyCurrentEvent(parser);
-            parser.nextToken();
-            return true;
-        }
-
         private T deserializeBufferedObject(BufferedUnionParser parser, DeserializationContext context)
                 throws IOException {
             JsonToken token = parser.currentToken();
@@ -447,7 +457,7 @@ public final class ConjureJacksonSupport {
                 return context.reportInputMismatch(unionClass, "Union discriminator 'type' is required");
             }
             BufferedObject object = parser.object;
-            if (object.typeFieldIndex < 0) {
+            if (object == null) {
                 return context.reportInputMismatch(unionClass, "Union discriminator 'type' is required");
             }
             if (object.typeToken != JsonToken.VALUE_STRING) {
@@ -581,17 +591,86 @@ public final class ConjureJacksonSupport {
             JsonToken token = nextToken();
             return token == JsonToken.FIELD_NAME ? nextToken() : token;
         }
+
+        @Override
+        public JsonParser skipChildren() throws IOException {
+            if (_nextParserIndex == _parsers.length) {
+                delegate.skipChildren();
+                return this;
+            }
+            return super.skipChildren();
+        }
+    }
+
+    private static final class BufferedPrefixParser extends ObjectStartParser {
+        BufferedPrefixParser(JsonParser prefix, JsonParser parser) {
+            super(prefix, parser);
+        }
+
+        @Override
+        public void close() throws IOException {
+            _parsers[0].close();
+        }
+
+        @Override
+        public JsonParser skipChildren() throws IOException {
+            // The prefix ends between root fields, so every buffered child is complete.
+            delegate.skipChildren();
+            return this;
+        }
+    }
+
+    /** Tracks nesting eagerly and allocates discriminator records only for objects with a type field. */
+    private static final class BufferedPrefixIndex {
+        private int[] parents = new int[8];
+        private int depth;
+        private int currentObject;
+        private int objectCount = 1;
+        private List<BufferedObject> objects;
+
+        void startObject() {
+            if (depth == parents.length) {
+                parents = Arrays.copyOf(parents, depth * 2);
+            }
+            parents[depth++] = currentObject;
+            currentObject = objectCount++;
+            if (objects != null) {
+                objects.add(null);
+            }
+        }
+
+        boolean endObject() {
+            if (depth == 0) {
+                return false;
+            }
+            currentObject = parents[--depth];
+            return true;
+        }
+
+        BufferedObject typeField(int tokenIndex) {
+            if (objects == null) {
+                objects = new ArrayList<>(objectCount);
+                for (int i = 0; i < objectCount; i++) {
+                    objects.add(null);
+                }
+            }
+            if (objects.get(currentObject) != null) {
+                return null;
+            }
+            BufferedObject object = new BufferedObject(tokenIndex);
+            objects.set(currentObject, object);
+            return object;
+        }
     }
 
     private static final class BufferedObject {
-        private final BufferedObject parent;
-        private int typeFieldIndex = -1;
+        private final int typeFieldIndex;
         private JsonToken typeToken;
         private String type;
         private boolean skipDiscriminator;
 
-        BufferedObject(BufferedObject parent) {
-            this.parent = parent;
+        BufferedObject(int typeFieldIndex) {
+            this.typeFieldIndex = typeFieldIndex;
         }
 
         void readType(JsonParser parser) throws IOException {
@@ -605,13 +684,18 @@ public final class ConjureJacksonSupport {
     /** Indexes objects in encounter order so recursive unions reuse the same token buffer. */
     private static final class BufferedUnionParser extends ObjectStartParser {
         private final List<BufferedObject> objects;
+        private final int[] parents;
         private BufferedObject object;
-        private int nextObject;
+        private int depth;
+        private int currentObject;
+        private int nextObject = 1;
         private int tokenIndex = -1;
 
-        BufferedUnionParser(JsonParser prefix, JsonParser parser, List<BufferedObject> objects) {
+        BufferedUnionParser(JsonParser prefix, JsonParser parser, BufferedPrefixIndex index) {
             super(prefix, parser);
-            this.objects = objects;
+            this.objects = index.objects;
+            // Buffering is complete, so replay can reuse its nesting stack.
+            this.parents = index.parents;
         }
 
         @Override
@@ -629,10 +713,14 @@ public final class ConjureJacksonSupport {
             }
             tokenIndex++;
             if (token == JsonToken.START_OBJECT) {
-                object = objects.get(nextObject++);
+                parents[depth++] = currentObject;
+                currentObject = nextObject++;
+                object = objects.get(currentObject);
             } else if (token == JsonToken.END_OBJECT) {
-                object = object.parent;
+                currentObject = parents[--depth];
+                object = objects.get(currentObject);
             } else if (token == JsonToken.FIELD_NAME
+                    && object != null
                     && object.skipDiscriminator
                     && tokenIndex == object.typeFieldIndex) {
                 super.nextToken();
@@ -646,22 +734,6 @@ public final class ConjureJacksonSupport {
         public JsonToken nextValue() throws IOException {
             JsonToken token = nextToken();
             return token == JsonToken.FIELD_NAME ? nextToken() : token;
-        }
-
-        @Override
-        public JsonParser skipChildren() throws IOException {
-            JsonToken token = currentToken();
-            if (token == JsonToken.START_OBJECT || token == JsonToken.START_ARRAY) {
-                int depth = 1;
-                while ((token = nextToken()) != null) {
-                    if (token.isStructStart()) {
-                        depth++;
-                    } else if (token.isStructEnd() && --depth == 0) {
-                        break;
-                    }
-                }
-            }
-            return this;
         }
     }
 

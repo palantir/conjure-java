@@ -215,6 +215,8 @@ final class ConjureUnionSerDeTest {
         for (String json : List.of(
                 "{\"type\":\"known\",\"value\":\"hello\"}",
                 "{\"value\":\"hello\",\"type\":\"known\"}",
+                "{\"ignored\":{\"nested\":[1,2,{}]},\"value\":\"hello\",\"type\":\"known\"}",
+                "{\"ignored\":{\"nested\":[1,2,{}]},\"type\":\"known\",\"value\":\"hello\"}",
                 "{\"ignored\":{\"type\":17,\"nested\":{\"type\":\"unused\"}},\"value\":\"hello\",\"type\":\"known\"}")) {
             assertThat(custom.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
             assertThat(custom.readValue(json, Alias.class)).isEqualTo(new Alias(new Known("hello")));
@@ -235,6 +237,49 @@ final class ConjureUnionSerDeTest {
                 .isEqualTo(new NestedVariant(List.of(new Known("hello"), new NumberVariant(42))));
         assertThat(ignoring.readValue(json.getBytes(StandardCharsets.UTF_8), Alias.class))
                 .isEqualTo(new Alias(new NestedVariant(List.of(new Known("hello"), new NumberVariant(42)))));
+    }
+
+    @Test
+    void skipsAnEntireUnionAcrossTheBufferedBoundary() throws IOException {
+        ObjectMapper custom = new ObjectMapper()
+                .registerModule(new SimpleModule().addDeserializer(Known.class, new JsonDeserializer<>() {
+                    @Override
+                    public Known deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
+                        assertThat(parser.currentToken()).isEqualTo(JsonToken.START_OBJECT);
+                        parser.skipChildren();
+                        assertThat(parser.currentToken()).isEqualTo(JsonToken.END_OBJECT);
+                        return new Known("skipped");
+                    }
+                }));
+        for (String json : List.of(
+                "{\"type\":\"known\",\"ignored\":[{}]}",
+                "{\"before\":[{}],\"type\":\"known\",\"after\":[{}]}",
+                "{\"ignored\":[{}],\"type\":\"known\"}",
+                "{\"ignored\":[{\"type\":\"unused\"}],\"type\":\"known\"}")) {
+            assertThat(custom.readValue(json, SampleUnion.class)).isEqualTo(new Known("skipped"));
+            assertThat(custom.readValue(json, Alias.class)).isEqualTo(new Alias(new Known("skipped")));
+            assertThat(custom.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
+                    .isEqualTo(new Holder(List.of(new Known("skipped"), new Known("skipped"))));
+        }
+    }
+
+    @Test
+    void indexesAlreadyBufferedObjectsWhenANestedDiscriminatorAppears() throws IOException {
+        ObjectMapper ignoring = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        String prefix = "\"ignored\":[" + "{\"a\":[1,{},[{}]],\"b\":\"text\"},".repeat(64) + "{}],";
+        String values = "\"values\":[{\"ignored\":[{},{}],\"values\":[{\"value\":\"hello\",\"type\":\"known\"}],"
+                + "\"type\":\"nested\"},{\"type\":\"number\",\"value\":42}]";
+        NestedVariant expected =
+                new NestedVariant(List.of(new NestedVariant(List.of(new Known("hello"))), new NumberVariant(42)));
+        for (String json : List.of(
+                "{" + prefix + values + ",\"type\":\"nested\"}",
+                "{" + prefix + values + ",\"type\":\"nested\",\"after\":[{}]}")) {
+            assertThat(ignoring.readValue(json, SampleUnion.class)).isEqualTo(expected);
+            assertThat(ignoring.readValue(json.getBytes(StandardCharsets.UTF_8), Alias.class))
+                    .isEqualTo(new Alias(expected));
+            assertThat(ignoring.readValue("{\"values\":[" + json + "," + json + "]}", Holder.class))
+                    .isEqualTo(new Holder(List.of(expected, expected)));
+        }
     }
 
     @Test
@@ -317,6 +362,7 @@ final class ConjureUnionSerDeTest {
                 "{\"type\":1}",
                 "{\"value\":1,\"type\":false}",
                 "{\"values\":[{\"value\":\"missing\"}],\"type\":\"nested\"}",
+                "{\"values\":[{\"type\":\"known\",\"value\":\"ok\"},{\"value\":\"missing\"}],\"type\":\"nested\"}",
                 "{\"values\":[{\"value\":\"invalid\",\"type\":null}],\"type\":\"nested\"}")) {
             assertThatThrownBy(() -> mapper.readValue(json, SampleUnion.class))
                     .isInstanceOf(JsonMappingException.class);
@@ -885,6 +931,12 @@ final class ConjureUnionSerDeTest {
                 "{\"value\":\"hello\",\"type\":\"known\",\"type\":\"number\"}")) {
             assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new Known("hello"));
             assertThatThrownBy(() -> strict.readValue(json, SampleUnion.class))
+                    .isInstanceOf(JsonProcessingException.class)
+                    .hasMessageContaining("Duplicate field 'type'");
+            String nested = "{\"values\":[" + json + "],\"type\":\"nested\"}";
+            assertThat(mapper.readValue(nested, SampleUnion.class))
+                    .isEqualTo(new NestedVariant(List.of(new Known("hello"))));
+            assertThatThrownBy(() -> strict.readValue(nested, SampleUnion.class))
                     .isInstanceOf(JsonProcessingException.class)
                     .hasMessageContaining("Duplicate field 'type'");
         }
