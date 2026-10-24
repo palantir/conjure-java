@@ -19,7 +19,6 @@ package com.palantir.conjure.java.lib.internal;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.util.JsonParserDelegate;
 import com.fasterxml.jackson.core.util.JsonParserSequence;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -30,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
+import com.fasterxml.jackson.databind.deser.UnresolvedForwardReference;
 import com.fasterxml.jackson.databind.deser.impl.JDKValueInstantiators;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
@@ -54,6 +54,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BiFunction;
 import java.util.function.ToIntFunction;
@@ -65,6 +67,8 @@ public final class ConjureJacksonSupport {
     /**
      * Gives generated code ownership of maps and sets. Standard Jackson containers with scalar entries may be transferred
      * directly; other results are defensively copied. Generated code validates nulls and exposes an unmodifiable view.
+     * Object-id references must resolve before their container entry is read; object-id entries in polymorphic containers
+     * are unsupported.
      */
     public static final class ContainerDeserializer extends JsonDeserializer<Object> implements ContextualDeserializer {
         @Override
@@ -76,15 +80,36 @@ public final class ConjureJacksonSupport {
                 // Jackson skips `as` refinement on delegating creators that also specify `using`.
                 type = context.constructSpecializedType(type, LinkedHashSet.class);
             }
-            JsonDeserializer<?> delegate = context.findContextualValueDeserializer(type, property);
+            JsonDeserializer<?> delegate = resolveDelegate(context, type, property);
             // Custom constructors, entries, and problem handlers can expose shared containers.
-            if (context.getConfig().getProblemHandlers() == null
+            if (property.getMetadata().getMergeInfo() == null
+                    && context.getConfig().getProblemHandlers() == null
                     && !hasTypeDeserializer(context, type)
                     && !hasTypeDeserializer(context, type.getContentType())
                     && (map ? isStandardMap(delegate, context, property) : isStandardSet(delegate, context))) {
                 return delegate;
             }
             return new CopyingDeserializer(delegate, map);
+        }
+
+        private static JsonDeserializer<?> resolveDelegate(
+                DeserializationContext context, JavaType type, BeanProperty property) throws JsonMappingException {
+            JsonDeserializer<?> delegate = context.findContextualValueDeserializer(type, property);
+            if (!(delegate instanceof ContainerDeserializerBase<?> container)) {
+                return delegate;
+            }
+            JsonDeserializer<?> content = container.getContentDeserializer();
+            if (content == null || content.getObjectIdReader() == null) {
+                return delegate;
+            }
+            if (hasTypeDeserializer(context, type)) {
+                // Subtype dispatch can replace the container deserializer and bypass its guarded content handler.
+                return context.reportBadDefinition(
+                        type, "Object-id entries in polymorphic owned containers are not supported");
+            }
+            // Jackson's deferred callbacks would otherwise populate the discarded container after it is copied.
+            return context.findContextualValueDeserializer(
+                    type.withContentValueHandler(new ResolvedReferenceDeserializer(content)), property);
         }
 
         private static boolean hasTypeDeserializer(DeserializationContext context, JavaType type)
@@ -131,6 +156,39 @@ public final class ConjureJacksonSupport {
         @Override
         public Object deserialize(JsonParser _parser, DeserializationContext _context) {
             throw new SafeIllegalStateException("Container deserializer must be contextualized");
+        }
+
+        private static final class ResolvedReferenceDeserializer extends DelegatingDeserializer {
+            ResolvedReferenceDeserializer(JsonDeserializer<?> delegate) {
+                super(delegate);
+            }
+
+            @Override
+            protected JsonDeserializer<?> newDelegatingInstance(JsonDeserializer<?> delegate) {
+                return new ResolvedReferenceDeserializer(delegate);
+            }
+
+            @Override
+            public Object deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+                try {
+                    return super.deserialize(parser, context);
+                } catch (UnresolvedForwardReference e) {
+                    return context.reportInputMismatch(
+                            this, "Forward object-id references are not supported in owned containers");
+                }
+            }
+
+            @Override
+            public Object deserializeWithType(
+                    JsonParser parser, DeserializationContext context, TypeDeserializer typeDeserializer)
+                    throws IOException {
+                try {
+                    return super.deserializeWithType(parser, context, typeDeserializer);
+                } catch (UnresolvedForwardReference e) {
+                    return context.reportInputMismatch(
+                            this, "Forward object-id references are not supported in owned containers");
+                }
+            }
         }
 
         private static final class CopyingDeserializer extends DelegatingDeserializer {
@@ -210,12 +268,14 @@ public final class ConjureJacksonSupport {
      * instances for each mapper; do not share deserializer instances between mappers. Variant deserializers receive
      * an object starting at START_OBJECT with the discriminator removed.
      */
-    public abstract static class UnionDeserializer<T> extends JsonDeserializer<T> {
+    public abstract static class UnionDeserializer<T> extends JsonDeserializer<T> implements ContextualDeserializer {
         private final Class<T> unionClass;
         private final List<Class<? extends T>> variantTypes;
         private final AtomicReferenceArray<JsonDeserializer<? extends T>> variantDeserializers;
         private final ToIntFunction<String> variantIndex;
         private final BiFunction<String, Map<String, Object>, ? extends T> unknownFactory;
+        private final BeanProperty property;
+        private volatile JsonDeserializer<Object> unknownValueDeserializer;
 
         /**
          * @param unionClass the generated union's base type
@@ -235,6 +295,22 @@ public final class ConjureJacksonSupport {
             this.variantDeserializers = new AtomicReferenceArray<>(this.variantTypes.size());
             this.variantIndex = Preconditions.checkNotNull(variantIndex, "variantIndex");
             this.unknownFactory = Preconditions.checkNotNull(unknownFactory, "unknownFactory");
+            this.property = null;
+        }
+
+        private UnionDeserializer(UnionDeserializer<T> source, BeanProperty property) {
+            this.unionClass = source.unionClass;
+            this.variantTypes = source.variantTypes;
+            this.variantDeserializers = new AtomicReferenceArray<>(variantTypes.size());
+            this.variantIndex = source.variantIndex;
+            this.unknownFactory = source.unknownFactory;
+            this.property = property;
+        }
+
+        @Override
+        @SuppressWarnings("ReferenceEquality") // Contextual caches belong to the exact Jackson property instance.
+        public final JsonDeserializer<?> createContextual(DeserializationContext _context, BeanProperty beanProperty) {
+            return property == beanProperty ? this : new ContextualUnionDeserializer<>(this, beanProperty);
         }
 
         @Override
@@ -264,24 +340,24 @@ public final class ConjureJacksonSupport {
                 }
                 String type = parser.getText();
                 parser.nextToken();
-                return deserializePrefixed(parser, context, type);
+                return deserializeSelected(parser, context, type, true);
             }
-            return deserializeDiscriminatorLast(parser, context, acceptCaseInsensitiveProperties);
+            return deserializeBufferedPrefix(parser, context, acceptCaseInsensitiveProperties);
         }
 
-        private T deserializeDiscriminatorLast(
+        private T deserializeBufferedPrefix(
                 JsonParser parser, DeserializationContext context, boolean acceptCaseInsensitiveProperties)
                 throws IOException {
             try (TokenBuffer buffer = context.bufferForInputBuffering(parser)) {
-                List<BufferedObject> objects = bufferObject(parser, context, buffer, acceptCaseInsensitiveProperties);
-                try (BufferedUnionParser buffered = new BufferedUnionParser(buffer.asParser(parser), objects)) {
+                List<BufferedObject> objects = bufferPrefix(parser, context, buffer, acceptCaseInsensitiveProperties);
+                try (BufferedUnionParser buffered = new BufferedUnionParser(buffer.asParser(parser), parser, objects)) {
                     buffered.nextToken();
                     return deserializeBufferedObject(buffered, context);
                 }
             }
         }
 
-        private List<BufferedObject> bufferObject(
+        private List<BufferedObject> bufferPrefix(
                 JsonParser parser,
                 DeserializationContext context,
                 TokenBuffer buffer,
@@ -296,7 +372,9 @@ public final class ConjureJacksonSupport {
             JsonToken token = parser.currentToken();
             while (token != null) {
                 if (discriminatorValue != null) {
-                    discriminatorValue.readType(parser);
+                    if (bufferDiscriminatorValue(parser, context, buffer, discriminatorValue)) {
+                        return objects;
+                    }
                     discriminatorValue = null;
                 }
                 if (token == JsonToken.START_OBJECT) {
@@ -310,8 +388,8 @@ public final class ConjureJacksonSupport {
                     object.typeFieldIndex = tokenIndex;
                     discriminatorValue = object;
                 }
-                buffer.copyCurrentEvent(parser);
-                if (token == JsonToken.END_OBJECT && object == null) {
+                copyBufferedEvent(parser, buffer);
+                if (object == null) {
                     return objects;
                 }
                 token = parser.nextToken();
@@ -319,6 +397,29 @@ public final class ConjureJacksonSupport {
             }
             return context.reportInputMismatch(
                     unionClass, "Expected the end of a JSON object while deserializing a union");
+        }
+
+        private static void copyBufferedEvent(JsonParser parser, TokenBuffer buffer) throws IOException {
+            if (parser.hasToken(JsonToken.VALUE_STRING)) {
+                // TokenBuffer may copy character arrays without calling the parser's length-validating getText().
+                parser.streamReadConstraints().validateStringLength(parser.getTextLength());
+            }
+            buffer.copyCurrentEvent(parser);
+        }
+
+        private boolean bufferDiscriminatorValue(
+                JsonParser parser, DeserializationContext context, TokenBuffer buffer, BufferedObject object)
+                throws IOException {
+            object.readType(parser);
+            if (object.parent != null) {
+                return false;
+            }
+            if (object.typeToken != JsonToken.VALUE_STRING) {
+                return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
+            }
+            buffer.copyCurrentEvent(parser);
+            parser.nextToken();
+            return true;
         }
 
         private T deserializeBufferedObject(BufferedUnionParser parser, DeserializationContext context)
@@ -336,29 +437,21 @@ public final class ConjureJacksonSupport {
             }
             object.skipDiscriminator = true;
             if (token == JsonToken.START_OBJECT) {
-                return deserializeSelected(parser, context, object.type);
+                return deserializeSelected(parser, context, object.type, false);
             }
             if (parser.tokenIndex == object.typeFieldIndex) {
                 parser.nextToken();
                 parser.nextToken();
             }
-            return deserializePrefixed(parser, context, object.type);
-        }
-
-        private T deserializePrefixed(JsonParser parser, DeserializationContext context, String type)
-                throws IOException {
-            try (JsonParser prefix = ObjectStartParser.OBJECT_START.asParser(parser)) {
-                JsonParser combined = new ObjectStartParser(prefix, parser);
-                combined.nextToken();
-                return deserializeSelected(combined, context, type);
-            }
+            return deserializeSelected(parser, context, object.type, true);
         }
 
         private static boolean isTypeField(String fieldName, boolean acceptCaseInsensitiveProperties) {
             return "type".equals(fieldName) || (acceptCaseInsensitiveProperties && "type".equalsIgnoreCase(fieldName));
         }
 
-        private T deserializeSelected(JsonParser parser, DeserializationContext context, String type)
+        private T deserializeSelected(
+                JsonParser parser, DeserializationContext context, String type, boolean prefixObject)
                 throws IOException {
             int index = variantIndex.applyAsInt(type);
             if (index < 0) {
@@ -368,6 +461,13 @@ public final class ConjureJacksonSupport {
             if (deserializer == null) {
                 deserializer = resolveDeserializer(context, index);
             }
+            if (prefixObject) {
+                try (JsonParser prefix = ObjectStartParser.OBJECT_START.asParser(parser)) {
+                    JsonParser combined = new ObjectStartParser(prefix, parser);
+                    combined.nextToken();
+                    return deserializer.deserialize(combined, context);
+                }
+            }
             return deserializer.deserialize(parser, context);
         }
 
@@ -375,7 +475,7 @@ public final class ConjureJacksonSupport {
         private JsonDeserializer<? extends T> resolveDeserializer(DeserializationContext context, int index)
                 throws JsonMappingException {
             JsonDeserializer<? extends T> deserializer = (JsonDeserializer<? extends T>)
-                    context.findContextualValueDeserializer(context.constructType(variantTypes.get(index)), null);
+                    context.findContextualValueDeserializer(context.constructType(variantTypes.get(index)), property);
             if (variantDeserializers.compareAndSet(index, null, deserializer)) {
                 return deserializer;
             }
@@ -393,7 +493,11 @@ public final class ConjureJacksonSupport {
                 String fieldName = parser.currentName();
                 parser.nextToken();
                 if (valueDeserializer == null) {
-                    valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                    valueDeserializer = unknownValueDeserializer;
+                    if (valueDeserializer == null) {
+                        valueDeserializer = context.findRootValueDeserializer(context.constructType(Object.class));
+                        unknownValueDeserializer = valueDeserializer;
+                    }
                 }
                 values.put(
                         fieldName,
@@ -410,7 +514,13 @@ public final class ConjureJacksonSupport {
         }
     }
 
-    private static final class ObjectStartParser extends JsonParserSequence {
+    private static final class ContextualUnionDeserializer<T> extends UnionDeserializer<T> {
+        ContextualUnionDeserializer(UnionDeserializer<T> source, BeanProperty property) {
+            super(source, property);
+        }
+    }
+
+    private static class ObjectStartParser extends JsonParserSequence {
         // Written once, then shared read-only. Each reader gets its own parser and parsing context.
         private static final TokenBuffer OBJECT_START = objectStart();
 
@@ -464,20 +574,30 @@ public final class ConjureJacksonSupport {
     }
 
     /** Indexes objects in encounter order so recursive unions reuse the same token buffer. */
-    private static final class BufferedUnionParser extends JsonParserDelegate {
+    private static final class BufferedUnionParser extends ObjectStartParser {
         private final List<BufferedObject> objects;
         private BufferedObject object;
         private int nextObject;
         private int tokenIndex = -1;
 
-        BufferedUnionParser(JsonParser parser, List<BufferedObject> objects) {
-            super(parser);
+        BufferedUnionParser(JsonParser prefix, JsonParser parser, List<BufferedObject> objects) {
+            super(prefix, parser);
             this.objects = objects;
+        }
+
+        @Override
+        public void close() throws IOException {
+            // The suffix parser is owned by the caller.
+            _parsers[0].close();
         }
 
         @Override
         public JsonToken nextToken() throws IOException {
             JsonToken token = super.nextToken();
+            // Only the buffered prefix has indexed object metadata.
+            if (_nextParserIndex == _parsers.length) {
+                return token;
+            }
             tokenIndex++;
             if (token == JsonToken.START_OBJECT) {
                 object = objects.get(nextObject++);
@@ -520,6 +640,7 @@ public final class ConjureJacksonSupport {
     public static final class UnionSerializer extends JsonSerializer<Object> implements ContextualSerializer {
         private final BeanProperty property;
         private volatile PropertySerializerMap variants = PropertySerializerMap.emptyForProperties();
+        private volatile ConcurrentMap<Class<?>, JsonSerializer<Object>> overflowVariants;
 
         public UnionSerializer() {
             this(null);
@@ -539,11 +660,35 @@ public final class ConjureJacksonSupport {
             Class<?> type = value.getClass();
             PropertySerializerMap snapshot = variants;
             JsonSerializer<Object> serializer = snapshot.serializerFor(type);
-            if (serializer == null) {
-                serializer = provider.findValueSerializer(type, property);
-                variants = snapshot.newWith(type, serializer);
+            return serializer == null ? resolveVariantSerializer(type, snapshot, provider) : serializer;
+        }
+
+        @SuppressWarnings("ReferenceEquality") // Jackson returns the same map when its bounded cache is full.
+        private JsonSerializer<Object> resolveVariantSerializer(
+                Class<?> type, PropertySerializerMap snapshot, SerializerProvider provider)
+                throws JsonMappingException {
+            ConcurrentMap<Class<?>, JsonSerializer<Object>> overflow = overflowVariants;
+            if (overflow != null) {
+                JsonSerializer<Object> serializer = overflow.get(type);
+                if (serializer != null) {
+                    return serializer;
+                }
             }
+            JsonSerializer<Object> serializer = provider.findValueSerializer(type, property);
+            PropertySerializerMap updated = snapshot.newWith(type, serializer);
+            if (updated == snapshot) {
+                return cacheOverflow(type, serializer);
+            }
+            variants = updated;
             return serializer;
+        }
+
+        private synchronized JsonSerializer<Object> cacheOverflow(Class<?> type, JsonSerializer<Object> serializer) {
+            if (overflowVariants == null) {
+                overflowVariants = new ConcurrentHashMap<>();
+            }
+            JsonSerializer<Object> existing = overflowVariants.putIfAbsent(type, serializer);
+            return existing == null ? serializer : existing;
         }
 
         @Override
