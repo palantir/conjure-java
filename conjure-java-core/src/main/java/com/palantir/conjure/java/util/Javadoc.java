@@ -21,6 +21,8 @@ import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpMethod;
 import com.palantir.conjure.spec.HttpPath;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -63,6 +65,7 @@ public final class Javadoc {
         if (StringUtils.isBlank(rawDocumentation)) {
             return "";
         }
+        checkDocumentationIsCommentSafe(rawDocumentation);
         String renderedHtml = renderer.render(parser.parse(rawDocumentation));
         return Strings.CS.appendIfMissing(renderedHtml, "\n");
     }
@@ -75,6 +78,21 @@ public final class Javadoc {
         documentation.map(Javadoc::render).ifPresent(sb::append);
         deprecation.map(Javadoc::getDeprecatedJavadoc).ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
+    }
+
+    /**
+     * Rejects documentation that could terminate the generated block comment. Conjure docs are attacker-controlled (an
+     * upstream API publisher owns IR {@code docs} strings), and an unescaped block-comment terminator would otherwise
+     * close the enclosing Javadoc comment and let the remainder be emitted as compiled Java in every consuming build.
+     * Commonmark rendering and javapoet both pass the terminator through verbatim, so this is enforced before rendering.
+     */
+    private static void checkDocumentationIsCommentSafe(String rawDocumentation) {
+        if (rawDocumentation.contains("*/")) {
+            throw new SafeIllegalArgumentException(
+                    "Conjure documentation may not contain the block-comment terminator '*/', which would break out of"
+                            + " the generated Javadoc comment",
+                    UnsafeArg.of("documentation", rawDocumentation));
+        }
     }
 
     public static Optional<String> getParameterJavadoc(ArgumentDefinition argument, EndpointDefinition endpoint) {

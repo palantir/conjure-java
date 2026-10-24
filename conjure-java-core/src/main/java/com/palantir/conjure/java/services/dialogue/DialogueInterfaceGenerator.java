@@ -27,6 +27,7 @@ import com.palantir.conjure.java.services.ServiceGenerators.EndpointErrorsJavaDo
 import com.palantir.conjure.java.services.ServiceGenerators.EndpointJavaDocGenerationOptions;
 import com.palantir.conjure.java.services.ServiceGenerators.RequestLineJavaDoc;
 import com.palantir.conjure.java.util.ErrorGenerationUtils;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointError;
@@ -53,7 +54,6 @@ import com.palantir.logsafe.SafeArg;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.Strings;
 
 public final class DialogueInterfaceGenerator {
 
@@ -101,7 +101,7 @@ public final class DialogueInterfaceGenerator {
                         .build())
                 .build());
 
-        def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Strings.CS.appendIfMissing(docs.get(), "\n")));
+        def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         for (EndpointDefinition endpoint : def.getEndpoints()) {
             serviceBuilder.addMethod(apiMethod(endpoint, serviceCallType));

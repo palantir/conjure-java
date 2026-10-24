@@ -17,8 +17,10 @@
 package com.palantir.conjure.java.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.spec.Documentation;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import org.junit.jupiter.api.Test;
 
 public class JavadocTest {
@@ -58,5 +60,24 @@ public class JavadocTest {
     public void testExistingHtmlTags() {
         assertThat(Javadoc.render(Documentation.of("Line includes <em>existing</em> html.")))
                 .isEqualTo("Line includes <em>existing</em> html.\n");
+    }
+
+    @Test
+    public void testRejectsCommentTerminator() {
+        assertThatThrownBy(() -> Javadoc.render(Documentation.of("evil */ injected")))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("may not contain the block-comment terminator");
+    }
+
+    @Test
+    public void testRejectsCommentTerminatorInCodeSpan() {
+        assertThatThrownBy(() -> Javadoc.render(Documentation.of("`*/`")))
+                .isInstanceOf(SafeIllegalArgumentException.class);
+    }
+
+    @Test
+    public void testAllowsStandaloneSlashesAndMarkings() {
+        assertThat(Javadoc.render(Documentation.of("See https://example.com/a/b and </tag>.")))
+                .isEqualTo("See https://example.com/a/b and </tag>.\n");
     }
 }

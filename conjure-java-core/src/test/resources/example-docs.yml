@@ -1,0 +1,16 @@
+# Regression fixture for the Javadoc comment-breakout finding: untrusted docs containing the
+# block-comment terminator "*/" must be rejected rather than emitted into generated Javadoc, where
+# the remainder would be compiled as attacker-controlled Java in every consuming build. Exercised by
+# DocumentationCommentSafetyTest.
+services:
+  PingService:
+    name: Ping Service
+    package: test.api
+    default-auth: none
+    base-path: /ping
+    docs: 'pwn*/ final class Hook { static { System.out.println("hook executed"); } } /*x'
+    endpoints:
+      ping:
+        http: GET /
+        returns: string
+        docs: 'pwn*/ String _init = String.valueOf(new Hook()); /*x'
