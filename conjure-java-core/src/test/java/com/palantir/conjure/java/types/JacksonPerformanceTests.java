@@ -160,18 +160,23 @@ final class JacksonPerformanceTests {
 
         mapper.readValue("{\"type\":\"future\"}", unionType);
         assertThat(resolutions).hasValue(0);
-        String json = "{\"type\":\"future\",\"a\":1,\"b\":2,\"c\":null}";
-        Object union = mapper.readValue(json, unionType);
-        assertThat(resolutions).hasValue(1);
-        assertThat(mapper.readTree(mapper.writeValueAsBytes(union)))
-                .isEqualTo(mapper.readTree("{\"type\":\"future\",\"a\":1,\"b\":2,\"c\":\"null\"}"));
-        mapper.readValue("{\"a\":1,\"type\":\"future\",\"b\":2}", unionType);
-        assertThat(resolutions).hasValue(2);
+        for (String json : List.of(
+                "{\"type\":\"future\",\"a\":1,\"b\":2,\"c\":null}",
+                "{\"a\":1,\"type\":\"future\",\"b\":2,\"c\":null}",
+                "{\"a\":1,\"b\":2,\"c\":null,\"type\":\"future\"}")) {
+            Object union = mapper.readValue(json, unionType);
+            assertThat(resolutions).hasValue(1);
+            assertThat(mapper.readTree(mapper.writeValueAsBytes(union)))
+                    .isEqualTo(mapper.readTree("{\"type\":\"future\",\"a\":1,\"b\":2,\"c\":\"null\"}"));
+        }
 
+        AtomicInteger otherResolutions = new AtomicInteger();
         ObjectMapper otherMapper = new ObjectMapper()
                 .registerModule(new SimpleModule()
-                        .addDeserializer(Object.class, new CountingDeserializer(new AtomicInteger(), "other")));
+                        .addDeserializer(Object.class, new CountingDeserializer(otherResolutions, "other")));
         Object other = otherMapper.readValue("{\"type\":\"future\",\"c\":null}", unionType);
+        assertThat(otherResolutions).hasValue(1);
+        assertThat(resolutions).hasValue(1);
         assertThat(otherMapper
                         .readTree(otherMapper.writeValueAsBytes(other))
                         .get("c")
