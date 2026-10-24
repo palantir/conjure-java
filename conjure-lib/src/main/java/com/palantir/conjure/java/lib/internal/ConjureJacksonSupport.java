@@ -335,10 +335,7 @@ public final class ConjureJacksonSupport {
             } else if (firstToken != JsonToken.FIELD_NAME && firstToken != JsonToken.END_OBJECT) {
                 return context.reportInputMismatch(unionClass, "Expected a JSON object for union deserialization");
             }
-            boolean acceptCaseInsensitiveProperties =
-                    context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
-            if (firstToken == JsonToken.FIELD_NAME
-                    && isTypeField(parser.currentName(), acceptCaseInsensitiveProperties)) {
+            if (firstToken == JsonToken.FIELD_NAME && isTypeField(parser.currentName(), context)) {
                 if (parser.nextToken() != JsonToken.VALUE_STRING) {
                     return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
                 }
@@ -346,7 +343,8 @@ public final class ConjureJacksonSupport {
                 parser.nextToken();
                 return deserializeSelected(parser, context, type, true);
             }
-            return deserializeBufferedPrefix(parser, context, acceptCaseInsensitiveProperties);
+            return deserializeBufferedPrefix(
+                    parser, context, context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
         }
 
         private String readType(JsonParser parser) throws IOException {
@@ -464,6 +462,12 @@ public final class ConjureJacksonSupport {
                 parser.nextToken();
             }
             return deserializeSelected(parser, context, object.type, true);
+        }
+
+        private static boolean isTypeField(String fieldName, DeserializationContext context) {
+            return "type".equals(fieldName)
+                    || (context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+                            && "type".equalsIgnoreCase(fieldName));
         }
 
         private static boolean isTypeField(String fieldName, boolean acceptCaseInsensitiveProperties) {
