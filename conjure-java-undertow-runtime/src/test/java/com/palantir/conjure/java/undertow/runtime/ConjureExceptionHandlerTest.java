@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableList;
@@ -40,6 +42,7 @@ import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -483,6 +486,21 @@ public final class ConjureExceptionHandlerTest {
                 ConjureExceptions.INSTANCE);
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void handlesDiagnosticInspectionFailure() throws IOException {
+        SafeRuntimeException diagnostic = mock(SafeRuntimeException.class);
+        when(diagnostic.getArgs()).thenThrow(new SafeIllegalStateException("Inspection failed"));
+
+        exception = QosException.unavailable();
+        exception.addSuppressed(diagnostic);
+
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(503);
+        assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isNull();
+        assertThat(connection.getErrorStream()).isNull();
     }
 
     private static String getErrorBody(HttpURLConnection connection) {

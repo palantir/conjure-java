@@ -68,8 +68,10 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
+    private static final RateLimiter retryExhaustionHeaderInspectionFailure = RateLimiter.create(1);
 
-    // Exhausted retries logic. We should expect Dialogue to add a SafeArg, with this name, on a suppressed exception when it has exhausted retries. The value is forwarded as a header
+    // Exhausted retries logic. We should expect Dialogue to add a SafeArg, with this name, on a suppressed exception
+    // when it has exhausted retries. The value is forwarded as a header
     private static final String RETRIES_EXHAUSTED = "Dialogue-Retries-Exhausted";
     private static final HttpString RETRIES_EXHAUSTED_HEADER = new HttpString(RETRIES_EXHAUSTED);
 
@@ -122,7 +124,9 @@ public enum ConjureExceptions implements ExceptionHandler {
         try {
             return hasRetriesExhaustedDiagnostic(failure);
         } catch (Throwable inspectionFailure) {
-            log.warn("Failed to inspect retry-exhaustion diagnostic", inspectionFailure);
+            if (retryExhaustionHeaderInspectionFailure.tryAcquire()) {
+                log.warn("Failed to inspect retry-exhaustion diagnostic", inspectionFailure);
+            }
             return false;
         }
     }
