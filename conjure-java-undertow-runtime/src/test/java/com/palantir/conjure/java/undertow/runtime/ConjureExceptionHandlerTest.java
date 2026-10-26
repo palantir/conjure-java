@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableList;
@@ -34,11 +36,14 @@ import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.BlockingHandler;
@@ -64,6 +69,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public final class ConjureExceptionHandlerTest {
 
@@ -346,13 +352,59 @@ public final class ConjureExceptionHandlerTest {
         assertThat(connection.getErrorStream()).isNull();
     }
 
-    @Test
-    public void handlesQosExceptionUnavailable() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void handlesQosExceptionUnavailable(boolean retriesExhausted) throws IOException {
         exception = QosException.unavailable();
+        if (retriesExhausted) {
+            exception.addSuppressed(
+                    new SafeRuntimeException("Retries exhausted", SafeArg.of("Dialogue-Retries-Exhausted", "true")));
+        }
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(503);
         assertThat(connection.getErrorStream()).isNull();
+        assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo(retriesExhausted ? "true" : null);
+    }
+
+    @ParameterizedTest(name = "{0}, wrapped = {2}, exhausted = {3}")
+    @MethodSource("retryMarkerExceptions")
+    void propagatesRetriesExhaustedMarkerForSupportedExceptions(
+            Exception downstreamFailure, int unwrappedStatus, boolean wrapped, boolean retriesExhausted)
+            throws IOException {
+        if (retriesExhausted) {
+            downstreamFailure.addSuppressed(
+                    new SafeRuntimeException("Retries exhausted", SafeArg.of("Dialogue-Retries-Exhausted", "true")));
+        }
+        exception = wrapped
+                ? new ServiceException(ErrorType.CONFLICT, new RuntimeException(downstreamFailure))
+                : downstreamFailure;
+
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(wrapped ? 409 : unwrappedStatus);
+        assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo(retriesExhausted ? "true" : null);
+    }
+
+    private static Stream<Arguments> retryMarkerExceptions() {
+        return Stream.of(false, true)
+                .flatMap(wrapped -> Stream.of(false, true)
+                        .flatMap(retriesExhausted -> Stream.of(
+                                Arguments.of(QosException.unavailable(), 503, wrapped, retriesExhausted),
+                                Arguments.of(
+                                        new RemoteException(
+                                                SerializableError.forException(
+                                                        new ServiceException(ErrorType.INTERNAL)),
+                                                500),
+                                        500,
+                                        wrapped,
+                                        retriesExhausted),
+                                Arguments.of(
+                                        new UnknownRemoteException(500, "Downstream failed"),
+                                        500,
+                                        wrapped,
+                                        retriesExhausted),
+                                Arguments.of(new IOException("Socket failed"), 500, wrapped, retriesExhausted))));
     }
 
     @Test
@@ -434,6 +486,21 @@ public final class ConjureExceptionHandlerTest {
                 ConjureExceptions.INSTANCE);
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    public void handlesDiagnosticInspectionFailure() throws IOException {
+        SafeRuntimeException diagnostic = mock(SafeRuntimeException.class);
+        when(diagnostic.getArgs()).thenThrow(new SafeIllegalStateException("Inspection failed"));
+
+        exception = QosException.unavailable();
+        exception.addSuppressed(diagnostic);
+
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(503);
+        assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isNull();
+        assertThat(connection.getErrorStream()).isNull();
     }
 
     private static String getErrorBody(HttpURLConnection connection) {
