@@ -693,6 +693,7 @@ public final class BeanBuilderGenerator {
                         prefix, enriched, typeMapper, builderClass, safetyEvaluator)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
+                .addCode(maybeCopyRetainedImmutableInput(enriched.poetSpec(), type))
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
                 .build();
@@ -745,7 +746,14 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CollectionType collectionType = getCollectionType(type);
             if (shouldClearFirst) {
-                if (collectionType.useNonNullFactory()) {
+                if (mayRetainImmutableInput(type)) {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.newNonNullSetUnlessImmutable($3L)",
+                            spec.name(),
+                            ConjureCollections.class,
+                            Expressions.requireNonNull(
+                                    spec.name(), enriched.fieldName().get() + " cannot be null"));
+                } else if (collectionType.useNonNullFactory()) {
                     return CodeBlocks.statement(
                             "this.$1N = $2T.newNonNull$3L($4L)",
                             spec.name(),
@@ -917,9 +925,23 @@ public final class BeanBuilderGenerator {
                     field.name(), enriched.fieldName().get() + " cannot be null"));
         }
 
-        return builder.addStatement("this.$1N.add($1N)", field.name())
+        return builder.addCode(maybeCopyRetainedImmutableInput(
+                        field, enriched.conjureDef().getType()))
+                .addStatement("this.$1N.add($1N)", field.name())
                 .addStatement("return this")
                 .build();
+    }
+
+    // Set setters may keep an immutable input instead of copying it, so additive setters copy it first
+    private boolean mayRetainImmutableInput(Type type) {
+        return type.accept(TypeVisitor.IS_SET) && getCollectionType(type).useNonNullFactory();
+    }
+
+    private CodeBlock maybeCopyRetainedImmutableInput(FieldSpec field, Type type) {
+        if (!mayRetainImmutableInput(type)) {
+            return CodeBlock.of("");
+        }
+        return CodeBlocks.statement("this.$1N = $2T.toMutableSet(this.$1N)", field.name(), ConjureCollections.class);
     }
 
     private MethodSpec createPrimitiveItemSetter(EnrichedField enriched, boolean override, Optional<LogSafety> safety) {

@@ -21,14 +21,18 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import allexamples.com.palantir.product.CovariantListExample;
 import allexamples.com.palantir.product.ListExample;
+import allexamples.com.palantir.product.SetExample;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import primitivecollections.com.palantir.product.PrimitiveExample;
 import strictprimitivecollections.com.palantir.product.PrimitiveStrictExample;
@@ -50,6 +54,30 @@ public class NonNullCollectionsTest {
                         () -> ListExample.builder().addAllItems(nullCollection).build());
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> ListExample.builder().items((String) null).build());
+    }
+
+    @Test
+    public void canAddToImmutableSetInput() {
+        ImmutableSet<String> items = ImmutableSet.of("b", "a");
+
+        SetExample example = SetExample.builder()
+                .items(items)
+                .items("c")
+                .addAllItems(List.of("d"))
+                .build();
+
+        assertThat(example.getItems()).containsExactly("b", "a", "c", "d");
+        assertThat(items).containsExactly("b", "a");
+    }
+
+    @Test
+    public void sortedSetInputUsesEqualsMembership() {
+        ImmutableSortedSet<String> items = ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER)
+                .add("a")
+                .build();
+
+        assertThat(SetExample.builder().items(items).build())
+                .isNotEqualTo(SetExample.builder().items(Set.of("A")).build());
     }
 
     @Test

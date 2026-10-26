@@ -286,7 +286,7 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongSet", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
-            this.safeExternalLongSet = ConjureCollections.newNonNullSet(
+            this.safeExternalLongSet = ConjureCollections.newNonNullSetUnlessImmutable(
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
         }
@@ -294,6 +294,7 @@ public final class SafeExternalLongExample {
         @Override
         public Builder addAllSafeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
+            this.safeExternalLongSet = ConjureCollections.toMutableSet(this.safeExternalLongSet);
             ConjureCollections.addAllAndCheckNonNull(
                     this.safeExternalLongSet,
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
@@ -304,6 +305,7 @@ public final class SafeExternalLongExample {
         public Builder safeExternalLongSet(@Safe long safeExternalLongSet) {
             checkNotBuilt();
             Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null");
+            this.safeExternalLongSet = ConjureCollections.toMutableSet(this.safeExternalLongSet);
             this.safeExternalLongSet.add(safeExternalLongSet);
             return this;
         }

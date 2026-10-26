@@ -322,13 +322,15 @@ public final class ManyFieldExample {
         @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            this.set = ConjureCollections.newNonNullSet(Preconditions.checkNotNull(set, "set cannot be null"));
+            this.set = ConjureCollections.newNonNullSetUnlessImmutable(
+                    Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
         /** docs for set field */
         public Builder addAllSet(@Nonnull Iterable<String> set) {
             checkNotBuilt();
+            this.set = ConjureCollections.toMutableSet(this.set);
             ConjureCollections.addAllAndCheckNonNull(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
@@ -337,6 +339,7 @@ public final class ManyFieldExample {
         public Builder set(String set) {
             checkNotBuilt();
             Preconditions.checkNotNull(set, "set cannot be null");
+            this.set = ConjureCollections.toMutableSet(this.set);
             this.set.add(set);
             return this;
         }

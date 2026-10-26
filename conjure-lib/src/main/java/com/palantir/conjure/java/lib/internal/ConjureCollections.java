@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
@@ -167,6 +169,20 @@ public final class ConjureCollections {
         }
 
         return set;
+    }
+
+    // Skips the copy for immutable inputs, so callers must use toMutableSet before adding to the result.
+    // Sorted sets are still copied because their membership follows a comparator rather than equals.
+    @SuppressWarnings("unchecked")
+    public static <T> Set<T> newNonNullSetUnlessImmutable(Iterable<? extends T> iterable) {
+        if (iterable instanceof ImmutableSet && !(iterable instanceof SortedSet)) {
+            return (Set<T>) iterable;
+        }
+        return newNonNullSet(iterable);
+    }
+
+    public static <T> Set<T> toMutableSet(Set<T> set) {
+        return set instanceof LinkedHashSet ? set : new LinkedHashSet<>(set);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
