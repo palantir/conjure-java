@@ -4,9 +4,9 @@ com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 
 com.fasterxml.jackson.core:jackson-annotations:2.22 (25 constraints: 3bb7ac63)
 
-com.fasterxml.jackson.core:jackson-core:2.22.4 (23 constraints: 0fd9d232)
+com.fasterxml.jackson.core:jackson-core:2.22.4 (23 constraints: 10d9d433)
 
-com.fasterxml.jackson.core:jackson-databind:2.22.4 (34 constraints: 35928590)
+com.fasterxml.jackson.core:jackson-databind:2.22.4 (34 constraints: 36926692)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.4 (4 constraints: 806cc7c2)
 
@@ -60,19 +60,19 @@ com.palantir.conjure.java.runtime:keystores:8.46.0 (3 constraints: 222a5360)
 
 com.palantir.deadlines:deadlines:0.29.0 (2 constraints: a91405ad)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.49.0 (2 constraints: 8629d202)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.50.0 (2 constraints: 7e29bb02)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.49.0 (2 constraints: e523a9b4)
+com.palantir.dialogue:dialogue-blocking-channels:6.50.0 (2 constraints: d5230bb3)
 
-com.palantir.dialogue:dialogue-clients:6.49.0 (1 constraints: 45056e3b)
+com.palantir.dialogue:dialogue-clients:6.50.0 (1 constraints: 3d05573b)
 
-com.palantir.dialogue:dialogue-core:6.49.0 (3 constraints: 8c3d84e4)
+com.palantir.dialogue:dialogue-core:6.50.0 (3 constraints: 7c3dd6e2)
 
-com.palantir.dialogue:dialogue-futures:6.49.0 (3 constraints: e0337ec1)
+com.palantir.dialogue:dialogue-futures:6.50.0 (3 constraints: c833f1bc)
 
-com.palantir.dialogue:dialogue-serde:6.49.0 (3 constraints: ca2e72a6)
+com.palantir.dialogue:dialogue-serde:6.50.0 (3 constraints: ba2e9ca2)
 
-com.palantir.dialogue:dialogue-target:6.49.0 (7 constraints: 1b79bec3)
+com.palantir.dialogue:dialogue-target:6.50.0 (7 constraints: eb7844aa)
 
 com.palantir.goethe:goethe:0.31.0 (1 constraints: 36052e3b)
 
