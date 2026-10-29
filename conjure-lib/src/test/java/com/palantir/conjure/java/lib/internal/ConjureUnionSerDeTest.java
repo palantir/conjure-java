@@ -61,7 +61,7 @@ import java.lang.management.ManagementFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -136,7 +136,7 @@ final class ConjureUnionSerDeTest {
     }
 
     @Test
-    void enforcesStringLimitsOnCachedDiscriminators() throws IOException {
+    void enforcesStringLimitsOnDiscriminatorsAfterWarming() throws IOException {
         String json = "{\"type\":\"known\",\"value\":\"ok\"}";
         assertThat(mapper.readValue(json, SampleUnion.class)).isEqualTo(new Known("ok"));
         JsonFactory constrained = JsonFactory.builder()
@@ -628,12 +628,13 @@ final class ConjureUnionSerDeTest {
     }
 
     @Test
-    void snapshotsVariantTypes() throws IOException {
-        List<Class<? extends SampleUnion>> variants =
-                new ArrayList<>(List.of(Known.class, NumberVariant.class, NestedVariant.class));
+    void snapshotsVariants() throws IOException {
+        Map<String, Class<? extends SampleUnion>> variants =
+                new HashMap<>(Map.of("known", Known.class, "number", NumberVariant.class));
         SampleDeserializer deserializer = new SampleDeserializer(variants);
         variants.clear();
-        variants.add(NumberVariant.class);
+        variants.put("known", NumberVariant.class);
+        variants.put("future", Known.class);
         ObjectMapper configured = new ObjectMapper()
                 .addMixIn(SampleUnion.class, DefaultDeserializer.class)
                 .registerModule(new SimpleModule().addDeserializer(SampleUnion.class, deserializer));
@@ -641,6 +642,8 @@ final class ConjureUnionSerDeTest {
                 .isEqualTo(new Known("hello"));
         assertThat(configured.readValue("{\"type\":\"number\",\"value\":42}", SampleUnion.class))
                 .isEqualTo(new NumberVariant(42));
+        assertThat(configured.readValue("{\"type\":\"future\",\"value\":\"hello\"}", SampleUnion.class))
+                .isEqualTo(new Unknown("future", Map.of("value", "hello")));
     }
 
     @Test
@@ -1044,37 +1047,27 @@ final class ConjureUnionSerDeTest {
 
     static final class OtherDeserializer extends ConjureJacksonSupport.UnionDeserializer<OtherUnion> {
         OtherDeserializer() {
-            super(
-                    OtherUnion.class,
-                    List.of(NumberVariant.class),
-                    type -> "number".equals(type) ? 0 : -1,
-                    OtherUnknown::new);
+            super(OtherUnion.class, Map.of("number", NumberVariant.class), OtherUnknown::new);
         }
     }
 
     static final class SampleDeserializer extends ConjureJacksonSupport.UnionDeserializer<SampleUnion> {
         SampleDeserializer() {
-            this(List.of(
+            this(Map.of(
+                    "known",
                     Known.class,
+                    "number",
                     NumberVariant.class,
+                    "nested",
                     NestedVariant.class,
+                    "aliases",
                     AliasVariant.class,
+                    "delegating",
                     DelegatingVariant.class));
         }
 
-        SampleDeserializer(List<Class<? extends SampleUnion>> variants) {
-            super(
-                    SampleUnion.class,
-                    variants,
-                    type -> switch (type) {
-                        case "known" -> 0;
-                        case "number" -> 1;
-                        case "nested" -> 2;
-                        case "aliases" -> 3;
-                        case "delegating" -> 4;
-                        default -> -1;
-                    },
-                    Unknown::new);
+        SampleDeserializer(Map<String, Class<? extends SampleUnion>> variants) {
+            super(SampleUnion.class, variants, Unknown::new);
         }
     }
 
@@ -1092,7 +1085,7 @@ final class ConjureUnionSerDeTest {
 
     static final class EmptyDeserializer extends ConjureJacksonSupport.UnionDeserializer<EmptyUnion> {
         EmptyDeserializer() {
-            super(EmptyUnion.class, List.of(), _type -> -1, EmptyUnknown::new);
+            super(EmptyUnion.class, Map.of(), EmptyUnknown::new);
         }
     }
 }

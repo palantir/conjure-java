@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.lib.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonMerge;
@@ -35,9 +36,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.util.AccessPattern;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +50,25 @@ import org.junit.jupiter.api.Test;
 
 final class ConjureSetDeserializerTest {
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @Test
+    void rejectsTypesOtherThanMapsAndSets() {
+        DeserializationContext context = ((DefaultDeserializationContext) mapper.getDeserializationContext())
+                .createInstance(mapper.getDeserializationConfig(), null, mapper.getInjectableValues());
+        for (Class<?> unsupported :
+                List.of(Iterable.class, Collection.class, List.class, Integer[].class, String.class)) {
+            BeanProperty property = new BeanProperty.Std(
+                    PropertyName.construct("values"),
+                    mapper.constructType(unsupported),
+                    null,
+                    null,
+                    PropertyMetadata.STD_OPTIONAL);
+            assertThatThrownBy(
+                            () -> new ConjureJacksonSupport.ContainerDeserializer().createContextual(context, property))
+                    .isInstanceOf(InvalidDefinitionException.class)
+                    .hasMessageContaining("Container deserializer only supports Map and Set properties");
+        }
+    }
 
     @Test
     void transfersStandardScalarSets() throws IOException {

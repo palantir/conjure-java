@@ -56,11 +56,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BiFunction;
-import java.util.function.ToIntFunction;
 
 /** Jackson support for generated code; not intended for application use. */
 public final class ConjureJacksonSupport {
@@ -69,6 +68,7 @@ public final class ConjureJacksonSupport {
     /**
      * Gives generated code ownership of maps and sets. Standard Jackson containers with scalar entries may be transferred
      * directly; other results are defensively copied. Generated code validates nulls and exposes an unmodifiable view.
+     * Only Map and Set properties are supported; other types are rejected during contextualization.
      * Object-id references must resolve before their container entry is read; object-id entries in polymorphic containers
      * are unsupported.
      */
@@ -77,8 +77,12 @@ public final class ConjureJacksonSupport {
         public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)
                 throws JsonMappingException {
             JavaType type = property.getType();
-            boolean map = type.isMapLikeType();
+            boolean map = type.isTypeOrSubTypeOf(Map.class);
             if (!map) {
+                if (!type.isTypeOrSubTypeOf(Set.class)) {
+                    return context.reportBadDefinition(
+                            type, "Container deserializer only supports Map and Set properties");
+                }
                 // Jackson skips `as` refinement on delegating creators that also specify `using`.
                 type = context.constructSpecializedType(type, LinkedHashSet.class);
             }
@@ -271,43 +275,33 @@ public final class ConjureJacksonSupport {
      * an object starting at START_OBJECT with the discriminator removed.
      */
     public abstract static class UnionDeserializer<T> extends JsonDeserializer<T> implements ContextualDeserializer {
-        private static final int MAX_CACHED_TYPE_LENGTH = 64;
-
         private final Class<T> unionClass;
-        private final List<Class<? extends T>> variantTypes;
-        private final AtomicReferenceArray<JsonDeserializer<? extends T>> variantDeserializers;
-        private final ToIntFunction<String> variantIndex;
+        private final Map<String, Class<? extends T>> variants;
+        private final ConcurrentMap<String, JsonDeserializer<? extends T>> variantDeserializers =
+                new ConcurrentHashMap<>();
         private final BiFunction<String, Map<String, Object>, ? extends T> unknownFactory;
         private final BeanProperty property;
-        private volatile String cachedType;
         private volatile JsonDeserializer<Object> unknownValueDeserializer;
 
         /**
          * @param unionClass the generated union's base type
-         * @param variantTypes concrete variant classes in selector order; the runtime copies this list
-         * @param variantIndex maps a discriminator to its variant's index, or a negative value for an unknown variant;
-         *     must be thread-safe and stable for the lifetime of this deserializer
+         * @param variants maps known discriminators to their concrete variant classes; the runtime copies this map
          * @param unknownFactory constructs an unknown variant from its discriminator and an owned map of payload fields;
          *     must be thread-safe and may retain the map
          */
         protected UnionDeserializer(
                 Class<T> unionClass,
-                List<Class<? extends T>> variantTypes,
-                ToIntFunction<String> variantIndex,
+                Map<String, Class<? extends T>> variants,
                 BiFunction<String, Map<String, Object>, ? extends T> unknownFactory) {
             this.unionClass = Preconditions.checkNotNull(unionClass, "unionClass");
-            this.variantTypes = List.copyOf(Preconditions.checkNotNull(variantTypes, "variantTypes"));
-            this.variantDeserializers = new AtomicReferenceArray<>(this.variantTypes.size());
-            this.variantIndex = Preconditions.checkNotNull(variantIndex, "variantIndex");
+            this.variants = Map.copyOf(Preconditions.checkNotNull(variants, "variants"));
             this.unknownFactory = Preconditions.checkNotNull(unknownFactory, "unknownFactory");
             this.property = null;
         }
 
         private UnionDeserializer(UnionDeserializer<T> source, BeanProperty property) {
             this.unionClass = source.unionClass;
-            this.variantTypes = source.variantTypes;
-            this.variantDeserializers = new AtomicReferenceArray<>(variantTypes.size());
-            this.variantIndex = source.variantIndex;
+            this.variants = source.variants;
             this.unknownFactory = source.unknownFactory;
             this.property = property;
         }
@@ -340,28 +334,12 @@ public final class ConjureJacksonSupport {
                 if (parser.nextToken() != JsonToken.VALUE_STRING) {
                     return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
                 }
-                String type = readType(parser);
+                String type = parser.getText();
                 parser.nextToken();
                 return deserializeSelected(parser, context, type, true);
             }
             return deserializeBufferedPrefix(
                     parser, context, context.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));
-        }
-
-        private String readType(JsonParser parser) throws IOException {
-            String cached = cachedType;
-            if (cached != null && parser.hasTextCharacters() && parser.getTextLength() == cached.length()) {
-                char[] characters = parser.getTextCharacters();
-                int offset = parser.getTextOffset();
-                for (int i = 0; i < cached.length(); i++) {
-                    if (characters[offset + i] != cached.charAt(i)) {
-                        return parser.getText();
-                    }
-                }
-                parser.streamReadConstraints().validateStringLength(cached.length());
-                return cached;
-            }
-            return parser.getText();
         }
 
         private T deserializeBufferedPrefix(
@@ -396,7 +374,7 @@ public final class ConjureJacksonSupport {
             if (parser.nextToken() != JsonToken.VALUE_STRING) {
                 return context.reportInputMismatch(unionClass, "Union discriminator 'type' must be a string");
             }
-            String type = readType(parser);
+            String type = parser.getText();
             parser.nextToken();
             try (JsonParser prefix = buffer.asParser(parser)) {
                 JsonParser combined = index == null || index.objects == null
@@ -487,17 +465,13 @@ public final class ConjureJacksonSupport {
         private T deserializeSelected(
                 JsonParser parser, DeserializationContext context, String type, boolean prefixObject)
                 throws IOException {
-            int index = variantIndex.applyAsInt(type);
-            if (index < 0) {
+            Class<? extends T> variantType = variants.get(type);
+            if (variantType == null) {
                 return unknownFactory.apply(type, deserializeUnknown(parser, context));
             }
-            JsonDeserializer<? extends T> deserializer = variantDeserializers.get(index);
+            JsonDeserializer<? extends T> deserializer = variantDeserializers.get(type);
             if (deserializer == null) {
-                deserializer = resolveDeserializer(context, index);
-                // Retain one bounded discriminator to avoid String allocation on repeated reads.
-                if (cachedType == null && type.length() <= MAX_CACHED_TYPE_LENGTH) {
-                    cachedType = type;
-                }
+                deserializer = resolveDeserializer(context, type, variantType);
             }
             // Jackson's standard bean deserializer accepts FIELD_NAME/END_OBJECT directly.
             if (prefixObject && deserializer.getClass() != BeanDeserializer.class) {
@@ -511,14 +485,13 @@ public final class ConjureJacksonSupport {
         }
 
         @SuppressWarnings("unchecked") // The constructor restricts variant classes to subtypes of T.
-        private JsonDeserializer<? extends T> resolveDeserializer(DeserializationContext context, int index)
+        private JsonDeserializer<? extends T> resolveDeserializer(
+                DeserializationContext context, String type, Class<? extends T> variantType)
                 throws JsonMappingException {
             JsonDeserializer<? extends T> deserializer = (JsonDeserializer<? extends T>)
-                    context.findContextualValueDeserializer(context.constructType(variantTypes.get(index)), property);
-            if (variantDeserializers.compareAndSet(index, null, deserializer)) {
-                return deserializer;
-            }
-            return variantDeserializers.get(index);
+                    context.findContextualValueDeserializer(context.constructType(variantType), property);
+            JsonDeserializer<? extends T> existing = variantDeserializers.putIfAbsent(type, deserializer);
+            return existing == null ? deserializer : existing;
         }
 
         private Map<String, Object> deserializeUnknown(JsonParser parser, DeserializationContext context)

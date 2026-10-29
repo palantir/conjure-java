@@ -29,6 +29,7 @@ import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.SimpleUnionAlias;
@@ -91,13 +92,7 @@ final class ConjureJacksonSupportIntegrationTest {
         RuntimeDeserializer() {
             super(
                     SimpleUnion.class,
-                    List.of(SimpleUnion.Foo.class, SimpleUnion.Bar.class, SimpleUnion.Baz.class),
-                    type -> switch (type) {
-                        case "foo" -> 0;
-                        case "bar" -> 1;
-                        case "baz" -> 2;
-                        default -> -1;
-                    },
+                    Map.of("foo", SimpleUnion.Foo.class, "bar", SimpleUnion.Bar.class, "baz", SimpleUnion.Baz.class),
                     (type, values) -> SimpleUnion.unknown(type, values.get(type)));
         }
     }
