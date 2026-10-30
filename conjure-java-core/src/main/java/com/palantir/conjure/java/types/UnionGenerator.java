@@ -847,30 +847,28 @@ public final class UnionGenerator {
 
     private static TypeSpec generateDeserializer(
             ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
+        boolean useMapOf = memberTypeDefs.size() <= 10;
         // Variants are qualified because member types the Deserializer inherits, such as JsonDeserializer.None, would
         // otherwise shadow variants with the same simple name.
-        CodeBlock variantTypes = memberTypeDefs.stream()
+        CodeBlock variants = memberTypeDefs.stream()
                 .map(member -> CodeBlock.of(
-                        "$T.$L.class",
+                        "$S, $T.$L.class",
+                        member.getFieldName(),
                         unionClass,
                         sealedVariantClass(unionClass, member.getFieldName()).simpleName()))
+                .map(entry -> useMapOf ? entry : CodeBlock.of("$T.entry($L)", Map.class, entry))
                 .collect(CodeBlock.joining(", "));
-        CodeBlock.Builder variantIndex = CodeBlock.builder().add("type -> switch (type) {\n");
-        for (int index = 0; index < memberTypeDefs.size(); index++) {
-            variantIndex.add("case $S -> $L;\n", memberTypeDefs.get(index).getFieldName(), index);
-        }
-        variantIndex.add("default -> -1;\n}");
         return TypeSpec.classBuilder(deserializerClass)
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(
                         ClassName.get(ConjureJacksonSupport.UnionDeserializer.class), unionClass))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addStatement(
-                                "super($T.class, $T.of($L), $L, $T.$L::new)",
+                                "super($T.class, $T.$L($L), $T.$L::new)",
                                 unionClass,
-                                List.class,
-                                variantTypes,
-                                variantIndex.build(),
+                                Map.class,
+                                useMapOf ? "of" : "ofEntries",
+                                variants,
                                 unionClass,
                                 SEALED_UNKNOWN_VARIANT_NAME)
                         .build())

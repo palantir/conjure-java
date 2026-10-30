@@ -75,12 +75,44 @@ import javax.tools.ToolProvider;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 final class UnionGeneratorTests {
     private static final ObjectMapper JSON_MAPPER = ObjectMappers.newServerObjectMapper();
 
     @TempDir
     Path output;
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 10, 11})
+    void sealedUnionVariantCounts(int variantCount) throws Exception {
+        UnionDefinition.Builder union = UnionDefinition.builder().typeName(TypeName.of("ExampleUnion", "variants"));
+        for (int index = 0; index < variantCount; index++) {
+            union.union(field("variant" + index, Type.primitive(PrimitiveType.STRING)));
+        }
+        ConjureDefinition definition = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.union(union.build()))
+                .build();
+        try (URLClassLoader loader =
+                generate(definition, Options.builder().sealedUnions(true).build())) {
+            Class<?> type = loader.loadClass("variants.ExampleUnion");
+            ObjectMapper mapper = new ObjectMapper();
+            for (int index = 0; index < variantCount; index++) {
+                String field = "variant" + index;
+                String json = mapper.createObjectNode()
+                        .put("type", field)
+                        .put(field, "test")
+                        .toString();
+                Object value = type.getMethod(field, String.class).invoke(null, "test");
+                assertThat(mapper.readValue(json, type)).isEqualTo(value);
+                assertThat(mapper.writerFor(type).writeValueAsString(value)).isEqualTo(json);
+            }
+            String unknownJson = "{\"type\":\"future\",\"future\":\"test\"}";
+            assertThat(mapper.writerFor(type).writeValueAsString(mapper.readValue(unknownJson, type)))
+                    .isEqualTo(unknownJson);
+        }
+    }
 
     @ParameterizedTest
     @CsvSource({"false,false", "true,false", "true,true"})
@@ -95,7 +127,8 @@ final class UnionGeneratorTests {
                 "ContainerDeserializer",
                 "UnionDeserializer",
                 "UnionSerializer",
-                "List");
+                "List",
+                "Map");
         ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
         for (String name : names) {
             UnionDefinition.Builder union = UnionDefinition.builder().typeName(TypeName.of(name, "collision"));
