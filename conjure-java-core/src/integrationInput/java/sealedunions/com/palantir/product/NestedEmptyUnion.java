@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -23,13 +25,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true,
-        defaultImpl = NestedEmptyUnion.Unknown.class)
-@JsonSubTypes(@JsonSubTypes.Type(value = NestedEmptyUnion.Empty.class, name = "empty"))
+@JsonDeserialize(using = NestedEmptyUnion.Deserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, NestedEmptyUnion.Unknown {
     public static NestedEmptyUnion empty(EmptyObject value) {
@@ -61,6 +58,10 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
     public sealed interface Known permits Empty {}
 
     @JsonTypeName("empty")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Empty extends NestedEmptyUnion implements Known {
         private final EmptyObject value;
 
@@ -105,6 +106,9 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         }
     }
 
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown extends NestedEmptyUnion {
         private final String type;
 
@@ -162,6 +166,12 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
         @Override
         public String toString() {
             return "NestedEmptyUnion{value: UnknownWrapper{value: " + value + "}}";
+        }
+    }
+
+    static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<NestedEmptyUnion> {
+        Deserializer() {
+            super(NestedEmptyUnion.class, Map.of("empty", NestedEmptyUnion.Empty.class), NestedEmptyUnion.Unknown::new);
         }
     }
 

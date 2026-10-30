@@ -48,14 +48,18 @@ import allexamples.com.palantir.product.StringAliasTwo;
 import allexamples.com.palantir.product.StringExample;
 import allexamples.com.palantir.product.UnionTypeExample;
 import allexamples.com.palantir.product.UuidExample;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -84,10 +88,12 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import sealedunions.com.palantir.product.CamelCaseUnion;
 import sealedunions.com.palantir.product.EmptyObject;
@@ -1034,6 +1040,55 @@ public final class WireFormatTests {
         System.out.println(
                 mapper.writerFor(new TypeReference<NestedEmptyUnion>() {}).writeValueAsString(nestedEmptyUnion));
     }
+
+    @ParameterizedTest
+    @MethodSource("polymorphicSealedUnions")
+    @SuppressWarnings(
+            "DangerousJsonTypeInfoUsage") // Validator restricts this regression test to sealed union variants.
+    void testSealedUnionType_defaultTyping(SimpleUnion union) throws JsonProcessingException {
+        ObjectMapper typedMapper = mapper.copy()
+                .activateDefaultTyping(
+                        BasicPolymorphicTypeValidator.builder()
+                                .allowIfSubType(SimpleUnion.class)
+                                .build(),
+                        ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE);
+        String expectedJson = "[\"" + union.getClass().getName() + "\"," + mapper.writeValueAsString(union) + "]";
+        String json = typedMapper.writerFor(SimpleUnion.class).writeValueAsString(union);
+        assertThat(json).isEqualTo(expectedJson);
+        assertThat(typedMapper.readValue(json, SimpleUnion.class)).isEqualTo(union);
+        UnionContainer container = new UnionContainer(union);
+        String nestedJson = typedMapper.writeValueAsString(container);
+        assertThat(nestedJson).isEqualTo("{\"value\":" + expectedJson + "}");
+        assertThat(typedMapper.readValue(nestedJson, UnionContainer.class)).isEqualTo(container);
+    }
+
+    @ParameterizedTest
+    @MethodSource("polymorphicSealedUnions")
+    void testSealedUnionType_explicitTypeInfo(SimpleUnion union) throws JsonProcessingException {
+        ObjectMapper typedMapper = mapper.copy().addMixIn(SimpleUnion.class, PolymorphicUnionMixin.class);
+        typedMapper.registerSubtypes(
+                new NamedType(union.getClass(), union.getClass().getSimpleName()));
+        String expectedJson = "{\"@variant\":\"" + union.getClass().getSimpleName() + "\","
+                + mapper.writeValueAsString(union).substring(1);
+        String json = typedMapper.writerFor(SimpleUnion.class).writeValueAsString(union);
+        assertThat(json).isEqualTo(expectedJson);
+        assertThat(typedMapper.readValue(json, SimpleUnion.class)).isEqualTo(union);
+        UnionContainer container = new UnionContainer(union);
+        String nestedJson = typedMapper.writeValueAsString(container);
+        assertThat(nestedJson).isEqualTo("{\"value\":" + expectedJson + "}");
+        assertThat(typedMapper.readValue(nestedJson, UnionContainer.class)).isEqualTo(container);
+    }
+
+    static Stream<SimpleUnion> polymorphicSealedUnions() {
+        return Stream.of(SimpleUnion.foo("test"), SimpleUnion.bar(42), SimpleUnion.unknown("future", "value"));
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@variant")
+    private interface PolymorphicUnionMixin {}
+
+    private record UnionContainer(
+            @JsonSerialize(typing = JsonSerialize.Typing.STATIC)
+            SimpleUnion value) {}
 
     @Test
     void testSealedUnionType_serializeOptionalSimpleUnion_usingWriterFor() throws JsonProcessingException {
