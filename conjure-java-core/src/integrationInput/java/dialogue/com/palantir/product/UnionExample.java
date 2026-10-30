@@ -408,20 +408,17 @@ public abstract sealed class UnionExample
         Deserializer() {
             super(
                     UnionExample.class,
-                    List.of(
+                    Map.of(
+                            "stringVariant",
                             UnionExample.StringVariant.class,
+                            "intVariant",
                             UnionExample.IntVariant.class,
+                            "objectVariant",
                             UnionExample.ObjectVariant.class,
+                            "collectionVariant",
                             UnionExample.CollectionVariant.class,
+                            "optionalVariant",
                             UnionExample.OptionalVariant.class),
-                    type -> switch (type) {
-                        case "stringVariant" -> 0;
-                        case "intVariant" -> 1;
-                        case "objectVariant" -> 2;
-                        case "collectionVariant" -> 3;
-                        case "optionalVariant" -> 4;
-                        default -> -1;
-                    },
                     UnionExample.Unknown::new);
         }
     }

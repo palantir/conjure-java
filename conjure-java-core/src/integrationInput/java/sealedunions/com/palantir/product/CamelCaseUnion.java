@@ -17,7 +17,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -174,11 +173,7 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
         Deserializer() {
             super(
                     CamelCaseUnion.class,
-                    List.of(CamelCaseUnion.CamelCasedField.class),
-                    type -> switch (type) {
-                        case "camelCasedField" -> 0;
-                        default -> -1;
-                    },
+                    Map.of("camelCasedField", CamelCaseUnion.CamelCasedField.class),
                     CamelCaseUnion.Unknown::new);
         }
     }

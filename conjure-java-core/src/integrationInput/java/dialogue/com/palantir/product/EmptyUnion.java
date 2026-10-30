@@ -15,7 +15,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
@@ -101,13 +100,7 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<EmptyUnion> {
         Deserializer() {
-            super(
-                    EmptyUnion.class,
-                    List.of(),
-                    type -> switch (type) {
-                        default -> -1;
-                    },
-                    EmptyUnion.Unknown::new);
+            super(EmptyUnion.class, Map.of(), EmptyUnion.Unknown::new);
         }
     }
 

@@ -17,7 +17,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -1047,42 +1046,23 @@ public abstract sealed class UnionReservedNames
         Deserializer() {
             super(
                     UnionReservedNames.class,
-                    List.of(
-                            UnionReservedNames.Known_.class,
-                            UnionReservedNames.Unknown_.class,
-                            UnionReservedNames.If.class,
-                            UnionReservedNames.New.class,
-                            UnionReservedNames.Interface.class,
-                            UnionReservedNames.Void.class,
-                            UnionReservedNames.Return.class,
-                            UnionReservedNames.Private.class,
-                            UnionReservedNames.Public.class,
-                            UnionReservedNames.Int.class,
-                            UnionReservedNames.Import.class,
-                            UnionReservedNames.Final.class,
-                            UnionReservedNames.Throws.class,
-                            UnionReservedNames.Static.class,
-                            UnionReservedNames.None.class,
-                            UnionReservedNames.UnionReservedNames_.class),
-                    type -> switch (type) {
-                        case "known" -> 0;
-                        case "unknown" -> 1;
-                        case "if" -> 2;
-                        case "new" -> 3;
-                        case "interface" -> 4;
-                        case "void" -> 5;
-                        case "return" -> 6;
-                        case "private" -> 7;
-                        case "public" -> 8;
-                        case "int" -> 9;
-                        case "import" -> 10;
-                        case "final" -> 11;
-                        case "throws" -> 12;
-                        case "static" -> 13;
-                        case "none" -> 14;
-                        case "unionReservedNames" -> 15;
-                        default -> -1;
-                    },
+                    Map.ofEntries(
+                            Map.entry("known", UnionReservedNames.Known_.class),
+                            Map.entry("unknown", UnionReservedNames.Unknown_.class),
+                            Map.entry("if", UnionReservedNames.If.class),
+                            Map.entry("new", UnionReservedNames.New.class),
+                            Map.entry("interface", UnionReservedNames.Interface.class),
+                            Map.entry("void", UnionReservedNames.Void.class),
+                            Map.entry("return", UnionReservedNames.Return.class),
+                            Map.entry("private", UnionReservedNames.Private.class),
+                            Map.entry("public", UnionReservedNames.Public.class),
+                            Map.entry("int", UnionReservedNames.Int.class),
+                            Map.entry("import", UnionReservedNames.Import.class),
+                            Map.entry("final", UnionReservedNames.Final.class),
+                            Map.entry("throws", UnionReservedNames.Throws.class),
+                            Map.entry("static", UnionReservedNames.Static.class),
+                            Map.entry("none", UnionReservedNames.None.class),
+                            Map.entry("unionReservedNames", UnionReservedNames.UnionReservedNames_.class)),
                     UnionReservedNames.Unknown::new);
         }
     }

@@ -18,7 +18,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -287,13 +286,7 @@ public abstract sealed class SimpleUnion
         Deserializer() {
             super(
                     SimpleUnion.class,
-                    List.of(SimpleUnion.Foo.class, SimpleUnion.Bar.class, SimpleUnion.Baz.class),
-                    type -> switch (type) {
-                        case "foo" -> 0;
-                        case "bar" -> 1;
-                        case "baz" -> 2;
-                        default -> -1;
-                    },
+                    Map.of("foo", SimpleUnion.Foo.class, "bar", SimpleUnion.Bar.class, "baz", SimpleUnion.Baz.class),
                     SimpleUnion.Unknown::new);
         }
     }

@@ -17,7 +17,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -172,14 +171,7 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<NestedEmptyUnion> {
         Deserializer() {
-            super(
-                    NestedEmptyUnion.class,
-                    List.of(NestedEmptyUnion.Empty.class),
-                    type -> switch (type) {
-                        case "empty" -> 0;
-                        default -> -1;
-                    },
-                    NestedEmptyUnion.Unknown::new);
+            super(NestedEmptyUnion.class, Map.of("empty", NestedEmptyUnion.Empty.class), NestedEmptyUnion.Unknown::new);
         }
     }
 
