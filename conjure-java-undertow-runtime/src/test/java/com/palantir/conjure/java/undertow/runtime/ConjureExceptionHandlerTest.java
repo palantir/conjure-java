@@ -41,11 +41,15 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
+import com.palantir.deadlines.Deadlines;
+import com.palantir.dialogue.ClientTimeout;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.tracing.CloseableTracer;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -65,6 +69,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -440,6 +445,85 @@ public final class ConjureExceptionHandlerTest {
         assertThat(connection.getResponseCode()).isEqualTo(500);
         assertThat(connection.getHeaderFields()).containsEntry("Deadline-Expired-Reason", ImmutableList.of("internal"));
         assertThat(connection.getErrorStream()).isNull();
+    }
+
+    @Nested
+    class ClientTimeouts {
+
+        @Test
+        void reportsClientTimeoutAsInternalDeadlineExpiry() throws IOException {
+            restartServerWithDeadline(Deadlines.Enforcement.DEFER);
+            exception = new TestClientTimeout();
+            HttpURLConnection connection = execute();
+
+            assertThat(connection.getResponseCode()).isEqualTo(500);
+            assertThat(connection.getHeaderFields())
+                    .containsEntry("Deadline-Expired-Reason", ImmutableList.of("internal"));
+            assertThat(connection.getErrorStream()).isNull();
+        }
+
+        @Test
+        void reportsClientTimeoutAsInternalErrorWhenDeadlineEnforcementIsDisabled() throws IOException {
+            restartServerWithDeadline(Deadlines.Enforcement.DISABLE);
+            exception = new TestClientTimeout();
+            HttpURLConnection connection = execute();
+
+            assertThat(connection.getResponseCode()).isEqualTo(500);
+            assertThat(connection.getHeaderField("Deadline-Expired-Reason")).isNull();
+            assertThat(getErrorBody(connection)).contains("{\"errorCode\":\"INTERNAL\"");
+        }
+
+        @Test
+        void reportsClientTimeoutAsInternalErrorWhenRequestHasNoDeadline() throws IOException {
+            exception = new TestClientTimeout();
+            HttpURLConnection connection = execute();
+
+            assertThat(connection.getResponseCode()).isEqualTo(500);
+            assertThat(connection.getHeaderField("Deadline-Expired-Reason")).isNull();
+            assertThat(getErrorBody(connection)).contains("{\"errorCode\":\"INTERNAL\"");
+        }
+
+        private void restartServerWithDeadline(Deadlines.Enforcement enforcement) {
+            server.stop();
+            HttpHandler conjureHandler = new ConjureExceptionHandler(
+                    _exchange -> {
+                        throw exception;
+                    },
+                    ConjureExceptions.INSTANCE);
+            server = Undertow.builder()
+                    .addHttpListener(12345, "localhost")
+                    .setHandler(new BlockingHandler(exchange -> {
+                        // Witchcraft's DeadlineHandler sets up deadline state the same way before endpoints run
+                        try (CloseableTracer ignored = CloseableTracer.startSpan("test")) {
+                            Deadlines.parseFromRequest(
+                                    Optional.of(Duration.ofMinutes(1)),
+                                    exchange,
+                                    NoDeadlineHeaders.INSTANCE,
+                                    enforcement);
+                            conjureHandler.handleRequest(exchange);
+                        }
+                    }))
+                    .build();
+            server.start();
+        }
+    }
+
+    private static final class TestClientTimeout extends RuntimeException implements ClientTimeout {}
+
+    private enum NoDeadlineHeaders implements Deadlines.RequestDecodingAdapter<HttpServerExchange> {
+        INSTANCE;
+
+        @Override
+        @Deprecated
+        public Optional<String> getFirstHeader(HttpServerExchange _exchange, String _headerName) {
+            return Optional.empty();
+        }
+
+        @Override
+        @Nullable
+        public String maybeFirstHeader(HttpServerExchange _exchange, String _headerName) {
+            return null;
+        }
     }
 
     @Test

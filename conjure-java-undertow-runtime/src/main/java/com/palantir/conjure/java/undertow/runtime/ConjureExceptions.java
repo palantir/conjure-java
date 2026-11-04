@@ -34,6 +34,8 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.deadlines.DeadlineExpiredReasons;
+import com.palantir.deadlines.Deadlines;
+import com.palantir.dialogue.ClientTimeout;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.SafeLoggable;
@@ -100,6 +102,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             frameworkException(exchange, frameworkException);
         } else if (throwable instanceof DeadlineExpiredException deadlineExpiredException) {
             deadlineExpiredException(exchange, deadlineExpiredException);
+        } else if (throwable instanceof ClientTimeout && hasEnforceableDeadline()) {
+            clientTimeout(exchange, throwable);
         } else if (throwable instanceof Error error) {
             error(exchange, error);
         } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
@@ -315,6 +319,22 @@ public enum ConjureExceptions implements ExceptionHandler {
         // writeResponse is called by UndertowDeadlineReasonResponseEncodingAdapter#setStatus
         DeadlineExpiredReasons.encodeToResponse(
                 exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
+    }
+
+    // A client timeout means this server gave up waiting on its own call to another service. When the request has a
+    // deadline, report that as an expired internal deadline instead of an internal error.
+    private static void clientTimeout(HttpServerExchange exchange, Throwable clientTimeout) {
+        DeadlineExpiredException expired = DeadlineExpiredException.internal();
+        expired.initCause(clientTimeout);
+        deadlineExpiredException(exchange, expired);
+    }
+
+    // Without deadline state (no Expect-Within header and no internal deadline), or with enforcement disabled, keep
+    // the 500 Default:Internal response, which has a body that clients without deadline support can read.
+    private static boolean hasEnforceableDeadline() {
+        return Deadlines.getEnforcement()
+                .map(enforcement -> enforcement != Deadlines.Enforcement.DISABLE)
+                .orElse(false);
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
