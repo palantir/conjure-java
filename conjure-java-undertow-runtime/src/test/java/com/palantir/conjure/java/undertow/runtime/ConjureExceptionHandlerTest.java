@@ -41,15 +41,12 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
-import com.palantir.deadlines.Deadlines;
 import com.palantir.dialogue.ClientTimeout;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.tracing.CloseableTracer;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -451,78 +448,74 @@ public final class ConjureExceptionHandlerTest {
     class ClientTimeouts {
 
         @Test
-        void reportsClientTimeoutAsInternalDeadlineExpiry() throws IOException {
-            restartServerWithDeadline(Deadlines.Enforcement.DEFER);
+        void reportsClientTimeoutAsDefaultTimeout() throws IOException {
             exception = new TestClientTimeout();
             HttpURLConnection connection = execute();
 
             assertThat(connection.getResponseCode()).isEqualTo(500);
-            assertThat(connection.getHeaderFields())
-                    .containsEntry("Deadline-Expired-Reason", ImmutableList.of("internal"));
-            assertThat(connection.getErrorStream()).isNull();
+            SerializableError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+            assertThat(error.errorCode()).isEqualTo("TIMEOUT");
+            assertThat(error.errorName()).isEqualTo("Default:Timeout");
+            assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isNull();
         }
 
         @Test
-        void reportsClientTimeoutAsInternalErrorWhenDeadlineEnforcementIsDisabled() throws IOException {
-            restartServerWithDeadline(Deadlines.Enforcement.DISABLE);
-            exception = new TestClientTimeout();
+        void forwardsDoNotRetryFromResponseTimeoutCause() throws IOException {
+            IOException timeout = new IOException("Read timed out");
+            timeout.addSuppressed(retriesExhaustedDiagnostic("do-not-retry"));
+            exception = new TestClientTimeout(timeout);
             HttpURLConnection connection = execute();
 
             assertThat(connection.getResponseCode()).isEqualTo(500);
-            assertThat(connection.getHeaderField("Deadline-Expired-Reason")).isNull();
-            assertThat(getErrorBody(connection)).contains("{\"errorCode\":\"INTERNAL\"");
+            assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo("do-not-retry");
         }
 
         @Test
-        void reportsClientTimeoutAsInternalErrorWhenRequestHasNoDeadline() throws IOException {
+        void forwardsDoNotRetryFromQueueTimeout() throws IOException {
             exception = new TestClientTimeout();
+            exception.addSuppressed(retriesExhaustedDiagnostic("do-not-retry"));
+            HttpURLConnection connection = execute();
+
+            assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo("do-not-retry");
+        }
+
+        @Test
+        void prefersDoNotRetryOverExhausted() throws IOException {
+            exception = QosException.unavailable();
+            exception.addSuppressed(retriesExhaustedDiagnostic("true"));
+            exception.addSuppressed(retriesExhaustedDiagnostic("do-not-retry"));
+            HttpURLConnection connection = execute();
+
+            assertThat(connection.getResponseCode()).isEqualTo(503);
+            assertThat(connection.getHeaderField("Dialogue-Retries-Exhausted")).isEqualTo("do-not-retry");
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"Default:Timeout", "Test:Timeout"})
+        void passesRemoteTimeoutThroughWithItsErrorInstanceId(String errorName) throws IOException {
+            SerializableError remoteError = SerializableError.forException(
+                    new ServiceException(ErrorType.create(Code.TIMEOUT, errorName), SafeArg.of("foo", "bar")));
+            exception = new RemoteException(remoteError, 500);
             HttpURLConnection connection = execute();
 
             assertThat(connection.getResponseCode()).isEqualTo(500);
-            assertThat(connection.getHeaderField("Deadline-Expired-Reason")).isNull();
-            assertThat(getErrorBody(connection)).contains("{\"errorCode\":\"INTERNAL\"");
+            SerializableError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+            assertThat(error.errorCode()).isEqualTo("TIMEOUT");
+            assertThat(error.errorName()).isEqualTo("Default:Timeout");
+            assertThat(error.errorInstanceId()).isEqualTo(remoteError.errorInstanceId());
+            assertThat(error.parameters()).isEmpty();
         }
 
-        private void restartServerWithDeadline(Deadlines.Enforcement enforcement) {
-            server.stop();
-            HttpHandler conjureHandler = new ConjureExceptionHandler(
-                    _exchange -> {
-                        throw exception;
-                    },
-                    ConjureExceptions.INSTANCE);
-            server = Undertow.builder()
-                    .addHttpListener(12345, "localhost")
-                    .setHandler(new BlockingHandler(exchange -> {
-                        // Witchcraft's DeadlineHandler sets up deadline state the same way before endpoints run
-                        try (CloseableTracer ignored = CloseableTracer.startSpan("test")) {
-                            Deadlines.parseFromRequest(
-                                    Optional.of(Duration.ofMinutes(1)),
-                                    exchange,
-                                    NoDeadlineHeaders.INSTANCE,
-                                    enforcement);
-                            conjureHandler.handleRequest(exchange);
-                        }
-                    }))
-                    .build();
-            server.start();
+        private static SafeRuntimeException retriesExhaustedDiagnostic(String value) {
+            return new SafeRuntimeException("Retries exhausted", SafeArg.of("Dialogue-Retries-Exhausted", value));
         }
     }
 
-    private static final class TestClientTimeout extends RuntimeException implements ClientTimeout {}
+    private static final class TestClientTimeout extends RuntimeException implements ClientTimeout {
+        TestClientTimeout() {}
 
-    private enum NoDeadlineHeaders implements Deadlines.RequestDecodingAdapter<HttpServerExchange> {
-        INSTANCE;
-
-        @Override
-        @Deprecated
-        public Optional<String> getFirstHeader(HttpServerExchange _exchange, String _headerName) {
-            return Optional.empty();
-        }
-
-        @Override
-        @Nullable
-        public String maybeFirstHeader(HttpServerExchange _exchange, String _headerName) {
-            return null;
+        TestClientTimeout(Throwable cause) {
+            super(cause);
         }
     }
 

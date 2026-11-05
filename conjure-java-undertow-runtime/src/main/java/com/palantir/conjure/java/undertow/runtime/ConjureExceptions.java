@@ -34,7 +34,6 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.deadlines.DeadlineExpiredException;
 import com.palantir.deadlines.DeadlineExpiredReasons;
-import com.palantir.deadlines.Deadlines;
 import com.palantir.dialogue.ClientTimeout;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
@@ -73,16 +72,20 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static final RateLimiter retryExhaustionHeaderInspectionFailure = RateLimiter.create(1);
 
     // Exhausted retries logic. We should expect Dialogue to add a SafeArg, with this name, on a suppressed exception
-    // when it has exhausted retries. The value is forwarded as a header
+    // when it has exhausted retries ("true") or when it chose not to retry a timeout ("do-not-retry"). The value is
+    // forwarded as a header.
     private static final String RETRIES_EXHAUSTED = "Dialogue-Retries-Exhausted";
     private static final HttpString RETRIES_EXHAUSTED_HEADER = new HttpString(RETRIES_EXHAUSTED);
+    private static final String EXHAUSTED = "true";
+    private static final String DO_NOT_RETRY = "do-not-retry";
 
     @SuppressWarnings("CyclomaticComplexity")
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
-        if (isRetriesExhausted(throwable)) {
-            exchange.getResponseHeaders().put(RETRIES_EXHAUSTED_HEADER, "true");
+        @Nullable String retriesExhausted = retriesExhausted(throwable);
+        if (retriesExhausted != null) {
+            exchange.getResponseHeaders().put(RETRIES_EXHAUSTED_HEADER, retriesExhausted);
         }
         if (throwable instanceof EndpointServiceException endpointServiceException) {
             endpointServiceException(exchange, endpointServiceException);
@@ -102,7 +105,7 @@ public enum ConjureExceptions implements ExceptionHandler {
             frameworkException(exchange, frameworkException);
         } else if (throwable instanceof DeadlineExpiredException deadlineExpiredException) {
             deadlineExpiredException(exchange, deadlineExpiredException);
-        } else if (throwable instanceof ClientTimeout && hasEnforceableDeadline()) {
+        } else if (throwable instanceof ClientTimeout) {
             clientTimeout(exchange, throwable);
         } else if (throwable instanceof Error error) {
             error(exchange, error);
@@ -123,43 +126,73 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Dialogue's ExceptionDeserializingErrorDecoder attaches response diagnostics to QosException,
     // RemoteException, and UnknownRemoteException.
     // RetryingChannel.handleThrowable attaches an exhaustion diagnostic directly to retryable
-    // IOExceptions when retries are exhausted.
-    private static boolean isRetriesExhausted(Throwable failure) {
+    // IOExceptions when retries are exhausted, and a do-not-retry diagnostic to timeouts it didn't retry: the
+    // IOException behind a response timeout, or a queue timeout.
+    // Returns the value to forward, preferring do-not-retry, or null if there is nothing to forward.
+    @Nullable
+    private static String retriesExhausted(Throwable failure) {
         try {
-            return hasRetriesExhaustedDiagnostic(failure);
+            return retriesExhaustedDiagnostic(failure);
         } catch (Throwable inspectionFailure) {
             if (retryExhaustionHeaderInspectionFailure.tryAcquire()) {
                 log.warn("Failed to inspect retry-exhaustion diagnostic", inspectionFailure);
             }
-            return false;
+            return null;
         }
     }
 
-    private static boolean hasRetriesExhaustedDiagnostic(Throwable failure) {
+    @Nullable
+    private static String retriesExhaustedDiagnostic(Throwable failure) {
+        @Nullable String found = null;
         @Nullable Throwable current = failure;
         for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
-            if (current instanceof QosException
-                    || current instanceof RemoteException
-                    || current instanceof UnknownRemoteException
-                    || current instanceof IOException) {
-                for (Throwable suppressed : current.getSuppressed()) {
-                    if (suppressed instanceof SafeLoggable loggable && hasRetriesExhaustedArg(loggable)) {
-                        return true;
-                    }
-                }
+            @Nullable
+            String value = mayCarryRetriesExhaustedDiagnostic(current) ? suppressedRetriesExhausted(current) : null;
+            if (DO_NOT_RETRY.equals(value)) {
+                return DO_NOT_RETRY;
+            } else if (value != null) {
+                found = value;
             }
             current = current.getCause();
         }
-        return false;
+        return found;
     }
 
-    private static boolean hasRetriesExhaustedArg(SafeLoggable loggable) {
-        for (Arg<?> arg : loggable.getArgs()) {
-            if (RETRIES_EXHAUSTED.equals(arg.getName()) && "true".equalsIgnoreCase(String.valueOf(arg.getValue()))) {
-                return true;
+    private static boolean mayCarryRetriesExhaustedDiagnostic(Throwable throwable) {
+        return throwable instanceof QosException
+                || throwable instanceof RemoteException
+                || throwable instanceof UnknownRemoteException
+                || throwable instanceof IOException
+                || throwable instanceof ClientTimeout;
+    }
+
+    @Nullable
+    private static String suppressedRetriesExhausted(Throwable throwable) {
+        @Nullable String found = null;
+        for (Throwable suppressed : throwable.getSuppressed()) {
+            @Nullable String value = suppressed instanceof SafeLoggable loggable ? retriesExhaustedArg(loggable) : null;
+            if (DO_NOT_RETRY.equals(value)) {
+                return DO_NOT_RETRY;
+            } else if (value != null) {
+                found = value;
             }
         }
-        return false;
+        return found;
+    }
+
+    @Nullable
+    private static String retriesExhaustedArg(SafeLoggable loggable) {
+        for (Arg<?> arg : loggable.getArgs()) {
+            if (RETRIES_EXHAUSTED.equals(arg.getName())) {
+                String value = String.valueOf(arg.getValue());
+                if (DO_NOT_RETRY.equalsIgnoreCase(value)) {
+                    return DO_NOT_RETRY;
+                } else if (EXHAUSTED.equalsIgnoreCase(value)) {
+                    return EXHAUSTED;
+                }
+            }
+        }
+        return null;
     }
 
     private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
@@ -277,6 +310,23 @@ public enum ConjureExceptions implements ExceptionHandler {
                     exchange,
                     Optional.of(ConjureError.fromRemoteException(remoteException)),
                     remoteException.getStatus());
+        } else if (ErrorType.Code.TIMEOUT
+                .name()
+                .equals(remoteException.getError().errorCode())) {
+            // A service below this one timed out. Keep reporting a timeout, with the same errorInstanceId, so every
+            // caller above can tell what happened and find the service that timed out.
+            log.warn(
+                    "Encountered a remote timeout. Propagating it as a timeout",
+                    SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
+                    SafeArg.of("errorName", remoteException.getError().errorName()),
+                    SafeArg.of("statusCode", remoteException.getStatus()),
+                    remoteException);
+
+            ServiceException exception = new ServiceException(ErrorType.TIMEOUT, remoteException);
+            writeResponse(
+                    exchange,
+                    Optional.of(ConjureError.fromServiceException(exception)),
+                    exception.getErrorType().httpErrorCode());
         } else {
             // log at WARN instead of ERROR because this indicates an issue in a remote server
             log.warn(
@@ -321,20 +371,15 @@ public enum ConjureExceptions implements ExceptionHandler {
                 exception, exchange, UndertowDeadlineReasonResponseEncodingAdapter.INSTANCE);
     }
 
-    // A client timeout means this server gave up waiting on its own call to another service. When the request has a
-    // deadline, report that as an expired internal deadline instead of an internal error.
+    // A client timeout means this server gave up waiting on its own call to another service. Report it as
+    // Default:Timeout rather than Default:Internal, so callers can tell it apart from a bug in this server.
     private static void clientTimeout(HttpServerExchange exchange, Throwable clientTimeout) {
-        DeadlineExpiredException expired = DeadlineExpiredException.internal();
-        expired.initCause(clientTimeout);
-        deadlineExpiredException(exchange, expired);
-    }
-
-    // Without deadline state (no Expect-Within header and no internal deadline), or with enforcement disabled, keep
-    // the 500 Default:Internal response, which has a body that clients without deadline support can read.
-    private static boolean hasEnforceableDeadline() {
-        return Deadlines.getEnforcement()
-                .map(enforcement -> enforcement != Deadlines.Enforcement.DISABLE)
-                .orElse(false);
+        ServiceException exception = new ServiceException(ErrorType.TIMEOUT, clientTimeout);
+        log(exception, clientTimeout, false);
+        writeResponse(
+                exchange,
+                Optional.of(ConjureError.fromServiceException(exception)),
+                exception.getErrorType().httpErrorCode());
     }
 
     private static void error(HttpServerExchange exchange, Error error) {
