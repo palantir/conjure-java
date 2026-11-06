@@ -84,4 +84,3 @@ tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureE
         check('Slf4jLogsafeArgs', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
     }
 }
-
