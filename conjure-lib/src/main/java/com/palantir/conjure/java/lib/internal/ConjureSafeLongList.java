@@ -16,70 +16,85 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
-import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.RandomAccess;
-import org.eclipse.collections.api.list.primitive.MutableLongList;
-import org.eclipse.collections.impl.utility.Iterate;
 
 /**
- * ConjureSafeLongList is a boxed list wrapper for the eclipse-collections LongArrayList. This handles boxing/unboxing
- * with SafeLongs, but stores the underlying longs densely in an long eclipse-collection.
+ * A boxed {@link java.util.List} wrapper over a dense primitive {@code long[]} array for {@link SafeLong} elements.
  */
-final class ConjureSafeLongList extends AbstractList<SafeLong> implements RandomAccess {
-    private final MutableLongList delegate;
+final class ConjureSafeLongList extends AbstractPrimitiveList<SafeLong, long[]> {
+    private static final long[] EMPTY = new long[0];
+    private static final ArrayOps<long[]> OPS = new ArrayOps<>() {
+        @Override
+        public int length(long[] array) {
+            return array.length;
+        }
 
-    ConjureSafeLongList(MutableLongList delegate) {
-        this.delegate = delegate;
+        @Override
+        public long[] copyOf(long[] array, int newLength) {
+            return Arrays.copyOf(array, newLength);
+        }
+    };
+
+    ConjureSafeLongList() {
+        this(new Storage<>(OPS, EMPTY, 0), false);
     }
 
-    @Override
-    public int size() {
-        return delegate.size();
+    ConjureSafeLongList(int initialCapacity) {
+        this(new Storage<>(OPS, initialCapacity == 0 ? EMPTY : new long[initialCapacity], 0), false);
     }
 
-    @Override
-    public void add(int index, SafeLong toAdd) {
-        delegate.addAtIndex(index, toAdd.longValue());
+    private ConjureSafeLongList(Storage<long[]> storage, boolean unmodifiable) {
+        super(storage, unmodifiable);
     }
 
     @Override
     public SafeLong get(int index) {
-        return SafeLong.of(delegate.get(index));
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends SafeLong> collection) {
-        long[] target = new long[collection.size()];
-        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.longValue());
-        return delegate.addAllAtIndex(index, target);
-    }
-
-    @Override
-    public SafeLong remove(int index) {
-        return SafeLong.of(delegate.removeAtIndex(index));
-    }
-
-    @Override
-    public void clear() {
-        delegate.clear();
+        storage().checkIndex(index);
+        return SafeLong.of(storage().items()[index]);
     }
 
     @Override
     public SafeLong set(int index, SafeLong element) {
-        return SafeLong.of(delegate.set(index, element.longValue()));
+        ensureMutable();
+        long value = element.longValue();
+        storage().checkIndex(index);
+        long[] items = storage().items();
+        long previous = items[index];
+        items[index] = value;
+        return SafeLong.of(previous);
+    }
+
+    @Override
+    public void add(int index, SafeLong toAdd) {
+        ensureMutable();
+        long value = toAdd.longValue();
+        storage().prepareInsertAt(index);
+        storage().items()[index] = value;
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends SafeLong> collection) {
+        ensureMutable();
+        long[] target = new long[collection.size()];
+        int idx = 0;
+        for (SafeLong each : collection) {
+            target[idx++] = each.longValue();
+        }
+        return storage().addAllAtIndex(index, target);
+    }
+
+    @Override
+    public SafeLong remove(int index) {
+        ensureMutable();
+        storage().checkIndex(index);
+        long previous = storage().items()[index];
+        storage().removeAt(index);
+        return SafeLong.of(previous);
     }
 
     ConjureSafeLongList asUnmodifiable() {
-        return new ConjureSafeLongList(delegate.asUnmodifiable());
-    }
-
-    // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
-    // This is a serialization optimization that avoids boxing, but does copy
-    @JsonValue
-    long[] jacksonSerialize() {
-        return delegate.toArray();
+        return isUnmodifiable() ? this : new ConjureSafeLongList(storage(), true);
     }
 }
