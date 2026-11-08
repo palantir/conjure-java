@@ -28,7 +28,6 @@ import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 
 // TODO(rfink): Consider async Jackson, see
@@ -72,7 +71,15 @@ public final class Encodings {
             ObjectWriter writer = mapper.writerFor(mapper.constructType(type.getType()));
             return (value, output) -> {
                 Preconditions.checkNotNull(value, "cannot serialize null value");
-                writer.writeValue(output, value);
+                try {
+                    writer.writeValue(output, value);
+                } catch (IOException e) {
+                    throw FrameworkException.ioFailure(
+                            "Failed to serialize and write response",
+                            e,
+                            SafeArg.of("contentType", getContentType()),
+                            SafeArg.of("type", type));
+                }
             };
         }
 
@@ -109,7 +116,7 @@ public final class Encodings {
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));
                 } catch (IOException e) {
-                    throw new SafeIoException(
+                    throw FrameworkException.ioFailure(
                             "Failed to deserialize request",
                             e,
                             SafeArg.of("contentType", getContentType()),
