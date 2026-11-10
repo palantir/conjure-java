@@ -291,6 +291,8 @@ types:
             type: integer
           result:
             type: integer
+          missingFields:
+            type: list<string>
       Union:
         union:
           foo: string
