@@ -1,4 +1,4 @@
-ch.qos.logback:* = 1.2.11
+ch.qos.logback:* = 1.6.6
 com.atlassian.commonmark:* = 0.12.1
 com.fasterxml.jackson.*:* = 2.22.4
 com.fasterxml.jackson.core:jackson-annotations = 2.22
