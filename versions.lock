@@ -150,7 +150,7 @@ jakarta.ws.rs:jakarta.ws.rs-api:4.0.0 (16 constraints: 64222106)
 
 joda-time:joda-time:2.15.1 (2 constraints: 691b1a71)
 
-org.apache.commons:commons-lang3:3.21.0 (3 constraints: f22113f7)
+org.apache.commons:commons-lang3:3.22.0 (3 constraints: f3216af7)
 
 org.apache.httpcomponents.client5:httpclient5:5.6.5 (3 constraints: fc392deb)
 
