@@ -26,7 +26,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.QosReasons;
 import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
-import com.palantir.conjure.java.api.errors.QosThrottleDetails;
+import com.palantir.conjure.java.api.errors.QosResponseBody;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
@@ -64,11 +64,11 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
     private static final int MAX_CAUSE_DEPTH = 100;
     // Exceptions should always be serialized using JSON
-    private static final Serializer<ConjureError> serializer =
-            new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
-
-    private static final Serializer<QosThrottleDetails> throttleDetailsSerializer =
-            new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
+    private static final ConjureBodySerDe jsonBodySerDe =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json()));
+    private static final Serializer<ConjureError> serializer = jsonBodySerDe.serializer(new TypeMarker<>() {});
+    private static final Serializer<QosResponseBody> qosBodySerializer =
+            jsonBodySerDe.serializer(new TypeMarker<>() {});
 
     // Log at most once every second
     private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
@@ -226,10 +226,10 @@ public enum ConjureExceptions implements ExceptionHandler {
             log.info("Quality-of-Service error handling request", qosException);
         }
 
-        Optional<QosThrottleDetails> details = qosException instanceof QosException.Throttle throttle
-                ? throttle.getThrottleDetails()
+        Optional<QosResponseBody> body = qosException instanceof QosException.Throttle throttle
+                ? throttle.getThrottleDetails().map(QosResponseBody::of)
                 : Optional.empty();
-        writeResponse(exchange, details, qosException.accept(QOS_EXCEPTION_STATUS_CODE), throttleDetailsSerializer);
+        writeResponse(exchange, body, qosException.accept(QOS_EXCEPTION_STATUS_CODE), qosBodySerializer);
     }
 
     /** Returns true if {@link QosException} provides additional metadata and should be logged at {@code info}. */
