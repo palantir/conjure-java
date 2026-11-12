@@ -559,32 +559,30 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testErrorParametersSerializedAsJson() {
         ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-        try {
-            exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON");
-        } catch (RemoteException e) {
-            assertThat(e.getError().parameters())
-                    .containsExactlyInAnyOrderEntriesOf(
-                            Map.of("serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
-            // Assert that error parameters can be re-serialized as JSON.
-            assertThat(e).isInstanceOfSatisfying(SerializableErrorProvider.class, errorProvider -> {
-                try {
-                    String serialized = objectMapper.writeValueAsString(
-                            errorProvider.error().parameters());
-                    assertThat(serialized)
-                            .isEqualTo("{\"serviceName\":\"my-service-string\",\"serviceDef\":\"VALUE\"}");
-                } catch (IOException exception) {
-                    throw new SafeUncheckedIoException("Failed to serialize parameters", exception);
-                }
-            });
-        }
+        assertThatThrownBy(() -> exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON"))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getError().parameters())
+                            .containsExactlyInAnyOrderEntriesOf(Map.of(
+                                    "serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
+                    // Assert that error parameters can be re-serialized as JSON.
+                    assertThat(e).isInstanceOfSatisfying(SerializableErrorProvider.class, errorProvider -> {
+                        try {
+                            String serialized = objectMapper.writeValueAsString(
+                                    errorProvider.error().parameters());
+                            assertThat(serialized)
+                                    .isEqualTo("{\"serviceName\":\"my-service-string\",\"serviceDef\":\"VALUE\"}");
+                        } catch (IOException exception) {
+                            throw new SafeUncheckedIoException("Failed to serialize parameters", exception);
+                        }
+                    });
+                });
 
-        try {
-            exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING");
-        } catch (RemoteException e) {
-            assertThat(e.getError().parameters())
-                    .containsExactlyInAnyOrderEntriesOf(
-                            Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]"));
-        }
+        assertThatThrownBy(() -> exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING"))
+                .isInstanceOfSatisfying(
+                        RemoteException.class,
+                        e -> assertThat(e.getError().parameters())
+                                .containsExactlyInAnyOrderEntriesOf(
+                                        Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]")));
     }
 
     @Test
