@@ -322,6 +322,61 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
+    public void handlesPropagatingServiceException() throws IOException {
+        exception = new ServiceException(
+                ErrorType.createPropagating(Code.CUSTOM_CLIENT, "Test:QuotaExceeded"), SafeArg.of("limit", 5));
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(400);
+        ConjureError error = CLIENT_JSON_MAPPER.readValue(getErrorBody(connection), ConjureError.class);
+        assertThat(error.errorName()).isEqualTo("Test:QuotaExceeded");
+        assertThat(error.parameters()).containsEntry("limit", "5");
+        assertThat(error.propagates()).isTrue();
+    }
+
+    @Test
+    public void handlesPropagatingRemoteException() throws IOException {
+        SerializableError remoteError = SerializableError.forException(new ServiceException(
+                ErrorType.createPropagating(Code.CUSTOM_CLIENT, "Test:QuotaExceeded"), SafeArg.of("limit", 5)));
+        exception = new RemoteException(remoteError, 400);
+        HttpURLConnection connection = execute();
+
+        // Forwards the remote error unchanged, including its args, and it still propagates
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(remoteError, stream);
+
+        assertThat(connection.getResponseCode()).isEqualTo(400);
+        assertThat(getErrorBody(connection))
+                .contains("\"propagates\":true")
+                .isEqualTo(stream.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void doesNotPropagateRemoteServerErrors() throws IOException {
+        // ErrorType doesn't allow server errors to propagate, but a remote server might still claim to
+        SerializableError remoteError = SerializableError.builder()
+                .errorCode("CUSTOM_SERVER")
+                .errorName("Test:Broken")
+                .errorInstanceId("00000000-0000-4000-8000-000000000001")
+                .putParameters("limit", "5")
+                .propagates(true)
+                .build();
+        exception = new RemoteException(remoteError, 500);
+        HttpURLConnection connection = execute();
+
+        SerializableError expectedPropagatedError = SerializableError.builder()
+                .errorCode("INTERNAL")
+                .errorName("Default:Internal")
+                .errorInstanceId("00000000-0000-4000-8000-000000000001")
+                .build();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
+
+        assertThat(connection.getResponseCode()).isEqualTo(500);
+        assertThat(getErrorBody(connection)).isEqualTo(stream.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
     public void handlesQosExceptionThrottleWithoutDuration() throws IOException {
         exception = QosException.throttle();
         HttpURLConnection connection = execute();

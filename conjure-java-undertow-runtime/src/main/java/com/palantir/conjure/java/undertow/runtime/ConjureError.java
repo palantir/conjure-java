@@ -16,7 +16,10 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.EndpointServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -51,12 +54,17 @@ import java.util.OptionalLong;
  *                  service's API surface.
  * @param errorInstanceId errorInstanceId A unique identifier for (this instance of) this error.
  * @param parameters params A list of parameters providing additional context about the error.
+ * @param propagates Whether servers that receive this error from a service they call return it to their own callers.
+ *                   See {@link ErrorType#propagates()}. Only serialized when true.
  */
 record ConjureError(
         @JsonProperty("errorCode") String errorCode,
         @JsonProperty("errorName") String errorName,
         @JsonProperty("errorInstanceId") String errorInstanceId,
-        @JsonProperty("parameters") Map<String, Object> parameters) {
+        @JsonProperty("parameters") Map<String, Object> parameters,
+
+        @JsonProperty("propagates") @JsonInclude(JsonInclude.Include.NON_DEFAULT) @JsonSetter(nulls = Nulls.AS_EMPTY)
+        boolean propagates) {
 
     ConjureError {
         Preconditions.checkNotNull(errorCode, "errorCode cannot be null");
@@ -71,7 +79,8 @@ record ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
                 exception.getErrorInstanceId(),
-                parameters);
+                parameters,
+                exception.getErrorType().propagates());
     }
 
     static ConjureError fromEndpointServiceException(EndpointServiceException exception) {
@@ -80,7 +89,8 @@ record ConjureError(
                 exception.getErrorType().code().name(),
                 exception.getErrorType().name(),
                 exception.getErrorInstanceId(),
-                parameters);
+                parameters,
+                exception.getErrorType().propagates());
     }
 
     static ConjureError fromServiceException(ServiceException exception) {
@@ -89,7 +99,12 @@ record ConjureError(
             parameters.put(arg.getName(), Objects.toString(arg.getValue()));
         }
         ErrorType errorType = exception.getErrorType();
-        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
+        return new ConjureError(
+                errorType.code().name(),
+                errorType.name(),
+                exception.getErrorInstanceId(),
+                parameters,
+                errorType.propagates());
     }
 
     /**
@@ -100,7 +115,12 @@ record ConjureError(
     static ConjureError fromServiceExceptionWithJsonSerializedParameterValues(ServiceException exception) {
         Map<String, Object> parameters = getParametersFromArgs(exception.getArgs());
         ErrorType errorType = exception.getErrorType();
-        return new ConjureError(errorType.code().name(), errorType.name(), exception.getErrorInstanceId(), parameters);
+        return new ConjureError(
+                errorType.code().name(),
+                errorType.name(),
+                exception.getErrorInstanceId(),
+                parameters,
+                errorType.propagates());
     }
 
     /**
@@ -112,7 +132,23 @@ record ConjureError(
      */
     static ConjureError fromRemoteException(RemoteException exception) {
         SerializableError error = exception.getError();
-        return new ConjureError(error.errorCode(), error.errorName(), error.errorInstanceId(), Collections.emptyMap());
+        return new ConjureError(
+                error.errorCode(), error.errorName(), error.errorInstanceId(), Collections.emptyMap(), false);
+    }
+
+    /**
+     * Returns the error of a {@link RemoteException} that {@link SerializableError#propagates() propagates}, unchanged:
+     * unlike {@link #fromRemoteException}, it keeps the parameters, and it still propagates, so the next server
+     * forwards it too.
+     */
+    static ConjureError fromPropagatingRemoteException(RemoteException exception) {
+        SerializableError error = exception.getError();
+        return new ConjureError(
+                error.errorCode(),
+                error.errorName(),
+                error.errorInstanceId(),
+                new HashMap<>(error.parameters()),
+                error.propagates());
     }
 
     private static boolean shouldIncludeArgInParameters(Arg<?> arg) {
