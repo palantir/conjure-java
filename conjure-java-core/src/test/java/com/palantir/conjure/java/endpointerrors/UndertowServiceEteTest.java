@@ -17,12 +17,11 @@
 package com.palantir.conjure.java.endpointerrors;
 
 import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
+import static com.palantir.conjure.java.api.testing.Assertions.assertThatRemoteExceptionThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.TestBase;
-import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.tokens.auth.AuthHeader;
@@ -79,9 +78,9 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void test_endpoint_error_utility() {
-        assertThatThrownBy(() ->
+        assertThatRemoteExceptionThrownBy(() ->
                         errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("invalidArgument")))
-                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                .satisfies(e -> {
                     TestBasicErrorError error = ErrorServiceBlocking.TestBasicErrorError.from(e);
                     assertThat(error)
                             .isInstanceOfSatisfying(TestBasicErrorError.InvalidArgument.class, invalidArgument -> {
