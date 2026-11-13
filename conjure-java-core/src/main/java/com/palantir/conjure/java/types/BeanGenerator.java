@@ -258,8 +258,7 @@ public final class BeanGenerator {
 
             builder.addParameter(spec.type(), spec.name());
 
-            // Collection and Map types not copied in constructor for performance. This assumes that the constructor
-            // is private and necessarily called from the builder, which does its own defensive copying.
+            // The builder owns its collections, so the private constructor can wrap them without copying.
             if (field.conjureDef().getType().accept(TypeVisitor.IS_LIST)) {
                 // TODO(melliot): contribute a fix to JavaPoet that parses $T correctly for a JavaPoet FieldSpec
                 body.addStatement("this.$1N = $2T.unmodifiableList($1N)", spec, ConjureCollections.class);

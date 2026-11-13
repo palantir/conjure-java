@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -23,29 +25,8 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true,
-        defaultImpl = UnionReservedNames.Unknown.class)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = UnionReservedNames.Known_.class, name = "known"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Unknown_.class, name = "unknown"),
-    @JsonSubTypes.Type(value = UnionReservedNames.If.class, name = "if"),
-    @JsonSubTypes.Type(value = UnionReservedNames.New.class, name = "new"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Interface.class, name = "interface"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Void.class, name = "void"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Return.class, name = "return"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Private.class, name = "private"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Public.class, name = "public"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Int.class, name = "int"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Import.class, name = "import"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Final.class, name = "final"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Throws.class, name = "throws"),
-    @JsonSubTypes.Type(value = UnionReservedNames.Static.class, name = "static"),
-    @JsonSubTypes.Type(value = UnionReservedNames.UnionReservedNames_.class, name = "unionReservedNames")
-})
+@JsonDeserialize(using = UnionReservedNames.Deserializer.class)
+@JsonSerialize(using = ConjureJacksonSupport.UnionSerializer.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract sealed class UnionReservedNames
         permits UnionReservedNames.Known_,
@@ -62,6 +43,7 @@ public abstract sealed class UnionReservedNames
                 UnionReservedNames.Final,
                 UnionReservedNames.Throws,
                 UnionReservedNames.Static,
+                UnionReservedNames.None,
                 UnionReservedNames.UnionReservedNames_,
                 UnionReservedNames.Unknown {
     public static UnionReservedNames known(String value) {
@@ -120,6 +102,10 @@ public abstract sealed class UnionReservedNames
         return new Static(value);
     }
 
+    public static UnionReservedNames none(String value) {
+        return new None(value);
+    }
+
     public static UnionReservedNames unionReservedNames(String value) {
         return new UnionReservedNames_(value);
     }
@@ -168,6 +154,9 @@ public abstract sealed class UnionReservedNames
             case "static":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: static");
+            case "none":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: none");
             case "unionReservedNames":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: unionReservedNames");
@@ -203,9 +192,14 @@ public abstract sealed class UnionReservedNames
                     Final,
                     Throws,
                     Static,
+                    None,
                     UnionReservedNames_ {}
 
     @JsonTypeName("known")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Known_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -251,6 +245,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("unknown")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -296,6 +294,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("if")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class If extends UnionReservedNames implements Known {
         private final String value;
 
@@ -341,6 +343,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("new")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class New extends UnionReservedNames implements Known {
         private final String value;
 
@@ -386,6 +392,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("interface")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Interface extends UnionReservedNames implements Known {
         private final String value;
 
@@ -431,6 +441,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("void")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Void extends UnionReservedNames implements Known {
         private final String value;
 
@@ -476,6 +490,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("return")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Return extends UnionReservedNames implements Known {
         private final String value;
 
@@ -521,6 +539,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("private")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Private extends UnionReservedNames implements Known {
         private final String value;
 
@@ -566,6 +588,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("public")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Public extends UnionReservedNames implements Known {
         private final String value;
 
@@ -611,6 +637,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("int")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Int extends UnionReservedNames implements Known {
         private final String value;
 
@@ -656,6 +686,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("import")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Import extends UnionReservedNames implements Known {
         private final String value;
 
@@ -701,6 +735,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("final")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Final extends UnionReservedNames implements Known {
         private final String value;
 
@@ -746,6 +784,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("throws")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Throws extends UnionReservedNames implements Known {
         private final String value;
 
@@ -791,6 +833,10 @@ public abstract sealed class UnionReservedNames
     }
 
     @JsonTypeName("static")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Static extends UnionReservedNames implements Known {
         private final String value;
 
@@ -835,7 +881,60 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    @JsonTypeName("none")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
+    public static final class None extends UnionReservedNames implements Known {
+        private final String value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private None(@JsonSetter("none") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "none cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(index = 0)
+        private String type() {
+            return "none";
+        }
+
+        @JsonProperty("none")
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitNone(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof None && equalTo((None) other));
+        }
+
+        private boolean equalTo(None other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "UnionReservedNames{value: NoneWrapper{value: " + value + "}}";
+        }
+    }
+
     @JsonTypeName("unionReservedNames")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class UnionReservedNames_ extends UnionReservedNames implements Known {
         private final String value;
 
@@ -880,6 +979,9 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    @JsonPropertyOrder("type")
+    @JsonDeserialize
+    @JsonSerialize
     public static final class Unknown extends UnionReservedNames {
         private final String type;
 
@@ -940,6 +1042,31 @@ public abstract sealed class UnionReservedNames
         }
     }
 
+    static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<UnionReservedNames> {
+        Deserializer() {
+            super(
+                    UnionReservedNames.class,
+                    Map.ofEntries(
+                            Map.entry("known", UnionReservedNames.Known_.class),
+                            Map.entry("unknown", UnionReservedNames.Unknown_.class),
+                            Map.entry("if", UnionReservedNames.If.class),
+                            Map.entry("new", UnionReservedNames.New.class),
+                            Map.entry("interface", UnionReservedNames.Interface.class),
+                            Map.entry("void", UnionReservedNames.Void.class),
+                            Map.entry("return", UnionReservedNames.Return.class),
+                            Map.entry("private", UnionReservedNames.Private.class),
+                            Map.entry("public", UnionReservedNames.Public.class),
+                            Map.entry("int", UnionReservedNames.Int.class),
+                            Map.entry("import", UnionReservedNames.Import.class),
+                            Map.entry("final", UnionReservedNames.Final.class),
+                            Map.entry("throws", UnionReservedNames.Throws.class),
+                            Map.entry("static", UnionReservedNames.Static.class),
+                            Map.entry("none", UnionReservedNames.None.class),
+                            Map.entry("unionReservedNames", UnionReservedNames.UnionReservedNames_.class)),
+                    UnionReservedNames.Unknown::new);
+        }
+    }
+
     public interface Visitor<T> {
         T visitKnown(String value);
 
@@ -969,6 +1096,8 @@ public abstract sealed class UnionReservedNames
 
         T visitStatic(String value);
 
+        T visitNone(String value);
+
         T visitUnionReservedNames(String value);
 
         T visitUnknown(@Safe String unknownType, Object unknownValue);
@@ -986,6 +1115,7 @@ public abstract sealed class UnionReservedNames
                     InterfaceStageVisitorBuilder<T>,
                     KnownStageVisitorBuilder<T>,
                     NewStageVisitorBuilder<T>,
+                    NoneStageVisitorBuilder<T>,
                     PrivateStageVisitorBuilder<T>,
                     PublicStageVisitorBuilder<T>,
                     ReturnStageVisitorBuilder<T>,
@@ -1009,6 +1139,8 @@ public abstract sealed class UnionReservedNames
         private Function<String, T> knownVisitor;
 
         private Function<String, T> newVisitor;
+
+        private Function<String, T> noneVisitor;
 
         private Function<String, T> privateVisitor;
 
@@ -1071,9 +1203,16 @@ public abstract sealed class UnionReservedNames
         }
 
         @Override
-        public PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor) {
+        public NoneStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor) {
             Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
             this.newVisitor = newVisitor;
+            return this;
+        }
+
+        @Override
+        public PrivateStageVisitorBuilder<T> none(@Nonnull Function<String, T> noneVisitor) {
+            Preconditions.checkNotNull(noneVisitor, "noneVisitor cannot be null");
+            this.noneVisitor = noneVisitor;
             return this;
         }
 
@@ -1166,6 +1305,7 @@ public abstract sealed class UnionReservedNames
             final Function<String, T> interfaceVisitor = this.interfaceVisitor;
             final Function<String, T> knownVisitor = this.knownVisitor;
             final Function<String, T> newVisitor = this.newVisitor;
+            final Function<String, T> noneVisitor = this.noneVisitor;
             final Function<String, T> privateVisitor = this.privateVisitor;
             final Function<String, T> publicVisitor = this.publicVisitor;
             final Function<String, T> returnVisitor = this.returnVisitor;
@@ -1209,6 +1349,11 @@ public abstract sealed class UnionReservedNames
                 @Override
                 public T visitNew(String value) {
                     return newVisitor.apply(value);
+                }
+
+                @Override
+                public T visitNone(String value) {
+                    return noneVisitor.apply(value);
                 }
 
                 @Override
@@ -1284,7 +1429,11 @@ public abstract sealed class UnionReservedNames
     }
 
     public interface NewStageVisitorBuilder<T> {
-        PrivateStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor);
+        NoneStageVisitorBuilder<T> new_(@Nonnull Function<String, T> newVisitor);
+    }
+
+    public interface NoneStageVisitorBuilder<T> {
+        PrivateStageVisitorBuilder<T> none(@Nonnull Function<String, T> noneVisitor);
     }
 
     public interface PrivateStageVisitorBuilder<T> {
