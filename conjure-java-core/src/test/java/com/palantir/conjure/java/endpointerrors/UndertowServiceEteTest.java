@@ -18,6 +18,7 @@ package com.palantir.conjure.java.endpointerrors;
 
 import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.TestBase;
@@ -78,16 +79,25 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void test_endpoint_error_utility() {
-        try {
-            errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("invalidArgument"));
-        } catch (RemoteException e) {
-            TestBasicErrorError error = ErrorServiceBlocking.TestBasicErrorError.from(e);
-            assertThat(error).isInstanceOfSatisfying(TestBasicErrorError.InvalidArgument.class, invalidArgument -> {
-                assertThat(invalidArgument.exception().error().parameters().field())
-                        .isEqualTo("field");
-                assertThat(invalidArgument.exception().error().parameters().value())
-                        .isEqualTo("value");
-            });
-        }
+        assertThatThrownBy(() ->
+                        errorServiceClient.testMultipleErrorsAndPackages(AUTH_HEADER, Optional.of("invalidArgument")))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    TestBasicErrorError error = ErrorServiceBlocking.TestBasicErrorError.from(e);
+                    assertThat(error)
+                            .isInstanceOfSatisfying(TestBasicErrorError.InvalidArgument.class, invalidArgument -> {
+                                assertThat(invalidArgument
+                                                .exception()
+                                                .error()
+                                                .parameters()
+                                                .field())
+                                        .isEqualTo("field");
+                                assertThat(invalidArgument
+                                                .exception()
+                                                .error()
+                                                .parameters()
+                                                .value())
+                                        .isEqualTo("value");
+                            });
+                });
     }
 }
