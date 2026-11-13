@@ -37,6 +37,7 @@ import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
@@ -63,6 +64,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
@@ -123,12 +126,7 @@ public final class BeanGenerator {
                 typeBuilder.addMethod(MethodSpecs.createHashCode(poetFields));
             }
 
-            typeBuilder.addMethod(MethodSpecs.createToString(
-                            prefixedName.getName(),
-                            fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList()))
-                    .toBuilder()
-                    .addAnnotations(safety)
-                    .build());
+            addToStringMethods(typeBuilder, prefixedName, fields, safety, safetyEvaluator, options);
 
             // If the `preferObjectBuilders` is set, do not create a static factory method. The object is guaranteed to
             // have at least one field here.
@@ -188,6 +186,34 @@ public final class BeanGenerator {
                 .build();
     }
 
+    private static void addToStringMethods(
+            TypeSpec.Builder typeBuilder,
+            com.palantir.conjure.spec.TypeName prefixedName,
+            ImmutableList<EnrichedField> fields,
+            ImmutableList<AnnotationSpec> safety,
+            SafetyEvaluator safetyEvaluator,
+            Options options) {
+        List<FieldName> allFieldNames =
+                fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList());
+        Set<FieldName> redactedFieldNames = options.redactToStringDoNotLog()
+                ? fields.stream()
+                        .filter(field -> safetyEvaluator
+                                .getUsageTimeSafety(field.conjureDef())
+                                .equals(Optional.of(LogSafety.DO_NOT_LOG)))
+                        .map(EnrichedField::fieldName)
+                        .collect(Collectors.toUnmodifiableSet())
+                : Set.of();
+        typeBuilder.addMethod(
+                MethodSpecs.createToString(prefixedName.getName(), allFieldNames, redactedFieldNames).toBuilder()
+                        .addAnnotations(safety)
+                        .build());
+        if (options.redactToStringDoNotLog()) {
+            typeBuilder.addMethod(MethodSpecs.createDangerousToString(prefixedName.getName(), allFieldNames).toBuilder()
+                    .addAnnotations(safety)
+                    .build());
+        }
+    }
+
     private static void addEmptyBean(
             TypeSpec.Builder typeBuilder,
             com.palantir.conjure.spec.TypeName prefixedName,
@@ -199,6 +225,13 @@ public final class BeanGenerator {
         typeBuilder.addMethod(MethodSpecs.createToString(prefixedName.getName(), Collections.emptyList()).toBuilder()
                 .addAnnotations(safety)
                 .build());
+
+        if (options.redactToStringDoNotLog()) {
+            typeBuilder.addMethod(
+                    MethodSpecs.createDangerousToString(prefixedName.getName(), Collections.emptyList()).toBuilder()
+                            .addAnnotations(safety)
+                            .build());
+        }
 
         typeBuilder.addMethod(createStaticFactoryMethodForEmptyBean(objectClass));
 
