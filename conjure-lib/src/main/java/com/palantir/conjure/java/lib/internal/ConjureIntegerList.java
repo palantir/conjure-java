@@ -16,80 +16,95 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.RandomAccess;
-import org.eclipse.collections.api.list.primitive.MutableIntList;
-import org.eclipse.collections.impl.utility.Iterate;
 
 /**
- * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 13,
- * a BoxedMutableIntList was released. However, there is an issue where MutableIntList does not implement subList.
- * https://github.com/eclipse-collections/eclipse-collections/issues/1053
+ * A boxed {@link java.util.List} wrapper over a dense primitive {@code int[]} array.
  */
-final class ConjureIntegerList extends AbstractList<Integer> implements RandomAccess {
-    private final MutableIntList delegate;
+final class ConjureIntegerList extends AbstractPrimitiveList<Integer, int[]> {
+    private static final int[] EMPTY = new int[0];
+    private static final ArrayOps<int[]> OPS = new ArrayOps<>() {
+        @Override
+        public int length(int[] array) {
+            return array.length;
+        }
 
-    ConjureIntegerList(MutableIntList delegate) {
-        this.delegate = delegate;
+        @Override
+        public int[] copyOf(int[] array, int newLength) {
+            return Arrays.copyOf(array, newLength);
+        }
+    };
+
+    ConjureIntegerList() {
+        this(new Storage<>(OPS, EMPTY, 0), false);
     }
 
-    @Override
-    public int size() {
-        return delegate.size();
+    ConjureIntegerList(int initialCapacity) {
+        this(new Storage<>(OPS, initialCapacity == 0 ? EMPTY : new int[initialCapacity], 0), false);
     }
 
-    @Override
-    public void add(int index, Integer toAdd) {
-        delegate.addAtIndex(index, toAdd);
+    ConjureIntegerList(int[] elements) {
+        this(new Storage<>(OPS, elements, elements.length), false);
     }
 
-    // Primitive optimized overload
-    void add(int toAdd) {
-        this.delegate.add(toAdd);
+    private ConjureIntegerList(Storage<int[]> storage, boolean unmodifiable) {
+        super(storage, unmodifiable);
     }
 
     @Override
     public Integer get(int index) {
-        return delegate.get(index);
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends Integer> collection) {
-        int[] target = new int[collection.size()];
-        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.intValue());
-        return delegate.addAllAtIndex(index, target);
-    }
-
-    // Primitive optimized overload
-    void addAll(int[] source) {
-        this.delegate.addAll(source);
-    }
-
-    @Override
-    public Integer remove(int index) {
-        return delegate.removeAtIndex(index);
-    }
-
-    @Override
-    public void clear() {
-        delegate.clear();
+        storage().checkIndex(index);
+        return storage().items()[index];
     }
 
     @Override
     public Integer set(int index, Integer element) {
-        return delegate.set(index, element);
+        ensureMutable();
+        int value = element;
+        storage().checkIndex(index);
+        int[] items = storage().items();
+        int previous = items[index];
+        items[index] = value;
+        return previous;
+    }
+
+    @Override
+    public void add(int index, Integer toAdd) {
+        ensureMutable();
+        int value = toAdd;
+        storage().prepareInsertAt(index);
+        storage().items()[index] = value;
+    }
+
+    // Primitive optimized overload
+    void add(int toAdd) {
+        ensureMutable();
+        int idx = storage().prepareAdd();
+        storage().items()[idx] = toAdd;
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Integer> collection) {
+        ensureMutable();
+        int[] target = new int[collection.size()];
+        int idx = 0;
+        for (Integer each : collection) {
+            target[idx++] = each;
+        }
+        return storage().addAllAtIndex(index, target);
+    }
+
+    @Override
+    public Integer remove(int index) {
+        ensureMutable();
+        storage().checkIndex(index);
+        int previous = storage().items()[index];
+        storage().removeAt(index);
+        return previous;
     }
 
     ConjureIntegerList asUnmodifiable() {
-        return new ConjureIntegerList(delegate.asUnmodifiable());
-    }
-
-    // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
-    // This is a serialization optimization that avoids boxing, but does copy
-    @JsonValue
-    int[] jacksonSerialize() {
-        return delegate.toArray();
+        return isUnmodifiable() ? this : new ConjureIntegerList(storage(), true);
     }
 }
