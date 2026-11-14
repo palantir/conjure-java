@@ -345,22 +345,28 @@ public final class BeanGenerator {
         MethodSpec.Builder builder =
                 MethodSpec.methodBuilder("validateFields").addModifiers(Modifier.PRIVATE, Modifier.STATIC);
 
-        builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
+        // A field named 'missingFields' is passed in as a parameter that the local variable must not redeclare.
+        String missingFields =
+                fields.stream().anyMatch(field -> field.poetSpec().name().equals("missingFields"))
+                        ? "missingFields_"
+                        : "missingFields";
+        builder.addStatement("$T $N = null", ParameterizedTypeName.get(List.class, String.class), missingFields);
         for (EnrichedField field : fields) {
             FieldSpec spec = field.poetSpec();
             builder.addParameter(ParameterSpec.builder(spec.type(), spec.name()).build());
             builder.addStatement(
-                    "missingFields = addFieldIfMissing(missingFields, $N, $S)",
+                    "$1N = addFieldIfMissing($1N, $2N, $3S)",
+                    missingFields,
                     spec,
                     field.fieldName().get());
         }
 
-        builder.beginControlFlow("if (missingFields != null)")
+        builder.beginControlFlow("if ($N != null)", missingFields)
                 .addStatement(
-                        "throw new $T(\"Some required fields have not been set\","
-                                + " $T.of(\"missingFields\", missingFields))",
+                        "throw new $T(\"Some required fields have not been set\", $T.of(\"missingFields\", $N))",
                         SafeIllegalArgumentException.class,
-                        SafeArg.class)
+                        SafeArg.class,
+                        missingFields)
                 .endControlFlow();
         return builder.build();
     }
