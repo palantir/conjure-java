@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
 import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
+import static com.palantir.conjure.java.api.testing.Assertions.assertThatRemoteExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -492,14 +493,13 @@ public final class UndertowServiceEteTest extends TestBase {
 
         byte[] data = new byte[chunkSize];
         ThreadLocalRandom.current().nextBytes(data);
-        assertThatThrownBy(() -> binaryClient.postBinaryThrows(
+        assertThatRemoteExceptionThrownBy(() -> binaryClient.postBinaryThrows(
                         AuthHeader.valueOf("authHeader"), bytesExpected, (OutputStream sink) -> {
                             for (int i = 0; i < chunksToSend; i++) {
                                 sink.write(data);
                             }
                         }))
-                .isInstanceOfSatisfying(
-                        RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
+                .hasStatus(400);
     }
 
     @Test
@@ -549,18 +549,17 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testListOfNull() {
-        assertThatThrownBy(() ->
+        assertThatRemoteExceptionThrownBy(() ->
                         client.receiveListOfStrings(AuthHeader.valueOf("authHeader"), Collections.singletonList(null)))
-                .isInstanceOfSatisfying(RemoteException.class, re -> {
-                    assertThat(re.getStatus()).isEqualTo(422);
-                });
+                .hasStatus(422);
     }
 
     @Test
     public void testErrorParametersSerializedAsJson() {
         ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-        assertThatThrownBy(() -> exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON"))
-                .isInstanceOfSatisfying(RemoteException.class, e -> {
+        assertThatRemoteExceptionThrownBy(
+                        () -> exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "JSON"))
+                .satisfies(e -> {
                     assertThat(e.getError().parameters())
                             .containsExactlyInAnyOrderEntriesOf(Map.of(
                                     "serviceName", "my-service-string", "serviceDef", SimpleEnum.VALUE.toString()));
@@ -577,12 +576,11 @@ public final class UndertowServiceEteTest extends TestBase {
                     });
                 });
 
-        assertThatThrownBy(() -> exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING"))
-                .isInstanceOfSatisfying(
-                        RemoteException.class,
-                        e -> assertThat(e.getError().parameters())
-                                .containsExactlyInAnyOrderEntriesOf(
-                                        Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]")));
+        assertThatRemoteExceptionThrownBy(
+                        () -> exceptionThrowingClient.jsonErrorsHeader(AuthHeader.valueOf("authHeader"), "TOSTRING"))
+                .satisfies(e -> assertThat(e.getError().parameters())
+                        .containsExactlyInAnyOrderEntriesOf(
+                                Map.of("serviceName", "my-service-string", "serviceDef", "Optional[VALUE]")));
     }
 
     @Test

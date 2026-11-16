@@ -71,6 +71,10 @@ dependencies {
     testImplementation 'com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider'
     testImplementation 'com.palantir.conjure.java.api:service-config'
     testImplementation 'com.palantir.conjure.java.api:ssl-config'
+    testImplementation 'com.palantir.conjure.java.api:test-utils', {
+        // These tests don't use mockito, which test-utils exposes as an api dependency.
+        exclude group: 'org.mockito'
+    }
     testImplementation 'com.palantir.conjure.java.runtime:client-config'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
