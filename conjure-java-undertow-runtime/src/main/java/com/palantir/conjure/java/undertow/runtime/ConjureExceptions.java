@@ -226,8 +226,8 @@ public enum ConjureExceptions implements ExceptionHandler {
             log.info("Quality-of-Service error handling request", qosException);
         }
 
-        Optional<QosResponseBody> body = qosException instanceof QosException.Throttle throttle
-                ? throttle.getThrottleDetails().map(QosResponseBody::of)
+        Optional<QosResponseBody> body = qosException instanceof QosException.DetailedThrottle detailed
+                ? Optional.of(QosResponseBody.of(detailed.getThrottleDetails()))
                 : Optional.empty();
         writeResponse(exchange, body, qosException.accept(QOS_EXCEPTION_STATUS_CODE), qosBodySerializer);
     }

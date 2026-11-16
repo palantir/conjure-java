@@ -345,11 +345,10 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handlesQosExceptionThrottleWithDetails() throws IOException {
-        exception = QosException.throttleBuilder()
-                .reason(QosReason.of("quota"))
-                .details(QosThrottleDetails.builder()
-                        .debugMessage("Quota exceeded")
+        exception = QosException.DetailedThrottle.builder(QosThrottleDetails.builder()
+                        .userMessage("Quota exceeded")
                         .build())
+                .reason(QosReason.of("quota"))
                 .retryAfter(Duration.ofSeconds(3))
                 .build();
         HttpURLConnection connection = execute();
@@ -357,7 +356,7 @@ public final class ConjureExceptionHandlerTest {
         assertThat(connection.getResponseCode()).isEqualTo(429);
         assertThat(connection.getHeaderFields()).containsEntry("Retry-After", ImmutableList.of("3"));
         assertThat(connection.getContentType()).startsWith("application/json");
-        assertThat(getErrorBody(connection)).isEqualTo("{\"qosDetails\":{\"debugMessage\":\"Quota exceeded\"}}");
+        assertThat(getErrorBody(connection)).isEqualTo("{\"qosDetails\":{\"userMessage\":\"Quota exceeded\"}}");
     }
 
     @Test
