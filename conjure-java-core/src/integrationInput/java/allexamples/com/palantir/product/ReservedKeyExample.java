@@ -2,8 +2,10 @@ package allexamples.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -28,6 +30,8 @@ public final class ReservedKeyExample {
 
     private final int result;
 
+    private final List<String> missingFields;
+
     private int memoizedHashCode;
 
     private ReservedKeyExample(
@@ -36,14 +40,16 @@ public final class ReservedKeyExample {
             String fieldNameWithDashes,
             int primitveFieldNameWithDashes,
             int memoizedHashCode_,
-            int result) {
-        validateFields(package_, interface_, fieldNameWithDashes);
+            int result,
+            List<String> missingFields) {
+        validateFields(package_, interface_, fieldNameWithDashes, missingFields);
         this.package_ = package_;
         this.interface_ = interface_;
         this.fieldNameWithDashes = fieldNameWithDashes;
         this.primitveFieldNameWithDashes = primitveFieldNameWithDashes;
         this.memoizedHashCode_ = memoizedHashCode_;
         this.result = result;
+        this.missingFields = ConjureCollections.unmodifiableList(missingFields);
     }
 
     @JsonProperty("package")
@@ -76,6 +82,11 @@ public final class ReservedKeyExample {
         return this.result;
     }
 
+    @JsonProperty("missingFields")
+    public List<String> getMissingFields() {
+        return this.missingFields;
+    }
+
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof ReservedKeyExample && equalTo((ReservedKeyExample) other));
@@ -92,7 +103,8 @@ public final class ReservedKeyExample {
                 && this.fieldNameWithDashes.equals(other.fieldNameWithDashes)
                 && this.primitveFieldNameWithDashes == other.primitveFieldNameWithDashes
                 && this.memoizedHashCode_ == other.memoizedHashCode_
-                && this.result == other.result;
+                && this.result == other.result
+                && this.missingFields.equals(other.missingFields);
     }
 
     @Override
@@ -106,6 +118,7 @@ public final class ReservedKeyExample {
             hash = 31 * hash + this.primitveFieldNameWithDashes;
             hash = 31 * hash + this.memoizedHashCode_;
             hash = 31 * hash + this.result;
+            hash = 31 * hash + this.missingFields.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -116,17 +129,20 @@ public final class ReservedKeyExample {
     public String toString() {
         return "ReservedKeyExample{package: " + package_ + ", interface: " + interface_ + ", field-name-with-dashes: "
                 + fieldNameWithDashes + ", primitve-field-name-with-dashes: " + primitveFieldNameWithDashes
-                + ", memoizedHashCode: " + memoizedHashCode_ + ", result: " + result + '}';
+                + ", memoizedHashCode: " + memoizedHashCode_ + ", result: " + result + ", missingFields: "
+                + missingFields + '}';
     }
 
-    private static void validateFields(String package_, String interface_, String fieldNameWithDashes) {
-        List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, package_, "package");
-        missingFields = addFieldIfMissing(missingFields, interface_, "interface");
-        missingFields = addFieldIfMissing(missingFields, fieldNameWithDashes, "field-name-with-dashes");
-        if (missingFields != null) {
+    private static void validateFields(
+            String package_, String interface_, String fieldNameWithDashes, List<String> missingFields) {
+        List<String> missingFields_ = null;
+        missingFields_ = addFieldIfMissing(missingFields_, package_, "package");
+        missingFields_ = addFieldIfMissing(missingFields_, interface_, "interface");
+        missingFields_ = addFieldIfMissing(missingFields_, fieldNameWithDashes, "field-name-with-dashes");
+        missingFields_ = addFieldIfMissing(missingFields_, missingFields, "missingFields");
+        if (missingFields_ != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields_));
         }
     }
 
@@ -134,7 +150,7 @@ public final class ReservedKeyExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(3);
+                missingFields = new ArrayList<>(4);
             }
             missingFields.add(fieldName);
         }
@@ -161,6 +177,8 @@ public final class ReservedKeyExample {
 
         private int result;
 
+        private List<String> missingFields = ConjureCollections.newNonNullList();
+
         private boolean _primitveFieldNameWithDashesInitialized = false;
 
         private boolean _memoizedHashCode_Initialized = false;
@@ -177,6 +195,7 @@ public final class ReservedKeyExample {
             primitveFieldNameWithDashes(other.getPrimitveFieldNameWithDashes());
             memoizedHashCode_(other.getMemoizedHashCode());
             result(other.getResult());
+            missingFields(other.getMissingFields());
             return this;
         }
 
@@ -226,6 +245,28 @@ public final class ReservedKeyExample {
             return this;
         }
 
+        @JsonSetter(value = "missingFields", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        public Builder missingFields(@Nonnull Iterable<String> missingFields) {
+            checkNotBuilt();
+            this.missingFields = ConjureCollections.newNonNullList(
+                    Preconditions.checkNotNull(missingFields, "missingFields cannot be null"));
+            return this;
+        }
+
+        public Builder addAllMissingFields(@Nonnull Iterable<String> missingFields) {
+            checkNotBuilt();
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.missingFields, Preconditions.checkNotNull(missingFields, "missingFields cannot be null"));
+            return this;
+        }
+
+        public Builder missingFields(String missingFields) {
+            checkNotBuilt();
+            Preconditions.checkNotNull(missingFields, "missingFields cannot be null");
+            this.missingFields.add(missingFields);
+            return this;
+        }
+
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(
@@ -255,7 +296,13 @@ public final class ReservedKeyExample {
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ReservedKeyExample(
-                    package_, interface_, fieldNameWithDashes, primitveFieldNameWithDashes, memoizedHashCode_, result);
+                    package_,
+                    interface_,
+                    fieldNameWithDashes,
+                    primitveFieldNameWithDashes,
+                    memoizedHashCode_,
+                    result,
+                    missingFields);
         }
 
         private void checkNotBuilt() {
