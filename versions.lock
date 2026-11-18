@@ -162,10 +162,6 @@ org.checkerframework:checker-qual:3.49.1 (12 constraints: 4cb1cd72)
 
 org.derive4j:derive4j-annotation:1.1.1 (1 constraints: 0505f435)
 
-org.eclipse.collections:eclipse-collections:13.0.0 (1 constraints: 3605363b)
-
-org.eclipse.collections:eclipse-collections-api:13.0.0 (2 constraints: 1418b976)
-
 org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.immutables:value:2.12.3 (1 constraints: 3a05383b)
