@@ -60,19 +60,19 @@ com.palantir.conjure.java.runtime:keystores:8.49.0 (3 constraints: 2c2a3c62)
 
 com.palantir.deadlines:deadlines:0.30.0 (2 constraints: 99146fab)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.56.0 (2 constraints: 7e299c01)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.57.0 (2 constraints: 7f299f01)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.56.0 (2 constraints: e12343b4)
+com.palantir.dialogue:dialogue-blocking-channels:6.57.0 (2 constraints: e32377b4)
 
-com.palantir.dialogue:dialogue-clients:6.56.0 (1 constraints: 4305693b)
+com.palantir.dialogue:dialogue-clients:6.57.0 (1 constraints: 44056c3b)
 
-com.palantir.dialogue:dialogue-core:6.56.0 (3 constraints: 823d8de1)
+com.palantir.dialogue:dialogue-core:6.57.0 (3 constraints: 843dc3e1)
 
-com.palantir.dialogue:dialogue-futures:6.56.0 (3 constraints: da335dc0)
+com.palantir.dialogue:dialogue-futures:6.57.0 (3 constraints: dd33efc0)
 
-com.palantir.dialogue:dialogue-serde:6.56.0 (3 constraints: c02e4da4)
+com.palantir.dialogue:dialogue-serde:6.57.0 (3 constraints: c22ec8a4)
 
-com.palantir.dialogue:dialogue-target:6.56.0 (7 constraints: 097959b7)
+com.palantir.dialogue:dialogue-target:6.57.0 (7 constraints: 0f7989ba)
 
 com.palantir.goethe:goethe:0.31.0 (1 constraints: 36052e3b)
 
