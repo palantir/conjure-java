@@ -48,6 +48,8 @@ import allexamples.com.palantir.product.StringAliasTwo;
 import allexamples.com.palantir.product.StringExample;
 import allexamples.com.palantir.product.UnionTypeExample;
 import allexamples.com.palantir.product.UuidExample;
+import allexamples.com.palantir.product.WithPrefixMapExample;
+import allexamples.com.palantir.product.WithPrefixOnlyMapExample;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,6 +59,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
@@ -98,6 +101,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import sealedunions.com.palantir.product.CamelCaseUnion;
 import sealedunions.com.palantir.product.EmptyObject;
 import sealedunions.com.palantir.product.NestedEmptyUnion;
+import sealedunions.com.palantir.product.None;
 import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.SimpleUnionAlias;
 import sealedunions.com.palantir.product.UnionReservedNames;
@@ -117,6 +121,31 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("{\"items\": {\"a\": \"b\"}}", MapExample.class)
                         .getItems())
                 .containsEntry("a", "b");
+    }
+
+    @Test
+    public void with_prefixed_map_field_round_trips_alongside_unprefixed_field() throws IOException {
+        assertThat(mapper.readValue("{\"items\":{\"a\":\"1\"}}", WithPrefixMapExample.class))
+                .isEqualTo(WithPrefixMapExample.of(Map.of("a", "1"), Map.of()));
+        assertThat(mapper.readValue("{\"withItems\":{\"b\":\"2\"}}", WithPrefixMapExample.class))
+                .isEqualTo(WithPrefixMapExample.of(Map.of(), Map.of("b", "2")));
+        WithPrefixMapExample both = WithPrefixMapExample.of(Map.of("a", "1"), Map.of("b", "2"));
+        assertThat(mapper.readValue(mapper.writeValueAsString(both), WithPrefixMapExample.class))
+                .isEqualTo(both);
+    }
+
+    @Test
+    public void with_prefixed_map_field_is_not_bound_to_unprefixed_key() {
+        assertThatThrownBy(() -> mapper.readValue("{\"items\":{\"a\":\"1\"}}", WithPrefixOnlyMapExample.class))
+                .isInstanceOf(UnrecognizedPropertyException.class);
+    }
+
+    @Test
+    public void sealed_union_named_none_round_trips() throws IOException {
+        None value = None.value("test");
+        String json = "{\"type\":\"value\",\"value\":\"test\"}";
+        assertThat(mapper.writeValueAsString(value)).isEqualTo(json);
+        assertThat(mapper.readValue(json, None.class)).isEqualTo(value);
     }
 
     @Test

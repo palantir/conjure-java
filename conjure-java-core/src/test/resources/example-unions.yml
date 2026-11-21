@@ -9,6 +9,9 @@ types:
           baz: safelong
       SimpleUnionAlias:
         alias: SimpleUnion
+      None:
+        union:
+          value: string
       UnionReservedNames:
         union:
           known: string
