@@ -111,13 +111,13 @@ public final class SimpleEnum {
     }
 
     private static final class VisitorBuilder<T>
-            implements ValueStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
+            implements ValueStageVisitorBuilder<T>, Unknown_StageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Supplier<T> valueVisitor;
 
         private Function<@Safe String, T> unknownVisitor;
 
         @Override
-        public UnknownStageVisitorBuilder<T> visitValue(@Nonnull Supplier<T> valueVisitor) {
+        public Unknown_StageVisitorBuilder<T> visitValue(@Nonnull Supplier<T> valueVisitor) {
             Preconditions.checkNotNull(valueVisitor, "valueVisitor cannot be null");
             this.valueVisitor = valueVisitor;
             return this;
@@ -158,10 +158,10 @@ public final class SimpleEnum {
     }
 
     public interface ValueStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> visitValue(@Nonnull Supplier<T> valueVisitor);
+        Unknown_StageVisitorBuilder<T> visitValue(@Nonnull Supplier<T> valueVisitor);
     }
 
-    public interface UnknownStageVisitorBuilder<T> {
+    public interface Unknown_StageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();

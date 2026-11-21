@@ -137,7 +137,7 @@ public final class OptionalBinaryResponseMode {
             implements PresentStageVisitorBuilder<T>,
                     AbsentStageVisitorBuilder<T>,
                     ErrorStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
+                    Unknown_StageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private Supplier<T> presentVisitor;
 
@@ -162,7 +162,7 @@ public final class OptionalBinaryResponseMode {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> visitError(@Nonnull Supplier<T> errorVisitor) {
+        public Unknown_StageVisitorBuilder<T> visitError(@Nonnull Supplier<T> errorVisitor) {
             Preconditions.checkNotNull(errorVisitor, "errorVisitor cannot be null");
             this.errorVisitor = errorVisitor;
             return this;
@@ -224,10 +224,10 @@ public final class OptionalBinaryResponseMode {
     }
 
     public interface ErrorStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> visitError(@Nonnull Supplier<T> errorVisitor);
+        Unknown_StageVisitorBuilder<T> visitError(@Nonnull Supplier<T> errorVisitor);
     }
 
-    public interface UnknownStageVisitorBuilder<T> {
+    public interface Unknown_StageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
