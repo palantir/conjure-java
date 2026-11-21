@@ -9,6 +9,9 @@ types:
           baz: safelong
       SimpleUnionAlias:
         alias: SimpleUnion
+      None:
+        union:
+          value: string
       UnionReservedNames:
         union:
           known: string
@@ -25,6 +28,7 @@ types:
           final: string
           throws: string
           static: string
+          none: string
           unionReservedNames: string
       EmptyUnion:
         union: {}

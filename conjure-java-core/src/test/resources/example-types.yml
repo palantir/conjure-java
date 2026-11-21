@@ -95,6 +95,13 @@ types:
           items: map<string, string>
           optionalItems: map<string, optional<string>>
           aliasOptionalItems: map<string, OptionalAlias>
+      WithPrefixMapExample:
+        fields:
+          items: map<string, string>
+          withItems: map<string, string>
+      WithPrefixOnlyMapExample:
+        fields:
+          withItems: map<string, string>
       EnumNameTestExample:
         values:
           - INCOMPLETE

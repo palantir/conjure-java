@@ -38,6 +38,14 @@ public final class Expressions {
         return CodeBlock.of("$1T.checkNotNull($2N, $3S)", Preconditions.class, fieldName, message);
     }
 
+    static CodeBlock requireNonNullElements(String fieldName) {
+        return CodeBlock.builder()
+                .beginControlFlow("for ($T element : $N)", Object.class, fieldName)
+                .addStatement("$L", requireNonNull("element", "iterable cannot contain null elements"))
+                .endControlFlow()
+                .build();
+    }
+
     public static CodeBlock constructorCall(ClassName clazz, Collection<?> args) {
         return CodeBlock.of("$1T(" + indexParams(2, args.size() + 2) + ")", append(clazz, args));
     }
