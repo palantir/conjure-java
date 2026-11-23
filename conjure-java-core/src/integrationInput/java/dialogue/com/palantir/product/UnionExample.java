@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -94,8 +93,6 @@ public abstract sealed class UnionExample
     public sealed interface Known
             permits StringVariant, IntVariant, ObjectVariant, CollectionVariant, OptionalVariant {}
 
-    @JsonTypeName("stringVariant")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -143,8 +140,6 @@ public abstract sealed class UnionExample
         }
     }
 
-    @JsonTypeName("intVariant")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -192,8 +187,6 @@ public abstract sealed class UnionExample
         }
     }
 
-    @JsonTypeName("objectVariant")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -241,8 +234,6 @@ public abstract sealed class UnionExample
         }
     }
 
-    @JsonTypeName("collectionVariant")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -291,8 +282,6 @@ public abstract sealed class UnionExample
         }
     }
 
-    @JsonTypeName("optionalVariant")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -407,19 +396,19 @@ public abstract sealed class UnionExample
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<UnionExample> {
         Deserializer() {
             super(
-                    dialogue.com.palantir.product.UnionExample.class,
+                    UnionExample.class,
                     Map.of(
                             "stringVariant",
-                            dialogue.com.palantir.product.UnionExample.StringVariant.class,
+                            StringVariant.class,
                             "intVariant",
-                            dialogue.com.palantir.product.UnionExample.IntVariant.class,
+                            IntVariant.class,
                             "objectVariant",
-                            dialogue.com.palantir.product.UnionExample.ObjectVariant.class,
+                            ObjectVariant.class,
                             "collectionVariant",
-                            dialogue.com.palantir.product.UnionExample.CollectionVariant.class,
+                            CollectionVariant.class,
                             "optionalVariant",
-                            dialogue.com.palantir.product.UnionExample.OptionalVariant.class),
-                    dialogue.com.palantir.product.UnionExample.Unknown::new);
+                            OptionalVariant.class),
+                    Unknown::new);
         }
     }
 

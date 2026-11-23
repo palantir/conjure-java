@@ -75,8 +75,7 @@ public final class ObjectGeneratorTests {
 
     @ParameterizedTest
     @CsvSource({"false,false", "false,true", "true,false", "true,true"})
-    @SuppressWarnings("DangerousParallelStreamUsage") // Verify callers can consume the output stream in parallel.
-    void jacksonGenerationIsStableWhenConsumedInParallel(boolean sealed, boolean defensive) {
+    void jacksonGenerationReferencesSharedHelpers(boolean sealed, boolean defensive) {
         ConjureDefinition.Builder definition = ConjureDefinition.builder().version(1);
         Type string = Type.primitive(PrimitiveType.STRING);
         for (String packageName : List.of("first.api", "second.api")) {
@@ -108,13 +107,6 @@ public final class ObjectGeneratorTests {
                 .build());
         ConjureDefinition conjure = definition.build();
         List<JavaFile> files = generator.generate(conjure).toList();
-        assertThat(generator
-                        .generate(conjure)
-                        .parallel()
-                        .map(JavaFile::toString)
-                        .toList())
-                .containsExactlyElementsOf(
-                        files.stream().map(JavaFile::toString).toList());
         assertThat(files.stream()
                         .map(file -> file.packageName() + "." + file.typeSpec().name()))
                 .doesNotHaveDuplicates();

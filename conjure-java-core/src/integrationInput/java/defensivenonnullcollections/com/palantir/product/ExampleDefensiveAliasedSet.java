@@ -72,11 +72,7 @@ public final class ExampleDefensiveAliasedSet {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private static ExampleDefensiveAliasedSet fromJson(
-            @Nonnull
-                    @JsonDeserialize(
-                            as = LinkedHashSet.class,
-                            using = ConjureJacksonSupport.ContainerDeserializer.class)
-                    Set<Integer> value) {
+            @Nonnull @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class) Set<Integer> value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         for (Object element : value) {
             Preconditions.checkNotNull(element, "iterable cannot contain null elements");

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -73,6 +74,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -99,6 +101,9 @@ public final class UnionGenerator {
     private static final TypeName UNKNOWN_VALUE_TYPE = ClassName.get(Object.class);
 
     private static final String SEALED_KNOWN_INTERFACE = "Known";
+    private static final Set<String> INHERITED_DESERIALIZER_TYPE_NAMES =
+            inheritedMemberTypeNames(ConjureJacksonSupport.UnionDeserializer.class);
+
     private static final String SEALED_UNKNOWN_VARIANT_NAME = "Unknown";
     private static final String DESERIALIZER_CLASS_NAME = "Deserializer";
 
@@ -848,14 +853,23 @@ public final class UnionGenerator {
     private static TypeSpec generateDeserializer(
             ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
         boolean useMapOf = memberTypeDefs.size() <= 10;
-        // Inherited types such as JsonDeserializer.None can shadow both the union and its variants.
-        String qualifiedUnionName = unionClass.canonicalName();
+        // Member types inherited by the deserializer (JsonDeserializer.None) shadow same-named generated classes, and
+        // JavaPoet does not account for them. Qualify only the shadowed references.
+        boolean unionShadowed = INHERITED_DESERIALIZER_TYPE_NAMES.contains(unionClass.simpleName());
+        Function<ClassName, CodeBlock> reference = type -> {
+            if (unionShadowed) {
+                return CodeBlock.of("$L", type.canonicalName());
+            }
+            if (!type.equals(unionClass) && INHERITED_DESERIALIZER_TYPE_NAMES.contains(type.simpleName())) {
+                return CodeBlock.of("$T.$L", unionClass, type.simpleName());
+            }
+            return CodeBlock.of("$T", type);
+        };
         CodeBlock variants = memberTypeDefs.stream()
                 .map(member -> CodeBlock.of(
-                        "$S, $L.$L.class",
+                        "$S, $L.class",
                         member.getFieldName(),
-                        qualifiedUnionName,
-                        sealedVariantClass(unionClass, member.getFieldName()).simpleName()))
+                        reference.apply(sealedVariantClass(unionClass, member.getFieldName()))))
                 .map(entry -> useMapOf ? entry : CodeBlock.of("$T.entry($L)", Map.class, entry))
                 .collect(CodeBlock.joining(", "));
         return TypeSpec.classBuilder(deserializerClass)
@@ -864,15 +878,24 @@ public final class UnionGenerator {
                         ClassName.get(ConjureJacksonSupport.UnionDeserializer.class), unionClass))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addStatement(
-                                "super($L.class, $T.$L($L), $L.$L::new)",
-                                qualifiedUnionName,
+                                "super($L.class, $T.$L($L), $L::new)",
+                                reference.apply(unionClass),
                                 Map.class,
                                 useMapOf ? "of" : "ofEntries",
                                 variants,
-                                qualifiedUnionName,
-                                SEALED_UNKNOWN_VARIANT_NAME)
+                                reference.apply(unionClass.nestedClass(SEALED_UNKNOWN_VARIANT_NAME)))
                         .build())
                 .build();
+    }
+
+    private static Set<String> inheritedMemberTypeNames(Class<?> type) {
+        ImmutableSet.Builder<String> names = ImmutableSet.builder();
+        for (Class<?> current = type; current != null && current != Object.class; current = current.getSuperclass()) {
+            for (Class<?> member : current.getDeclaredClasses()) {
+                names.add(member.getSimpleName());
+            }
+        }
+        return names.build();
     }
 
     /**
@@ -971,9 +994,6 @@ public final class UnionGenerator {
                                     options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE,
                                     Modifier.STATIC,
                                     Modifier.FINAL)
-                            .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
-                                    .addMember("value", "$S", memberTypeDef.getFieldName())
-                                    .build())
                             .addFields(fields)
                             .addMethods(generateWrapperConstructors(
                                     wrapperClass,
@@ -1005,10 +1025,16 @@ public final class UnionGenerator {
                     if (options.sealedUnions()) {
                         // Prevent the custom union serializer and deserializer on the sealed base class from being
                         // inherited by concrete variants when delegating directly to a known wrapper.
-                        typeBuilder.addAnnotation(ignoreUnknownAnnotation());
                         typeBuilder.addAnnotation(typeFirstAnnotation());
                         typeBuilder.addAnnotation(JsonDeserialize.class);
                         typeBuilder.addAnnotation(JsonSerialize.class);
+                    }
+
+                    if (!options.sealedUnions()) {
+                        // Legacy wrappers are registered through @JsonSubTypes entries that rely on this name.
+                        typeBuilder.addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
+                                .addMember("value", "$S", memberTypeDef.getFieldName())
+                                .build());
                     }
 
                     if (!options.sealedUnions() || (options.sealedUnions() && options.sealedUnionVisitors())) {
@@ -1064,7 +1090,7 @@ public final class UnionGenerator {
         Type type = memberTypeDef.getType();
         if (hasOwnedCollection(type, options)) {
             if (type.accept(TypeVisitor.IS_MAP)) {
-                jsonParameter.addAnnotation(JacksonAnnotations.ownedContainer(type));
+                jsonParameter.addAnnotation(JacksonAnnotations.ownedContainer());
             }
             MethodSpec.Builder jsonFactory = MethodSpec.methodBuilder(jsonFactoryName)
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
@@ -1121,7 +1147,7 @@ public final class UnionGenerator {
     private static Iterable<AnnotationSpec> deserializationAnnotationForSets(FieldDefinition field, Options options) {
         if (field.getType().accept(TypeVisitor.IS_SET)) {
             if (options.sealedUnions() && options.defensiveCollections()) {
-                return List.of(JacksonAnnotations.ownedContainer(field.getType()));
+                return List.of(JacksonAnnotations.ownedContainer());
             }
             return List.of(AnnotationSpec.builder(JsonDeserialize.class)
                     .addMember("as", "$T.class", LinkedHashSet.class)

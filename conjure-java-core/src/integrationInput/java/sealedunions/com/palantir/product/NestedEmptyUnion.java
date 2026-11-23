@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
@@ -57,8 +56,6 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
 
     public sealed interface Known permits Empty {}
 
-    @JsonTypeName("empty")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -171,10 +168,7 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<NestedEmptyUnion> {
         Deserializer() {
-            super(
-                    sealedunions.com.palantir.product.NestedEmptyUnion.class,
-                    Map.of("empty", sealedunions.com.palantir.product.NestedEmptyUnion.Empty.class),
-                    sealedunions.com.palantir.product.NestedEmptyUnion.Unknown::new);
+            super(NestedEmptyUnion.class, Map.of("empty", Empty.class), Unknown::new);
         }
     }
 

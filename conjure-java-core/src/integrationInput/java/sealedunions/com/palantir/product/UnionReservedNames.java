@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
@@ -195,8 +194,6 @@ public abstract sealed class UnionReservedNames
                     None,
                     UnionReservedNames_ {}
 
-    @JsonTypeName("known")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -244,8 +241,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("unknown")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -293,8 +288,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("if")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -342,8 +335,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("new")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -391,8 +382,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("interface")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -440,8 +429,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("void")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -489,8 +476,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("return")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -538,8 +523,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("private")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -587,8 +570,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("public")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -636,8 +617,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("int")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -685,8 +664,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("import")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -734,8 +711,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("final")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -783,8 +758,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("throws")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -832,8 +805,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("static")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -881,8 +852,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("none")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -930,8 +899,6 @@ public abstract sealed class UnionReservedNames
         }
     }
 
-    @JsonTypeName("unionReservedNames")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -1045,28 +1012,25 @@ public abstract sealed class UnionReservedNames
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<UnionReservedNames> {
         Deserializer() {
             super(
-                    sealedunions.com.palantir.product.UnionReservedNames.class,
+                    UnionReservedNames.class,
                     Map.ofEntries(
-                            Map.entry("known", sealedunions.com.palantir.product.UnionReservedNames.Known_.class),
-                            Map.entry("unknown", sealedunions.com.palantir.product.UnionReservedNames.Unknown_.class),
-                            Map.entry("if", sealedunions.com.palantir.product.UnionReservedNames.If.class),
-                            Map.entry("new", sealedunions.com.palantir.product.UnionReservedNames.New.class),
-                            Map.entry(
-                                    "interface", sealedunions.com.palantir.product.UnionReservedNames.Interface.class),
-                            Map.entry("void", sealedunions.com.palantir.product.UnionReservedNames.Void.class),
-                            Map.entry("return", sealedunions.com.palantir.product.UnionReservedNames.Return.class),
-                            Map.entry("private", sealedunions.com.palantir.product.UnionReservedNames.Private.class),
-                            Map.entry("public", sealedunions.com.palantir.product.UnionReservedNames.Public.class),
-                            Map.entry("int", sealedunions.com.palantir.product.UnionReservedNames.Int.class),
-                            Map.entry("import", sealedunions.com.palantir.product.UnionReservedNames.Import.class),
-                            Map.entry("final", sealedunions.com.palantir.product.UnionReservedNames.Final.class),
-                            Map.entry("throws", sealedunions.com.palantir.product.UnionReservedNames.Throws.class),
-                            Map.entry("static", sealedunions.com.palantir.product.UnionReservedNames.Static.class),
-                            Map.entry("none", sealedunions.com.palantir.product.UnionReservedNames.None.class),
-                            Map.entry(
-                                    "unionReservedNames",
-                                    sealedunions.com.palantir.product.UnionReservedNames.UnionReservedNames_.class)),
-                    sealedunions.com.palantir.product.UnionReservedNames.Unknown::new);
+                            Map.entry("known", Known_.class),
+                            Map.entry("unknown", Unknown_.class),
+                            Map.entry("if", If.class),
+                            Map.entry("new", New.class),
+                            Map.entry("interface", Interface.class),
+                            Map.entry("void", Void.class),
+                            Map.entry("return", Return.class),
+                            Map.entry("private", Private.class),
+                            Map.entry("public", Public.class),
+                            Map.entry("int", Int.class),
+                            Map.entry("import", Import.class),
+                            Map.entry("final", Final.class),
+                            Map.entry("throws", Throws.class),
+                            Map.entry("static", Static.class),
+                            Map.entry("none", UnionReservedNames.None.class),
+                            Map.entry("unionReservedNames", UnionReservedNames_.class)),
+                    Unknown::new);
         }
     }
 

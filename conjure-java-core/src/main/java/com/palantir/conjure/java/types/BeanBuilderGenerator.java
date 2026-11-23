@@ -428,8 +428,7 @@ public final class BeanBuilderGenerator {
                 .map(field -> field.conjureDef().getType().accept(TypeVisitor.IS_MAP)
                         ? field.poetSpec().toBuilder()
                                 .addAnnotation(createJacksonSetterAnnotation(field, typesMap))
-                                .addAnnotation(JacksonAnnotations.ownedContainer(
-                                        field.conjureDef().getType()))
+                                .addAnnotation(JacksonAnnotations.ownedContainer())
                                 .build()
                         : field.poetSpec())
                 .toList();

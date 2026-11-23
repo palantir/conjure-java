@@ -131,6 +131,20 @@ final class ConjureMapDeserializerTest {
     }
 
     @Test
+    @SuppressWarnings({"NonApiType", "checkstyle:IllegalType"}) // Jackson registration requires the concrete map type.
+    void copiesMapsFromCustomConstructors() throws IOException {
+        LinkedHashMap<String, Integer> shared = new LinkedHashMap<>();
+        ObjectMapper constructing = new ObjectMapper()
+                .registerModule(new SimpleModule()
+                        .addValueInstantiator(
+                                LinkedHashMap.class, new SharedInstantiator(LinkedHashMap.class, shared)));
+        Map<String, Integer> result =
+                constructing.readValue("{\"values\":{\"a\":1}}", Value.class).values();
+        shared.clear();
+        assertThat(result).containsExactlyEntriesOf(Map.of("a", 1));
+    }
+
+    @Test
     void givesSuccessiveReadsIndependentEmptyAndNullValues() throws IOException {
         Map<String, Integer> shared = new LinkedHashMap<>();
         ObjectMapper custom = new ObjectMapper()

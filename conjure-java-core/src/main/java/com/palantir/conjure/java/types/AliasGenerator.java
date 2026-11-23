@@ -153,7 +153,7 @@ public final class AliasGenerator {
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(Parameters.nonnullParameter(aliasTypeName, "value").toBuilder()
-                            .addAnnotation(JacksonAnnotations.ownedContainer(typeDef.getAlias()))
+                            .addAnnotation(JacksonAnnotations.ownedContainer())
                             .build())
                     .returns(thisClass)
                     .addStatement("$L", Expressions.requireNonNull("value", "value cannot be null"));

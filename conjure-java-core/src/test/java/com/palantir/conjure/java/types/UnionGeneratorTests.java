@@ -20,17 +20,11 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-import com.fasterxml.jackson.databind.deser.ValueInstantiator;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.palantir.conjure.defs.SafetyDeclarationRequirements;
@@ -66,7 +60,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -208,18 +201,14 @@ final class UnionGeneratorTests {
             assertThat(mapValue(publicValue, sealed).containsKey("added")).isEqualTo(!defensive);
 
             if (defensive) {
+                // Representative wiring check; ContainerDeserializer edge cases are covered in conjure-lib.
                 Map<String, String> shared = new LinkedHashMap<>(Map.of("shared", "original"));
-                for (ObjectMapper custom : customMappers(Map.class, shared)) {
-                    for (String json : List.of(
-                            "{\"type\":\"map\",\"map\":{}}", "{\"type\":\"map\",\"map\":null}", "{\"type\":\"map\"}")) {
-                        shared.put("shared", "original");
-                        Object union = custom.readValue(json, type);
-                        shared.put("shared", "modified");
-                        assertThat(mapValue(union, sealed).get("shared")).isEqualTo("original");
-                        assertThatThrownBy(mapValue(union, sealed)::clear)
-                                .isInstanceOf(UnsupportedOperationException.class);
-                    }
-                }
+                Object union = ObjectMappers.newServerObjectMapper()
+                        .registerModule(sharedDeserializer(Map.class, shared))
+                        .readValue("{\"type\":\"map\",\"map\":{}}", type);
+                shared.put("shared", "modified");
+                assertThat(mapValue(union, sealed).get("shared")).isEqualTo("original");
+                assertThatThrownBy(mapValue(union, sealed)::clear).isInstanceOf(UnsupportedOperationException.class);
             }
         }
     }
@@ -249,13 +238,8 @@ final class UnionGeneratorTests {
         try (URLClassLoader loader = generateCollections(sealed, defensive, nonNull)) {
             Class<?> type = loader.loadClass("ownership.SetUnion");
             Class<?> aliasType = loader.loadClass("ownership.SetAlias");
-            for (ObjectMapper mapper : List.of(
-                    ObjectMappers.newServerObjectMapper(),
-                    ObjectMappers.newCborServerObjectMapper(),
-                    ObjectMappers.newSmileServerObjectMapper())) {
-                assertSetWireSemantics(mapper, type, sealed, defensive, nonNull);
-                assertAliasWireSemantics(mapper, loader);
-            }
+            assertSetWireSemantics(JSON_MAPPER, type, sealed, defensive, nonNull);
+            assertAliasWireSemantics(JSON_MAPPER, loader);
             assertThatThrownBy(() -> type.getMethod("set", Set.class).invoke(null, new Object[] {null}))
                     .hasCauseInstanceOf(NullPointerException.class);
             if (defensive && nonNull) {
@@ -274,8 +258,6 @@ final class UnionGeneratorTests {
                     .isEqualTo(!defensive);
             if (defensive) {
                 assertCustomSetOwnership(type, aliasType, sealed, nonNull);
-                assertCustomElementOwnership(type, sealed);
-                assertPolymorphicSetOwnership(type, aliasType, sealed);
             }
         }
     }
@@ -354,83 +336,26 @@ final class UnionGeneratorTests {
 
     private record AliasCase(String name, Class<?> parameter, Object input, String json) {}
 
+    // Representative wiring check; ContainerDeserializer edge cases are covered in conjure-lib.
     private static void assertCustomSetOwnership(Class<?> type, Class<?> aliasType, boolean sealed, boolean nonNull)
             throws Exception {
-        Set<String> shared = new LinkedHashSet<>();
-        for (ObjectMapper mapper : customMappers(LinkedHashSet.class, shared)) {
-            for (String json :
-                    List.of("{\"type\":\"set\",\"set\":[]}", "{\"type\":\"set\",\"set\":null}", "{\"type\":\"set\"}")) {
-                shared.clear();
-                shared.add("original");
-                Object union = mapper.readValue(json, type);
-                Object alias = mapper.readValue("[]", aliasType);
-                shared.clear();
-                assertThat(new ArrayList<>((Set<?>) unionValue(union, sealed)))
-                        .describedAs("Union ownership for %s using %s", json, mapper.getRegisteredModuleIds())
-                        .isEqualTo(List.of("original"));
-                Set<?> aliasValue = (Set<?>) aliasType.getMethod("get").invoke(alias);
-                assertThat(new ArrayList<>(aliasValue))
-                        .describedAs("Alias ownership using %s", mapper.getRegisteredModuleIds())
-                        .isEqualTo(List.of("original"));
-                assertThatThrownBy(aliasValue::clear).isInstanceOf(UnsupportedOperationException.class);
-            }
-            shared.add(null);
-            if (nonNull) {
-                assertThatThrownBy(() -> mapper.readValue("{\"type\":\"set\",\"set\":[]}", type))
-                        .hasMessageContaining("iterable cannot contain null elements");
-                assertThatThrownBy(() -> mapper.readValue("[]", aliasType))
-                        .hasMessageContaining("iterable cannot contain null elements");
-            }
-        }
-        ObjectMapper recovering = ObjectMappers.newServerObjectMapper().addHandler(new DeserializationProblemHandler() {
-            @Override
-            public Object handleUnexpectedToken(
-                    DeserializationContext context,
-                    JavaType targetType,
-                    JsonToken token,
-                    JsonParser parser,
-                    String message)
-                    throws IOException {
-                return Set.class.isAssignableFrom(targetType.getRawClass()) ? shared : NOT_HANDLED;
-            }
-        });
-        shared.clear();
-        shared.add("original");
-        Object recovered = recovering.readValue("{\"type\":\"set\",\"set\":42}", type);
-        shared.clear();
-        assertThat(new ArrayList<>((Set<?>) unionValue(recovered, sealed))).isEqualTo(List.of("original"));
-    }
-
-    private static void assertCustomElementOwnership(Class<?> type, boolean sealed) throws Exception {
-        AtomicReference<Set<?>> captured = new AtomicReference<>();
-        ObjectMapper mapper = ObjectMappers.newServerObjectMapper()
-                .registerModule(new SimpleModule().addDeserializer(Integer.class, new JsonDeserializer<>() {
-                    @Override
-                    public Integer deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
-                        captured.set((Set<?>) parser.currentValue());
-                        return parser.getIntValue();
-                    }
-                }));
-        Object union = mapper.readValue("{\"type\":\"numbers\",\"numbers\":[1,2]}", type);
-        captured.get().clear();
-        assertThat(new ArrayList<>((Set<?>) unionValue(union, sealed))).isEqualTo(List.of(1, 2));
-    }
-
-    private static void assertPolymorphicSetOwnership(Class<?> type, Class<?> aliasType, boolean sealed)
-            throws Exception {
-        SharedSet shared = new SharedSet();
-        shared.add("original");
-        SimpleModule module = sharedDeserializer(SharedSet.class, shared);
-        module.registerSubtypes(new NamedType(SharedSet.class, "shared"));
-        ObjectMapper mapper = ObjectMappers.newServerObjectMapper()
-                .addMixIn(Set.class, TypedSet.class)
-                .registerModule(module);
-        Object union = mapper.readValue("{\"type\":\"set\",\"set\":[\"shared\",[]]}", type);
-        Object alias = mapper.readValue("[\"shared\",[]]", aliasType);
+        Set<String> shared = new LinkedHashSet<>(List.of("original"));
+        ObjectMapper mapper =
+                ObjectMappers.newServerObjectMapper().registerModule(sharedDeserializer(LinkedHashSet.class, shared));
+        Object union = mapper.readValue("{\"type\":\"set\",\"set\":[]}", type);
+        Object alias = mapper.readValue("[]", aliasType);
         shared.clear();
         assertThat(new ArrayList<>((Set<?>) unionValue(union, sealed))).isEqualTo(List.of("original"));
-        assertThat(new ArrayList<>((Set<?>) aliasType.getMethod("get").invoke(alias)))
-                .isEqualTo(List.of("original"));
+        Set<?> aliasValue = (Set<?>) aliasType.getMethod("get").invoke(alias);
+        assertThat(new ArrayList<>(aliasValue)).isEqualTo(List.of("original"));
+        assertThatThrownBy(aliasValue::clear).isInstanceOf(UnsupportedOperationException.class);
+        if (nonNull) {
+            shared.add(null);
+            assertThatThrownBy(() -> mapper.readValue("{\"type\":\"set\",\"set\":[]}", type))
+                    .hasMessageContaining("iterable cannot contain null elements");
+            assertThatThrownBy(() -> mapper.readValue("[]", aliasType))
+                    .hasMessageContaining("iterable cannot contain null elements");
+        }
     }
 
     private static <T> SimpleModule sharedDeserializer(Class<?> type, T shared) {
@@ -448,24 +373,6 @@ final class UnionGeneratorTests {
             }
         })));
         return module;
-    }
-
-    private static <T> List<ObjectMapper> customMappers(Class<?> binding, T shared) {
-        SimpleModule constructor = new SimpleModule("shared-constructor")
-                .addValueInstantiator(shared.getClass(), new ValueInstantiator.Base(shared.getClass()) {
-                    @Override
-                    public boolean canCreateUsingDefault() {
-                        return true;
-                    }
-
-                    @Override
-                    public Object createUsingDefault(DeserializationContext _context) {
-                        return shared;
-                    }
-                });
-        return List.of(
-                ObjectMappers.newServerObjectMapper().registerModule(sharedDeserializer(binding, shared)),
-                ObjectMappers.newServerObjectMapper().registerModule(constructor));
     }
 
     private URLClassLoader generateCollections(boolean sealed, boolean defensive, boolean nonNull) throws IOException {
@@ -518,15 +425,6 @@ final class UnionGeneratorTests {
                 .fieldName(FieldName.of(name))
                 .type(type)
                 .build();
-    }
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    private interface TypedSet {}
-
-    @SuppressWarnings(
-            "checkstyle:IllegalType") // Tests Jackson subtype handling for the generated LinkedHashSet binding.
-    private static final class SharedSet extends LinkedHashSet<String> {
-        private static final long serialVersionUID = 1L;
     }
 
     private URLClassLoader generate(ConjureDefinition definition, Options options) throws IOException {

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
@@ -57,8 +56,6 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
 
     public sealed interface Known permits CamelCasedField {}
 
-    @JsonTypeName("camelCasedField")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -171,10 +168,7 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<CamelCaseUnion> {
         Deserializer() {
-            super(
-                    sealedunions.com.palantir.product.CamelCaseUnion.class,
-                    Map.of("camelCasedField", sealedunions.com.palantir.product.CamelCaseUnion.CamelCasedField.class),
-                    sealedunions.com.palantir.product.CamelCaseUnion.Unknown::new);
+            super(CamelCaseUnion.class, Map.of("camelCasedField", CamelCasedField.class), Unknown::new);
         }
     }
 

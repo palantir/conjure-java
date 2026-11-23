@@ -18,20 +18,14 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
-import com.palantir.conjure.spec.Type;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.javapoet.AnnotationSpec;
-import java.util.LinkedHashSet;
 
 final class JacksonAnnotations {
     private JacksonAnnotations() {}
 
-    static AnnotationSpec ownedContainer(Type type) {
-        AnnotationSpec.Builder annotation = AnnotationSpec.builder(JsonDeserialize.class);
-        if (type.accept(TypeVisitor.IS_SET)) {
-            annotation.addMember("as", "$T.class", LinkedHashSet.class);
-        }
-        return annotation
+    /** ContainerDeserializer refines Set properties to LinkedHashSet itself, so no {@code as} refinement is needed. */
+    static AnnotationSpec ownedContainer() {
+        return AnnotationSpec.builder(JsonDeserialize.class)
                 .addMember("using", "$T.class", ConjureJacksonSupport.ContainerDeserializer.class)
                 .build();
     }

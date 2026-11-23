@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -73,8 +72,6 @@ public abstract sealed class SimpleUnion
 
     public sealed interface Known permits Foo, Bar, Baz {}
 
-    @JsonTypeName("foo")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -122,8 +119,6 @@ public abstract sealed class SimpleUnion
         }
     }
 
-    @JsonTypeName("bar")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -171,8 +166,6 @@ public abstract sealed class SimpleUnion
         }
     }
 
-    @JsonTypeName("baz")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonPropertyOrder("type")
     @JsonDeserialize
     @JsonSerialize
@@ -285,16 +278,7 @@ public abstract sealed class SimpleUnion
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<SimpleUnion> {
         Deserializer() {
-            super(
-                    sealedunions.com.palantir.product.SimpleUnion.class,
-                    Map.of(
-                            "foo",
-                            sealedunions.com.palantir.product.SimpleUnion.Foo.class,
-                            "bar",
-                            sealedunions.com.palantir.product.SimpleUnion.Bar.class,
-                            "baz",
-                            sealedunions.com.palantir.product.SimpleUnion.Baz.class),
-                    sealedunions.com.palantir.product.SimpleUnion.Unknown::new);
+            super(SimpleUnion.class, Map.of("foo", Foo.class, "bar", Bar.class, "baz", Baz.class), Unknown::new);
         }
     }
 

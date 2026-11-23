@@ -101,10 +101,7 @@ public abstract sealed class EmptyUnion permits EmptyUnion.Unknown {
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<EmptyUnion> {
         Deserializer() {
-            super(
-                    sealedunions.com.palantir.product.EmptyUnion.class,
-                    Map.of(),
-                    sealedunions.com.palantir.product.EmptyUnion.Unknown::new);
+            super(EmptyUnion.class, Map.of(), Unknown::new);
         }
     }
 

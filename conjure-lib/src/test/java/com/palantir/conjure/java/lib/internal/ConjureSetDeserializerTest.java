@@ -22,9 +22,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
@@ -34,9 +36,11 @@ import com.fasterxml.jackson.databind.PropertyMetadata;
 import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.databind.deser.std.CollectionDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringCollectionDeserializer;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.util.AccessPattern;
 import java.io.IOException;
@@ -138,6 +142,59 @@ final class ConjureSetDeserializerTest {
         assertThat(retained.get()).isInstanceOf(Set.class).isNotSameAs(result);
         ((Set<?>) retained.get()).clear();
         assertThat(result).containsExactly(1, 2);
+    }
+
+    @Test
+    @SuppressWarnings({"NonApiType", "checkstyle:IllegalType"
+    }) // Jackson registration requires the concrete collection type.
+    void copiesSetsFromCustomConstructorsAndRecoveryHandlers() throws IOException {
+        LinkedHashSet<Integer> shared = new LinkedHashSet<>();
+        ObjectMapper constructing = new ObjectMapper()
+                .registerModule(new SimpleModule()
+                        .addValueInstantiator(
+                                LinkedHashSet.class, new SharedInstantiator(LinkedHashSet.class, shared)));
+        Set<Integer> constructed =
+                constructing.readValue("{\"values\":[1]}", Value.class).values();
+        shared.clear();
+        assertThat(constructed).containsExactly(1);
+
+        ObjectMapper recovering = new ObjectMapper().addHandler(new DeserializationProblemHandler() {
+            @Override
+            public Object handleUnexpectedToken(
+                    DeserializationContext _context,
+                    JavaType targetType,
+                    JsonToken _token,
+                    JsonParser _parser,
+                    String _message) {
+                return targetType.isTypeOrSubTypeOf(Set.class) ? shared : NOT_HANDLED;
+            }
+        });
+        shared.add(2);
+        Set<Integer> recovered =
+                recovering.readValue("{\"values\":42}", Value.class).values();
+        shared.clear();
+        assertThat(recovered).containsExactly(2);
+    }
+
+    @Test
+    void copiesPolymorphicSets() throws IOException {
+        SharedSet shared = new SharedSet();
+        shared.add(1);
+        SimpleModule module = new SimpleModule().addDeserializer(SharedSet.class, new JsonDeserializer<>() {
+            @Override
+            public SharedSet deserialize(JsonParser parser, DeserializationContext _context) throws IOException {
+                parser.skipChildren();
+                return shared;
+            }
+        });
+        module.registerSubtypes(new NamedType(SharedSet.class, "shared"));
+        ObjectMapper polymorphic =
+                new ObjectMapper().addMixIn(Set.class, TypedSet.class).registerModule(module);
+        Set<Integer> result = polymorphic
+                .readValue("{\"values\":[\"shared\",[]]}", Value.class)
+                .values();
+        shared.clear();
+        assertThat(result).containsExactly(1);
     }
 
     @Test
@@ -266,6 +323,14 @@ final class ConjureSetDeserializerTest {
         @JsonMerge
         @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         public Set<Integer> values;
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+    private interface TypedSet {}
+
+    @SuppressWarnings("checkstyle:IllegalType") // Tests Jackson subtype handling for LinkedHashSet bindings.
+    private static final class SharedSet extends LinkedHashSet<Integer> {
+        private static final long serialVersionUID = 1L;
     }
 
     record Value(
