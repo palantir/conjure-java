@@ -1028,9 +1028,7 @@ public final class UnionGenerator {
                         typeBuilder.addAnnotation(typeFirstAnnotation());
                         typeBuilder.addAnnotation(JsonDeserialize.class);
                         typeBuilder.addAnnotation(JsonSerialize.class);
-                    }
-
-                    if (!options.sealedUnions()) {
+                    } else {
                         // Legacy wrappers are registered through @JsonSubTypes entries that rely on this name.
                         typeBuilder.addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
                                 .addMember("value", "$S", memberTypeDef.getFieldName())
