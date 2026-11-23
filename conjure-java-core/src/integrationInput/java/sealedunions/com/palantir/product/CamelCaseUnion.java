@@ -172,9 +172,9 @@ public abstract sealed class CamelCaseUnion permits CamelCaseUnion.CamelCasedFie
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<CamelCaseUnion> {
         Deserializer() {
             super(
-                    CamelCaseUnion.class,
-                    Map.of("camelCasedField", CamelCaseUnion.CamelCasedField.class),
-                    CamelCaseUnion.Unknown::new);
+                    sealedunions.com.palantir.product.CamelCaseUnion.class,
+                    Map.of("camelCasedField", sealedunions.com.palantir.product.CamelCaseUnion.CamelCasedField.class),
+                    sealedunions.com.palantir.product.CamelCaseUnion.Unknown::new);
         }
     }
 

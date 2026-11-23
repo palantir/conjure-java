@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -445,6 +446,9 @@ public final class BeanBuilderGenerator {
 
         specBuilder
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
+                .addAnnotation(AnnotationSpec.builder(JsonAutoDetect.class)
+                        .addMember("setterVisibility", "$T.NONE", JsonAutoDetect.Visibility.class)
+                        .build())
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(boolean.class, BUILT_FIELD).build())
                 .addFields(builderFields)

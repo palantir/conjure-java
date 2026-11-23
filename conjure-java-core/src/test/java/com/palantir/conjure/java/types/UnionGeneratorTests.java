@@ -123,6 +123,7 @@ final class UnionGeneratorTests {
                 "Serializer_",
                 "Deserializer_",
                 "Named",
+                "None",
                 "ConjureJacksonSupport",
                 "ContainerDeserializer",
                 "UnionDeserializer",

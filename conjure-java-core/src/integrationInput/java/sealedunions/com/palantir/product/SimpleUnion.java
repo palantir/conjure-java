@@ -286,9 +286,15 @@ public abstract sealed class SimpleUnion
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<SimpleUnion> {
         Deserializer() {
             super(
-                    SimpleUnion.class,
-                    Map.of("foo", SimpleUnion.Foo.class, "bar", SimpleUnion.Bar.class, "baz", SimpleUnion.Baz.class),
-                    SimpleUnion.Unknown::new);
+                    sealedunions.com.palantir.product.SimpleUnion.class,
+                    Map.of(
+                            "foo",
+                            sealedunions.com.palantir.product.SimpleUnion.Foo.class,
+                            "bar",
+                            sealedunions.com.palantir.product.SimpleUnion.Bar.class,
+                            "baz",
+                            sealedunions.com.palantir.product.SimpleUnion.Baz.class),
+                    sealedunions.com.palantir.product.SimpleUnion.Unknown::new);
         }
     }
 

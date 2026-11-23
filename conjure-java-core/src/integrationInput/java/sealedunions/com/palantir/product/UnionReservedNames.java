@@ -1045,25 +1045,28 @@ public abstract sealed class UnionReservedNames
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<UnionReservedNames> {
         Deserializer() {
             super(
-                    UnionReservedNames.class,
+                    sealedunions.com.palantir.product.UnionReservedNames.class,
                     Map.ofEntries(
-                            Map.entry("known", UnionReservedNames.Known_.class),
-                            Map.entry("unknown", UnionReservedNames.Unknown_.class),
-                            Map.entry("if", UnionReservedNames.If.class),
-                            Map.entry("new", UnionReservedNames.New.class),
-                            Map.entry("interface", UnionReservedNames.Interface.class),
-                            Map.entry("void", UnionReservedNames.Void.class),
-                            Map.entry("return", UnionReservedNames.Return.class),
-                            Map.entry("private", UnionReservedNames.Private.class),
-                            Map.entry("public", UnionReservedNames.Public.class),
-                            Map.entry("int", UnionReservedNames.Int.class),
-                            Map.entry("import", UnionReservedNames.Import.class),
-                            Map.entry("final", UnionReservedNames.Final.class),
-                            Map.entry("throws", UnionReservedNames.Throws.class),
-                            Map.entry("static", UnionReservedNames.Static.class),
-                            Map.entry("none", UnionReservedNames.None.class),
-                            Map.entry("unionReservedNames", UnionReservedNames.UnionReservedNames_.class)),
-                    UnionReservedNames.Unknown::new);
+                            Map.entry("known", sealedunions.com.palantir.product.UnionReservedNames.Known_.class),
+                            Map.entry("unknown", sealedunions.com.palantir.product.UnionReservedNames.Unknown_.class),
+                            Map.entry("if", sealedunions.com.palantir.product.UnionReservedNames.If.class),
+                            Map.entry("new", sealedunions.com.palantir.product.UnionReservedNames.New.class),
+                            Map.entry(
+                                    "interface", sealedunions.com.palantir.product.UnionReservedNames.Interface.class),
+                            Map.entry("void", sealedunions.com.palantir.product.UnionReservedNames.Void.class),
+                            Map.entry("return", sealedunions.com.palantir.product.UnionReservedNames.Return.class),
+                            Map.entry("private", sealedunions.com.palantir.product.UnionReservedNames.Private.class),
+                            Map.entry("public", sealedunions.com.palantir.product.UnionReservedNames.Public.class),
+                            Map.entry("int", sealedunions.com.palantir.product.UnionReservedNames.Int.class),
+                            Map.entry("import", sealedunions.com.palantir.product.UnionReservedNames.Import.class),
+                            Map.entry("final", sealedunions.com.palantir.product.UnionReservedNames.Final.class),
+                            Map.entry("throws", sealedunions.com.palantir.product.UnionReservedNames.Throws.class),
+                            Map.entry("static", sealedunions.com.palantir.product.UnionReservedNames.Static.class),
+                            Map.entry("none", sealedunions.com.palantir.product.UnionReservedNames.None.class),
+                            Map.entry(
+                                    "unionReservedNames",
+                                    sealedunions.com.palantir.product.UnionReservedNames.UnionReservedNames_.class)),
+                    sealedunions.com.palantir.product.UnionReservedNames.Unknown::new);
         }
     }
 

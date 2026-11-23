@@ -1,5 +1,6 @@
 package template.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -101,6 +102,7 @@ public final class OptionalAliasExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE)
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 

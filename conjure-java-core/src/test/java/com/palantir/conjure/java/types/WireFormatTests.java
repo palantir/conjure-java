@@ -105,6 +105,8 @@ import sealedunions.com.palantir.product.None;
 import sealedunions.com.palantir.product.SimpleUnion;
 import sealedunions.com.palantir.product.SimpleUnionAlias;
 import sealedunions.com.palantir.product.UnionReservedNames;
+import stagedbuilder.com.palantir.product.WithPrefixedMapFields;
+import strictstagedbuilder.com.palantir.product.StrictWithPrefixedMapFields;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class WireFormatTests {
@@ -138,6 +140,14 @@ public final class WireFormatTests {
     public void with_prefixed_map_field_is_not_bound_to_unprefixed_key() {
         assertThatThrownBy(() -> mapper.readValue("{\"items\":{\"a\":\"1\"}}", WithPrefixOnlyMapExample.class))
                 .isInstanceOf(UnrecognizedPropertyException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {WithPrefixedMapFields.class, StrictWithPrefixedMapFields.class})
+    void with_prefixed_map_fields_round_trip_using_staged_builders(Class<?> type) throws IOException {
+        String json = "{\"required\":\"value\",\"items\":{\"a\":\"1\"},\"withItems\":{\"b\":\"2\"}}";
+        Object value = mapper.readValue(json, type);
+        assertThat(mapper.readTree(mapper.writeValueAsString(value))).isEqualTo(mapper.readTree(json));
     }
 
     @Test

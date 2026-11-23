@@ -407,19 +407,19 @@ public abstract sealed class UnionExample
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<UnionExample> {
         Deserializer() {
             super(
-                    UnionExample.class,
+                    dialogue.com.palantir.product.UnionExample.class,
                     Map.of(
                             "stringVariant",
-                            UnionExample.StringVariant.class,
+                            dialogue.com.palantir.product.UnionExample.StringVariant.class,
                             "intVariant",
-                            UnionExample.IntVariant.class,
+                            dialogue.com.palantir.product.UnionExample.IntVariant.class,
                             "objectVariant",
-                            UnionExample.ObjectVariant.class,
+                            dialogue.com.palantir.product.UnionExample.ObjectVariant.class,
                             "collectionVariant",
-                            UnionExample.CollectionVariant.class,
+                            dialogue.com.palantir.product.UnionExample.CollectionVariant.class,
                             "optionalVariant",
-                            UnionExample.OptionalVariant.class),
-                    UnionExample.Unknown::new);
+                            dialogue.com.palantir.product.UnionExample.OptionalVariant.class),
+                    dialogue.com.palantir.product.UnionExample.Unknown::new);
         }
     }
 

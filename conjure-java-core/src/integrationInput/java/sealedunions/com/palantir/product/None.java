@@ -170,7 +170,10 @@ public abstract sealed class None permits None.Value, None.Unknown {
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<None> {
         Deserializer() {
-            super(None.class, Map.of("value", None.Value.class), None.Unknown::new);
+            super(
+                    sealedunions.com.palantir.product.None.class,
+                    Map.of("value", sealedunions.com.palantir.product.None.Value.class),
+                    sealedunions.com.palantir.product.None.Unknown::new);
         }
     }
 

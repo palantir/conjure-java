@@ -171,7 +171,10 @@ public abstract sealed class NestedEmptyUnion permits NestedEmptyUnion.Empty, Ne
 
     static final class Deserializer extends ConjureJacksonSupport.UnionDeserializer<NestedEmptyUnion> {
         Deserializer() {
-            super(NestedEmptyUnion.class, Map.of("empty", NestedEmptyUnion.Empty.class), NestedEmptyUnion.Unknown::new);
+            super(
+                    sealedunions.com.palantir.product.NestedEmptyUnion.class,
+                    Map.of("empty", sealedunions.com.palantir.product.NestedEmptyUnion.Empty.class),
+                    sealedunions.com.palantir.product.NestedEmptyUnion.Unknown::new);
         }
     }
 

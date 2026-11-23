@@ -848,13 +848,13 @@ public final class UnionGenerator {
     private static TypeSpec generateDeserializer(
             ClassName unionClass, ClassName deserializerClass, List<FieldDefinition> memberTypeDefs) {
         boolean useMapOf = memberTypeDefs.size() <= 10;
-        // Variants are qualified because member types the Deserializer inherits, such as JsonDeserializer.None, would
-        // otherwise shadow variants with the same simple name.
+        // Inherited types such as JsonDeserializer.None can shadow both the union and its variants.
+        String qualifiedUnionName = unionClass.canonicalName();
         CodeBlock variants = memberTypeDefs.stream()
                 .map(member -> CodeBlock.of(
-                        "$S, $T.$L.class",
+                        "$S, $L.$L.class",
                         member.getFieldName(),
-                        unionClass,
+                        qualifiedUnionName,
                         sealedVariantClass(unionClass, member.getFieldName()).simpleName()))
                 .map(entry -> useMapOf ? entry : CodeBlock.of("$T.entry($L)", Map.class, entry))
                 .collect(CodeBlock.joining(", "));
@@ -864,12 +864,12 @@ public final class UnionGenerator {
                         ClassName.get(ConjureJacksonSupport.UnionDeserializer.class), unionClass))
                 .addMethod(MethodSpec.constructorBuilder()
                         .addStatement(
-                                "super($T.class, $T.$L($L), $T.$L::new)",
-                                unionClass,
+                                "super($L.class, $T.$L($L), $L.$L::new)",
+                                qualifiedUnionName,
                                 Map.class,
                                 useMapOf ? "of" : "ofEntries",
                                 variants,
-                                unionClass,
+                                qualifiedUnionName,
                                 SEALED_UNKNOWN_VARIANT_NAME)
                         .build())
                 .build();

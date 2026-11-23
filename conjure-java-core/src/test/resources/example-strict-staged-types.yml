@@ -2,6 +2,11 @@ types:
   definitions:
     default-package: com.palantir.product
     objects:
+      StrictWithPrefixedMapFields:
+        fields:
+          required: string
+          items: map<string, string>
+          withItems: map<string, string>
       StrictOneField:
         fields:
           bearerTokenValue: bearertoken
