@@ -76,7 +76,7 @@ com.palantir.dialogue:dialogue-target:6.57.0 (7 constraints: 12798fbd)
 
 com.palantir.goethe:goethe:0.31.0 (1 constraints: 36052e3b)
 
-com.palantir.human-readable-types:human-readable-types:1.20.0 (1 constraints: 35052d3b)
+com.palantir.human-readable-types:human-readable-types:1.21.0 (1 constraints: 3605303b)
 
 com.palantir.javapoet:javapoet:0.23.0 (2 constraints: 2a1137ee)
 
