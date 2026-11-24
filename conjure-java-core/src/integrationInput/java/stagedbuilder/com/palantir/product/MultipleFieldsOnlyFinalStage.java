@@ -1,5 +1,6 @@
 package stagedbuilder.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -201,12 +203,15 @@ public final class MultipleFieldsOnlyFinalStage {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
         private List<String> items = ConjureCollections.newList();
 
+        @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
@@ -215,6 +220,8 @@ public final class MultipleFieldsOnlyFinalStage {
 
         private List<String> itemsOld = ConjureCollections.newList();
 
+        @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Integer> itemsMapOld = new LinkedHashMap<>();
 
         private Optional<String> optionalItemOld = Optional.empty();
@@ -255,7 +262,6 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
         public Builder itemsMap(@Nonnull Map<String, Integer> itemsMap) {
             checkNotBuilt();
             this.itemsMap = new LinkedHashMap<>(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
@@ -333,7 +339,6 @@ public final class MultipleFieldsOnlyFinalStage {
 
         /** @deprecated this map is deprecated */
         @Deprecated
-        @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
         public Builder itemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
             checkNotBuilt();
             this.itemsMapOld =

@@ -41,7 +41,11 @@ public final class ObjectGenerator implements Generator {
         Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
         TypeMapper typeMapper = new TypeMapper(typesMap, options);
         SafetyEvaluator safetyEvaluator = new SafetyEvaluator(typesMap);
-        return types.stream().map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef));
+        // Keep generation sequential: the safety evaluator shares a mutable cache across models.
+        List<JavaFile> models = types.stream()
+                .map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef))
+                .toList();
+        return models.stream();
     }
 
     private JavaFile generateInner(

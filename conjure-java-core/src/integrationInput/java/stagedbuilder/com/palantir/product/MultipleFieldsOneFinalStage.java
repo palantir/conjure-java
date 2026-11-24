@@ -1,5 +1,6 @@
 package stagedbuilder.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -191,10 +193,13 @@ public final class MultipleFieldsOneFinalStage {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE)
     @JsonIgnoreProperties(ignoreUnknown = true)
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
+        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private OneField token;
@@ -213,7 +218,6 @@ public final class MultipleFieldsOneFinalStage {
         }
 
         @Override
-        @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));

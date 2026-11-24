@@ -1,5 +1,6 @@
 package allexamples.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -205,6 +207,7 @@ public final class ManyFieldExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE)
     public static final class Builder {
         boolean _buildInvoked;
 
@@ -220,6 +223,8 @@ public final class ManyFieldExample {
 
         private Set<String> set = ConjureCollections.newNonNullSet();
 
+        @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, String> map = new LinkedHashMap<>();
 
         private StringAliasExample alias;
@@ -343,7 +348,6 @@ public final class ManyFieldExample {
 
         /** @deprecated deprecation documentation. */
         @Deprecated
-        @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
             checkNotBuilt();
             this.map = new LinkedHashMap<>(Preconditions.checkNotNull(map, "map cannot be null"));

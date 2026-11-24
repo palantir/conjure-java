@@ -117,6 +117,16 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     Union types can be one of a few variants. To interact with a union value, users should use the `.accept` method and define a Visitor that handles each of the possible variants, including the possibility of an unknown variant.
 
+    With `--sealedUnions`, Jackson writes the `type` discriminator first so generated readers can avoid buffering. Readers also accept the discriminator in any position.
+
+    With `--defensiveCollections`, public union factories continue to copy input maps and sets. Sealed unions and Set aliases can take ownership of standard Jackson-created containers with scalar entries, avoiding a redundant copy.
+
+    Independently of `--defensiveCollections`, Jackson populates bean builder map fields directly using the same ownership checks.
+
+    For all of these, custom collection, key, or element deserializers, custom constructors, recovery handlers, and polymorphic values use a copying fallback. Encounter order, deduplication, and configured null-element validation are preserved.
+
+    Generated code may reference `ConjureJacksonSupport` from `conjure-lib`, so it requires `com.palantir.conjure.java:conjure-lib` 8.99.0 or later at compile time and runtime.
+
     ```java
     Foo output = unionTypeExample.accept(new Visitor<Foo>() {
 

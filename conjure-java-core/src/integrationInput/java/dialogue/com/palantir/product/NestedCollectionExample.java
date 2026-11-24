@@ -1,5 +1,6 @@
 package dialogue.com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -7,6 +8,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureJacksonSupport;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -132,14 +134,19 @@ public final class NestedCollectionExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonAutoDetect(setterVisibility = JsonAutoDetect.Visibility.NONE)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
         private List<List<String>> nestedList = ConjureCollections.newList();
 
+        @JsonSetter(value = "nestedMap", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, Map<String, String>> nestedMap = new LinkedHashMap<>();
 
+        @JsonSetter(value = "mixedCollection", nulls = Nulls.SKIP)
+        @JsonDeserialize(using = ConjureJacksonSupport.ContainerDeserializer.class)
         private Map<String, List<ObjectReference>> mixedCollection = new LinkedHashMap<>();
 
         private Builder() {}
@@ -173,7 +180,6 @@ public final class NestedCollectionExample {
             return this;
         }
 
-        @JsonSetter(value = "nestedMap", nulls = Nulls.SKIP)
         public Builder nestedMap(@Nonnull Map<String, Map<String, String>> nestedMap) {
             checkNotBuilt();
             this.nestedMap = new LinkedHashMap<>(Preconditions.checkNotNull(nestedMap, "nestedMap cannot be null"));
@@ -192,7 +198,6 @@ public final class NestedCollectionExample {
             return this;
         }
 
-        @JsonSetter(value = "mixedCollection", nulls = Nulls.SKIP)
         public Builder mixedCollection(@Nonnull Map<String, List<ObjectReference>> mixedCollection) {
             checkNotBuilt();
             this.mixedCollection =
