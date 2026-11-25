@@ -85,7 +85,7 @@ public final class ObjectWithDoNotLogField {
     }
 
     @Override
-    @DoNotLog
+    @Unsafe
     public String toString() {
         return "ObjectWithDoNotLogField{safeString: " + safeString + ", unsafeInt: " + unsafeInt
                 + ", secretToken: REDACTED" + '}';

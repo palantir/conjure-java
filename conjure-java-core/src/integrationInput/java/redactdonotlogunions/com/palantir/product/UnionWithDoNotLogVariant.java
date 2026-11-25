@@ -84,6 +84,11 @@ public final class UnionWithDoNotLogVariant {
         return "UnionWithDoNotLogVariant{value: " + value + '}';
     }
 
+    @DoNotLog
+    public String dangerousToString() {
+        return "UnionWithDoNotLogVariant{value: " + value.dangerousToString() + '}';
+    }
+
     public interface Visitor<T> {
         T visitSafeValue(@Safe String value);
 
@@ -190,6 +195,11 @@ public final class UnionWithDoNotLogVariant {
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
+
+        @DoNotLog
+        default String dangerousToString() {
+            return toString();
+        }
     }
 
     @JsonTypeName("safeValue")
@@ -279,6 +289,12 @@ public final class UnionWithDoNotLogVariant {
         @Override
         public String toString() {
             return "SecretValueWrapper{value: REDACTED" + '}';
+        }
+
+        @DoNotLog
+        @Override
+        public String dangerousToString() {
+            return "SecretValueWrapper{value: " + value + '}';
         }
     }
 

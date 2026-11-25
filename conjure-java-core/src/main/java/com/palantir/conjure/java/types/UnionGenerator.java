@@ -58,6 +58,7 @@ import com.palantir.javapoet.ParameterizedTypeName;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import com.palantir.javapoet.TypeVariableName;
+import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -150,6 +151,11 @@ public final class UnionGenerator {
                             options))
                     .addType(generateUnknownWrapper(unionClass, visitorClass, options));
 
+            if (options.redactToStringDoNotLog()) {
+                typeBuilder.addMethod(
+                        dangerousToString().addStatement("return toString()").build());
+            }
+
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
             if (options.sealedUnionVisitors()) {
@@ -197,7 +203,7 @@ public final class UnionGenerator {
                 .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options)));
 
         typeBuilder
-                .addType(generateBase(baseClass, visitorClass, memberTypes))
+                .addType(generateBase(baseClass, visitorClass, memberTypes, options))
                 .addTypes(generateWrapperClasses(
                         typeMapper, safetyEvaluator, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
@@ -213,12 +219,28 @@ public final class UnionGenerator {
                         .addAnnotations(safety)
                         .build());
 
+        if (options.redactToStringDoNotLog()) {
+            typeBuilder.addMethod(dangerousToString()
+                    .addStatement(
+                            "return $S + $N.dangerousToString() + '}'",
+                            unionClass.simpleName() + "{value: ",
+                            VALUE_FIELD_NAME)
+                    .build());
+        }
+
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static MethodSpec.Builder dangerousToString() {
+        return MethodSpec.methodBuilder("dangerousToString")
+                .addAnnotation(DoNotLog.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class);
     }
 
     /** Creates a backward compatible toString method. While in general, Conjure-Java does not provide any guarantees on
@@ -862,7 +884,7 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateBase(
-            ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes) {
+            ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes, Options options) {
         ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
@@ -900,6 +922,12 @@ public final class UnionGenerator {
                 .addParameter(visitor)
                 .returns(TYPE_VARIABLE)
                 .build());
+        if (options.redactToStringDoNotLog()) {
+            baseBuilder.addMethod(dangerousToString()
+                    .addModifiers(Modifier.DEFAULT)
+                    .addStatement("return toString()")
+                    .build());
+        }
         return baseBuilder.build();
     }
 
@@ -1004,6 +1032,16 @@ public final class UnionGenerator {
                                                     wrapperClass.simpleName(),
                                                     wrapperFieldNames,
                                                     redactValue ? Set.copyOf(wrapperFieldNames) : Set.of()));
+                    if (redactValue) {
+                        MethodSpec unredacted = options.sealedUnions()
+                                ? createLegacyToStringForSealedUnions(
+                                        baseClass, peerWrapperClass(baseClass, memberName), false)
+                                : MethodSpecs.createToString(wrapperClass.simpleName(), wrapperFieldNames);
+                        typeBuilder.addMethod(dangerousToString()
+                                .addAnnotation(Override.class)
+                                .addCode(unredacted.code())
+                                .build());
+                    }
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());

@@ -70,6 +70,11 @@ public abstract sealed class UnionWithDoNotLogVariant
         }
     }
 
+    @DoNotLog
+    public String dangerousToString() {
+        return toString();
+    }
+
     public abstract <T> T accept(Visitor<T> visitor);
 
     public sealed interface Known permits SafeValue, SecretValue {}
@@ -161,6 +166,12 @@ public abstract sealed class UnionWithDoNotLogVariant
         @Override
         public String toString() {
             return "UnionWithDoNotLogVariant{value: SecretValueWrapper{value: REDACTED" + "}}";
+        }
+
+        @DoNotLog
+        @Override
+        public String dangerousToString() {
+            return "UnionWithDoNotLogVariant{value: SecretValueWrapper{value: " + value + "}}";
         }
     }
 

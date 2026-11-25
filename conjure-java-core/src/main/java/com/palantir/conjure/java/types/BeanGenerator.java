@@ -203,9 +203,16 @@ public final class BeanGenerator {
                         .map(EnrichedField::fieldName)
                         .collect(Collectors.toUnmodifiableSet())
                 : Set.of();
+        ImmutableList<AnnotationSpec> toStringSafety = redactedFieldNames.isEmpty()
+                ? safety
+                : ConjureAnnotations.safety(fields.stream()
+                        .filter(field -> !redactedFieldNames.contains(field.fieldName()))
+                        .map(EnrichedField::conjureDef)
+                        .map(field -> safetyEvaluator.evaluate(field.getType(), field.getSafety()))
+                        .reduce(Optional.of(LogSafety.SAFE), SafetyEvaluator::combine));
         typeBuilder.addMethod(
                 MethodSpecs.createToString(prefixedName.getName(), allFieldNames, redactedFieldNames).toBuilder()
-                        .addAnnotations(safety)
+                        .addAnnotations(toStringSafety)
                         .build());
         if (options.redactToStringDoNotLog()) {
             typeBuilder.addMethod(MethodSpecs.createDangerousToString(prefixedName.getName(), allFieldNames).toBuilder()

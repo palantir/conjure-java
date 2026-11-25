@@ -23,7 +23,6 @@ public final class SecretAlias implements Comparable<SecretAlias> {
     }
 
     @Override
-    @DoNotLog
     public String toString() {
         return "REDACTED";
     }

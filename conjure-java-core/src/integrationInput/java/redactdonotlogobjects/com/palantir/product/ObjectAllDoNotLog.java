@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public final class ObjectAllDoNotLog {
     }
 
     @Override
-    @DoNotLog
+    @Safe
     public String toString() {
         return "ObjectAllDoNotLog{secret: REDACTED" + ", token: REDACTED" + '}';
     }

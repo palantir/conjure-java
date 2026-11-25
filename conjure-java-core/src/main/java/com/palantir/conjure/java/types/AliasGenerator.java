@@ -81,6 +81,7 @@ public final class AliasGenerator {
 
         List<FieldSpec> fields = List.of(FieldSpec.builder(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
                 .build());
+        boolean redactValue = options.redactToStringDoNotLog() && safety.equals(Optional.of(LogSafety.DO_NOT_LOG));
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
                 .addAnnotations(computedSafetyAnnotations)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
@@ -96,7 +97,7 @@ public final class AliasGenerator {
                 .addMethod(MethodSpec.methodBuilder("toString")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
-                        .addAnnotations(safetyAnnotations)
+                        .addAnnotations(redactValue ? ImmutableList.of() : safetyAnnotations)
                         .returns(String.class)
                         .addCode(primitiveSafeToString(
                                 aliasTypeName,
