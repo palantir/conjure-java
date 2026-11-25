@@ -182,7 +182,7 @@ org.jspecify:jspecify:1.0.1 (25 constraints: 268cc785)
 
 org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir:1.1.3 (1 constraints: 0d10f991)
 
-org.slf4j:slf4j-api:2.0.19 (36 constraints: 7efc47c1)
+org.slf4j:slf4j-api:2.0.19 (36 constraints: 80fc67cc)
 
 org.slf4j:slf4j-simple:2.0.19 (1 constraints: 3c05323b)
 
@@ -196,9 +196,9 @@ org.yaml:snakeyaml:2.5 (1 constraints: 3f178e10)
 
 [Test dependencies]
 
-ch.qos.logback:logback-classic:1.5.18 (7 constraints: d5616120)
+ch.qos.logback:logback-classic:1.6.8 (7 constraints: af6124f4)
 
-ch.qos.logback:logback-core:1.5.18 (5 constraints: 75503fe6)
+ch.qos.logback:logback-core:1.6.8 (5 constraints: 455009b5)
 
 ch.qos.logback.access:logback-access-common:2.0.6 (2 constraints: ad232460)
 
