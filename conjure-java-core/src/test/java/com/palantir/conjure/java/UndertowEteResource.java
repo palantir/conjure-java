@@ -317,13 +317,19 @@ public final class UndertowEteResource implements UndertowEteService {
     }
 
     @Override
+    public void receiveListOfStrings(AuthHeader _authHeader, List<String> _value) {}
+
+    @Override
+    public void receiveSetOfStrings(AuthHeader authHeader, List<String> value) {}
+
+    @Override
+    public void receiveMapOfStrings(AuthHeader authHeader, Map<String, String> value) {}
+
+    @Override
     public void receiveListOfOptionals(AuthHeader _authHeader, List<Optional<String>> _value) {}
 
     @Override
     public void receiveSetOfOptionals(AuthHeader _authHeader, Set<Optional<String>> _value) {}
-
-    @Override
-    public void receiveListOfStrings(AuthHeader _authHeader, List<String> _value) {}
 
     @Override
     public SimpleUnion union(AuthHeader _authHeader, SimpleUnion value) {

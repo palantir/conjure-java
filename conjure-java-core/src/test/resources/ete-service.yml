@@ -258,6 +258,21 @@ services:
             type: set<integer>
             param-type: query
 
+      receiveListOfStrings:
+        http: PUT /list/strings
+        args:
+          value: list<string>
+
+      receiveSetOfStrings:
+        http: PUT /set/strings
+        args:
+          value: list<string>
+
+      receiveMapOfStrings:
+        http: PUT /map/strings
+        args:
+          value: map<string, string>
+
       receiveListOfOptionals:
         http: PUT /list/optionals
         args:
@@ -267,11 +282,6 @@ services:
         http: PUT /set/optionals
         args:
           value: set<optional<string>>
-
-      receiveListOfStrings:
-        http: PUT /list/strings
-        args:
-          value: list<string>
 
       union:
         http: PUT /union

@@ -7,6 +7,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Generated;
@@ -144,14 +145,20 @@ public interface UndertowEteService {
             Set<Long> longs,
             Set<Integer> ints);
 
+    /** @apiNote {@code PUT /base/list/strings} */
+    void receiveListOfStrings(AuthHeader authHeader, List<String> value);
+
+    /** @apiNote {@code PUT /base/set/strings} */
+    void receiveSetOfStrings(AuthHeader authHeader, List<String> value);
+
+    /** @apiNote {@code PUT /base/map/strings} */
+    void receiveMapOfStrings(AuthHeader authHeader, Map<String, String> value);
+
     /** @apiNote {@code PUT /base/list/optionals} */
     void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
 
     /** @apiNote {@code PUT /base/set/optionals} */
     void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
-
-    /** @apiNote {@code PUT /base/list/strings} */
-    void receiveListOfStrings(AuthHeader authHeader, List<String> value);
 
     /** @apiNote {@code PUT /base/union} */
     SimpleUnion union(AuthHeader authHeader, SimpleUnion value);

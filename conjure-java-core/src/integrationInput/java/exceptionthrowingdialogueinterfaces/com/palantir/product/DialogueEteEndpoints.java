@@ -984,6 +984,105 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
+    receiveListOfStrings {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("list")
+                .fixed("strings")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.PUT;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "receiveListOfStrings";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
+    receiveSetOfStrings {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("set")
+                .fixed("strings")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.PUT;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "receiveSetOfStrings";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
+    receiveMapOfStrings {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("map")
+                .fixed("strings")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.PUT;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "receiveMapOfStrings";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
     receiveListOfOptionals {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("base")
@@ -1042,39 +1141,6 @@ enum DialogueEteEndpoints implements Endpoint {
         @Override
         public String endpointName() {
             return "receiveSetOfOptionals";
-        }
-
-        @Override
-        public String version() {
-            return "1.2.3";
-        }
-    },
-
-    receiveListOfStrings {
-        private final PathTemplate pathTemplate = PathTemplate.builder()
-                .fixed("base")
-                .fixed("list")
-                .fixed("strings")
-                .build();
-
-        @Override
-        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
-            pathTemplate.fill(params, url);
-        }
-
-        @Override
-        public HttpMethod httpMethod() {
-            return HttpMethod.PUT;
-        }
-
-        @Override
-        public String serviceName() {
-            return "EteService";
-        }
-
-        @Override
-        public String endpointName() {
-            return "receiveListOfStrings";
         }
 
         @Override
