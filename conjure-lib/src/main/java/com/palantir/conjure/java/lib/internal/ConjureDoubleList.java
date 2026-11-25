@@ -16,80 +16,95 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.AbstractList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.RandomAccess;
-import org.eclipse.collections.api.list.primitive.MutableDoubleList;
-import org.eclipse.collections.impl.utility.Iterate;
 
 /**
- * ConjureDoubleList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 13,
- * a BoxedMutableDoubleList was released. However, there is an issue where MutableDoubleList does not implement subList.
- * https://github.com/eclipse-collections/eclipse-collections/issues/1053
+ * A boxed {@link java.util.List} wrapper over a dense primitive {@code double[]} array.
  */
-final class ConjureDoubleList extends AbstractList<Double> implements RandomAccess {
-    private final MutableDoubleList delegate;
+final class ConjureDoubleList extends AbstractPrimitiveList<Double, double[]> {
+    private static final double[] EMPTY = new double[0];
+    private static final ArrayOps<double[]> OPS = new ArrayOps<>() {
+        @Override
+        public int length(double[] array) {
+            return array.length;
+        }
 
-    ConjureDoubleList(MutableDoubleList delegate) {
-        this.delegate = delegate;
+        @Override
+        public double[] copyOf(double[] array, int newLength) {
+            return Arrays.copyOf(array, newLength);
+        }
+    };
+
+    ConjureDoubleList() {
+        this(new Storage<>(OPS, EMPTY, 0), false);
     }
 
-    @Override
-    public int size() {
-        return delegate.size();
+    ConjureDoubleList(int initialCapacity) {
+        this(new Storage<>(OPS, initialCapacity == 0 ? EMPTY : new double[initialCapacity], 0), false);
     }
 
-    @Override
-    public void add(int index, Double toAdd) {
-        delegate.addAtIndex(index, toAdd);
+    ConjureDoubleList(double[] elements) {
+        this(new Storage<>(OPS, elements, elements.length), false);
     }
 
-    // Primitive optimized overload
-    void add(double toAdd) {
-        this.delegate.add(toAdd);
+    private ConjureDoubleList(Storage<double[]> storage, boolean unmodifiable) {
+        super(storage, unmodifiable);
     }
 
     @Override
     public Double get(int index) {
-        return delegate.get(index);
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends Double> collection) {
-        double[] target = new double[collection.size()];
-        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.doubleValue());
-        return delegate.addAllAtIndex(index, target);
-    }
-
-    // Primitive optimized overload
-    void addAll(double[] source) {
-        this.delegate.addAll(source);
-    }
-
-    @Override
-    public Double remove(int index) {
-        return delegate.removeAtIndex(index);
-    }
-
-    @Override
-    public void clear() {
-        delegate.clear();
+        storage().checkIndex(index);
+        return storage().items()[index];
     }
 
     @Override
     public Double set(int index, Double element) {
-        return delegate.set(index, element);
+        ensureMutable();
+        double value = element;
+        storage().checkIndex(index);
+        double[] items = storage().items();
+        double previous = items[index];
+        items[index] = value;
+        return previous;
+    }
+
+    @Override
+    public void add(int index, Double toAdd) {
+        ensureMutable();
+        double value = toAdd;
+        storage().prepareInsertAt(index);
+        storage().items()[index] = value;
+    }
+
+    // Primitive optimized overload
+    void add(double toAdd) {
+        ensureMutable();
+        int idx = storage().prepareAdd();
+        storage().items()[idx] = toAdd;
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Double> collection) {
+        ensureMutable();
+        double[] target = new double[collection.size()];
+        int idx = 0;
+        for (Double each : collection) {
+            target[idx++] = each;
+        }
+        return storage().addAllAtIndex(index, target);
+    }
+
+    @Override
+    public Double remove(int index) {
+        ensureMutable();
+        storage().checkIndex(index);
+        double previous = storage().items()[index];
+        storage().removeAt(index);
+        return previous;
     }
 
     ConjureDoubleList asUnmodifiable() {
-        return new ConjureDoubleList(delegate.asUnmodifiable());
-    }
-
-    // Cannot be named 'toArray' as that conflicts with the #toArray in AbstractList
-    // This is a serialization optimization that avoids boxing, but does copy
-    @JsonValue
-    double[] jacksonSerialize() {
-        return delegate.toArray();
+        return isUnmodifiable() ? this : new ConjureDoubleList(storage(), true);
     }
 }

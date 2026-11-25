@@ -24,9 +24,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
-import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
-import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 
 /**
  * Utility functions for conjure. Consumers should prefer to use something like guava instead of using these functions
@@ -171,21 +168,21 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
-        return new ConjureDoubleList(new DoubleArrayList());
+        return new ConjureDoubleList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList(double[] doubles) {
-        return new ConjureDoubleList(new DoubleArrayList(doubles));
+        return new ConjureDoubleList(doubles);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList(Iterable<Double> iterable) {
         List<Double> doubleList;
         if (iterable instanceof Collection) {
-            doubleList = new ConjureDoubleList(new DoubleArrayList(((Collection<Double>) iterable).size()));
+            doubleList = new ConjureDoubleList(((Collection<Double>) iterable).size());
         } else {
-            doubleList = new ConjureDoubleList(new DoubleArrayList());
+            doubleList = new ConjureDoubleList();
         }
         addAll(doubleList, iterable);
 
@@ -214,21 +211,21 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList() {
-        return new ConjureIntegerList(new IntArrayList());
+        return new ConjureIntegerList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList(int[] ints) {
-        return new ConjureIntegerList(new IntArrayList(ints));
+        return new ConjureIntegerList(ints);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList(Iterable<Integer> iterable) {
         List<Integer> integerList;
         if (iterable instanceof Collection) {
-            integerList = new ConjureIntegerList(new IntArrayList(((Collection<Integer>) iterable).size()));
+            integerList = new ConjureIntegerList(((Collection<Integer>) iterable).size());
         } else {
-            integerList = new ConjureIntegerList(new IntArrayList());
+            integerList = new ConjureIntegerList();
         }
         addAll(integerList, iterable);
 
@@ -272,16 +269,16 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList() {
-        return new ConjureSafeLongList(new LongArrayList());
+        return new ConjureSafeLongList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList(Iterable<SafeLong> iterable) {
         List<SafeLong> safeLongList;
         if (iterable instanceof Collection) {
-            safeLongList = new ConjureSafeLongList(new LongArrayList(((Collection<SafeLong>) iterable).size()));
+            safeLongList = new ConjureSafeLongList(((Collection<SafeLong>) iterable).size());
         } else {
-            safeLongList = new ConjureSafeLongList(new LongArrayList());
+            safeLongList = new ConjureSafeLongList();
         }
         addAll(safeLongList, iterable);
 

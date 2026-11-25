@@ -18,12 +18,42 @@ package com.palantir.conjure.java.lib.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class ConjureCollectionsTest {
+
+    @Test
+    public void newNonNullIntegerList() {
+        List<Integer> intList = ConjureCollections.newNonNullIntegerList();
+        assertThat(intList).isEmpty();
+        ConjureCollections.addAll(intList, List.of(1, 2));
+        ConjureCollections.addToIntegerList(intList, 3);
+        ConjureCollections.addAllToIntegerList(intList, new int[] {4, 5});
+        intList.add(1, 99);
+        assertThat(intList).containsExactly(1, 99, 2, 3, 4, 5);
+
+        int previous = intList.set(1, 10);
+        assertThat(previous).isEqualTo(99);
+        int removed = intList.remove(/* index */ 1);
+        assertThat(removed).isEqualTo(10);
+        assertThat(intList).containsExactly(1, 2, 3, 4, 5);
+
+        List<Integer> unmodifiable = ConjureCollections.unmodifiableList(intList);
+        assertThat(unmodifiable).containsExactly(1, 2, 3, 4, 5);
+        assertThatThrownBy(() -> unmodifiable.add(6)).isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> unmodifiable.set(0, 6)).isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> unmodifiable.remove(/* index */ 0)).isInstanceOf(UnsupportedOperationException.class);
+
+        intList = ConjureCollections.newNonNullIntegerList(new int[] {7, 8, 9});
+        assertThat(intList).containsExactly(7, 8, 9);
+        assertThat(((ConjureIntegerList) intList).jacksonSerialize()).containsExactly(7, 8, 9);
+        intList.clear();
+        assertThat(intList).isEmpty();
+    }
 
     @Test
     public void newNonNullDoubleList() {
