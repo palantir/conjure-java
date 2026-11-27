@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -405,6 +406,8 @@ final class UndertowServiceHandlerGenerator {
     private static final ClassName IMMUTABLE_LIST_NAME = ClassName.get(ImmutableList.class);
     private static final ClassName SET_NAME = ClassName.get(Set.class);
     private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
+    private static final ClassName MAP_NAME = ClassName.get(Map.class);
+    private static final ClassName IMMUTABLE_MAP_NAME = ClassName.get(ImmutableMap.class);
     private static final ClassName TYPE_MARKER = ClassName.get(TypeMarker.class);
 
     private static CodeBlock typeMarker(TypeName type) {
@@ -415,13 +418,15 @@ final class UndertowServiceHandlerGenerator {
         // Note that only the outermost collection is considered for replacement to avoid
         // generic type incompatibilities.
         if (options.nonNullTopLevelCollectionValues() && input instanceof ParameterizedTypeName parameterized) {
-
             if (LIST_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
                         IMMUTABLE_LIST_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
             } else if (SET_NAME.equals(parameterized.rawType())) {
                 return ParameterizedTypeName.get(
                         IMMUTABLE_SET_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
+            } else if (MAP_NAME.equals(parameterized.rawType())) {
+                return ParameterizedTypeName.get(
+                        IMMUTABLE_MAP_NAME, parameterized.typeArguments().toArray(new TypeName[0]));
             }
         }
 

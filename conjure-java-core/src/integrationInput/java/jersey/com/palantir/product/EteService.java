@@ -20,6 +20,7 @@ import jakarta.ws.rs.core.StreamingOutput;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.processing.Generated;
@@ -241,6 +242,23 @@ public interface EteService {
             @QueryParam("ints") Set<Integer> ints);
 
     @PUT
+    @Path("base/list/strings")
+    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
+    void receiveListOfStrings(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull List<String> value);
+
+    @PUT
+    @Path("base/set/strings")
+    @ClientEndpoint(method = "PUT", path = "/base/set/strings")
+    void receiveSetOfStrings(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull List<String> value);
+
+    @PUT
+    @Path("base/map/strings")
+    @ClientEndpoint(method = "PUT", path = "/base/map/strings")
+    void receiveMapOfStrings(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull Map<String, String> value);
+
+    @PUT
     @Path("base/list/optionals")
     @ClientEndpoint(method = "PUT", path = "/base/list/optionals")
     void receiveListOfOptionals(
@@ -251,12 +269,6 @@ public interface EteService {
     @ClientEndpoint(method = "PUT", path = "/base/set/optionals")
     void receiveSetOfOptionals(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull Set<Optional<String>> value);
-
-    @PUT
-    @Path("base/list/strings")
-    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
-    void receiveListOfStrings(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull List<String> value);
 
     @PUT
     @Path("base/union")

@@ -28,6 +28,7 @@ import java.lang.String;
 import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -198,6 +199,18 @@ public interface EteServiceBlocking {
             Set<Long> longs,
             Set<Integer> ints);
 
+    /** @apiNote {@code PUT /base/list/strings} */
+    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
+    void receiveListOfStrings(AuthHeader authHeader, List<String> value);
+
+    /** @apiNote {@code PUT /base/set/strings} */
+    @ClientEndpoint(method = "PUT", path = "/base/set/strings")
+    void receiveSetOfStrings(AuthHeader authHeader, List<String> value);
+
+    /** @apiNote {@code PUT /base/map/strings} */
+    @ClientEndpoint(method = "PUT", path = "/base/map/strings")
+    void receiveMapOfStrings(AuthHeader authHeader, Map<String, String> value);
+
     /** @apiNote {@code PUT /base/list/optionals} */
     @ClientEndpoint(method = "PUT", path = "/base/list/optionals")
     void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
@@ -205,10 +218,6 @@ public interface EteServiceBlocking {
     /** @apiNote {@code PUT /base/set/optionals} */
     @ClientEndpoint(method = "PUT", path = "/base/set/optionals")
     void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
-
-    /** @apiNote {@code PUT /base/list/strings} */
-    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
-    void receiveListOfStrings(AuthHeader authHeader, List<String> value);
 
     /** @apiNote {@code PUT /base/union} */
     @ClientEndpoint(method = "PUT", path = "/base/union")
@@ -269,13 +278,16 @@ public interface EteServiceBlocking {
 
             private static final TypeMarker<SimpleUnion> simpleUnionTypeMarker = TypeMarker.of(SimpleUnion.class);
 
+            private static final TypeMarker<List<String>> listStringTypeMarker = TypeMarker.listOf(String.class);
+
+            private static final TypeMarker<Map<String, String>> mapStringStringTypeMarker =
+                    TypeMarker.mapOf(String.class, String.class);
+
             private static final TypeMarker<List<Optional<String>>> listOptionalStringTypeMarker =
                     new TypeMarker<List<Optional<String>>>() {};
 
             private static final TypeMarker<Set<Optional<String>>> setOptionalStringTypeMarker =
                     new TypeMarker<Set<Optional<String>>>() {};
-
-            private static final TypeMarker<List<String>> listStringTypeMarker = TypeMarker.listOf(String.class);
 
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
@@ -353,14 +365,17 @@ public interface EteServiceBlocking {
                     optionalStringAliasExampleSerializer =
                             _runtime.bodySerDe().serializer(optionalStringAliasExampleTypeMarker);
 
+            private final Serializer<List<String>> listStringSerializer =
+                    _runtime.bodySerDe().serializer(listStringTypeMarker);
+
+            private final Serializer<Map<String, String>> mapStringStringSerializer =
+                    _runtime.bodySerDe().serializer(mapStringStringTypeMarker);
+
             private final Serializer<List<Optional<String>>> listOptionalStringSerializer =
                     _runtime.bodySerDe().serializer(listOptionalStringTypeMarker);
 
             private final Serializer<Set<Optional<String>>> setOptionalStringSerializer =
                     _runtime.bodySerDe().serializer(setOptionalStringTypeMarker);
-
-            private final Serializer<List<String>> listStringSerializer =
-                    _runtime.bodySerDe().serializer(listStringTypeMarker);
 
             private final Serializer<SimpleUnion> simpleUnionSerializer =
                     _runtime.bodySerDe().serializer(simpleUnionTypeMarker);
@@ -451,14 +466,20 @@ public interface EteServiceBlocking {
             private final EndpointChannel complexQueryParametersChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
+            private final EndpointChannel receiveListOfStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
+
+            private final EndpointChannel receiveSetOfStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfStrings);
+
+            private final EndpointChannel receiveMapOfStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveMapOfStrings);
+
             private final EndpointChannel receiveListOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
 
             private final EndpointChannel receiveSetOfOptionalsChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
-
-            private final EndpointChannel receiveListOfStringsChannel =
-                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
 
             private final EndpointChannel unionChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.union);
 
@@ -753,6 +774,30 @@ public interface EteServiceBlocking {
             }
 
             @Override
+            public void receiveListOfStrings(AuthHeader authHeader, List<String> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(listStringSerializer.serialize(value));
+                _runtime.clients().callBlocking(receiveListOfStringsChannel, _request.build(), voidDeserializer);
+            }
+
+            @Override
+            public void receiveSetOfStrings(AuthHeader authHeader, List<String> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(listStringSerializer.serialize(value));
+                _runtime.clients().callBlocking(receiveSetOfStringsChannel, _request.build(), voidDeserializer);
+            }
+
+            @Override
+            public void receiveMapOfStrings(AuthHeader authHeader, Map<String, String> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(mapStringStringSerializer.serialize(value));
+                _runtime.clients().callBlocking(receiveMapOfStringsChannel, _request.build(), voidDeserializer);
+            }
+
+            @Override
             public void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
@@ -766,14 +811,6 @@ public interface EteServiceBlocking {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(setOptionalStringSerializer.serialize(value));
                 _runtime.clients().callBlocking(receiveSetOfOptionalsChannel, _request.build(), voidDeserializer);
-            }
-
-            @Override
-            public void receiveListOfStrings(AuthHeader authHeader, List<String> value) {
-                Request.Builder _request = Request.builder();
-                _request.putHeaderParams("Authorization", authHeader.toString());
-                _request.body(listStringSerializer.serialize(value));
-                _runtime.clients().callBlocking(receiveListOfStringsChannel, _request.build(), voidDeserializer);
             }
 
             @Override

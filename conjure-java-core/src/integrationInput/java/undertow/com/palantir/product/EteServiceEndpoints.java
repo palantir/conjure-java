@@ -1,6 +1,7 @@
 package undertow.com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
@@ -76,9 +77,11 @@ public final class EteServiceEndpoints implements UndertowService {
                 new ErrorParameterSerializationEndpoint(runtime, delegate),
                 new AliasLongEndpointEndpoint(runtime, delegate),
                 new ComplexQueryParametersEndpoint(runtime, delegate),
+                new ReceiveListOfStringsEndpoint(runtime, delegate),
+                new ReceiveSetOfStringsEndpoint(runtime, delegate),
+                new ReceiveMapOfStringsEndpoint(runtime, delegate),
                 new ReceiveListOfOptionalsEndpoint(runtime, delegate),
                 new ReceiveSetOfOptionalsEndpoint(runtime, delegate),
-                new ReceiveListOfStringsEndpoint(runtime, delegate),
                 new UnionEndpoint(runtime, delegate));
     }
 
@@ -1580,6 +1583,148 @@ public final class EteServiceEndpoints implements UndertowService {
         }
     }
 
+    private static final class ReceiveListOfStringsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<ImmutableList<String>> deserializer;
+
+        ReceiveListOfStringsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ImmutableList<String>>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            List<String> value = deserializer.deserialize(exchange);
+            delegate.receiveListOfStrings(authHeader, value);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/base/list/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "receiveListOfStrings";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ReceiveSetOfStringsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<ImmutableList<String>> deserializer;
+
+        ReceiveSetOfStringsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ImmutableList<String>>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            List<String> value = deserializer.deserialize(exchange);
+            delegate.receiveSetOfStrings(authHeader, value);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/base/set/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "receiveSetOfStrings";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ReceiveMapOfStringsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<ImmutableMap<String, String>> deserializer;
+
+        ReceiveMapOfStringsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<ImmutableMap<String, String>>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> value = deserializer.deserialize(exchange);
+            delegate.receiveMapOfStrings(authHeader, value);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/base/map/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "receiveMapOfStrings";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
     private static final class ReceiveListOfOptionalsEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
@@ -1668,53 +1813,6 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "receiveSetOfOptionals";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
-    }
-
-    private static final class ReceiveListOfStringsEndpoint implements HttpHandler, Endpoint {
-        private final UndertowRuntime runtime;
-
-        private final UndertowEteService delegate;
-
-        private final Deserializer<ImmutableList<String>> deserializer;
-
-        ReceiveListOfStringsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ImmutableList<String>>() {}, this);
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            List<String> value = deserializer.deserialize(exchange);
-            delegate.receiveListOfStrings(authHeader, value);
-            exchange.setStatusCode(StatusCodes.NO_CONTENT);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.PUT;
-        }
-
-        @Override
-        public String template() {
-            return "/base/list/strings";
-        }
-
-        @Override
-        public String serviceName() {
-            return "EteService";
-        }
-
-        @Override
-        public String name() {
-            return "receiveListOfStrings";
         }
 
         @Override
