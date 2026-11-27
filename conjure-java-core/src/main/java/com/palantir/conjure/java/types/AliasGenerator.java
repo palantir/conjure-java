@@ -81,6 +81,7 @@ public final class AliasGenerator {
 
         List<FieldSpec> fields = List.of(FieldSpec.builder(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
                 .build());
+        boolean redactValue = options.redactToStringDoNotLog() && safety.equals(Optional.of(LogSafety.DO_NOT_LOG));
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
                 .addAnnotations(computedSafetyAnnotations)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
@@ -96,9 +97,11 @@ public final class AliasGenerator {
                 .addMethod(MethodSpec.methodBuilder("toString")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
-                        .addAnnotations(safetyAnnotations)
+                        .addAnnotations(redactValue ? ImmutableList.of() : safetyAnnotations)
                         .returns(String.class)
-                        .addCode(primitiveSafeToString(aliasTypeName))
+                        .addCode(primitiveSafeToString(
+                                aliasTypeName,
+                                options.redactToStringDoNotLog() && safety.equals(Optional.of(LogSafety.DO_NOT_LOG))))
                         .build());
 
         if (typeDef.getAlias().accept(BeanGenerator.FieldRequiresMemoizedHashCode.INSTANCE)) {
@@ -486,7 +489,10 @@ public final class AliasGenerator {
         return builder.build();
     }
 
-    private static CodeBlock primitiveSafeToString(TypeName aliasTypeName) {
+    private static CodeBlock primitiveSafeToString(TypeName aliasTypeName, boolean redact) {
+        if (redact) {
+            return CodeBlocks.statement("return $S", "REDACTED");
+        }
         if (Primitives.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement("return $T.valueOf(value)", String.class);
         }
